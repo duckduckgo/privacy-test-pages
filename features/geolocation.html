@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Geolocation</title>
+</head>
+<body>
+<p><a href="../index.html">[Home]</a></p>
+  
+<p>Allowing geolocation permission will cause this page to pull latest location information and show it on this page every 1s. Switching to a different tab or an app should prevent page from getting the location. You can verify that it's true by switching tabs, or apps, and comming back to this page after couple of seconds. Last update time should be > 1s and be marked in red.</P>
+
+<p id="demo"></p>
+
+<script>
+const demo = document.getElementById("demo");
+
+function getLocation() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(showPosition, currentPositionError);
+  } else { 
+    demo.innerHTML = "Geolocation is not supported by this browser.";
+  }
+}
+
+function currentPositionError(err) {
+    demo.innerHTML = `🛑 Location not available ("${err.message}").<br/>${demo.innerHTML}`;
+}
+  
+let lastUpdate = null;
+
+function showPosition(position) {
+  let diff = 0;
+  if (lastUpdate !== null) {
+    diff = Date.now() - lastUpdate;
+  }
+ 
+  lastUpdate = Date.now();
+  const diffSec = Math.round(diff/1000);
+  const color = diffSec > 1 ? 'red' : 'green';
+  
+  if (diffSec === 0) {
+    return;
+  }
+  
+  demo.innerHTML = `Last update <span style='color: ${color}'>${diffSec}s</span> ago (lat ${position.coords.latitude} lon ${position.coords.longitude})<br/>${demo.innerHTML}`;
+}
+  
+setInterval(getLocation, 1000);
+</script>
+
+  
+</body>
+</html>

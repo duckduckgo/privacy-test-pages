@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Tracker created via a document fragment</title>
+
+  <script>
+
+	function loadTracker() {		
+
+        /* Original code:
+
+        appendMarkup: function appendMarkup(a) {
+            if (this.trackingFooterEl) {
+                var b = document.createDocumentFragment();
+                var c = document.createElement('div');
+                c.innerHTML = a;
+                var d = _.map(c.getElementsByTagName('script'), _.identity);
+                while (c.firstChild) {
+                    b.appendChild(c.firstChild);
+                }
+                this.trackingFooterEl.appendChild(b);
+                loadScripts(d, 0);
+            }
+        }
+
+        */
+
+        var targetElement = document.getElementById("target-div");
+
+        var markup = "<img src='//facebook.com/tr?test=1'>"
+
+        var fragment = document.createDocumentFragment();
+        var div = document.createElement('div');
+        div.innerHTML = markup;
+        // var d = _.map(c.getElementsByTagName('script'), _.identity);
+        while (div.firstChild) {
+            fragment.appendChild(div.firstChild);
+        }
+        targetElement.appendChild(fragment);
+
+        // loadScripts(d, 0);
+
+	}
+
+  </script>
+
+</head>
+<body onload="loadTracker()">
+<p><a href="../index.html">[Home]</a></p>
+
+<p>Tracker created via a document fragment</p>
+
+<div id="target-div">
+</div>
+
+</body>
+</html>

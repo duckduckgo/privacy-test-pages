@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Tracker created via a document fragment</title>
+
+  <script>
+
+	function loadTracker() {		
+
+        var targetElement = document.getElementById("target-div");
+
+        fetch('https://facebook.com/tr?test=1')
+          .then(resp => {
+            if (!resp.ok) {
+              targetElement.innerText = 'Tracker not loaded';
+              return;
+            }
+
+            targetElement.innerText = 'Tracker loaded';
+          })
+          .catch(err => {
+            targetElement.innerText = 'Tracker not loaded';
+          });
+
+	}
+
+  </script>
+
+</head>
+<body onload="loadTracker()">
+<p><a href="../index.html">[Home]</a></p>
+
+<p>Tracker created via a document fragment</p>
+
+<div id="target-div">
+</div>
+
+</body>
+</html>

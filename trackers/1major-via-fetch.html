@@ -11,13 +11,8 @@
 
         var targetElement = document.getElementById("target-div");
 
-        fetch('https://facebook.com/tr?test=1')
+        fetch('https://facebook.com/tr?test=1', {mode: 'no-cors'})
           .then(resp => {
-            if (!resp.ok) {
-              targetElement.innerText = 'Tracker not loaded';
-              return;
-            }
-
             targetElement.innerText = 'Tracker loaded';
           })
           .catch(err => {

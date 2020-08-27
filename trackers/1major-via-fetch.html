@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Tracker loaded via fetch</title>
+
+  <script>
+
+	function loadTracker() {		
+
+        var targetElement = document.getElementById("target-div");
+
+        fetch('https://facebook.com/tr?test=1', {mode: 'no-cors'})
+          .then(resp => {
+            targetElement.innerText = 'Tracker loaded';
+          })
+          .catch(err => {
+            targetElement.innerText = 'Tracker not loaded';
+          });
+
+	}
+
+  </script>
+
+</head>
+<body onload="loadTracker()">
+<p><a href="../index.html">[Home]</a></p>
+
+<p>Tracker loaded via fetch</p>
+
+<div id="target-div">
+</div>
+
+</body>
+</html>

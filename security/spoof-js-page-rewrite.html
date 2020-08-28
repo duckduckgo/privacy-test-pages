@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+
+<script>
+  function next() {
+         w.location.replace('http://tests.netsekure.org/slow.php?seconds=10000');
+        }
+
+  function f() {
+    w = window.open("");
+    w.document.write('<p class="b"><body bgcolor="#5DBCD2"><p style="text-align:center;">This is not the content that belongs to the above URL</p>');
+    w.location = "https://duck.co";
+    i = setInterval("try { x = w.location.href; } catch(e) { clearInterval(i); next(); }", 1);
+  }
+</script>
+
+</head>
+
+<body>
+<a href="#" onclick="f()">Start</a>
+</body>
+
+</html>

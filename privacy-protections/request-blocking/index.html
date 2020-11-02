@@ -1,0 +1,84 @@
+<html>
+    <head>
+        <script src='./main.js' defer></script>
+
+        <link href='./style.css' rel='stylesheet'></link>
+        <link rel="shortcut icon" type="image/jpg" href="https://cdn.krxd.net/favicon.ico" />
+        <meta http-equiv="Content-Security-Policy-Report-Only" content="default-src 'self'; report-uri https://cdn.krxd.net/csp.report">
+    </head>
+    <body>
+        <p>This page tests if different types of requests, made using various browser mechanisms are getting blocked.</p>
+
+        <ul>
+            <li>HTML
+                <ul>
+                    <li id='html-script'>SCRIPT
+                        <script src='https://cdn.krxd.net/script.js' async></script>
+                        <span class='status'>⬜️ not loaded</span>
+                    </li>
+                    <li id='html-style'>
+                        STYLE
+                        <link href='https://cdn.krxd.net/style.css' rel='stylesheet'></link>
+                        <span class='status'>⬜️ not loaded</span>
+                    </li>
+                    <li id='html-img'>IMG
+                        <img src='https://cdn.krxd.net/img.jpg' style='width:1px; height: 1px'/>
+                        <span class='status'>⬜️ not loaded</span>
+                    </li>
+                    <li id='html-picture'>PICTURE
+                        <picture style='width:1px; height: 1px'>
+                            <source srcset="https://cdn.krxd.net/picture.jpg" media="(min-width: 0px)">
+                            <img src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==' />
+                        </picture>
+                        <span class='status'>⬜️ not loaded</span>
+                    </li>
+                    <li id='html-object'>OBJECT
+                        <object type="image/png" data="https://cdn.krxd.net/object.png" style='width:1px; height: 1px'></object>
+                        <span class='status'>⬜️ not loaded</span>
+                    </li>
+                    <li id='html-audio'>AUDIO
+                        <audio src='https://cdn.krxd.net/audio.mp3' style='width:1px; height: 1px'></audio>
+                        <span class='status'>⬜️ not loaded</span>
+                    </li>
+                    <li id='html-video'>VIDEO
+                        <video src='https://cdn.krxd.net/video.avi' style='width:1px; height: 1px'></video>
+                        <span class='status'>⬜️ not loaded</span>
+                    </li>
+                    <li id='html-iframe'>IFRAME
+                        <iframe src='https://cdn.krxd.net/frame.html' style='width:1px; height: 1px'></iframe>
+                        <span class='status'>⬜️ not loaded</span>
+                    </li>
+                </ul>
+            </li>
+            <li>CSS
+                <ul>
+                    <li id='css-import'>@import <span class='status'>⬜️ not loaded</span></li>
+                    <li id='css-background'>background-url <span class='status'>⬜️ not loaded</span></li>
+                    <li id='css-font'>font <span class='status'>⬜️ not loaded</span> - ⚠️ blocked by CORS, always looks blocked</li>   
+                </ul>
+            </li>
+            <li>
+                JS
+                <ul>
+                    <li id='js-ajax'>XMLHttpRequest <span class='status'>⬜️ not loaded</span> - ⚠️ blocked by CORS, always looks blocked</li>
+                    <li id='js-fetch'>fetch <span class='status'>⬜️ not loaded</span></li>
+                    <li id='js-ws'>WebSocket <span class='status'>⬜️ not loaded</span> - ⚠️ can't tell if error or blocked</li>
+                    <li id='js-sse'>Server Sent Events <span class='status'>⬜️ not loaded</span> - ⚠️ can't tell if error or blocked</li>
+                    <li id='js-webrtc'>WebRTC <span class='status'>⬜️ not loaded</span> - TODO</li>
+                </ul>
+            </li>
+            <li>
+                Other
+                <ul>
+                    <li id='other-csp'>CSP <span class='status'>⬜️ not loaded</span> - ⚠️ we can't send the report w/o the header</li>
+                    <li id='other-favicon'>Favicon <span class='status'>⬜️ not loaded</span></li>
+                    <li>Request from an iframe <span class='status'>⬜️ not loaded</span> - TODO</li>
+                    <li>Request from a WebWorker <span class='status'>⬜️ not loaded</span> - TODO</li>
+                    <li>Request from a ServiceWorker <span class='status'>⬜️ not loaded - TODO</span></li>
+                    <li>Dynamically created IMG <span class='status'>⬜️ not loaded</span> - TODO</li>
+                </ul>
+            </li>
+        </ul>
+
+    </body>
+</html>

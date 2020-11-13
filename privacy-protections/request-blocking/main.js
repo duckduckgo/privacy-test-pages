@@ -8,7 +8,13 @@ const tests = [
     {
         category: 'html',
         id: 'script',
-        html: `<script src='./block-me/script.js?${random}'></script>`
+        html: () => {
+            // for some reason returning a string here does not work, I have to construct nodes in JS
+            const script = document.createElement('script');
+            script.src = `./block-me/script.js?${random}`;
+
+            return script;
+        }
     },
     {
         category: 'html',
@@ -19,9 +25,9 @@ const tests = [
             const item = document.querySelector('#html-style-test');
 
             if (item) {
-                const fontFamily = window.getComputedStyle(item).fontFamily;
+                const content = window.getComputedStyle(item).content;
 
-                if (fontFamily.includes('works')) {
+                if (content.includes('works')) {
                     return 'loaded';
                 }
             }
@@ -47,7 +53,7 @@ const tests = [
         category: 'html',
         id: 'picture',
         html: `<picture id='html-picture-test' style='display: inline-block'>
-        <source srcset="./block-me/picture.jpg?${random}" media="(min-width: 0px)">
+        <source srcset="./block-me/picture.jpg?${random}">
         <img src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==' />
         </picture>`,
         check: () => {
@@ -131,9 +137,9 @@ const tests = [
             const item = document.querySelector('#css-import-test');
 
             if (item) {
-                const fontFamily = window.getComputedStyle(item).fontFamily;
+                const content = window.getComputedStyle(item).content;
 
-                if (fontFamily.includes('works')) {
+                if (content.includes('works')) {
                     return 'loaded';
                 }
             }
@@ -301,7 +307,13 @@ tests.forEach(test => {
     const status = li.querySelector('.status');
 
     if (test.html) {
-        playground.innerHTML += `<hr/>${test.category} - ${test.id} ${test.html}`;
+        if (typeof test.html === 'string') {
+            const template = document.createElement('template');
+            template.innerHTML = `<hr/>${test.category} - ${test.id} ${test.html}`;
+            playground.appendChild(template.content);
+        } else if (typeof test.html === 'function') {
+            playground.appendChild(test.html());
+        }
     }
 
     categoryUl.appendChild(li);

@@ -21,7 +21,7 @@ app.post('/git', (req, res) => {
 });
 
 // dummy websocket server
-const wss = new ws.Server({port: 40510, path: '/block-me/web-socket'});
+const wss = new ws.Server({server: listener, path: '/block-me/web-socket'});
 
 wss.on('connection', (ws) => {
     ws.send('It works 👍');

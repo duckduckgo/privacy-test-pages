@@ -206,7 +206,7 @@ const tests = [
         id: 'websocket',
         checkAsync: (callback) => {
             const wsProtocol = urlObj.protocol == "https:" ? "wss" : "ws";
-            const websocketUrl = `${wsProtocol}://${urlObj.hostname}:40510/block-me/web-socket`;
+            const websocketUrl = `${wsProtocol}://${urlObj.hostname}:${urlObj.port}/block-me/web-socket`;
             const socket = new WebSocket(websocketUrl);
             socket.addEventListener('message', event => {
                 callback('loaded');

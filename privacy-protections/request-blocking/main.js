@@ -278,7 +278,7 @@ const tests = [
             const observer = new PerformanceObserver(observed); 
 
             const checkResource = resource => {
-                if (resource.name.includes('favicon.ico')) {
+                if (resource.name.includes('favicon.ico?')) {
                     if (resource.duration === 0 && resource.nextHopProtocol === '') {
                         callback('failed');
                     } else {

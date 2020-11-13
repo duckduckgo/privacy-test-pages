@@ -9,7 +9,9 @@
     <script>
         if (window.parent) {
             document.body.style.background = 'red';
-            window.parent.postMessage('Frame loaded 👍');
+            setInterval(() => {
+                window.parent.postMessage('frame loaded 👍', '*');
+            }, 300);
         }
     </script>
 </body>

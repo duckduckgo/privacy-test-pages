@@ -1,110 +1,327 @@
 const urlObj = new URL(location.href);
 const locationPrefix = `${urlObj.protocol}//${urlObj.hostname}:${urlObj.port}`;
+const random = Math.random();
 
-const urlToId = [
-    // HTML
-    {path: '/block-me/script.js', id: 'html-script'},
-    {path: '/block-me/style.css', id: 'html-style'},
-    {path: '/block-me/img.jpg', id: 'html-img'},
-    {path: '/block-me/picture.jpg', id: 'html-picture'},
-    {path: '/block-me/object.png', id: 'html-object'},
-    {path: '/block-me/audio.wav', id: 'html-audio'},
-    {path: '/block-me/video.mp4', id: 'html-video'},
-    {path: '/block-me/frame.html', id: 'html-iframe'},
+const playground = document.querySelector('#playground');
 
-    // CSS
-    {path: '/block-me/cssImport.css', id: 'css-import'},
-    {path: '/block-me/cssbg.jpg', id: 'css-background'},
-    {path: '/block-me/cssfont.woff', id: 'css-font'},
+const tests = [
+    {
+        category: 'html',
+        id: 'script',
+        html: `<script src='./block-me/script.js?${random}'></script>`
+    },
+    {
+        category: 'html',
+        id: 'style',
+        html: `<link href='./block-me/style.css?${random}' rel='stylesheet'></link>
+        <div id='html-style-test'></div>`,
+        check: () => {
+            const item = document.querySelector('#html-style-test');
 
-    // JS
-    {path: '/block-me/fetch.json', id: 'js-fetch'},
-    {path: '/block-me/ajax.json', id: 'js-ajax'},
+            if (item) {
+                const fontFamily = window.getComputedStyle(item).fontFamily;
 
-    // OTHER
-    {path: '/block-me/csp.report', id: 'other-csp'},
-    {path: '/block-me/favicon.ico', id: 'other-favicon'},
+                if (fontFamily.includes('works')) {
+                    return 'loaded';
+                }
+            }
+        }
+    },
+    {
+        category: 'html',
+        id: 'img',
+        html: `<img src='./block-me/img.jpg?${random}' id='html-img-test'/>`,
+        check: () => {
+            const item = document.querySelector('#html-img-test');
+
+            if (item) {
+                const size = item.getBoundingClientRect();
+
+                if (size.width === 100) {
+                    return 'loaded';
+                }
+            }
+        }
+    },
+    {
+        category: 'html',
+        id: 'picture',
+        html: `<picture id='html-picture-test' style='display: inline-block'>
+        <source srcset="./block-me/picture.jpg?${random}" media="(min-width: 0px)">
+        <img src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==' />
+        </picture>`,
+        check: () => {
+            const item = document.querySelector('#html-picture-test');
+
+            if (item) {
+                const size = item.getBoundingClientRect();
+
+                if (size.width === 100) {
+                    return 'loaded';
+                }
+            }
+        }
+    },
+    {
+        category: 'html',
+        id: 'object',
+        html: `<object type="image/png" data="./block-me/object.png?${random}" id='html-object-test'></object>`,
+        check: () => {
+            const item = document.querySelector('#html-object-test');
+
+            if (item) {
+                const size = item.getBoundingClientRect();
+
+                if (size.width === 100) {
+                    return 'loaded';
+                }
+            }
+        }  
+    },
+    {
+        category: 'html',
+        id: 'audio',
+        html: `<audio src='./block-me/audio.wav?${random}' id='html-audio-test'></audio>`,
+        check: () => {
+            const item = document.querySelector('#html-audio-test');
+
+            if (item && item.duration > 0) {
+                return 'loaded';
+            }
+        }  
+    },
+    {
+        category: 'html',
+        id: 'video',
+        html: `<video src='./block-me/video.mp4?${random}' id='html-video-test' style='max-width: 100px'></video>`,
+        check: () => {
+            const item = document.querySelector('#html-video-test');
+
+            if (item && item.duration > 0) {
+                return 'loaded';
+            }
+        }  
+    },
+    {
+        category: 'html',
+        id: 'iframe',
+        html: `<iframe src='./block-me/frame.html?${random}' style='width:100px' id='html-iframe-test'></iframe>`,
+        checkAsync: (callback) => {
+            const item = document.querySelector('#html-iframe-test');
+
+            if (item) {
+                const onMessage = msg => {
+                    if (msg.data.includes('frame loaded')) {
+                        callback('loaded');
+                        window.removeEventListener('message', onMessage);
+                    }
+                };
+
+                window.addEventListener('message', onMessage);
+            }
+        }
+    },
+
+    {
+        category: 'css',
+        id: 'import',
+        html: `<style>@import url(./block-me/cssImport.css?${random});</style>
+        <div id='css-import-test'></div>`,
+        check: () => {
+            const item = document.querySelector('#css-import-test');
+
+            if (item) {
+                const fontFamily = window.getComputedStyle(item).fontFamily;
+
+                if (fontFamily.includes('works')) {
+                    return 'loaded';
+                }
+            }
+        }
+    },
+    {
+        category: 'css',
+        id: 'font',
+        html: `<style>@font-face {
+            font-family: fakeFont;
+            src: url(./block-me/cssfont.woff?${random});
+        }
+        
+        #css-font-test {
+            font-family: 'fakeFont';
+        }</style>
+        <div id='css-font-test'>text</div>`,
+        check: () => {
+            const item = document.querySelector('#css-font-test');
+
+            if (item) {
+                const size = item.getBoundingClientRect();
+
+                if (size.height >= 20) {
+                    return 'loaded';
+                }
+            }
+        }
+    },
+    {
+        category: 'css',
+        id: 'background',
+        html: `<style>
+        #css-bg-test {
+            background: url(./block-me/cssbg.jpg?${random});
+            width: 100px;
+            height: 100px;
+        }</style>
+        <div id='css-bg-test'></div>`,
+        checkAsync: callback => {
+            const observer = new PerformanceObserver(observed); 
+
+            const checkResource = resource => {
+                if (resource.name.includes('cssbg.jpg')) {
+                    if (resource.duration === 0 && resource.nextHopProtocol === '') {
+                        callback('failed');
+                    } else {
+                        callback('loaded');
+                    }
+                    observer.disconnect();
+                }
+            };
+
+            function observed(list) { 
+                list.getEntries().forEach(checkResource);
+            } 
+
+            observer.observe({entryTypes: ["resource", "navigation"]});
+        }
+    },
+
+    {
+        category: 'js',
+        id: 'websocket',
+        checkAsync: (callback) => {
+            const websocketUrl = `ws://${urlObj.hostname}:40510/block-me/web-socket`;
+            const socket = new WebSocket(websocketUrl);
+            socket.addEventListener('message', event => {
+                callback('loaded');
+            });
+            socket.addEventListener('close', event => {
+                if (event.code !== 1005) {
+                    callback('failed');
+                }
+            });
+        }
+    },
+    {
+        category: 'js',
+        id: 'server-sent-events',
+        checkAsync: (callback) => {
+            const sseUrl = `${locationPrefix}/block-me/server-sent-events`;
+            const eventSource = new EventSource(sseUrl);
+            eventSource.addEventListener('message', event => {
+                callback('loaded');
+                eventSource.close();
+            });
+            eventSource.addEventListener('error', e => {
+                callback('failed');
+                eventSource.close();
+            });
+        }
+    },
+    {
+        category: 'js',
+        id: 'fetch',
+        checkAsync: (callback) => {
+            fetch(`./block-me/fetch.json?${random}`)
+                .then(r => r.json())
+                .then(data => {
+                    if (data.data.includes('fetch loaded')) {
+                        callback('loaded');
+                    }
+                })
+                .catch(e => {
+                    callback('failed');
+                })
+        }
+    },
+    {
+        category: 'js',
+        id: 'xmlhttprequest',
+        checkAsync: (callback) => {
+            const ajax = new XMLHttpRequest();
+            ajax.onreadystatechange = () => {
+                if (ajax.readyState == 4 && ajax.status == 200) {
+                   const data = JSON.parse(ajax.responseText);
+
+                   if (data.data.includes('ajax loaded')) {
+                       callback('loaded');
+                   }
+                }
+            };
+            ajax.onerror = () => {
+                callback('failed');
+            };
+            ajax.open('GET', `./block-me/ajax.json?${random}`, true);
+            ajax.send();
+        }
+    },
+    {
+        category: 'other',
+        id: 'favicon',
+        checkAsync: (callback) => {
+            const observer = new PerformanceObserver(observed); 
+
+            const checkResource = resource => {
+                if (resource.name.includes('favicon.ico')) {
+                    if (resource.duration === 0 && resource.nextHopProtocol === '') {
+                        callback('failed');
+                    } else {
+                        callback('loaded');
+                    }
+                    observer.disconnect();
+                }
+            };
+
+            function observed(list) { 
+                list.getEntries().forEach(checkResource);
+            } 
+
+            observer.observe({entryTypes: ["resource", "navigation"]});
+
+            document.head.innerHTML += `<link rel="shortcut icon" type="image/icon" href="./block-me/favicon.ico?${random}" />`;
+        }
+    }
 ];
 
-function updateUrl(url, status) {
-    const urlObj = new URL(url);
-    const item = urlToId.find(({path, id}) => urlObj.pathname.endsWith(path));
+tests.forEach(test => {
+    const categoryUl = document.querySelector(`.category-${test.category} ul`);
 
-    if (!item) {
-        console.error('Match for url not found', url);
-        return;
+    const li = document.createElement('li');
+    li.id = `test-${test.category}-${test.id}`;
+    li.innerHTML = `<div class='status'></div> - ${test.id}`;
+    const status = li.querySelector('.status');
+
+    if (test.html) {
+        playground.innerHTML += `<hr/>${test.category} - ${test.id} ${test.html}`;
     }
 
-    updateElement(item.id, status);
-}
+    categoryUl.appendChild(li);
 
-function updateElement(id, status) {
-    console.log(id, 'changed status to', status);
-
-    const testElem = document.getElementById(id);
-
-    if (!testElem) {
-        console.error('Element not found with id', id);
-        return;
+    if (test.check) {
+        const interval = setInterval(() => {
+            const result = test.check();
+            
+            if (result === 'loaded' || result === 'failed') {
+                status.classList.add(result);
+                clearInterval(interval);
+            }
+        }, 300);
     }
 
-    const statusElem = testElem.querySelector('.status');
-    statusElem.innerText = ' ' + (status === 'blocked' ? '🟥 blocked' : '🟩 loaded');
-}
-
-function checkResource(resource) {
-    updateUrl(resource.name, (resource.duration === 0 && resource.nextHopProtocol === '') ? 'blocked' : 'loaded');
-}
-
-performance.getEntries().forEach(checkResource);
-
-
-function observed(list, observer) { 
-    list.getEntries().forEach(checkResource);
-} 
-
-const observer = new PerformanceObserver(observed); 
-observer.observe({entryTypes: ["resource", "navigation"]});
-
-/**
- * JS calls
- */
-
-fetch('./block-me/fetch.json', {mode: 'no-cors'});
-
-const ajax = new XMLHttpRequest();
-ajax.open('GET', './block-me/ajax.json', true);
-ajax.send();
-
-const websocketUrl = `ws://${urlObj.hostname}:40510/block-me/web-socket`;
-const socket = new WebSocket(websocketUrl);
-socket.addEventListener('message', event => {
-    console.log('ws message', event.data);
-    updateElement('js-ws', 'loaded');
-});
-socket.addEventListener('close', event => {
-    if (event.code !== 1005) {
-        updateElement('js-ws', 'blocked');
+    if (test.checkAsync) {
+        test.checkAsync(result => {
+            if (result === 'loaded' || result === 'failed') {
+                status.classList.add(result);
+            }
+        });
     }
 });
-
-const sseUrl = `${locationPrefix}/block-me/server-sent-events`;
-const eventSource = new EventSource(sseUrl);
-eventSource.addEventListener('message', event => {
-    console.log('sse message', event.data);
-    updateElement('js-sse', 'loaded');
-
-    eventSource.close();
-});
-eventSource.addEventListener('error', e => {
-    console.log('see failed', e);
-    updateElement('js-sse', 'blocked');
-});
-
-// navigator.serviceWorker.register('./service-worker.js');
-
-// navigator.serviceWorker.addEventListener('message', event => {
-//     console.log('Service worker msg', event.data.msg, event.data.url, event.data.error);
-
-//     updateUrl(event.data.url, event.data.msg);
-// });

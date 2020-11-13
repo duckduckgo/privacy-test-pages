@@ -13,12 +13,11 @@ app.use(express.static('.'));
 
 // endpoint for updating the app
 app.post('/git', (req, res) => {
-    // If event is "push"
     if (req.headers['x-github-event'] == "push") { 
         /* Here will be our updating code */
     }
 
-    return res.sendStatus(200); // Send back OK status
+    return res.sendStatus(200);
 });
 
 // dummy websocket server

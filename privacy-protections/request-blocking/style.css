@@ -1,11 +1,20 @@
-@import url(./block-me/cssImport.css);
-
-@font-face {
-    font-family: fakeFont;
-    src: url(./block-me/cssfont.woff);
+#playground {
+    margin-top: 100px;
+    opacity: 0.3;
 }
 
-body {
-    background: url(./block-me/cssbg.jpg);
-    font-family: 'fakeFont';
+.status {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background: gray;
+    transition: background-color 300ms;
+}
+
+.status.loaded {
+    background: green;
+}
+
+.status.failed {
+    background: red;
 }

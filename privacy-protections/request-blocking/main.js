@@ -1,32 +1,41 @@
 const urlObj = new URL(location.href);
+const locationPrefix = `${urlObj.protocol}//${urlObj.hostname}:${urlObj.port}`;
 
-const urlToId = {
+const urlToId = [
     // HTML
-    'https://cdn.krxd.net/script.js': 'html-script',
-    'https://cdn.krxd.net/style.css': 'html-style',
-    'https://cdn.krxd.net/img.jpg': 'html-img',
-    'https://cdn.krxd.net/picture.jpg': 'html-picture',
-    'https://cdn.krxd.net/object.png': 'html-object',
-    'https://cdn.krxd.net/audio.mp3': 'html-audio',
-    'https://cdn.krxd.net/video.avi': 'html-video',
-    'https://cdn.krxd.net/frame.html': 'html-iframe',
+    {path: '/block-me/script.js', id: 'html-script'},
+    {path: '/block-me/style.css', id: 'html-style'},
+    {path: '/block-me/img.jpg', id: 'html-img'},
+    {path: '/block-me/picture.jpg', id: 'html-picture'},
+    {path: '/block-me/object.png', id: 'html-object'},
+    {path: '/block-me/audio.wav', id: 'html-audio'},
+    {path: '/block-me/video.mp4', id: 'html-video'},
+    {path: '/block-me/frame.html', id: 'html-iframe'},
 
     // CSS
-    'https://cdn.krxd.net/cssImport.css': 'css-import',
-    'https://cdn.krxd.net/cssBackground.jpg': 'css-background',
-    'https://cdn.krxd.net/cssFont.woff': 'css-font',
+    {path: '/block-me/cssImport.css', id: 'css-import'},
+    {path: '/block-me/cssbg.jpg', id: 'css-background'},
+    {path: '/block-me/cssfont.woff', id: 'css-font'},
 
     // JS
-    'https://cdn.krxd.net/fetch.json': 'js-fetch',
-    'https://cdn.krxd.net/ajax.json': 'js-ajax',
+    {path: '/block-me/fetch.json', id: 'js-fetch'},
+    {path: '/block-me/ajax.json', id: 'js-ajax'},
 
     // OTHER
-    'https://cdn.krxd.net/csp.report': 'other-csp',
-    'https://cdn.krxd.net/favicon.ico': 'other-favicon',
-};
+    {path: '/block-me/csp.report', id: 'other-csp'},
+    {path: '/block-me/favicon.ico', id: 'other-favicon'},
+];
 
 function updateUrl(url, status) {
-    updateElement(urlToId[url], status);
+    const urlObj = new URL(url);
+    const item = urlToId.find(({path, id}) => urlObj.pathname.endsWith(path));
+
+    if (!item) {
+        console.error('Match for url not found', url);
+        return;
+    }
+
+    updateElement(item.id, status);
 }
 
 function updateElement(id, status) {
@@ -44,10 +53,6 @@ function updateElement(id, status) {
 }
 
 function checkResource(resource) {
-    if (!urlToId[resource.name]) {
-        return;
-    }
-
     updateUrl(resource.name, (resource.duration === 0 && resource.nextHopProtocol === '') ? 'blocked' : 'loaded');
 }
 
@@ -65,10 +70,10 @@ observer.observe({entryTypes: ["resource", "navigation"]});
  * JS calls
  */
 
-fetch('https://cdn.krxd.net/fetch.json', {mode: 'no-cors'});
+fetch('./block-me/fetch.json', {mode: 'no-cors'});
 
 const ajax = new XMLHttpRequest();
-ajax.open('GET', 'https://cdn.krxd.net/ajax.json', true);
+ajax.open('GET', './block-me/ajax.json', true);
 ajax.send();
 
 const websocketUrl = `ws://${urlObj.hostname}:40510/block-me/web-socket`;
@@ -83,7 +88,7 @@ socket.addEventListener('close', event => {
     }
 });
 
-const sseUrl = `${urlObj.protocol}//${urlObj.hostname}:${urlObj.port}/block-me/server-sent-events`;
+const sseUrl = `${locationPrefix}/block-me/server-sent-events`;
 const eventSource = new EventSource(sseUrl);
 eventSource.addEventListener('message', event => {
     console.log('sse message', event.data);

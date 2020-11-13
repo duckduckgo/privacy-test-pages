@@ -38,6 +38,4 @@ app.get('/block-me/server-sent-events', (req, res) => {
     res.flushHeaders();
 
     res.write(`data: It works 👍\n\n`);
-
-    //res.end();
 });

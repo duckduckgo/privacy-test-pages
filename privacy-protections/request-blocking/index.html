@@ -3,8 +3,8 @@
         <script src='./main.js' defer></script>
 
         <link href='./style.css' rel='stylesheet'></link>
-        <link rel="shortcut icon" type="image/jpg" href="https://cdn.krxd.net/favicon.ico" />
-        <meta http-equiv="Content-Security-Policy-Report-Only" content="default-src 'self'; report-uri https://cdn.krxd.net/csp.report">
+        <link rel="shortcut icon" type="image/icon" href="./block-me/favicon.ico" />
+        <meta http-equiv="Content-Security-Policy-Report-Only" content="default-src 'self'; report-uri ./block-me/csp.report">
     </head>
     <body>
         <p>This page tests if different types of requests, made using various browser mechanisms are getting blocked.</p>
@@ -13,39 +13,39 @@
             <li>HTML
                 <ul>
                     <li id='html-script'>SCRIPT
-                        <script src='https://cdn.krxd.net/script.js' async></script>
+                        <script src='./block-me/script.js' async></script>
                         <span class='status'>⬜️ not loaded</span>
                     </li>
                     <li id='html-style'>
                         STYLE
-                        <link href='https://cdn.krxd.net/style.css' rel='stylesheet'></link>
+                        <link href='./block-me/style.css' rel='stylesheet'></link>
                         <span class='status'>⬜️ not loaded</span>
                     </li>
                     <li id='html-img'>IMG
-                        <img src='https://cdn.krxd.net/img.jpg' style='width:1px; height: 1px'/>
+                        <img src='./block-me/img.jpg' style='width:1px; height: 1px'/>
                         <span class='status'>⬜️ not loaded</span>
                     </li>
                     <li id='html-picture'>PICTURE
                         <picture style='width:1px; height: 1px'>
-                            <source srcset="https://cdn.krxd.net/picture.jpg" media="(min-width: 0px)">
+                            <source srcset="./block-me/picture.jpg" media="(min-width: 0px)">
                             <img src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==' />
                         </picture>
                         <span class='status'>⬜️ not loaded</span>
                     </li>
                     <li id='html-object'>OBJECT
-                        <object type="image/png" data="https://cdn.krxd.net/object.png" style='width:1px; height: 1px'></object>
+                        <object type="image/png" data="./block-me/object.png" style='width:1px; height: 1px'></object>
                         <span class='status'>⬜️ not loaded</span>
                     </li>
                     <li id='html-audio'>AUDIO
-                        <audio src='https://cdn.krxd.net/audio.mp3' style='width:1px; height: 1px'></audio>
+                        <audio src='./block-me/audio.wav' style='width:1px; height: 1px'></audio>
                         <span class='status'>⬜️ not loaded</span>
                     </li>
                     <li id='html-video'>VIDEO
-                        <video src='https://cdn.krxd.net/video.avi' style='width:1px; height: 1px'></video>
+                        <video src='./block-me/video.mp4' style='width:1px; height: 1px'></video>
                         <span class='status'>⬜️ not loaded</span>
                     </li>
                     <li id='html-iframe'>IFRAME
-                        <iframe src='https://cdn.krxd.net/frame.html' style='width:1px; height: 1px'></iframe>
+                        <iframe src='./block-me/frame.html' style='width:1px; height: 1px'></iframe>
                         <span class='status'>⬜️ not loaded</span>
                     </li>
                 </ul>

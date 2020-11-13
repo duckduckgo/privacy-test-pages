@@ -1,11 +1,11 @@
-@import url(https://cdn.krxd.net/cssImport.css);
+@import url(./block-me/cssImport.css);
 
 @font-face {
     font-family: fakeFont;
-    src: url(https://cdn.krxd.net/cssFont.woff);
+    src: url(./block-me/cssfont.woff);
 }
 
 body {
-    background: url(https://cdn.krxd.net/cssBackground.jpg);
+    background: url(./block-me/cssbg.jpg);
     font-family: 'fakeFont';
 }

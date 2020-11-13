@@ -11,7 +11,7 @@
     "type": "git",
     "url": "git+https://github.com/kdzwinel/privacy-test-pages.git"
   },
-  "author": "Konrad Dzwinel <kdzwinel@gmail.com>",
+  "author": "Duck Duck Go, Inc.",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/kdzwinel/privacy-test-pages/issues"

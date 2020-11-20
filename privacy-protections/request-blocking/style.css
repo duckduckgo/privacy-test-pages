@@ -18,3 +18,7 @@
 .status.failed {
     background: red;
 }
+
+.description {
+    color: gray;
+}

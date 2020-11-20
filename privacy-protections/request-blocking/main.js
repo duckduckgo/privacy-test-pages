@@ -8,6 +8,7 @@ const tests = [
     {
         category: 'html',
         id: 'script',
+        description: 'Try loading a JavaScript file using <code>&lt;script&gt;</code> element.',
         html: () => {
             // for some reason returning a string here does not work, I have to construct nodes in JS
             const script = document.createElement('script');
@@ -19,6 +20,7 @@ const tests = [
     {
         category: 'html',
         id: 'style',
+        description: 'Try loading a CSS file using <code>&lt;link&gt;</code> element.',
         html: `<link href='./block-me/style.css?${random}' rel='stylesheet'></link>
         <div id='html-style-test'></div>`,
         check: () => {
@@ -36,6 +38,7 @@ const tests = [
     {
         category: 'html',
         id: 'img',
+        description: 'Try loading an image using <code>&lt;img&gt;</code> element.',
         html: `<img src='./block-me/img.jpg?${random}' id='html-img-test'/>`,
         check: () => {
             const item = document.querySelector('#html-img-test');
@@ -52,6 +55,7 @@ const tests = [
     {
         category: 'html',
         id: 'picture',
+        description: 'Try loading an image using <code>&lt;picture&gt;</code> element.',
         html: `<picture id='html-picture-test' style='display: inline-block'>
         <source srcset="./block-me/picture.jpg?${random}">
         <img src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==' />
@@ -71,6 +75,7 @@ const tests = [
     {
         category: 'html',
         id: 'object',
+        description: 'Try loading an image using <code>&lt;object&gt;</code> element.',
         html: `<object type="image/png" data="./block-me/object.png?${random}" id='html-object-test'></object>`,
         check: () => {
             const item = document.querySelector('#html-object-test');
@@ -87,6 +92,7 @@ const tests = [
     {
         category: 'html',
         id: 'audio',
+        description: 'Try loading an audio file using <code>&lt;audio&gt;</code> element.',
         html: `<audio src='./block-me/audio.wav?${random}' id='html-audio-test'></audio>`,
         check: () => {
             const item = document.querySelector('#html-audio-test');
@@ -99,6 +105,7 @@ const tests = [
     {
         category: 'html',
         id: 'video',
+        description: 'Try loading a video file using <code>&lt;video&gt;</code> element.',
         html: `<video src='./block-me/video.mp4?${random}' id='html-video-test' style='max-width: 100px'></video>`,
         check: () => {
             const item = document.querySelector('#html-video-test');
@@ -111,6 +118,7 @@ const tests = [
     {
         category: 'html',
         id: 'iframe',
+        description: 'Try loading a frame using <code>&lt;iframe&gt;</code> element.',
         html: `<iframe src='./block-me/frame.html?${random}' style='width:100px' id='html-iframe-test'></iframe>`,
         checkAsync: (callback) => {
             const item = document.querySelector('#html-iframe-test');
@@ -131,6 +139,7 @@ const tests = [
     {
         category: 'css',
         id: 'import',
+        description: 'Try loading a CSS file using <code>@import url(…)</code>.',
         html: `<style>@import url(./block-me/cssImport.css?${random});</style>
         <div id='css-import-test'></div>`,
         check: () => {
@@ -148,6 +157,7 @@ const tests = [
     {
         category: 'css',
         id: 'font',
+        description: 'Try loading a font file using <code>@font-face {src: url(…)}</code>.',
         html: `<style>@font-face {
             font-family: fakeFont;
             src: url(./block-me/cssfont.woff?${random});
@@ -172,6 +182,7 @@ const tests = [
     {
         category: 'css',
         id: 'background',
+        description: 'Try loading an image using <code>background: url(…)</code>.',
         html: `<style>
         #css-bg-test {
             background: url(./block-me/cssbg.jpg?${random});
@@ -204,6 +215,7 @@ const tests = [
     {
         category: 'js',
         id: 'websocket',
+        description: 'Try connecting to a WebSocket.',
         checkAsync: (callback) => {
             const wsProtocol = urlObj.protocol == "https:" ? "wss" : "ws";
             const websocketUrl = `${wsProtocol}://${urlObj.hostname}:${urlObj.port}/block-me/web-socket`;
@@ -221,6 +233,7 @@ const tests = [
     {
         category: 'js',
         id: 'server-sent-events',
+        description: 'Try connecting to an EventSource.',
         checkAsync: (callback) => {
             const sseUrl = `${locationPrefix}/block-me/server-sent-events`;
             const eventSource = new EventSource(sseUrl);
@@ -237,6 +250,7 @@ const tests = [
     {
         category: 'js',
         id: 'fetch',
+        description: 'Try requesting data using <code>fetch(…)</code>.',
         checkAsync: (callback) => {
             fetch(`./block-me/fetch.json?${random}`)
                 .then(r => r.json())
@@ -253,6 +267,7 @@ const tests = [
     {
         category: 'js',
         id: 'xmlhttprequest',
+        description: 'Try requesting data using <code>XMLHttpRequest</code>.',
         checkAsync: (callback) => {
             const ajax = new XMLHttpRequest();
             ajax.onreadystatechange = () => {
@@ -274,6 +289,7 @@ const tests = [
     {
         category: 'other',
         id: 'favicon',
+        description: 'Try loading an image using <code>&lt;link rel="shortcut icon" …</code>.',
         checkAsync: (callback) => {
             const observer = new PerformanceObserver(observed); 
 
@@ -304,7 +320,7 @@ tests.forEach(test => {
 
     const li = document.createElement('li');
     li.id = `test-${test.category}-${test.id}`;
-    li.innerHTML = `<div class='status'></div> - ${test.id}`;
+    li.innerHTML = `<div class='status'></div> - ${test.id} - <span class='description'>${test.description || ''}</span>`;
     const status = li.querySelector('.status');
 
     if (test.html) {

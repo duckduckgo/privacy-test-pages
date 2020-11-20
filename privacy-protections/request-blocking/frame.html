@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frame Fetch Test</title>
+</head>
+<body>
+    <script>
+        fetch(`./block-me/fetch.json?${Math.random()}`)
+            .then(r => r.json())
+            .then(data => {
+                if (data.data.includes('fetch loaded')) {
+                    window.parent.postMessage('frame fetch loaded 👍', '*');
+                }
+            })
+            .catch(e => {
+                window.parent.postMessage('frame fetch failed', '*');
+            })
+    </script>
+</body>
+</html>

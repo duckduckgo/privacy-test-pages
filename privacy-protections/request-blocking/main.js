@@ -312,6 +312,112 @@ const tests = [
 
             document.head.innerHTML += `<link rel="shortcut icon" type="image/icon" href="./block-me/favicon.ico?${random}" />`;
         }
+    },
+    {
+        category: 'other',
+        id: 'iframe-fetch',
+        description: 'Try requesting data from within a first-party iframe.',
+        html: `<iframe src='./frame.html?${random}' style='width:100px' id='html-iframe-fetch-test'></iframe>`,
+        checkAsync: (callback) => {
+            const item = document.querySelector('#html-iframe-fetch-test');
+
+            if (item) {
+                const onMessage = msg => {
+                    if (msg.data.includes('frame fetch loaded')) {
+                        callback('loaded');
+                        window.removeEventListener('message', onMessage);
+                    } else if (msg.data.includes('frame fetch failed')) {
+                        callback('failed');
+                        window.removeEventListener('message', onMessage);
+                    }
+                };
+
+                window.addEventListener('message', onMessage);
+            }
+        }
+    },
+    {
+        category: 'other',
+        id: 'webworker-fetch',
+        description: 'Try fetching data from within a WebWorker.',
+        checkAsync: (callback) => {
+            const worker = new Worker('./worker.js');
+
+            worker.addEventListener('message', msg => {
+                if (msg.data.includes('worker fetch loaded')) {
+                    callback('loaded');
+                    worker.terminate();
+                } else if (msg.data.includes('worker fetch failed')) {
+                    callback('failed');
+                    worker.terminate();
+                }
+            });
+        }
+    },
+    {
+        category: 'other',
+        id: 'serviceworker-fetch',
+        description: 'Try fetching data from within a ServiceWorker.',
+        checkAsync: (callback) => {
+            const onMessage = msg => {
+                if (msg.data.includes('service worker fetch loaded')) {
+                    callback('loaded');
+                    navigator.serviceWorker.removeEventListener('message', onMessage);
+                } else if (msg.data.includes('service worker fetch failed')) {
+                    callback('failed');
+                    navigator.serviceWorker.removeEventListener('message', onMessage);
+                }
+            };
+
+            navigator.serviceWorker.addEventListener('message', onMessage);
+            navigator.serviceWorker.register('./service-worker.js', {scope: './'})
+                .then(registration => {
+                    if (registration.active) {
+                        registration.active.addEventListener('message', () => {
+                            console.log('client received message');
+                        });
+                        registration.active.postMessage('fetch');
+                    } else if (registration.installing) {
+                        registration.installing.addEventListener('statechange', () => {
+                            if (registration.active) {
+                                registration.active.addEventListener('message', () => {
+                                    console.log('client received message');
+                                });
+                                registration.active.postMessage('fetch');
+                            } 
+                        });
+                    }
+                })
+                .catch((error) => {
+                    console.log('Registration failed with ' + error);
+                });
+        }
+    },
+    {
+        category: 'other',
+        id: 'csp-report',
+        description: 'Try sending data via CSP report.',
+        html: `<img src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=='/>`,// causes CSP violation which triggers a report
+        checkAsync: (callback) => {
+            const observer = new PerformanceObserver(observed); 
+
+            const checkResource = resource => {
+                if (resource.name.includes('/csp')) {
+                    if (resource.duration === 0 && resource.nextHopProtocol === '') {
+                        callback('failed');
+                    } else {
+                        callback('loaded');
+                    }
+                    observer.disconnect();
+                }
+            };
+
+            function observed(list) { 
+                list.getEntries().forEach(checkResource);
+            } 
+
+            observer.observe({entryTypes: ["resource", "navigation"]});
+        }
     }
 ];
 

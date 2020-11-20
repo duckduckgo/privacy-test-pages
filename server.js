@@ -9,7 +9,16 @@ const listener = app.listen(port, () => {
 });
 
 // serve all static files
-app.use(express.static('.'));
+app.use(express.static('.', {
+    setHeaders: (res, path) => {
+        res.set("Access-Control-Allow-Origin", "*");
+
+        // send CSP header when fetching request blocking test site
+        if (path.endsWith('privacy-protections/request-blocking/index.html')) {
+            res.set("Content-Security-Policy-Report-Only", "img-src http: https:; report-uri /block-me/csp");
+        }
+    }
+}));
 
 // endpoint for updating the app
 app.post('/git', (req, res) => {
@@ -37,4 +46,9 @@ app.get('/block-me/server-sent-events', (req, res) => {
     res.flushHeaders();
 
     res.write(`data: It works 👍\n\n`);
+});
+
+// dummy CSP report endopoint
+app.post('/block-me/csp', (req, res) => {
+    return res.sendStatus(200);
 });

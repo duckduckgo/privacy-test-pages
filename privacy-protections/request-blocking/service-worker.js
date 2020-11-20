@@ -1,43 +1,20 @@
 self.addEventListener('install', (evt) => {
-    console.log('The service worker is being installed.');
+    self.skipWaiting();
 });
 
-function reportSuccess(event, response) {
-    // console.log('success', event.request, response);
-
-    clients.get(event.clientId)
-        .then((client) => {
-            client.postMessage({
-                msg: 'loaded',
-                url: event.request.url
-            });
-        });
-
-
-    return response;
-}
-
-function reportFailure(event, error) {
-    // console.log('failure', event.request.url, event, error);
-
-    clients.get(event.clientId)
-        .then((client) => {
-            client.postMessage({
-                msg: 'blocked',
-                url: event.request.url,
-                error: error.toString()
-            });
-        });
-
-    return error;
-}
-
-self.addEventListener('fetch', function (evt) {
-    console.log('Service worker fetch', evt);
-    
-    evt.respondWith(
-        fetch(evt.request)
-            .then(reportSuccess.bind(null, evt))
-            .catch(reportFailure.bind(null, evt))
-    );
+self.addEventListener('message', (event) => {
+    if (event.data === 'fetch') {
+        fetch(`./block-me/fetch.json?${Math.random()}`)
+            .then(r => r.json())
+            .then(data => {
+                if (data.data.includes('fetch loaded')) {
+                    event.source.postMessage('service worker fetch loaded 👍');
+                    self.registration.unregister();
+                }
+            })
+            .catch(() => {
+                event.source.postMessage('service worker fetch failed');
+                self.registration.unregister();
+            })
+    }
 });

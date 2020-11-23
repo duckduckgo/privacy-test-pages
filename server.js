@@ -20,15 +20,6 @@ app.use(express.static('.', {
     }
 }));
 
-// endpoint for updating the app
-app.post('/git', (req, res) => {
-    if (req.headers['x-github-event'] == "push") { 
-        /* Here will be our updating code */
-    }
-
-    return res.sendStatus(200);
-});
-
 // dummy websocket server
 const wss = new ws.Server({server: listener, path: '/block-me/web-socket'});
 

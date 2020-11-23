@@ -4,8 +4,11 @@ const debugDiv = document.querySelector('#debug');
 const startButton = document.querySelector('#start');
 const downloadButton = document.querySelector('#download');
 
-// results array that can be queried for results
-const results = [];
+// object that contains results of all tests
+const results = {
+    page: 'request-blocking',
+    results: []
+};
 
 /**
  * List of tests each testing different way of making a request
@@ -438,7 +441,7 @@ const tests = [
 function runTests() {
     startButton.setAttribute('disabled', 'disabled');
     downloadButton.removeAttribute('disabled');
-    results.length = 0;
+    results.results.length = 0;
 
     tests.forEach(test => {
         const resultObj = {
@@ -446,7 +449,7 @@ function runTests() {
             category: test.category,
             status: 'not loaded'
         };
-        results.push(resultObj);
+        results.results.push(resultObj);
 
         const categoryUl = document.querySelector(`.category-${test.category} ul`);
 

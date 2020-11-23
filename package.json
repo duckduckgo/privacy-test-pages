@@ -1,5 +1,5 @@
 {
-  "name": "fork-privacy-test-pages",
+  "name": "privacy-test-pages",
   "version": "1.0.0",
   "description": "A collection of pages with known content (trackers, web functionality) for testing with the mobile apps and extensions.",
   "main": "server.js",
@@ -9,14 +9,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kdzwinel/privacy-test-pages.git"
+    "url": "git+https://github.com/duckduckgo/privacy-test-pages.git"
   },
   "author": "Duck Duck Go, Inc.",
-  "license": "ISC",
   "bugs": {
-    "url": "https://github.com/kdzwinel/privacy-test-pages/issues"
+    "url": "https://github.com/duckduckgo/privacy-test-pages/issues"
   },
-  "homepage": "https://github.com/kdzwinel/privacy-test-pages#readme",
+  "homepage": "https://github.com/duckduckgo/privacy-test-pages#readme",
   "dependencies": {
     "express": "^4.17.1",
     "ws": "^7.4.0"

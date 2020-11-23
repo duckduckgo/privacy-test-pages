@@ -1,12 +1,18 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
     <head>
-        <script src='./main.js' defer></script>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Request blocking test page</title>
 
+        <script src='./main.js' defer></script>
         <link href='./style.css' rel='stylesheet'></link>
-        <!-- <meta http-equiv="Content-Security-Policy-Report-Only" content="default-src 'self'; report-uri ./block-me/csp.report"> -->
     </head>
     <body>
         <p>This page tests if different types of requests, made using various browser mechanisms are getting blocked.</p>
+
+        <button id='start'>Start the test</button>
+        <button id='download' disabled='disabled'>Download the results</button>
 
         <ul>
             <li class='category-html'>HTML
@@ -27,7 +33,7 @@
             </li>
         </ul>
 
-        <div id='playground'>
+        <div id='debug'>
             Debug data:
         </div>
     </body>

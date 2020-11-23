@@ -1,9 +1,15 @@
 const urlObj = new URL(location.href);
-const locationPrefix = `${urlObj.protocol}//${urlObj.hostname}:${urlObj.port}`;
 const random = Math.random();
+const debugDiv = document.querySelector('#debug');
+const startButton = document.querySelector('#start');
+const downloadButton = document.querySelector('#download');
 
-const playground = document.querySelector('#playground');
+// results array that can be queried for results
+const results = [];
 
+/**
+ * List of tests each testing different way of making a request
+ */
 const tests = [
     {
         category: 'html',
@@ -15,6 +21,10 @@ const tests = [
             script.src = `./block-me/script.js?${random}`;
 
             return script;
+        },
+        checkAsync: (callback) => {
+            // when script loads it will call this global function
+            window.scriptLoadedCallback = callback.bind(null, 'loaded');
         }
     },
     {
@@ -235,6 +245,7 @@ const tests = [
         id: 'server-sent-events',
         description: 'Try connecting to an EventSource.',
         checkAsync: (callback) => {
+            const locationPrefix = `${urlObj.protocol}//${urlObj.hostname}:${urlObj.port}`;
             const sseUrl = `${locationPrefix}/block-me/server-sent-events`;
             const eventSource = new EventSource(sseUrl);
             eventSource.addEventListener('message', event => {
@@ -421,42 +432,85 @@ const tests = [
     }
 ];
 
-tests.forEach(test => {
-    const categoryUl = document.querySelector(`.category-${test.category} ul`);
+/**
+ * Test runner
+ */
+function runTests() {
+    startButton.setAttribute('disabled', 'disabled');
+    downloadButton.removeAttribute('disabled');
+    results.length = 0;
 
-    const li = document.createElement('li');
-    li.id = `test-${test.category}-${test.id}`;
-    li.innerHTML = `<div class='status'></div> - ${test.id} - <span class='description'>${test.description || ''}</span>`;
-    const status = li.querySelector('.status');
+    tests.forEach(test => {
+        const resultObj = {
+            id: test.id,
+            category: test.category,
+            status: 'not loaded'
+        };
+        results.push(resultObj);
 
-    if (test.html) {
-        if (typeof test.html === 'string') {
-            const template = document.createElement('template');
-            template.innerHTML = `<hr/>${test.category} - ${test.id} ${test.html}`;
-            playground.appendChild(template.content);
-        } else if (typeof test.html === 'function') {
-            playground.appendChild(test.html());
+        const categoryUl = document.querySelector(`.category-${test.category} ul`);
+
+        const li = document.createElement('li');
+        li.id = `test-${test.category}-${test.id}`;
+        li.innerHTML = `<div class='status'></div> - ${test.id} - <span class='description'>${test.description || ''}</span>`;
+        const status = li.querySelector('.status');
+
+        if (test.html) {
+            if (typeof test.html === 'string') {
+                const template = document.createElement('template');
+                template.innerHTML = `<hr/>${test.category} - ${test.id} ${test.html}`;
+                debugDiv.appendChild(template.content);
+            } else if (typeof test.html === 'function') {
+                debugDiv.appendChild(test.html());
+            }
         }
-    }
 
-    categoryUl.appendChild(li);
+        categoryUl.appendChild(li);
 
-    if (test.check) {
-        const interval = setInterval(() => {
-            const result = test.check();
-            
-            if (result === 'loaded' || result === 'failed') {
-                status.classList.add(result);
-                clearInterval(interval);
-            }
-        }, 300);
-    }
+        if (test.check) {
+            const interval = setInterval(() => {
+                const testResult = test.check();
+                
+                if (testResult === 'loaded' || testResult === 'failed') {
+                    status.classList.add(testResult);
+                    clearInterval(interval);
 
-    if (test.checkAsync) {
-        test.checkAsync(result => {
-            if (result === 'loaded' || result === 'failed') {
-                status.classList.add(result);
-            }
-        });
-    }
-});
+                    resultObj.status = testResult;
+                }
+            }, 300);
+        }
+
+        if (test.checkAsync) {
+            test.checkAsync(testResult => {
+                if (testResult === 'loaded' || testResult === 'failed') {
+                    status.classList.add(testResult);
+                    resultObj.status = testResult;
+                }
+            });
+        }
+    });
+}
+
+function downloadTheResults() {
+    const data = JSON.stringify(results, null, 2);
+    const a = document.createElement('a');
+    const url = window.URL.createObjectURL(new Blob([data], {type: 'application/json'}));
+    a.href = url;
+    a.download = 'request-blocking-results.json';
+    
+    debugDiv.appendChild(a);
+    a.click();
+
+    window.URL.revokeObjectURL(url);
+    a.remove();
+}
+
+downloadButton.addEventListener('click', () => downloadTheResults());
+
+// run tests if button was clicked or…
+startButton.addEventListener('click', () => runTests());
+
+// if url contains 'run-tests'
+if (document.location.search === '?run') {
+    runTests();
+}

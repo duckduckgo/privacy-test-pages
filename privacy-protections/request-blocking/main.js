@@ -452,7 +452,7 @@ function runTests() {
 
         const li = document.createElement('li');
         li.id = `test-${test.category}-${test.id}`;
-        li.innerHTML = `<div class='status'></div> - ${test.id} - <span class='description'>${test.description || ''}</span>`;
+        li.innerHTML = `<div class='status' title='not loaded'></div> - ${test.id} - <span class='description'>${test.description || ''}</span>`;
         const status = li.querySelector('.status');
 
         if (test.html) {
@@ -473,6 +473,7 @@ function runTests() {
                 
                 if (testResult === 'loaded' || testResult === 'failed') {
                     status.classList.add(testResult);
+                    status.setAttribute('title', testResult);
                     clearInterval(interval);
 
                     resultObj.status = testResult;
@@ -484,6 +485,7 @@ function runTests() {
             test.checkAsync(testResult => {
                 if (testResult === 'loaded' || testResult === 'failed') {
                     status.classList.add(testResult);
+                    status.setAttribute('title', testResult);
                     resultObj.status = testResult;
                 }
             });

@@ -1,0 +1,45 @@
+const express = require('express');
+const ws = require('ws');
+const app = express();
+const port = process.env.PORT || 3000;
+
+// start server
+const listener = app.listen(port, () => {
+  console.log(`Server listening at port ${listener.address().port}`)
+});
+
+// serve all static files
+app.use(express.static('.', {
+    setHeaders: (res, path) => {
+        res.set("Access-Control-Allow-Origin", "*");
+
+        // send CSP header when fetching request blocking test site
+        if (path.endsWith('privacy-protections/request-blocking/index.html')) {
+            res.set("Content-Security-Policy-Report-Only", "img-src http: https:; report-uri /block-me/csp");
+        }
+    }
+}));
+
+// dummy websocket server
+const wss = new ws.Server({server: listener, path: '/block-me/web-socket'});
+
+wss.on('connection', (ws) => {
+    ws.send('It works 👍');
+    ws.close();
+});
+
+// dummy server sent events
+app.get('/block-me/server-sent-events', (req, res) => {
+    res.set({
+        'Cache-Control': 'no-cache',
+        'Content-Type': 'text/event-stream',
+    });
+    res.flushHeaders();
+
+    res.write(`data: It works 👍\n\n`);
+});
+
+// dummy CSP report endopoint
+app.post('/block-me/csp', (req, res) => {
+    return res.sendStatus(200);
+});

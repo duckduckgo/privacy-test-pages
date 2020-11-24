@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Request blocking test page</title>
+
+        <script src='./main.js' defer></script>
+        <link href='./style.css' rel='stylesheet'></link>
+    </head>
+    <body>
+        <p><a href="../../">[Home]</a> ↣ <a href="../">[Privacy Protections Tests]</a></p>
+
+        <p>This page tests if different types of requests, made using various browser mechanisms are getting blocked.</p>
+
+        <button id='start'>Start the test</button>
+        <button id='download' disabled='disabled'>Download the results</button>
+
+        <ul>
+            <li class='category-html'>HTML
+                <ul>
+                </ul>
+            </li>
+            <li class='category-css'>CSS
+                <ul>
+                </ul>
+            </li>
+            <li class='category-js'>JS
+                <ul>
+                </ul>
+            </li>
+            <li class='category-other'>Other
+                <ul>
+                </ul>
+            </li>
+        </ul>
+
+        <div id='debug'>
+            Debug data:
+        </div>
+    </body>
+</html>

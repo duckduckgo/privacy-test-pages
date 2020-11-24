@@ -1,5 +1,7 @@
 # Running tests
 
+Please use [glitch](https://privacy-test-pages.glitch.me) deloyment for running tests. Some privacy protection tests don't work correctly on github pages.
+
 # Manually
 
 1. Go to a page and click "Start the test" button.

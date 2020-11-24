@@ -465,6 +465,8 @@ function runTests() {
                 debugDiv.appendChild(template.content);
             } else if (typeof test.html === 'function') {
                 debugDiv.appendChild(test.html());
+            } else {
+                throw new Error('Unexpected value of the `html` property on a test.');
             }
         }
 

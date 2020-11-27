@@ -18,8 +18,8 @@
 
     <p><button id='start'>Start the test</button></p>
     <ul>
-        <li><input type='checkbox' id='include-all-props'> Include all properties of <code>window</code>, <code>navigator</code> and <code>screen</code> objects</li>
-        <li><input type='checkbox' id='include-events'> Collect information from events (you will have to invoke those events)</li>
+        <li><input type='checkbox' id='include-all-props'> <label for='include-all-props'>Include all properties of <code>window</code>, <code>navigator</code> and <code>screen</code> objects</label></li>
+        <li><input type='checkbox' id='include-events'> <label for='include-events'>Collect information from events (you will have to invoke those events)</label></li>
     </ul>
 
     <details id='tests' hidden>
@@ -28,10 +28,10 @@
         </ul>
     </details>
 
-    <p><button id='download' disabled='disabled'>Download the result</button></p>
-    <p><button id='save-to-ls' disabled='disabled'>Save result in localStorage</button></p>
-    <p><button id='compare-with-ls' disabled='disabled'>Compare current result with result from localStorage</button></p>
-    <p><button id='compare-with-file' disabled='disabled'>Compare current result with result loaded from a file</button></p>
+    <p><button id='download' disabled>Download the result</button></p>
+    <p><button id='save-to-ls' disabled>Save result in localStorage</button></p>
+    <p><button id='compare-with-ls' disabled>Compare current result with result from localStorage</button></p>
+    <p>Compare current result with result loaded from a file <input type='file' accept='application/json' id='compare-with-file' disabled></p>
 
     <details id='diff' hidden>
         <summary id='diff-summary'></summary>

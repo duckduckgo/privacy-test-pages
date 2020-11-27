@@ -13,6 +13,9 @@ const diffDiv = document.querySelector('#diff');
 const diffDetailsDiv = document.querySelector('#diff-details');
 const diffSummaryDiv = document.querySelector('#diff-summary');
 
+const includeAllPropsCheckbox = document.querySelector('#include-all-props');
+const includeEventsCheckbox = document.querySelector('#include-events');
+
 const headers = fetch('/reflect-headers').then(r => r.json());
 
 // object that contains results of all tests
@@ -32,14 +35,25 @@ function runTests() {
 
     results.results.length = 0;
     results.date = (new Date()).toUTCString();
+    let all = 0;
     let failed = 0;
 
+    testsDetailsDiv.innerHTML = '';
+
     function updateSummary() {
-        testsSummaryDiv.innerText = `Collected ${tests.length} datapoints${failed > 0 ? ` (${failed} failed)` : ''}. Click for details.`;
+        testsSummaryDiv.innerText = `Collected ${all} datapoints${failed > 0 ? ` (${failed} failed)` : ''}. Click for details.`;
     }
-    updateSummary();
 
     tests.forEach(test => {
+        if (test.category === 'all-props' && !includeAllPropsCheckbox.checked) {
+            return;
+        }
+        if (test.category === 'events' && !includeEventsCheckbox.checked) {
+            return;
+        }
+
+        all++;
+
         const resultObj = {
             id: test.id,
             category: test.category
@@ -74,7 +88,6 @@ function runTests() {
                     resultObj.value = v;
                 }).catch(e => {
                     valueSpan.innerHTML = `❌ error thrown ("${e}")`;
-                    //resultObj.value = undefined;
                     failed++;
                     updateSummary();
                 });
@@ -85,11 +98,12 @@ function runTests() {
         } catch (e) {
             valueSpan.innerHTML = `❌ error thrown ("${e}")`;
             failed++;
-            updateSummary();
-            //resultObj.value = undefined;
         }
     });
 
+    updateSummary();
+
+    startButton.removeAttribute('disabled');
     saveToLS.removeAttribute('disabled');
     compareWithFile.removeAttribute('disabled');
 
@@ -194,6 +208,16 @@ compareWithLS.addEventListener('click', () => {
 
     compareResults(oldResults, results);
 });
+
+compareWithFile.addEventListener('change', event => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const oldResults = JSON.parse(reader.result);
+
+      compareResults(oldResults, results);
+    };
+    reader.readAsText(compareWithFile.files[0]);
+})
 
 downloadButton.addEventListener('click', () => downloadTheResults());
 

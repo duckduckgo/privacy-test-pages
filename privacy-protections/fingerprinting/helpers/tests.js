@@ -114,7 +114,13 @@ const tests = [
     {
         id: 'navigator.mimeTypes',
         category: 'navigator',
-        getValue: () => Array.from(navigator.mimeTypes).map(mtype => mtype.type)
+        getValue: () => {
+            const results = {};
+    
+            Array.from(navigator.mimeTypes).forEach(mtype => results[mtype.type] = true);
+
+            return results;
+        }
     },
     {
         id: 'navigator.cookieEnabled',
@@ -459,7 +465,11 @@ const tests = [
         category: 'webgl',
         getValue: () => {
             const c = document.createElement("canvas");
-            return c.getContext("webgl").getSupportedExtensions();
+            const results = {};
+
+            c.getContext("webgl").getSupportedExtensions().forEach(extension => results[extension] = true);
+
+            return results;
         }
     },
     {
@@ -556,7 +566,9 @@ const tests = [
             // checking the size of the baseline text
             const baselineSize = context.measureText(text);
 
-            return fontList.filter(fontName => {
+            const result = {};
+
+            fontList.forEach(fontName => {
                 // specifying the font whose existence we want to check
                 context.font = "72px '" + fontName + "', monospace";
 
@@ -567,14 +579,28 @@ const tests = [
                 // If the size of the two text instances is the same, the font does not exist because it is being rendered
                 // using the default sans-serif font
                 //
-                return (newSize.width !== baselineSize.width) || (newSize.height !== baselineSize.height);
+                if ((newSize.width !== baselineSize.width) || (newSize.height !== baselineSize.height)) {
+                    result[fontName] = true;
+                }
             });
+
+            return result;
         }
     },
     {
         id: 'document.fonts.check',
         category: 'fonts',
-        getValue: () => fontList.filter(font => document.fonts.check(`small "${font}"`))
+        getValue: () => {
+            const result = {};
+
+            fontList.forEach(font => {
+                if(document.fonts.check(`small "${font}"`)) {
+                    result[font] = true;
+                }
+            });
+
+            return result;
+        }
     },
 
     // codecs
@@ -654,24 +680,26 @@ const tests = [
             // why timeout and calling the API twice? It's a workaround for a chromium bug of some sorts where first call to getVoices returns empty array
             speechSynthesis.getVoices();
             setTimeout(() => {
-                resolve(speechSynthesis.getVoices().map(voice => {
-                    const result = {
+                const result = {};
+
+                speechSynthesis.getVoices().forEach(voice => {
+                    const item = {
                         name: voice.name,
                         lang: voice.lang,
-                        voiceURI: voice.voiceURI
                     };
             
                     if (voice.default) {
-                        result.default = true;
+                        item.default = true;
                     }
             
                     if (!voice.localService) {
-                        result.external = true;
+                        item.external = true;
                     }
 
-            
-                    return result;
-                }));
+                    result[voice.voiceURI] = item;
+                });
+
+                resolve(result);
             }, 300);
 
             return promise;

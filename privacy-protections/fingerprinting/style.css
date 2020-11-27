@@ -1,0 +1,19 @@
+* {
+    box-sizing: border-box;
+}
+
+.value {
+    color: gray;
+}
+
+.changed {
+    color: orange;
+}
+
+.removed {
+    color: darkred;
+}
+
+.added {
+    color: darkgreen;
+}

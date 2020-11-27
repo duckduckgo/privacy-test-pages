@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fingerprinting test page</title>
+
+    <script src='./helpers/diff.js' defer></script>
+    <script src='./main.js' defer></script>
+    <link href='./style.css' rel='stylesheet'></link>
+</head>
+<body>
+    <p><a href="../../">[Home]</a> ↣ <a href="../">[Privacy Protections Tests]</a></p>
+
+    <p>This page collects various datapoints from your browser that can be used for fingerprinting.</p>
+
+    <button id='start'>Start the test</button>
+    <button id='download' disabled='disabled'>Download the results</button>
+
+    <p id='tests-summary'></p>
+    <ul id='tests'>
+    </ul>
+
+    <button id='save-to-ls' disabled='disabled'>Save result to localStorage</button>
+    <button id='compare-with-ls' disabled='disabled'>Compare with result from localStorage</button>
+    <button id='compare-with-file' disabled='disabled'>Compare with result from a file</button>
+
+    <div id='diff' hidden>
+        <p>Diff summary: <span id='diff-summary'></span></p>
+        <p>Diff details:</p>
+        <ul id='diff-details'>
+
+        </ul>
+    </div>
+    
+</body>
+</html>

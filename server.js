@@ -55,5 +55,5 @@ app.post('/block-me/csp', (req, res) => {
 
 // reflects request headers back
 app.get('/reflect-headers', (req, res) => {
-    return res.json({headers: req.headers}).sendStatus(200);
+    return res.json({headers: req.headers});
 });

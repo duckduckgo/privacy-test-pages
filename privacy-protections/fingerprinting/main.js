@@ -501,24 +501,24 @@ function compareResults(resultsA, resultsB) {
             const testB = resultsBObj[testId];
 
             if (change.kind === 'E') { // modified property
-                li.innerHTML = `<strong>${testId}</strong> ${path} - value <span class='changed'>changed</span> from "<code>${change.lhs}</code>" to "<code>${change.rhs}</code>"`;
+                li.innerHTML = `<strong>${testId}</strong> ${path} - value <span class='changed'>changed</span> from <code>${change.lhs}</code> to <code>${change.rhs}</code>`;
             } else if (change.kind === 'A') { // array change
-                if (change.item.kind === 'A') {
-                    li.innerHTML = `<strong>${testId}</strong> ${path} - new item "<code>${change.item.lhs}</code>" <span class='added'>added</span> ("<code>${JSON.stringify(testB.value, null, 2)}</code>")`;
+                if (change.item.kind === 'N') {
+                    li.innerHTML = `<strong>${testId}</strong> ${path} - new item <code>${JSON.stringify(change.item.rhs, null, 2)}</code> <span class='added'>added</span> (<code>${JSON.stringify(testB.value, null, 2)}</code>)`;
                 } else if (change.item.kind === 'D') {
-                    li.innerHTML = `<strong>${testId}</strong> ${path} - item "<code>${change.item.lhs}</code>" <span class='removed'>removed</span> ("<code>${JSON.stringify(testB.value, null, 2)}</code>")`;
+                    li.innerHTML = `<strong>${testId}</strong> ${path} - item <code>${JSON.stringify(change.item.lhs, null, 2)}</code> <span class='removed'>removed</span> (<code>${JSON.stringify(testB.value, null, 2)}</code>)`;
                 }
             } else if (change.kind === 'D') { // deleted property
                 if (change.item) {
-                    li.innerHTML = `<strong>${testId}</strong> ${path} - item "<code>${change.item.rhs}</code>" <span class='removed'>removed</span>`;
+                    li.innerHTML = `<strong>${testId}</strong> ${path} - item <code>${JSON.stringify(change.item.rhs, null, 2)}</code> <span class='removed'>removed</span>`;
                 } else {
                     li.innerHTML = `<strong>${testId}</strong> ${path} - property <span class='removed'>missing</span>`;
                 }
             } else if (change.kind === 'N') { // added property
                 if (change.item) {
-                    li.innerHTML = `<strong>${testId}</strong> ${path} - new item <span class='added'>added</span> "<code>${change.item.lhs}</code>" ("<code>${JSON.stringify(testB.value, null, 2)}</code>")`;
+                    li.innerHTML = `<strong>${testId}</strong> ${path} - new item <span class='added'>added</span> <code>${JSON.stringify(change.item.lhs, null, 2)}</code> (<code>${JSON.stringify(testB.value, null, 2)}</code>)`;
                 } else {
-                    li.innerHTML = `<strong>${testId}</strong> ${path} - <span class='added'>new</span> property ("<code>${JSON.stringify(testB.value, null, 2)}</code>")`;
+                    li.innerHTML = `<strong>${testId}</strong> ${path} - <span class='added'>new</span> property (<code>${JSON.stringify(testB.value, null, 2)}</code>)`;
                 }
             }
 

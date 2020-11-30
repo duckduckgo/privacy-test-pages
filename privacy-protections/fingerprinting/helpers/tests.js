@@ -256,6 +256,30 @@ const tests = [
                 });
         }
     },
+    {
+        id: 'navigator.webkitTemporaryStorage.queryUsageAndQuota',
+        category: 'navigator',
+        getValue: () => {
+            let resolve, reject;
+            const promise = new Promise((res, rej) => {resolve = res; reject = rej});
+
+            navigator.webkitTemporaryStorage.queryUsageAndQuota((usage, quota) => resolve({usage: usage, quota: quota}));
+
+            return promise;
+        }
+    },
+    {
+        id: 'navigator.webkitPersistentStorage.queryUsageAndQuota',
+        category: 'navigator',
+        getValue: () => {
+            let resolve, reject;
+            const promise = new Promise((res, rej) => {resolve = res; reject = rej});
+
+            navigator.webkitPersistentStorage.queryUsageAndQuota((usage, quota) => resolve({usage: usage, quota: quota}));
+
+            return promise;
+        }
+    },
 
     // window
     {

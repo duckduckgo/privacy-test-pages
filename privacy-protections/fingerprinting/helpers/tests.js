@@ -25,25 +25,6 @@ const tests = [
         category: 'headers',
         getValue: () => headers.then(res => res.headers['user-agent'])
     },
-    {
-        id: 'headers - other',
-        category: 'headers',
-        getValue: () => headers.then(res => {
-            const exclude = [
-                'accept', 'accept-encoding', 'accept-language', 'dnt', 'user-agent', // already covered above
-                'referer' // not useful
-            ];
-            const other = {};
-
-            Object.keys(res.headers).forEach(k => {
-                if (!exclude.includes(k)) {
-                    other[k] = res.headers[k];
-                }
-            })
-
-            return other;
-        })
-    },
 
     // navigator
     {
@@ -1217,6 +1198,22 @@ const tests = [
 
             return result;
         }
+    },
+    {
+        id: 'headers',
+        category: 'all-props',
+        getValue: () => headers.then(res => {
+            const testedHeaders = tests.filter(t => t.category === 'headers').map(t => t.id.match('headers - (.*)')[1]);
+            const other = {};
+
+            Object.keys(res.headers).forEach(k => {
+                if (!testedHeaders.includes(k)) {
+                    other[k] = res.headers[k];
+                }
+            })
+
+            return other;
+        })
     },
 
     // optional - events

@@ -19,12 +19,12 @@
     <ul>
         <li>not all of the properties listed here have to be modified to succesfully prevent fingerprining,</li>
         <li>some properties may change randomly, depending on the brower, on every page reload or test run,</li>
-        <li>some data is retrieved using couple different methods, but may be the same.</li>
+        <li>some data is duplicated, but it's retrieved using different methods.</li>
     </ul>
 
     <p><button id='start'>Start the test</button></p>
     <ul>
-        <li><input type='checkbox' id='include-all-props'> <label for='include-all-props'>Include all properties of <code>window</code>, <code>navigator</code> and <code>screen</code> objects</label></li>
+        <li><input type='checkbox' id='include-all-props'> <label for='include-all-props'>Include all headers and all properties of <code>window</code>, <code>navigator</code> and <code>screen</code> objects</label></li>
         <li><input type='checkbox' id='include-events'> <label for='include-events'>Collect information from events (you will have to invoke those events)</label></li>
     </ul>
 

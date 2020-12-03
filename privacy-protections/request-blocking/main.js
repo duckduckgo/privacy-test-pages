@@ -442,6 +442,7 @@ function runTests() {
     startButton.setAttribute('disabled', 'disabled');
     downloadButton.removeAttribute('disabled');
     results.results.length = 0;
+    results.date = (new Date()).toUTCString();
 
     tests.forEach(test => {
         const resultObj = {

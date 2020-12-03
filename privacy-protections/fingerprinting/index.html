@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fingerprinting test page</title>
+
+    <script src='./helpers/diff.js' defer></script>
+    <script src='./helpers/constants.js' defer></script>
+    <script src='./helpers/tests.js' defer></script>
+    <script src='./main.js' defer></script>
+    <link href='./style.css' rel='stylesheet'></link>
+</head>
+<body>
+    <p><a href="../../">[Home]</a> ↣ <a href="../">[Privacy Protections Tests]</a></p>
+
+    <p>This page collects various datapoints from your browser that can be used for fingerprinting.</p>
+    <p>⚠️ Please note that: </p>
+    <ul>
+        <li>not all of the properties listed here have to be modified to succesfully prevent fingerprining,</li>
+        <li>some properties may change randomly, depending on the brower, on every page reload or test run,</li>
+        <li>some data is duplicated, but it's retrieved using different methods.</li>
+    </ul>
+
+    <p><button id='start'>Start the test</button></p>
+    <ul>
+        <li><input type='checkbox' id='include-all-props'> <label for='include-all-props'>Include all headers and all properties of <code>window</code>, <code>navigator</code> and <code>screen</code> objects</label></li>
+        <li><input type='checkbox' id='include-events'> <label for='include-events'>Collect information from events (you will have to invoke those events)</label></li>
+    </ul>
+
+    <details id='tests' hidden>
+        <summary id='tests-summary'></summary>
+        <ul id='tests-details'>
+        </ul>
+    </details>
+
+    <p><button id='download' disabled>Download the result</button></p>
+    <p><button id='save-to-ls' disabled>Save result in localStorage</button></p>
+    <p><button id='compare-with-ls' disabled>Compare current result with result from localStorage</button></p>
+    <p>Compare current result with result loaded from a file <input type='file' accept='application/json' id='compare-with-file' disabled></p>
+
+    <details id='diff' hidden>
+        <summary id='diff-summary'></summary>
+        <ul id='diff-details'>
+        </ul>
+    </details>
+    
+</body>
+</html>

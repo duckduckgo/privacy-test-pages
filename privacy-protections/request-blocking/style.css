@@ -1,5 +1,11 @@
+* {
+    box-sizing: border-box;
+}
+
 .status {
     display: inline-block;
+    vertical-align: bottom;
+    margin: 2px;
     width: 20px;
     height: 20px;
     background: gray;
@@ -11,7 +17,7 @@
 }
 
 .status.failed {
-    background: red;
+    border: solid red 2px;
 }
 
 .description {

@@ -20,6 +20,15 @@ app.use(express.static('.', {
     }
 }));
 
+// // endpoint for updating the app
+// app.post('/git', (req, res) => {
+//     if (req.headers['x-github-event'] == "push") { 
+//         /* Here will be our updating code */
+//     }
+
+//     return res.sendStatus(200);
+// });
+
 // dummy websocket server
 const wss = new ws.Server({server: listener, path: '/block-me/web-socket'});
 
@@ -42,4 +51,9 @@ app.get('/block-me/server-sent-events', (req, res) => {
 // dummy CSP report endopoint
 app.post('/block-me/csp', (req, res) => {
     return res.sendStatus(200);
+});
+
+// reflects request headers back
+app.get('/reflect-headers', (req, res) => {
+    return res.json({headers: req.headers});
 });

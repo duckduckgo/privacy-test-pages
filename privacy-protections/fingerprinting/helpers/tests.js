@@ -1122,81 +1122,27 @@ const tests = [
         id: 'window',
         category: 'all-props',
         getValue: () => {
+            // ignore props that we already test
             const testedProps = tests.filter(t => t.category === 'window').map(t => t.id.match('window\.([^.(]*).*')[1]);
-            const ignoredTypes = ['object', 'function', 'undefined'];
-            const result = {};
-
-            Object.keys(window).forEach(propName => {
-                // ignore props that we alredy test
-                if (testedProps.includes(propName)) {
-                    return;
-                }
-
-                const propType = typeof window[propName];
-
-                // ignore props of complex types
-                if (ignoredTypes.includes(propType)) {
-                    return;
-                }
-
-                result[propName] = window[propName];
-            });
-
-            return result;
+            return extractSimplePropsFromObject(window, {excludeProps: testedProps});
         }
     },
     {
         id: 'navigator',
         category: 'all-props',
         getValue: () => {
+            // ignore props that we already test
             const testedProps = tests.filter(t => t.category === 'navigator').map(t => t.id.match('navigator\.([^.(]*).*')[1]);
-            const ignoredTypes = ['object', 'function', 'undefined'];
-            const result = {};
-
-            Object.keys(navigator).forEach(propName => {
-                // ignore props that we alredy test
-                if (testedProps.includes(propName)) {
-                    return;
-                }
-
-                const propType = typeof navigator[propName];
-
-                // ignore props of complex types
-                if (ignoredTypes.includes(propType)) {
-                    return;
-                }
-
-                result[propName] = navigator[propName];
-            });
-
-            return result;
+            return extractSimplePropsFromObject(window.navigator, {excludeProps: testedProps});
         }
     },
     {
         id: 'screen',
         category: 'all-props',
         getValue: () => {
+            // ignore props that we already test
             const testedProps = tests.filter(t => t.category === 'screen').map(t => t.id.match('screen\.([^.(]*).*')[1]);
-            const ignoredTypes = ['object', 'function', 'undefined'];
-            const result = {};
-
-            Object.keys(screen).forEach(propName => {
-                // ignore props that we alredy test
-                if (testedProps.includes(propName)) {
-                    return;
-                }
-
-                const propType = typeof screen[propName];
-
-                // ignore props of complex types
-                if (ignoredTypes.includes(propType)) {
-                    return;
-                }
-
-                result[propName] = screen[propName];
-            });
-
-            return result;
+            return extractSimplePropsFromObject(window.screen, {excludeProps: testedProps});
         }
     },
     {
@@ -1311,3 +1257,28 @@ const tests = [
         }
     },
 ];
+
+function extractSimplePropsFromObject(object, options) {
+    const ignoredTypes = options.ignoredTypes || ['object', 'function', 'undefined'];
+    const excludeProps = options.excludeProps || [];
+
+    const result = {};
+
+    for (const propName in object) {
+        if (excludeProps.includes(propName)) {
+            continue;
+        }
+
+        const propType = typeof object[propName];
+
+        // ignore values of complex types
+        if (ignoredTypes.includes(propType)) {
+            result[propName] = `~${propType}~`;
+            continue;
+        }
+
+        result[propName] = object[propName];
+    }
+
+    return result;
+}

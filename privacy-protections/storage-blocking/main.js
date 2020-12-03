@@ -4,9 +4,7 @@ const downloadButton = document.querySelector('#download');
 
 const testsDiv = document.querySelector('#tests');
 const testsSummaryDiv = document.querySelector('#tests-summary');
-const testsDetailsDiv = document.querySelector('#tests-details');
-
-const randomNumber = Math.round(Math.random() * 1000);
+const testsDetailsElement = document.querySelector('#tests-details');
 
 // object that contains results of all tests
 const results = {
@@ -41,6 +39,21 @@ const tests = [
         },
         retrive: () => {
             return document.cookie.match(/jsdata\=([0-9]+)/)[1];
+        }
+    },
+    {
+        id: 'cookie-header',
+        store: (data) => {
+            return fetch(`/set-cookie?value=${data}`).then(r => {
+                if (!r.ok) {
+                    throw new Error('Request failed.');
+                }
+            });
+        },
+        retrive: () => {
+            return fetch('/reflect-headers')
+                .then(r => r.json())
+                .then(data => data.headers.cookie.match(/headerdata\=([0-9]+)/)[1]);
         }
     },
     {
@@ -87,6 +100,68 @@ const tests = [
 
             return promise;
         }
+    },
+    {
+        id: 'Cache API',
+        store: (data) => {
+            return caches.open('data').then((cache) => {
+                const res = new Response(data, {
+                    status: 200
+                });
+
+                return cache.put('/cache-api-response', res);
+            });
+        },
+        retrive: () => {
+            return caches.open('data').then((cache) => {
+                return cache.match('/cache-api-response')
+                    .then(r => r.text());
+            });
+        }
+    },
+    {
+        id: 'browser cache',
+        store: (data) => {
+            // already done before all tests
+        },
+        retrive: () => {
+            return fetch('/cached-random-number').then(r => r.text());
+        }
+    },
+    {
+        id: 'memory',
+        store: (data) => {
+            window.randomNumber = data;
+        },
+        retrive: () => {
+            return window.randomNumber;
+        }
+    },
+    {
+        id: 'window.name',
+        store: (data) => {
+            window.name = data;
+        },
+        retrive: () => {
+            return window.name;
+        }
+    },
+    {
+        id: 'history',
+        store: (data) => {
+            history.pushState({data: data}, 'data', `#${data}`);
+        },
+        retrive: () => {
+            if (history.state) {
+                return history.state.data;
+            }
+
+            const hash = (new URL(location.href)).hash;
+
+            if (hash) {
+                return hash.replace('#', '');
+            }
+        }
     }
 ]
 
@@ -103,7 +178,7 @@ function runTests() {
     let all = 0;
     let failed = 0;
 
-    testsDetailsDiv.innerHTML = '';
+    testsDetailsElement.innerHTML = '';
 
     function updateSummary() {
         testsSummaryDiv.innerText = `Collected ${all} datapoints${failed > 0 ? ` (${failed} failed)` : ''}. Click for details.`;
@@ -127,7 +202,7 @@ function runTests() {
             categoryUl = document.createElement('ul');
             category.appendChild(categoryUl);
 
-            testsDetailsDiv.appendChild(category);
+            testsDetailsElement.appendChild(category);
         }
 
         const li = document.createElement('li');
@@ -160,53 +235,114 @@ function runTests() {
     });
 
     updateSummary();
-
-    startButton.removeAttribute('disabled');
-    saveToLS.removeAttribute('disabled');
-    compareWithFile.removeAttribute('disabled');
-
-    // when there is data in localStorage enable comparing with localStorage
-    if (localStorage.getItem('results')) {
-        compareWithLS.removeAttribute('disabled');
-    }
 }
 
 function storeData() {
-    tests.forEach(test => {
-        try {
-            const result = test.store(randomNumber);
+    storeButton.setAttribute('disabled', 'disabled');
+    downloadButton.setAttribute('disabled', 'disabled');
+    testsDiv.removeAttribute('hidden');
 
-            if (result instanceof Promise) {
-                result.catch(e => {
-                    console.log(test.id, 'failed', `(${e.message ? e.message : e})`);
-                });
-            }
-        } catch(e) {
-            console.log(test.id, 'failed', `(${e.message ? e.message : e})`);
-        }
-    });
+    let all = 0;
+    let failed = 0;
+
+    testsDetailsElement.innerHTML = '';
+
+    function updateSummary(data) {
+        testsSummaryDiv.innerText = `Stored random number "${data}" using ${all} storage mechanisms${failed > 0 ? ` (${failed} failed)` : ''}. Click for details.`;
+    }
+
+    fetch('/cached-random-number')
+        .then(r => r.text())
+        .then(randomNumber => {
+            tests.forEach(test => {
+                all++;
+
+                const li = document.createElement('li');
+                li.id = `test-${test.id.replace(' ', '-')}`;
+                li.innerHTML = `${test.id} - <span class='value'>OK</span>`;
+                const valueSpan = li.querySelector('.value');
+
+                testsDetailsElement.appendChild(li);
+
+                try {
+                    const result = test.store(randomNumber);
+        
+                    if (result instanceof Promise) {
+                        result.catch(e => {
+                            valueSpan.innerHTML = `❌ error thrown ("${e.message ? e.message : e}")`;
+
+                            failed++;
+                            updateSummary()
+                        });
+                    }
+                } catch(e) {
+                    valueSpan.innerHTML = `❌ error thrown ("${e.message ? e.message : e}")`;
+                    failed++;
+                }
+            });
+
+            updateSummary(randomNumber);
+            storeButton.removeAttribute('disabled');
+        });
 }
 
 function retrieveData() {
+    testsDiv.removeAttribute('hidden');
+
+    results.results.length = 0;
+    results.date = (new Date()).toUTCString();
+
+    let all = 0;
+    let failed = 0;
+
+    testsDetailsElement.innerHTML = '';
+
+    function updateSummary() {
+        testsSummaryDiv.innerText = `Retrieved data from ${all} storage mechanisms${failed > 0 ? ` (${failed} failed)` : ''}. Click for details.`;
+    }
+
     tests.forEach(test => {
+        all++;
+
+        const resultObj = {
+            id: test.id,
+            value: null
+        };
+        results.results.push(resultObj);
+
+        const li = document.createElement('li');
+        li.id = `test-${test.id.replace(' ', '-')}`;
+        li.innerHTML = `${test.id} - <span class='value'></span>`;
+        const valueSpan = li.querySelector('.value');
+
+        testsDetailsElement.appendChild(li);
+
         try {
             const result = test.retrive();
 
             if (result instanceof Promise) {
                 result
                     .then(data => {
-                        console.log(test.id, data);
+                        valueSpan.innerText = data;
+                        resultObj.value = data;
                     })
                     .catch(e => {
-                        console.log(test.id, 'failed', `(${e.message ? e.message : e})`);
+                        failed++;
+                        valueSpan.innerHTML = `❌ error thrown ("${e.message ? e.message : e}")`;
+                        updateSummary();
                     });
             } else {
-                console.log(test.id, result);
+                valueSpan.innerText = result || undefined;
+                resultObj.value = result || null;
             }
         } catch(e) {
-            console.log(test.id, 'failed', `(${e.message ? e.message : e})`);
+            failed++;
+            valueSpan.innerHTML = `❌ error thrown ("${e.message ? e.message : e}")`;
         }
     });
+
+    updateSummary();
+    downloadButton.removeAttribute('disabled');
 }
 
 function downloadTheResults() {

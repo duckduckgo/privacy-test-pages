@@ -57,3 +57,21 @@ app.post('/block-me/csp', (req, res) => {
 app.get('/reflect-headers', (req, res) => {
     return res.json({headers: req.headers});
 });
+
+// sets a cookie with provided value
+app.get('/set-cookie', (req, res) => {
+    const expires = new Date((Date.now() + (7 * 24 * 60 * 60 * 1000)));
+    
+    if (!req.query['value']) {
+        return res.sendStatus(401);
+    }
+    return res.cookie('headerdata', req.query['value'], {expires, httpOnly: true}).sendStatus(200);
+});
+
+app.get('/cached-random-number', (req, res) => {
+    res.setHeader('Cache-Control', 'max-age=31556926');
+
+    const random = (Math.round(Math.random() * 1000)).toString();
+
+    res.end(random);
+});

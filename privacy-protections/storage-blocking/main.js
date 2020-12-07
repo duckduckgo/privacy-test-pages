@@ -162,6 +162,25 @@ const tests = [
                 return hash.replace('#', '');
             }
         }
+    },
+    {
+        id: 'service worker',
+        store: (data) => {
+            return navigator.serviceWorker.register(`./service-worker.js?data=${data}`, {scope: './'})
+                .catch((error) => {
+                    console.log('Registration failed with ' + error);
+                });
+        },
+        retrive: () => {
+            return fetch('./service-worker-data')
+                .then(r => {
+                    if (r.ok) {
+                        return r.text();
+                    }
+
+                    throw new Error(`Invalid response (${r.status})`);
+                });
+        }
     }
 ]
 

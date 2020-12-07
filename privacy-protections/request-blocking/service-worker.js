@@ -2,6 +2,10 @@ self.addEventListener('install', (evt) => {
     self.skipWaiting();
 });
 
+self.addEventListener('activate', (evt) => {
+    evt.waitUntil(clients.claim());
+});
+
 self.addEventListener('message', (event) => {
     if (event.data === 'fetch') {
         fetch(`./block-me/fetch.json?${Math.random()}`)

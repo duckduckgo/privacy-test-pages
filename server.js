@@ -69,7 +69,7 @@ app.get('/set-cookie', (req, res) => {
 });
 
 app.get('/cached-random-number', (req, res) => {
-    res.setHeader('Cache-Control', 'max-age=31556926');
+    res.setHeader('Cache-Control', 'public, max-age=31556926, immutable');
 
     const random = (Math.round(Math.random() * 1000)).toString();
 

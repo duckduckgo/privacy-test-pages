@@ -139,7 +139,6 @@ const tests = [
 
             window.addEventListener('message', cleanUp);
             iframe.addEventListener('load', () => {
-                console.log(this.contentDocument);
                 failTimeout = setTimeout(() => reject('timeout'), 1000);
             });
 
@@ -169,7 +168,6 @@ const tests = [
 
             window.addEventListener('message', cleanUp);
             iframe.addEventListener('load', () => {
-                console.log(this.contentDocument);
                 failTimeout = setTimeout(() => reject('timeout'), 1000);
             });
 

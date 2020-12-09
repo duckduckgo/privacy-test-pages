@@ -1,4 +1,4 @@
-const THIRD_PARTY_DOMAIN = 'http://other.localhost:3000';
+const THIRD_PARTY_DOMAIN = 'https://other.localhost:3000';
 
 const storeButton = document.querySelector('#store');
 const retriveButton = document.querySelector('#retrive');
@@ -125,17 +125,23 @@ const tests = [
             iframe.src = `${THIRD_PARTY_DOMAIN}/privacy-protections/storage-blocking/iframe.html?data=${data}`;
             iframe.style.width = '10px';
             iframe.style.height = '10px';
+            let failTimeout = null;
 
             function cleanUp(msg) {
                 if (msg.data) {
                     resolve(msg.data);
 
+                    clearTimeout(failTimeout);
                     document.body.removeChild(iframe);
                     window.removeEventListener('message', cleanUp);
                 }
             }
 
             window.addEventListener('message', cleanUp);
+            iframe.addEventListener('load', () => {
+                console.log(this.contentDocument);
+                failTimeout = setTimeout(() => reject('timeout'), 1000);
+            });
 
             document.body.appendChild(iframe);
 
@@ -149,17 +155,23 @@ const tests = [
             iframe.src = `${THIRD_PARTY_DOMAIN}/privacy-protections/storage-blocking/iframe.html`;
             iframe.style.width = '10px';
             iframe.style.height = '10px';
+            let failTimeout = null;
 
             function cleanUp(msg) {
                 if (msg.data) {
                     resolve(msg.data);
 
+                    clearTimeout(failTimeout);
                     document.body.removeChild(iframe);
                     window.removeEventListener('message', cleanUp);
                 }
             }
 
             window.addEventListener('message', cleanUp);
+            iframe.addEventListener('load', () => {
+                console.log(this.contentDocument);
+                failTimeout = setTimeout(() => reject('timeout'), 1000);
+            });
 
             document.body.appendChild(iframe);
 
@@ -281,12 +293,16 @@ function storeData() {
                     const result = test.store(randomNumber);
         
                     if (result instanceof Promise) {
+                        valueSpan.innerText = '…';
+
                         result
                             .then(result => {
                                 if (Array.isArray(result)) {
                                     valueSpan.innerHTML = `<ul>${result.map(r => `<li>${r.test} - ${r.result}</li>`).join('')}</ul>`;
-                                } else if (result) {
+                                } else if (result && result !== 'OK') {
                                     valueSpan.innerHTML = JSON.stringify(result, null, 2);
+                                } else {
+                                    valueSpan.innerText = 'OK';
                                 }
                             })
                             .catch(e => {
@@ -333,7 +349,7 @@ function retrieveData() {
 
         const li = document.createElement('li');
         li.id = `test-${test.id.replace(' ', '-')}`;
-        li.innerHTML = `${test.id} - <span class='value'></span>`;
+        li.innerHTML = `${test.id} - <span class='value'>…</span>`;
         const valueSpan = li.querySelector('.value');
 
         testsDetailsElement.appendChild(li);

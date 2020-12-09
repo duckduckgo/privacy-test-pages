@@ -1,3 +1,5 @@
+const THIRD_PARTY_DOMAIN = 'http://other.localhost:3000';
+
 const storeButton = document.querySelector('#store');
 const retriveButton = document.querySelector('#retrive');
 const downloadButton = document.querySelector('#download');
@@ -14,6 +16,45 @@ const results = {
 };
 
 const tests = [
+    {
+        id: 'JS cookie',
+        store: (data) => {
+            document.cookie = `jsdata=${data}; expires= Wed, 21 Aug 2030 20:00:00 UTC; Secure; SameSite=Lax`;
+        },
+        retrive: () => {
+            return document.cookie.match(/jsdata\=([0-9]+)/)[1];
+        }
+    },
+    {
+        id: 'header cookie',
+        store: (data) => {
+            return fetch(`/set-cookie?value=${data}`).then(r => {
+                if (!r.ok) {
+                    throw new Error('Request failed.');
+                }
+            });
+        },
+        retrive: () => {
+            return fetch('/reflect-headers')
+                .then(r => r.json())
+                .then(data => data.headers.cookie.match(/headerdata\=([0-9]+)/)[1]);
+        }
+    },
+    {
+        id: 'third party header cookie',
+        store: (data) => {
+            return fetch(`${THIRD_PARTY_DOMAIN}/set-cookie?value=${data}`, {credentials: 'include'}).then(r => {
+                if (!r.ok) {
+                    throw new Error('Request failed.');
+                }
+            });
+        },
+        retrive: () => {
+            return fetch(`${THIRD_PARTY_DOMAIN}/reflect-headers`, {credentials: 'include'})
+                .then(r => r.json())
+                .then(data => data.headers.cookie.match(/headerdata\=([0-9]+)/)[1]);
+        }
+    },
     {
         id: 'localStorage',
         store: (data) => {
@@ -33,36 +74,9 @@ const tests = [
         }
     },
     {
-        id: 'cookie-js',
-        store: (data) => {
-            document.cookie = `jsdata=${data}; expires= Wed, 21 Aug 2030 20:00:00 UTC`;
-        },
-        retrive: () => {
-            return document.cookie.match(/jsdata\=([0-9]+)/)[1];
-        }
-    },
-    {
-        id: 'cookie-header',
-        store: (data) => {
-            return fetch(`/set-cookie?value=${data}`).then(r => {
-                if (!r.ok) {
-                    throw new Error('Request failed.');
-                }
-            });
-        },
-        retrive: () => {
-            return fetch('/reflect-headers')
-                .then(r => r.json())
-                .then(data => data.headers.cookie.match(/headerdata\=([0-9]+)/)[1]);
-        }
-    },
-    {
         id: 'IndexedDB',
         store: (data) => {
-            return DB('data').then(db => {
-                db.deleteAll();
-                db.put({ id: data })
-            });
+            return DB('data').then(db => Promise.all([db.deleteAll(), db.put({ id: data })])).then(() => "OK");
         },
         retrive: () => {
             return DB('data').then(db => db.getAll()).then(data => data[0].id);
@@ -102,6 +116,57 @@ const tests = [
         }
     },
     {
+        id: 'third party iframe',
+        store: (data) => {
+            let resolve, reject;
+            const promise = new Promise((res, rej) => {resolve = res; reject = rej});
+
+            const iframe = document.createElement('iframe');
+            iframe.src = `${THIRD_PARTY_DOMAIN}/privacy-protections/storage-blocking/iframe.html?data=${data}`;
+            iframe.style.width = '10px';
+            iframe.style.height = '10px';
+
+            function cleanUp(msg) {
+                if (msg.data) {
+                    resolve(msg.data);
+
+                    document.body.removeChild(iframe);
+                    window.removeEventListener('message', cleanUp);
+                }
+            }
+
+            window.addEventListener('message', cleanUp);
+
+            document.body.appendChild(iframe);
+
+            return promise;
+        },
+        retrive: () => {
+            let resolve, reject;
+            const promise = new Promise((res, rej) => {resolve = res; reject = rej});
+
+            const iframe = document.createElement('iframe');
+            iframe.src = `${THIRD_PARTY_DOMAIN}/privacy-protections/storage-blocking/iframe.html`;
+            iframe.style.width = '10px';
+            iframe.style.height = '10px';
+
+            function cleanUp(msg) {
+                if (msg.data) {
+                    resolve(msg.data);
+
+                    document.body.removeChild(iframe);
+                    window.removeEventListener('message', cleanUp);
+                }
+            }
+
+            window.addEventListener('message', cleanUp);
+
+            document.body.appendChild(iframe);
+
+            return promise;
+        }
+    },
+    {
         id: 'Cache API',
         store: (data) => {
             return caches.open('data').then((cache) => {
@@ -125,7 +190,7 @@ const tests = [
             // already done before all tests
         },
         retrive: () => {
-            return fetch('/cached-random-number').then(r => r.text());
+            return fetch('/cached-random-number', {cache: 'force-cache'}).then(r => r.text());
         }
     },
     {
@@ -167,6 +232,7 @@ const tests = [
         id: 'service worker',
         store: (data) => {
             return navigator.serviceWorker.register(`./service-worker.js?data=${data}`, {scope: './'})
+                .then(() => 'OK')
                 .catch((error) => {
                     console.log('Registration failed with ' + error);
                 });
@@ -182,79 +248,7 @@ const tests = [
                 });
         }
     }
-]
-
-/**
- * Test runner
- */
-function runTests() {
-    startButton.setAttribute('disabled', 'disabled');
-    downloadButton.removeAttribute('disabled');
-    testsDiv.removeAttribute('hidden');
-
-    results.results.length = 0;
-    results.date = (new Date()).toUTCString();
-    let all = 0;
-    let failed = 0;
-
-    testsDetailsElement.innerHTML = '';
-
-    function updateSummary() {
-        testsSummaryDiv.innerText = `Collected ${all} datapoints${failed > 0 ? ` (${failed} failed)` : ''}. Click for details.`;
-    }
-
-    tests.forEach(test => {
-        all++;
-
-        const resultObj = {
-            id: test.id,
-            category: test.category
-        };
-        results.results.push(resultObj);
-
-        let categoryUl = document.querySelector(`.category-${test.category} ul`);
-
-        if (!categoryUl) {
-            const category = document.createElement('div');
-            category.classList.add(`category-${test.category}`);
-            category.innerText = test.category;
-            categoryUl = document.createElement('ul');
-            category.appendChild(categoryUl);
-
-            testsDetailsElement.appendChild(category);
-        }
-
-        const li = document.createElement('li');
-        li.id = `test-${test.category}-${test.id}`;
-        li.innerHTML = `${test.id} - <span class='value'></span>`;
-        const valueSpan = li.querySelector('.value');
-
-        categoryUl.appendChild(li);
-
-        try {
-            const value = test.getValue();
-
-            if (value instanceof Promise) {
-                value.then(v => {
-                    valueSpan.innerHTML = `(${Array.isArray(v) ? 'array' : (typeof v)}) - <code>${JSON.stringify(v, null, 2)}</code>`;
-                    resultObj.value = v;
-                }).catch(e => {
-                    valueSpan.innerHTML = `❌ error thrown ("${e}")`;
-                    failed++;
-                    updateSummary();
-                });
-            } else {
-                valueSpan.innerHTML = `(${Array.isArray(value) ? 'array' : (typeof value)}) - <code>${JSON.stringify(value, null, 2)}</code>`;
-                resultObj.value = value;
-            }
-        } catch (e) {
-            valueSpan.innerHTML = `❌ error thrown ("${e}")`;
-            failed++;
-        }
-    });
-
-    updateSummary();
-}
+];
 
 function storeData() {
     storeButton.setAttribute('disabled', 'disabled');
@@ -270,7 +264,7 @@ function storeData() {
         testsSummaryDiv.innerText = `Stored random number "${data}" using ${all} storage mechanisms${failed > 0 ? ` (${failed} failed)` : ''}. Click for details.`;
     }
 
-    fetch('/cached-random-number')
+    fetch('/cached-random-number', {cache: 'reload'})
         .then(r => r.text())
         .then(randomNumber => {
             tests.forEach(test => {
@@ -287,12 +281,20 @@ function storeData() {
                     const result = test.store(randomNumber);
         
                     if (result instanceof Promise) {
-                        result.catch(e => {
-                            valueSpan.innerHTML = `❌ error thrown ("${e.message ? e.message : e}")`;
+                        result
+                            .then(result => {
+                                if (Array.isArray(result)) {
+                                    valueSpan.innerHTML = `<ul>${result.map(r => `<li>${r.test} - ${r.result}</li>`).join('')}</ul>`;
+                                } else if (result) {
+                                    valueSpan.innerHTML = JSON.stringify(result, null, 2);
+                                }
+                            })
+                            .catch(e => {
+                                valueSpan.innerHTML = `❌ error thrown ("${e.message ? e.message : e}")`;
 
-                            failed++;
-                            updateSummary()
-                        });
+                                failed++;
+                                updateSummary(randomNumber)
+                            });
                     }
                 } catch(e) {
                     valueSpan.innerHTML = `❌ error thrown ("${e.message ? e.message : e}")`;
@@ -342,7 +344,12 @@ function retrieveData() {
             if (result instanceof Promise) {
                 result
                     .then(data => {
-                        valueSpan.innerText = data;
+                        if (Array.isArray(data)) {
+                            valueSpan.innerHTML = `<ul>${data.map(r => `<li>${r.test} - ${r.result}</li>`).join('')}</ul>`;
+                        } else if (data) {
+                            valueSpan.innerHTML = JSON.stringify(data, null, 2);
+                        }
+
                         resultObj.value = data;
                     })
                     .catch(e => {
@@ -351,7 +358,7 @@ function retrieveData() {
                         updateSummary();
                     });
             } else {
-                valueSpan.innerText = result || undefined;
+                valueSpan.innerText = JSON.stringify(result, null, 2) || undefined;
                 resultObj.value = result || null;
             }
         } catch(e) {

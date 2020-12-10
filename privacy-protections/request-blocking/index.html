@@ -11,7 +11,8 @@
     <body>
         <p><a href="../../">[Home]</a> ↣ <a href="../">[Privacy Protections Tests]</a></p>
 
-        <p>This page tests if different types of requests, made using various browser mechanisms are getting blocked.</p>
+        <p>This page tests if different types of requests, made using various browser mechanisms, are getting blocked.</p>
+        <p>To test your request blocking solution please add <storng>bad.third-party.site</storng> domain to your blocklist.</p>
 
         <button id='start'>Start the test</button>
         <button id='download' disabled='disabled'>Download the results</button>
@@ -39,7 +40,7 @@
         <ul>
             <li><div class='status loaded'></div> - request has loaded</li>
             <li><div class='status'></div> - request hasn't loaded</li>
-            <li><div class='status failed'></div> - request hasn't loaded as it was most probably blocked</li>
+            <li><div class='status failed'></div> - request failed (e.g. due to being blocked)</li>
         </ul>
 
         <div id='debug'>

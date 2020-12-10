@@ -227,7 +227,6 @@ const tests = [
             observer.observe({entryTypes: ["resource", "navigation"]});
         }
     },
-
     {
         category: 'js',
         id: 'websocket',

@@ -11,11 +11,12 @@ const listener = app.listen(port, () => {
 // serve all static files
 app.use(express.static('.', {
     setHeaders: (res, path) => {
-        res.set("Access-Control-Allow-Origin", "*");
+        res.set('Access-Control-Allow-Origin', '*');
+        res.set('Timing-Allow-Origin', '*');
 
         // send CSP header when fetching request blocking test site
         if (path.endsWith('privacy-protections/request-blocking/index.html')) {
-            res.set("Content-Security-Policy-Report-Only", "img-src http: https:; report-uri /block-me/csp");
+            res.set('Content-Security-Policy-Report-Only', 'img-src http: https:; report-uri https://bad.third-party.site/block-me/csp');
         }
     }
 }));
@@ -42,6 +43,7 @@ app.get('/block-me/server-sent-events', (req, res) => {
     res.set({
         'Cache-Control': 'no-cache',
         'Content-Type': 'text/event-stream',
+        'Access-Control-Allow-Origin': '*'
     });
     res.flushHeaders();
 
@@ -57,6 +59,7 @@ app.post('/block-me/csp', (req, res) => {
 app.get('/reflect-headers', (req, res) => {
     res.set('Access-Control-Allow-Origin', req.headers.origin || '*');
     res.set('Access-Control-Allow-Credentials', 'true');
+    res.set('Timing-Allow-Origin', '*');
 
     return res.json({headers: req.headers});
 });
@@ -65,6 +68,7 @@ app.get('/reflect-headers', (req, res) => {
 app.get('/set-cookie', (req, res) => {
     res.set('Access-Control-Allow-Origin', req.headers.origin || '*');
     res.set('Access-Control-Allow-Credentials', 'true');
+    res.set('Timing-Allow-Origin', '*');
 
     const expires = new Date((Date.now() + (7 * 24 * 60 * 60 * 1000)));
     

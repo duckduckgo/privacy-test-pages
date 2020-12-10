@@ -4,6 +4,9 @@ const debugDiv = document.querySelector('#debug');
 const startButton = document.querySelector('#start');
 const downloadButton = document.querySelector('#download');
 
+const TRACKER_DOMAIN = 'bad.third-party.site';
+const TRACKER_RESOURCES_URL = `https://${TRACKER_DOMAIN}/privacy-protections/request-blocking/block-me`;
+
 // object that contains results of all tests
 const results = {
     page: 'request-blocking',
@@ -21,7 +24,7 @@ const tests = [
         html: () => {
             // for some reason returning a string here does not work, I have to construct nodes in JS
             const script = document.createElement('script');
-            script.src = `./block-me/script.js?${random}`;
+            script.src = `${TRACKER_RESOURCES_URL}/script.js?${random}`;
 
             return script;
         },
@@ -34,7 +37,7 @@ const tests = [
         category: 'html',
         id: 'style',
         description: 'Try loading a CSS file using <code>&lt;link&gt;</code> element.',
-        html: `<link href='./block-me/style.css?${random}' rel='stylesheet'></link>
+        html: `<link href='${TRACKER_RESOURCES_URL}/style.css?${random}' rel='stylesheet'></link>
         <div id='html-style-test'></div>`,
         check: () => {
             const item = document.querySelector('#html-style-test');
@@ -52,7 +55,7 @@ const tests = [
         category: 'html',
         id: 'img',
         description: 'Try loading an image using <code>&lt;img&gt;</code> element.',
-        html: `<img src='./block-me/img.jpg?${random}' id='html-img-test'/>`,
+        html: `<img src='${TRACKER_RESOURCES_URL}/img.jpg?${random}' id='html-img-test'/>`,
         check: () => {
             const item = document.querySelector('#html-img-test');
 
@@ -70,7 +73,7 @@ const tests = [
         id: 'picture',
         description: 'Try loading an image using <code>&lt;picture&gt;</code> element.',
         html: `<picture id='html-picture-test' style='display: inline-block'>
-        <source srcset="./block-me/picture.jpg?${random}">
+        <source srcset="${TRACKER_RESOURCES_URL}/picture.jpg?${random}">
         <img src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==' />
         </picture>`,
         check: () => {
@@ -89,7 +92,7 @@ const tests = [
         category: 'html',
         id: 'object',
         description: 'Try loading an image using <code>&lt;object&gt;</code> element.',
-        html: `<object type="image/png" data="./block-me/object.png?${random}" id='html-object-test'></object>`,
+        html: `<object type="image/png" data="${TRACKER_RESOURCES_URL}/object.png?${random}" id='html-object-test'></object>`,
         check: () => {
             const item = document.querySelector('#html-object-test');
 
@@ -106,7 +109,7 @@ const tests = [
         category: 'html',
         id: 'audio',
         description: 'Try loading an audio file using <code>&lt;audio&gt;</code> element.',
-        html: `<audio src='./block-me/audio.wav?${random}' id='html-audio-test'></audio>`,
+        html: `<audio src='${TRACKER_RESOURCES_URL}/audio.wav?${random}' id='html-audio-test'></audio>`,
         check: () => {
             const item = document.querySelector('#html-audio-test');
 
@@ -119,7 +122,7 @@ const tests = [
         category: 'html',
         id: 'video',
         description: 'Try loading a video file using <code>&lt;video&gt;</code> element.',
-        html: `<video src='./block-me/video.mp4?${random}' id='html-video-test' style='max-width: 100px'></video>`,
+        html: `<video src='${TRACKER_RESOURCES_URL}/video.mp4?${random}' id='html-video-test' style='max-width: 100px'></video>`,
         check: () => {
             const item = document.querySelector('#html-video-test');
 
@@ -132,7 +135,7 @@ const tests = [
         category: 'html',
         id: 'iframe',
         description: 'Try loading a frame using <code>&lt;iframe&gt;</code> element.',
-        html: `<iframe src='./block-me/frame.html?${random}' style='width:100px' id='html-iframe-test'></iframe>`,
+        html: `<iframe src='${TRACKER_RESOURCES_URL}/frame.html?${random}' style='width:100px' id='html-iframe-test'></iframe>`,
         checkAsync: (callback) => {
             const item = document.querySelector('#html-iframe-test');
 
@@ -153,7 +156,7 @@ const tests = [
         category: 'css',
         id: 'import',
         description: 'Try loading a CSS file using <code>@import url(…)</code>.',
-        html: `<style>@import url(./block-me/cssImport.css?${random});</style>
+        html: `<style>@import url(${TRACKER_RESOURCES_URL}/cssImport.css?${random});</style>
         <div id='css-import-test'></div>`,
         check: () => {
             const item = document.querySelector('#css-import-test');
@@ -173,7 +176,7 @@ const tests = [
         description: 'Try loading a font file using <code>@font-face {src: url(…)}</code>.',
         html: `<style>@font-face {
             font-family: fakeFont;
-            src: url(./block-me/cssfont.woff?${random});
+            src: url(${TRACKER_RESOURCES_URL}/cssfont.woff?${random});
         }
         
         #css-font-test {
@@ -198,7 +201,7 @@ const tests = [
         description: 'Try loading an image using <code>background: url(…)</code>.',
         html: `<style>
         #css-bg-test {
-            background: url(./block-me/cssbg.jpg?${random});
+            background: url(${TRACKER_RESOURCES_URL}/cssbg.jpg?${random});
             width: 100px;
             height: 100px;
         }</style>
@@ -230,8 +233,7 @@ const tests = [
         id: 'websocket',
         description: 'Try connecting to a WebSocket.',
         checkAsync: (callback) => {
-            const wsProtocol = urlObj.protocol == "https:" ? "wss" : "ws";
-            const websocketUrl = `${wsProtocol}://${urlObj.hostname}:${urlObj.port}/block-me/web-socket`;
+            const websocketUrl = `wss://${TRACKER_DOMAIN}/block-me/web-socket`;
             const socket = new WebSocket(websocketUrl);
             socket.addEventListener('message', event => {
                 callback('loaded');
@@ -248,8 +250,7 @@ const tests = [
         id: 'server-sent-events',
         description: 'Try connecting to an EventSource.',
         checkAsync: (callback) => {
-            const locationPrefix = `${urlObj.protocol}//${urlObj.hostname}:${urlObj.port}`;
-            const sseUrl = `${locationPrefix}/block-me/server-sent-events`;
+            const sseUrl = `https://${TRACKER_DOMAIN}/block-me/server-sent-events`;
             const eventSource = new EventSource(sseUrl);
             eventSource.addEventListener('message', event => {
                 callback('loaded');
@@ -266,7 +267,7 @@ const tests = [
         id: 'fetch',
         description: 'Try requesting data using <code>fetch(…)</code>.',
         checkAsync: (callback) => {
-            fetch(`./block-me/fetch.json?${random}`)
+            fetch(`${TRACKER_RESOURCES_URL}/fetch.json?${random}`)
                 .then(r => r.json())
                 .then(data => {
                     if (data.data.includes('fetch loaded')) {
@@ -296,7 +297,7 @@ const tests = [
             ajax.onerror = () => {
                 callback('failed');
             };
-            ajax.open('GET', `./block-me/ajax.json?${random}`, true);
+            ajax.open('GET', `${TRACKER_RESOURCES_URL}/ajax.json?${random}`, true);
             ajax.send();
         }
     },
@@ -324,7 +325,7 @@ const tests = [
 
             observer.observe({entryTypes: ["resource", "navigation"]});
 
-            document.head.innerHTML += `<link rel="shortcut icon" type="image/icon" href="./block-me/favicon.ico?${random}" />`;
+            document.head.innerHTML += `<link rel="shortcut icon" type="image/icon" href="${TRACKER_RESOURCES_URL}/favicon.ico?${random}" />`;
         }
     },
     {
@@ -336,6 +337,10 @@ const tests = [
             const item = document.querySelector('#html-iframe-fetch-test');
 
             if (item) {
+                item.addEventListener('load', () => {
+                    item.contentWindow.postMessage({action: 'fetch', url: `${TRACKER_RESOURCES_URL}/fetch.json?iframe-${Math.random()}`});
+                });
+
                 const onMessage = msg => {
                     if (msg.data.includes('frame fetch loaded')) {
                         callback('loaded');
@@ -356,6 +361,8 @@ const tests = [
         description: 'Try fetching data from within a WebWorker.',
         checkAsync: (callback) => {
             const worker = new Worker('./worker.js');
+
+            worker.postMessage({action: 'fetch', url: `${TRACKER_RESOURCES_URL}/fetch.json?webworker-${Math.random()}`});
 
             worker.addEventListener('message', msg => {
                 if (msg.data.includes('worker fetch loaded')) {
@@ -390,14 +397,14 @@ const tests = [
                         registration.active.addEventListener('message', () => {
                             console.log('client received message');
                         });
-                        registration.active.postMessage('fetch');
+                        registration.active.postMessage({action: 'fetch', url: `${TRACKER_RESOURCES_URL}/fetch.json?serviceworker-${Math.random()}`});
                     } else if (registration.installing) {
                         registration.installing.addEventListener('statechange', () => {
                             if (registration.active) {
                                 registration.active.addEventListener('message', () => {
                                     console.log('client received message');
                                 });
-                                registration.active.postMessage('fetch');
+                                registration.active.postMessage({action: 'fetch', url: `${TRACKER_RESOURCES_URL}/fetch.json?serviceworker-${Math.random()}`});
                             } 
                         });
                     }

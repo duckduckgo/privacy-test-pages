@@ -43,7 +43,8 @@ app.get('/block-me/server-sent-events', (req, res) => {
     res.set({
         'Cache-Control': 'no-cache',
         'Content-Type': 'text/event-stream',
-        'Access-Control-Allow-Origin': '*'
+        'Access-Control-Allow-Origin': '*',
+        'Timing-Allow-Origin': '*'
     });
     res.flushHeaders();
 
@@ -52,6 +53,7 @@ app.get('/block-me/server-sent-events', (req, res) => {
 
 // dummy CSP report endopoint
 app.post('/block-me/csp', (req, res) => {
+    res.set('Timing-Allow-Origin', '*');
     return res.sendStatus(200);
 });
 

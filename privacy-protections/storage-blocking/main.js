@@ -1,4 +1,4 @@
-const THIRD_PARTY_DOMAIN = 'https://other.localhost:3000';
+const THIRD_PARTY_ORIGIN = 'https://good.third-party.site';
 
 const storeButton = document.querySelector('#store');
 const retriveButton = document.querySelector('#retrive');
@@ -43,14 +43,14 @@ const tests = [
     {
         id: 'third party header cookie',
         store: (data) => {
-            return fetch(`${THIRD_PARTY_DOMAIN}/set-cookie?value=${data}`, {credentials: 'include'}).then(r => {
+            return fetch(`${THIRD_PARTY_ORIGIN}/set-cookie?value=${data}`, {credentials: 'include'}).then(r => {
                 if (!r.ok) {
                     throw new Error('Request failed.');
                 }
             });
         },
         retrive: () => {
-            return fetch(`${THIRD_PARTY_DOMAIN}/reflect-headers`, {credentials: 'include'})
+            return fetch(`${THIRD_PARTY_ORIGIN}/reflect-headers`, {credentials: 'include'})
                 .then(r => r.json())
                 .then(data => data.headers.cookie.match(/headerdata\=([0-9]+)/)[1]);
         }
@@ -122,7 +122,7 @@ const tests = [
             const promise = new Promise((res, rej) => {resolve = res; reject = rej});
 
             const iframe = document.createElement('iframe');
-            iframe.src = `${THIRD_PARTY_DOMAIN}/privacy-protections/storage-blocking/iframe.html?data=${data}`;
+            iframe.src = `${THIRD_PARTY_ORIGIN}/privacy-protections/storage-blocking/iframe.html?data=${data}`;
             iframe.style.width = '10px';
             iframe.style.height = '10px';
             let failTimeout = null;
@@ -151,7 +151,7 @@ const tests = [
             const promise = new Promise((res, rej) => {resolve = res; reject = rej});
 
             const iframe = document.createElement('iframe');
-            iframe.src = `${THIRD_PARTY_DOMAIN}/privacy-protections/storage-blocking/iframe.html`;
+            iframe.src = `${THIRD_PARTY_ORIGIN}/privacy-protections/storage-blocking/iframe.html`;
             iframe.style.width = '10px';
             iframe.style.height = '10px';
             let failTimeout = null;

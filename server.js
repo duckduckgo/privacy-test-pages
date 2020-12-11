@@ -107,9 +107,10 @@ app.get('/come-back', (req, res) => {
 </head>
 <body>
 <script>
-    document.body.innerHTML += '<p>header: <strong>${req.headers.referer}</strong></p><p>js: <strong>' + document.referrer + '</strong></p>';
+    const jsReferrer = document.referrer;
+    document.body.innerHTML += '<p>header: <strong>${req.headers.referer}</strong></p><p>js: <strong>' + jsReferrer + '</strong></p>';
     setTimeout(() => {
-        location.href = 'http://localhost:3000/privacy-protections/referrer-trimming/?run&header=${req.headers.referer}&js=' + document.referrer;
+        location.href = 'http://localhost:3000/privacy-protections/referrer-trimming/?run&header=${req.headers.referer}&js=' + jsReferrer;
     }, 2000);
 </script>
 </body>

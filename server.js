@@ -103,11 +103,15 @@ app.get('/come-back', (req, res) => {
     res.write(`<!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Redirect…</title>
-    <script>
-        location.href = 'http://localhost:3000/privacy-protections/referrer-trimming/?run&header=${req.headers.referer}&js=' + document.referrer;
-    </script>
+    <title>Redirecting</title>
 </head>
-<body></body>
+<body>
+<script>
+    document.body.innerHTML += '<p>header: <strong>${req.headers.referer}</strong></p><p>js: <strong>' + document.referrer + '</strong></p>';
+    setTimeout(() => {
+        location.href = 'http://localhost:3000/privacy-protections/referrer-trimming/?run&header=${req.headers.referer}&js=' + document.referrer;
+    }, 2000);
+</script>
+</body>
 </html>`);
 });

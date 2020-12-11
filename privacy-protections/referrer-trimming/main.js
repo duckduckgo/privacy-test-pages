@@ -20,8 +20,10 @@ const tests = [
             const key = 'referrer-trimming-test-1p';
 
             if (localStorage[key]) {// test already finished before
+                console.log(key, 'done before');
                 return JSON.parse(localStorage[key]);
             } else if(currentURL.searchParams.get('js')) {// test finished now
+                console.log(key, 'done now');
                 const result = [
                     {
                         test: 'js',
@@ -32,11 +34,17 @@ const tests = [
                         result: currentURL.searchParams.get('header')
                     }
                 ];
-                localStorage[key] = JSON.stringify(result);
+                localStorage.setItem(key, JSON.stringify(result));
+
+                // clear url so that the next test doesn't think it's their result
+                history.pushState(null, '', '/privacy-protections/referrer-trimming/')
 
                 return result;
             } else {// test haven't run yet
+                console.log(key, 'running…');
                 window.location.href = '/come-back';
+
+                return 'stop';
             }
         }
     },
@@ -47,8 +55,10 @@ const tests = [
             const key = 'referrer-trimming-test-3p-good';
 
             if (localStorage[key]) {// test already finished before
+                console.log(key, 'done before');
                 return JSON.parse(localStorage[key]);
             } else if(currentURL.searchParams.get('js')) {// test finished now
+                console.log('done now');
                 const result = [
                     {
                         test: 'js',
@@ -61,9 +71,15 @@ const tests = [
                 ];
                 localStorage[key] = JSON.stringify(result);
 
+                // clear url so that the next test doesn't think it's their result
+                history.pushState(null, '', '/privacy-protections/referrer-trimming/')
+
                 return result;
             } else {// test haven't run yet
+                console.log(key, 'running…');
                 window.location.href = 'https://good.third-party.site/come-back';
+
+                return 'stop';
             }
         }
     },
@@ -74,6 +90,7 @@ const tests = [
             const key = 'referrer-trimming-test-3p-bad';
 
             if (localStorage[key]) {// test already finished before
+                console.log(key, 'done before');
                 return JSON.parse(localStorage[key]);
             } else if(currentURL.searchParams.get('js')) {// test finished now
                 const result = [
@@ -88,9 +105,14 @@ const tests = [
                 ];
                 localStorage[key] = JSON.stringify(result);
 
+                // clear url so that the next test doesn't think it's their result
+                history.pushState(null, '', '/privacy-protections/referrer-trimming/')
+
                 return result;
             } else {// test haven't run yet
                 window.location.href = 'https://bad.third-party.site/come-back';
+
+                return 'stop';
             }
         }
     },
@@ -115,9 +137,7 @@ function runTests() {
         testsSummaryDiv.innerText = `Performed ${all} tests${failed > 0 ? ` (${failed} failed)` : ''}. Click for details.`;
     }
 
-    tests.forEach(test => {
-        all++;
-
+    for (const test of tests) {
         const resultObj = {
             id: test.id,
             value: null
@@ -134,7 +154,9 @@ function runTests() {
         try {
             const result = test.run();
 
-            if (result instanceof Promise) {
+            if (result === 'stop') {
+                break;
+            } else if (result instanceof Promise) {
                 result
                     .then(data => {
                         if (Array.isArray(data)) {
@@ -163,11 +185,16 @@ function runTests() {
             failed++;
             valueSpan.innerHTML = `❌ error thrown ("${e.message ? e.message : e}")`;
         }
-    });
 
-    localStorage.removeItem('referrer-trimming-test-1p');
-    localStorage.removeItem('referrer-trimming-test-3p-good');
-    localStorage.removeItem('referrer-trimming-test-3p-bad');
+        all++;
+    }
+
+    // if all tests actually run (and we are not in the middle of testing)
+    if (all === tests.length) {
+        localStorage.removeItem('referrer-trimming-test-1p');
+        localStorage.removeItem('referrer-trimming-test-3p-good');
+        localStorage.removeItem('referrer-trimming-test-3p-bad');
+    }
 
     updateSummary();
 

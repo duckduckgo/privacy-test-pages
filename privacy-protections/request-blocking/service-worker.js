@@ -2,9 +2,13 @@ self.addEventListener('install', (evt) => {
     self.skipWaiting();
 });
 
+self.addEventListener('activate', (evt) => {
+    evt.waitUntil(clients.claim());
+});
+
 self.addEventListener('message', (event) => {
-    if (event.data === 'fetch') {
-        fetch(`./block-me/fetch.json?${Math.random()}`)
+    if (event.data.action && event.data.action === 'fetch') {
+        fetch(event.data.url)
             .then(r => r.json())
             .then(data => {
                 if (data.data.includes('fetch loaded')) {

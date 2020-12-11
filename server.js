@@ -11,11 +11,12 @@ const listener = app.listen(port, () => {
 // serve all static files
 app.use(express.static('.', {
     setHeaders: (res, path) => {
-        res.set("Access-Control-Allow-Origin", "*");
+        res.set('Access-Control-Allow-Origin', '*');
+        res.set('Timing-Allow-Origin', '*');
 
         // send CSP header when fetching request blocking test site
         if (path.endsWith('privacy-protections/request-blocking/index.html')) {
-            res.set("Content-Security-Policy-Report-Only", "img-src http: https:; report-uri /block-me/csp");
+            res.set('Content-Security-Policy-Report-Only', 'img-src http: https:; report-uri https://bad.third-party.site/block-me/csp');
         }
     }
 }));
@@ -42,18 +43,51 @@ app.get('/block-me/server-sent-events', (req, res) => {
     res.set({
         'Cache-Control': 'no-cache',
         'Content-Type': 'text/event-stream',
+        'Access-Control-Allow-Origin': '*',
+        'Timing-Allow-Origin': '*'
     });
     res.flushHeaders();
 
     res.write(`data: It works 👍\n\n`);
+  
+    setTimeout(() => {
+      res.end();
+    }, 1000);
 });
 
 // dummy CSP report endopoint
 app.post('/block-me/csp', (req, res) => {
+    res.set('Timing-Allow-Origin', '*');
     return res.sendStatus(200);
 });
 
 // reflects request headers back
 app.get('/reflect-headers', (req, res) => {
+    res.set('Access-Control-Allow-Origin', req.headers.origin || '*');
+    res.set('Access-Control-Allow-Credentials', 'true');
+    res.set('Timing-Allow-Origin', '*');
+
     return res.json({headers: req.headers});
+});
+
+// sets a cookie with provided value
+app.get('/set-cookie', (req, res) => {
+    res.set('Access-Control-Allow-Origin', req.headers.origin || '*');
+    res.set('Access-Control-Allow-Credentials', 'true');
+    res.set('Timing-Allow-Origin', '*');
+
+    const expires = new Date((Date.now() + (7 * 24 * 60 * 60 * 1000)));
+    
+    if (!req.query['value']) {
+        return res.sendStatus(401);
+    }
+    return res.cookie('headerdata', req.query['value'], {expires, httpOnly: true, sameSite: 'none', secure: true}).sendStatus(200);
+});
+
+app.get('/cached-random-number', (req, res) => {
+    res.setHeader('Cache-Control', 'public, max-age=31556926, immutable');
+
+    const random = (Math.round(Math.random() * 1000)).toString();
+
+    res.end(random);
 });

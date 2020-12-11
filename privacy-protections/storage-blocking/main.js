@@ -17,15 +17,6 @@ const results = {
 
 const tests = [
     {
-        id: 'JS cookie',
-        store: (data) => {
-            document.cookie = `jsdata=${data}; expires= Wed, 21 Aug 2030 20:00:00 UTC; Secure; SameSite=Lax`;
-        },
-        retrive: () => {
-            return document.cookie.match(/jsdata\=([0-9]+)/)[1];
-        }
-    },
-    {
         id: 'header cookie',
         store: (data) => {
             return fetch(`/set-cookie?value=${data}`).then(r => {
@@ -53,66 +44,6 @@ const tests = [
             return fetch(`${THIRD_PARTY_ORIGIN}/reflect-headers`, {credentials: 'include'})
                 .then(r => r.json())
                 .then(data => data.headers.cookie.match(/headerdata\=([0-9]+)/)[1]);
-        }
-    },
-    {
-        id: 'localStorage',
-        store: (data) => {
-            localStorage.setItem('data', data);
-        },
-        retrive: () => {
-            return localStorage.getItem('data');
-        }
-    },
-    {
-        id: 'sessionStorage',
-        store: (data) => {
-            sessionStorage.setItem('data', data);
-        },
-        retrive: () => {
-            return sessionStorage.getItem('data');
-        }
-    },
-    {
-        id: 'IndexedDB',
-        store: (data) => {
-            return DB('data').then(db => Promise.all([db.deleteAll(), db.put({ id: data })])).then(() => "OK");
-        },
-        retrive: () => {
-            return DB('data').then(db => db.getAll()).then(data => data[0].id);
-        }
-    },
-    {
-        id: 'WebSQL',
-        store: (data) => {
-            let resolve, reject;
-            const promise = new Promise((res, rej) => {resolve = res; reject = rej});
-
-            const db = openDatabase('data', '1.0', 'data', 2 * 1024 * 1024);
-
-            db.transaction(tx => {   
-                tx.executeSql('CREATE TABLE IF NOT EXISTS data (value)', [], () => {
-                    tx.executeSql('DELETE FROM data;', [], () => {
-                            tx.executeSql('INSERT INTO data (value) VALUES (?)', [data], () => resolve(), (sql, e) => reject('err - insert ' + e.message));
-                    }, (sql, e) => reject('err - delete ' + e.message)); 
-                }, (sql, e) => reject('err - create ' + e.message)); 
-            });
-
-            return promise;
-        },
-        retrive: () => {
-            let resolve, reject;
-            const promise = new Promise((res, rej) => {resolve = res; reject = rej});
-
-            const db = openDatabase('data', '1.0', 'data', 2 * 1024 * 1024);
-
-            db.transaction(tx => {   
-                tx.executeSql('SELECT * FROM data', [], (tx, d) => {
-                    resolve(d.rows[0].value);
-                }, (sql, e) => reject('err - select ' + e.message));
-            });
-
-            return promise;
         }
     },
     {
@@ -174,24 +105,6 @@ const tests = [
             document.body.appendChild(iframe);
 
             return promise;
-        }
-    },
-    {
-        id: 'Cache API',
-        store: (data) => {
-            return caches.open('data').then((cache) => {
-                const res = new Response(data, {
-                    status: 200
-                });
-
-                return cache.put('/cache-api-response', res);
-            });
-        },
-        retrive: () => {
-            return caches.open('data').then((cache) => {
-                return cache.match('/cache-api-response')
-                    .then(r => r.text());
-            });
         }
     },
     {
@@ -277,7 +190,7 @@ function storeData() {
     fetch('/cached-random-number', {cache: 'reload'})
         .then(r => r.text())
         .then(randomNumber => {
-            tests.forEach(test => {
+            tests.concat(commonTests).forEach(test => {
                 all++;
 
                 const li = document.createElement('li');

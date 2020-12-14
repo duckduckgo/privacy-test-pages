@@ -65,7 +65,7 @@ function generateFrameTest(url) {
     document.body.appendChild(iframe);
 
     iframe.addEventListener('load', () => {
-        iframe.contentWindow.postMessage({action: 'referrer'});
+        iframe.contentWindow.postMessage({action: 'referrer'}, origin);
     });
 
     return promise;

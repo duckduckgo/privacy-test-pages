@@ -201,7 +201,6 @@ function runTests() {
         all++;
     }
 
-    console.log(lsEntriesToClear);
     // clear partial results from navigational tests
     lsEntriesToClear.forEach(key => localStorage.removeItem(key))
 

@@ -12,8 +12,12 @@ const results = {
     results: []
 };
 
+// list of localStorage entries with partial test results that we need to clear at the end of all testing
+const lsEntriesToClear = [];
+
 function generateNavigationTest(url) {
     const key = `referrer-trimming-${url}`;
+    lsEntriesToClear.push(key);
     const currentURL = new URL(location.href);
 
     if (localStorage[key]) {// test already finished before
@@ -38,6 +42,7 @@ function generateNavigationTest(url) {
     } else {// test haven't run yet
         window.location.href = url;
 
+        // let test runner know that it should not run other tests
         return 'stop';
     }
 }
@@ -161,7 +166,8 @@ function runTests() {
             const result = test.run();
 
             if (result === 'stop') {
-                break;
+                updateSummary();
+                return;
             } else if (result instanceof Promise) {
                 result
                     .then(data => {
@@ -195,12 +201,9 @@ function runTests() {
         all++;
     }
 
-    // if all tests actually run (and we are not in the middle of testing)
-    if (all === tests.length) {
-        localStorage.removeItem('referrer-trimming-test-1p');
-        localStorage.removeItem('referrer-trimming-test-3p-good');
-        localStorage.removeItem('referrer-trimming-test-3p-bad');
-    }
+    console.log(lsEntriesToClear);
+    // clear partial results from navigational tests
+    lsEntriesToClear.forEach(key => localStorage.removeItem(key))
 
     updateSummary();
 

@@ -18,6 +18,11 @@ app.use(express.static('.', {
         if (path.endsWith('privacy-protections/request-blocking/index.html')) {
             res.set('Content-Security-Policy-Report-Only', 'img-src http: https:; report-uri https://bad.third-party.site/block-me/csp');
         }
+
+        // send Referrer-policy header when fetching referrer trimming test site
+        if (path.endsWith('privacy-protections/referrer-trimming/index.html')) {
+            res.set('Referrer-Policy', 'unsafe-url');
+        }
     }
 }));
 
@@ -84,10 +89,30 @@ app.get('/set-cookie', (req, res) => {
     return res.cookie('headerdata', req.query['value'], {expires, httpOnly: true, sameSite: 'none', secure: true}).sendStatus(200);
 });
 
+// returns a random number and sets caching for a year
 app.get('/cached-random-number', (req, res) => {
     res.setHeader('Cache-Control', 'public, max-age=31556926, immutable');
 
     const random = (Math.round(Math.random() * 1000)).toString();
 
     res.end(random);
+});
+
+// returns referrer found in the header and in js back to the test page
+app.get('/come-back', (req, res) => {
+    res.end(`<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Redirecting</title>
+</head>
+<body>
+<script>
+    const jsReferrer = document.referrer;
+    document.body.innerHTML += '<p>header: <strong>${req.headers.referer}</strong></p><p>js: <strong>' + jsReferrer + '</strong></p>';
+    setTimeout(() => {
+        location.href = 'https://privacy-test-pages.glitch.me/privacy-protections/referrer-trimming/?run&header=${req.headers.referer}&js=' + jsReferrer;
+    }, 1000);
+</script>
+</body>
+</html>`);
 });

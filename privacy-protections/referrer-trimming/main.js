@@ -12,110 +12,114 @@ const results = {
     results: []
 };
 
+function generateNavigationTest(url) {
+    const key = `referrer-trimming-${url}`;
+    const currentURL = new URL(location.href);
+
+    if (localStorage[key]) {// test already finished before
+        return JSON.parse(localStorage[key]);
+    } else if(currentURL.searchParams.get('js')) {// test finished now
+        const result = [
+            {
+                test: 'js',
+                result: currentURL.searchParams.get('js')
+            },
+            {
+                test: 'header',
+                result: currentURL.searchParams.get('header')
+            }
+        ];
+        localStorage.setItem(key, JSON.stringify(result));
+
+        // clear url so that the next test doesn't think it's their result
+        history.pushState(null, '', '/privacy-protections/referrer-trimming/')
+
+        return result;
+    } else {// test haven't run yet
+        window.location.href = url;
+
+        return 'stop';
+    }
+}
+
+function generateFrameTest(url) {
+    let resolve, reject;
+    const promise = new Promise((res, rej) => {resolve = res; reject = rej});
+
+    const origin = (new URL(url, document.location.href)).origin;
+
+    const iframe = document.createElement('iframe');
+    iframe.src = url;
+
+    const onMessage = msg => {
+        // check message and if it's comming from the right origin
+        if (msg.data.referrer && msg.origin === origin) {
+            resolve(msg.data.referrer);
+            window.removeEventListener('message', onMessage);
+            document.body.removeChild(iframe);
+        }
+    };
+
+    window.addEventListener('message', onMessage);
+
+    document.body.appendChild(iframe);
+
+    iframe.addEventListener('load', () => {
+        iframe.contentWindow.postMessage({action: 'referrer'});
+    });
+
+    return promise;
+}
+
 const tests = [
     {
-        id: 'referrer - 1p origin',
+        id: '1p navigation',
+        run: () => generateNavigationTest('/come-back')
+    },
+    {
+        id: '3p navigation',
+        run: () => generateNavigationTest('https://good.third-party.site/come-back')
+    },
+    {
+        id: '3p tracker navigation',
+        run: () => generateNavigationTest('https://bad.third-party.site/come-back')
+    },
+    {
+        id: '1p request',
         run: () => {
-            const currentURL = new URL(location.href);
-            const key = 'referrer-trimming-test-1p';
-
-            if (localStorage[key]) {// test already finished before
-                console.log(key, 'done before');
-                return JSON.parse(localStorage[key]);
-            } else if(currentURL.searchParams.get('js')) {// test finished now
-                console.log(key, 'done now');
-                const result = [
-                    {
-                        test: 'js',
-                        result: currentURL.searchParams.get('js')
-                    },
-                    {
-                        test: 'header',
-                        result: currentURL.searchParams.get('header')
-                    }
-                ];
-                localStorage.setItem(key, JSON.stringify(result));
-
-                // clear url so that the next test doesn't think it's their result
-                history.pushState(null, '', '/privacy-protections/referrer-trimming/')
-
-                return result;
-            } else {// test haven't run yet
-                console.log(key, 'running…');
-                window.location.href = '/come-back';
-
-                return 'stop';
-            }
+            return fetch('/reflect-headers')
+                .then(r => r.json())
+                .then(data => data.headers.referer);
         }
     },
     {
-        id: 'referrer - 3p origin',
+        id: '3p request',
         run: () => {
-            const currentURL = new URL(location.href);
-            const key = 'referrer-trimming-test-3p-good';
-
-            if (localStorage[key]) {// test already finished before
-                console.log(key, 'done before');
-                return JSON.parse(localStorage[key]);
-            } else if(currentURL.searchParams.get('js')) {// test finished now
-                console.log('done now');
-                const result = [
-                    {
-                        test: 'js',
-                        result: currentURL.searchParams.get('js')
-                    },
-                    {
-                        test: 'header',
-                        result: currentURL.searchParams.get('header')
-                    }
-                ];
-                localStorage[key] = JSON.stringify(result);
-
-                // clear url so that the next test doesn't think it's their result
-                history.pushState(null, '', '/privacy-protections/referrer-trimming/')
-
-                return result;
-            } else {// test haven't run yet
-                console.log(key, 'running…');
-                window.location.href = 'https://good.third-party.site/come-back';
-
-                return 'stop';
-            }
+            return fetch('https://good.third-party.site/reflect-headers')
+                .then(r => r.json())
+                .then(data => data.headers.referer);
         }
     },
     {
-        id: 'referrer - 3p tracker',
+        id: '3p tracker request',
         run: () => {
-            const currentURL = new URL(location.href);
-            const key = 'referrer-trimming-test-3p-bad';
-
-            if (localStorage[key]) {// test already finished before
-                console.log(key, 'done before');
-                return JSON.parse(localStorage[key]);
-            } else if(currentURL.searchParams.get('js')) {// test finished now
-                const result = [
-                    {
-                        test: 'js',
-                        result: currentURL.searchParams.get('js')
-                    },
-                    {
-                        test: 'header',
-                        result: currentURL.searchParams.get('header')
-                    }
-                ];
-                localStorage[key] = JSON.stringify(result);
-
-                // clear url so that the next test doesn't think it's their result
-                history.pushState(null, '', '/privacy-protections/referrer-trimming/')
-
-                return result;
-            } else {// test haven't run yet
-                window.location.href = 'https://bad.third-party.site/come-back';
-
-                return 'stop';
-            }
+            return fetch('https://bad.third-party.site/reflect-headers')
+                .then(r => r.json())
+                .then(data => data.headers.referer);
         }
     },
+    {
+        id: '1p iframe',
+        run: () => generateFrameTest('./frame.html')
+    },
+    {
+        id: '3p iframe',
+        run: () => generateFrameTest('https://good.third-party.site/privacy-protections/referrer-trimming/frame.html')
+    },
+    {
+        id: '3p tracker iframe',
+        run: () => generateFrameTest('https://bad.third-party.site/privacy-protections/referrer-trimming/frame.html')
+    }
 ];
 
 /**

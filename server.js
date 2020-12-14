@@ -100,7 +100,7 @@ app.get('/cached-random-number', (req, res) => {
 
 // returns referrer found in the header and in js back to the test page
 app.get('/come-back', (req, res) => {
-    res.write(`<!DOCTYPE html>
+    res.end(`<!DOCTYPE html>
 <html lang="en">
 <head>
     <title>Redirecting</title>

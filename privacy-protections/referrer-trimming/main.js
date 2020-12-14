@@ -50,6 +50,8 @@ function generateFrameTest(url) {
 
     const iframe = document.createElement('iframe');
     iframe.src = url;
+    iframe.style.width = '10px';
+    iframe.style.height = '10px';
 
     const onMessage = msg => {
         // check message and if it's comming from the right origin

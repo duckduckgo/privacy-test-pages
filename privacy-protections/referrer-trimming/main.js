@@ -32,7 +32,7 @@ function generateNavigationTest(url) {
         localStorage.setItem(key, JSON.stringify(result));
 
         // clear url so that the next test doesn't think it's their result
-        history.pushState(null, '', '/privacy-protections/referrer-trimming/')
+        history.pushState(null, '', '/privacy-protections/referrer-trimming/');
 
         return result;
     } else {// test haven't run yet

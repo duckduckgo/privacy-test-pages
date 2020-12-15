@@ -22,7 +22,7 @@ function generateNavigationTest(url) {
 
     if (localStorage[key]) {// test already finished before
         return JSON.parse(localStorage[key]);
-    } else if(currentURL.searchParams.get('js')) {// test finished now
+    } else if(currentURL.searchParams.get('js') !== null) {// test finished now
         const result = [
             {
                 test: 'js',

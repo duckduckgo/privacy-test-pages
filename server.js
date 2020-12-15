@@ -108,7 +108,7 @@ app.get('/come-back', (req, res) => {
 <body>
 <script>
     const jsReferrer = document.referrer;
-    document.body.innerHTML += '<p>header: <strong>${req.headers.referer}</strong></p><p>js: <strong>' + jsReferrer + '</strong></p>';
+    document.body.innerHTML += '<p>header: <strong>${req.headers.referer || ''}</strong></p><p>js: <strong>' + jsReferrer + '</strong></p>';
     setTimeout(() => {
         location.href = 'https://privacy-test-pages.glitch.me/privacy-protections/referrer-trimming/?run&header=${req.headers.referer}&js=' + jsReferrer;
     }, 1000);

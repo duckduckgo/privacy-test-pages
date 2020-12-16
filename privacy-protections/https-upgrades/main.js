@@ -5,7 +5,7 @@ const testsDiv = document.querySelector('#tests');
 const testsSummaryDiv = document.querySelector('#tests-summary');
 const testsDetailsDiv = document.querySelector('#tests-details');
 
-const TEST_DOMAIN = 'good-third-party.site';
+const TEST_DOMAIN = 'good.third-party.site';
 
 const tests = [
     {
@@ -14,6 +14,7 @@ const tests = [
             let resolve, reject;
             const promise = new Promise((res, rej) => {resolve = res; reject = rej});
             const otherWindow = window.open(`http://${TEST_DOMAIN}/privacy-protections/https-upgrades/frame.html`);
+            window.focus();
 
             const interval = setInterval(() => {
                 otherWindow.postMessage({action: 'url', type: 'navigation'}, `http://${TEST_DOMAIN}/`);

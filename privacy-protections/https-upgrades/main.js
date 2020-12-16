@@ -5,17 +5,19 @@ const testsDiv = document.querySelector('#tests');
 const testsSummaryDiv = document.querySelector('#tests-summary');
 const testsDetailsDiv = document.querySelector('#tests-details');
 
+const TEST_DOMAIN = 'good-third-party.site';
+
 const tests = [
     {
         id: 'upgrade-navigation',
         run: () => {
             let resolve, reject;
             const promise = new Promise((res, rej) => {resolve = res; reject = rej});
-            const otherWindow = window.open('http://good.third-party.site/privacy-protections/https-upgrades/frame.html');
+            const otherWindow = window.open(`http://${TEST_DOMAIN}/privacy-protections/https-upgrades/frame.html`);
 
             const interval = setInterval(() => {
-                otherWindow.postMessage({action: 'url', type: 'navigation'}, 'http://good.third-party.site/');
-                otherWindow.postMessage({action: 'url', type: 'navigation'}, 'https://good.third-party.site/');
+                otherWindow.postMessage({action: 'url', type: 'navigation'}, `http://${TEST_DOMAIN}/`);
+                otherWindow.postMessage({action: 'url', type: 'navigation'}, `https://${TEST_DOMAIN}/`);
             }, 500);
 
             function onMessage(m) {
@@ -41,11 +43,11 @@ const tests = [
             const iframe = document.createElement('iframe');
 
             iframe.addEventListener('load', i => {
-                iframe.contentWindow.postMessage({action: 'url', type: 'frame'}, 'http://good.third-party.site/');
-                iframe.contentWindow.postMessage({action: 'url', type: 'frame'}, 'https://good.third-party.site/');
+                iframe.contentWindow.postMessage({action: 'url', type: 'frame'}, `http://${TEST_DOMAIN}/`);
+                iframe.contentWindow.postMessage({action: 'url', type: 'frame'}, `https://${TEST_DOMAIN}/`);
             });
 
-            iframe.src = 'http://good.third-party.site/privacy-protections/https-upgrades/frame.html';
+            iframe.src = `http://${TEST_DOMAIN}/privacy-protections/https-upgrades/frame.html`;
 
             document.body.appendChild(iframe);
 
@@ -65,7 +67,7 @@ const tests = [
     {
         id: 'upgrade-subrequest',
         run: () => {
-            return fetch('http://good.third-party.site/reflect-headers')
+            return fetch(`http://${TEST_DOMAIN}/reflect-headers`)
                 .then(r => r.json())
                 .then(data => data.url);
         }
@@ -76,7 +78,7 @@ const tests = [
             let resolve, reject;
             const promise = new Promise((res, rej) => {resolve = res; reject = rej});
 
-            const websocketUrl = `ws://good.third-party.site/block-me/web-socket`;
+            const websocketUrl = `ws://${TEST_DOMAIN}/block-me/web-socket`;
             const socket = new WebSocket(websocketUrl);
             socket.addEventListener('message', () => {
                 resolve(socket.url);

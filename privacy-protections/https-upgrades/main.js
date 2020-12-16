@@ -14,15 +14,19 @@ const tests = [
             const otherWindow = window.open('http://good.third-party.site/privacy-protections/https-upgrades/frame.html');
 
             otherWindow.addEventListener('load', i => {
-                otherWindow.sendMessage({action: 'url', type: 'navigation'}, 'http://good.third-party.site/');
-                otherWindow.sendMessage({action: 'url', type: 'navigation'}, 'https://good.third-party.site/');
+                otherWindow.postMessage({action: 'url', type: 'navigation'}, 'http://good.third-party.site/');
+                otherWindow.postMessage({action: 'url', type: 'navigation'}, 'https://good.third-party.site/');
             });
 
-            window.addEventListener('message', m => {
-                console.log('navigation', m);
-            });
+            function onMessage(m) {
+                if (m.data && m.data.type === 'navigation') {
+                    otherWindow.close();
+                    window.removeEventListener('message', onMessage);
+                    resolve(m.data.url);
+                }
+            }
 
-            document.body.appendChild(iframe);
+            window.addEventListener('message', onMessage);
 
             return promise;
         }
@@ -36,17 +40,23 @@ const tests = [
             const iframe = document.createElement('iframe');
 
             iframe.addEventListener('load', i => {
-                iframe.contentWindow.sendMessage({action: 'url', type: 'frame'}, 'http://good.third-party.site/');
-                iframe.contentWindow.sendMessage({action: 'url', type: 'frame'}, 'https://good.third-party.site/');
+                iframe.contentWindow.postMessage({action: 'url', type: 'frame'}, 'http://good.third-party.site/');
+                iframe.contentWindow.postMessage({action: 'url', type: 'frame'}, 'https://good.third-party.site/');
             });
 
             iframe.src = 'http://good.third-party.site/privacy-protections/https-upgrades/frame.html';
 
             document.body.appendChild(iframe);
 
-            window.addEventListener('message', m => {
-                console.log('frame', m);
-            });
+            function onMessage(m) {
+                if (m.data && m.data.type === 'navigation') {
+                    otherWindow.close();
+                    window.removeEventListener('message', onMessage);
+                    document.body.removeChild(iframe);
+                }
+            }
+
+            window.addEventListener('message', onMessage);
 
             return promise;
         }
@@ -57,6 +67,25 @@ const tests = [
             return fetch('http://good.third-party.site/reflect-headers')
                 .then(r => r.json())
                 .then(data => data.url);
+        }
+    },
+    {
+        id: 'upgrade-websocket',
+        run: () => {
+            let resolve, reject;
+            const promise = new Promise((res, rej) => {resolve = res; reject = rej});
+
+            const websocketUrl = `ws://good.third-party.site/block-me/web-socket`;
+            const socket = new WebSocket(websocketUrl);
+            socket.addEventListener('message', event => {
+                console.log(event);
+                resolve();
+            });
+            socket.addEventListener('close', event => {
+                reject();
+            });
+
+            return promise;
         }
     }
 ];

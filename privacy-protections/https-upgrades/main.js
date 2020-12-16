@@ -49,10 +49,10 @@ const tests = [
             document.body.appendChild(iframe);
 
             function onMessage(m) {
-                if (m.data && m.data.type === 'navigation') {
-                    otherWindow.close();
+                if (m.data && m.data.type === 'frame') {
                     window.removeEventListener('message', onMessage);
                     document.body.removeChild(iframe);
+                    resolve(m.data.url);
                 }
             }
 
@@ -77,12 +77,8 @@ const tests = [
 
             const websocketUrl = `ws://good.third-party.site/block-me/web-socket`;
             const socket = new WebSocket(websocketUrl);
-            socket.addEventListener('message', event => {
-                console.log(event);
-                resolve();
-            });
-            socket.addEventListener('close', event => {
-                reject();
+            socket.addEventListener('message', () => {
+                resolve(socket.url);
             });
 
             return promise;

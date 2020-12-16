@@ -13,13 +13,14 @@ const tests = [
             const promise = new Promise((res, rej) => {resolve = res; reject = rej});
             const otherWindow = window.open('http://good.third-party.site/privacy-protections/https-upgrades/frame.html');
 
-            otherWindow.addEventListener('load', i => {
+            const interval = setInterval(() => {
                 otherWindow.postMessage({action: 'url', type: 'navigation'}, 'http://good.third-party.site/');
                 otherWindow.postMessage({action: 'url', type: 'navigation'}, 'https://good.third-party.site/');
-            });
+            }, 500);
 
             function onMessage(m) {
                 if (m.data && m.data.type === 'navigation') {
+                    clearInterval(interval);
                     otherWindow.close();
                     window.removeEventListener('message', onMessage);
                     resolve(m.data.url);

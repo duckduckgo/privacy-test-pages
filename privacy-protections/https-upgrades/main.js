@@ -5,12 +5,78 @@ const testsDiv = document.querySelector('#tests');
 const testsSummaryDiv = document.querySelector('#tests-summary');
 const testsDetailsDiv = document.querySelector('#tests-details');
 
+const tests = [
+    {
+        id: 'upgrade-navigation',
+        run: () => {
+            let resolve, reject;
+            const promise = new Promise((res, rej) => {resolve = res; reject = rej});
+            const otherWindow = window.open('http://good.third-party.site/privacy-protections/https-upgrades/frame.html');
+
+            otherWindow.addEventListener('load', i => {
+                otherWindow.sendMessage({action: 'url', type: 'navigation'}, 'http://good.third-party.site/');
+                otherWindow.sendMessage({action: 'url', type: 'navigation'}, 'https://good.third-party.site/');
+            });
+
+            window.addEventListener('message', m => {
+                console.log('navigation', m);
+            });
+
+            document.body.appendChild(iframe);
+
+            return promise;
+        }
+    },
+    {
+        id: 'upgrade-iframe',
+        run: () => {
+            let resolve, reject;
+            const promise = new Promise((res, rej) => {resolve = res; reject = rej});
+
+            const iframe = document.createElement('iframe');
+
+            iframe.addEventListener('load', i => {
+                iframe.contentWindow.sendMessage({action: 'url', type: 'frame'}, 'http://good.third-party.site/');
+                iframe.contentWindow.sendMessage({action: 'url', type: 'frame'}, 'https://good.third-party.site/');
+            });
+
+            iframe.src = 'http://good.third-party.site/privacy-protections/https-upgrades/frame.html';
+
+            document.body.appendChild(iframe);
+
+            window.addEventListener('message', m => {
+                console.log('frame', m);
+            });
+
+            return promise;
+        }
+    },
+    {
+        id: 'upgrade-subrequest',
+        run: () => {
+            return fetch('http://good.third-party.site/reflect-headers')
+                .then(r => r.json())
+                .then(data => data.url);
+        }
+    }
+];
+
 // object that contains results of all tests
 const results = {
     page: 'https-upgrades',
     date: null,
     results: []
 };
+
+function resultToHTML(data) {
+    if (Array.isArray(data)) {
+        return `<ul>${data.map(r => `<li>${r.test} - ${r.result}</li>`).join('')}</ul>`;
+    } else if (data) {
+        return JSON.stringify(data, null, 2);
+    }
+
+    return null;
+}
 
 /**
  * Test runner
@@ -31,9 +97,45 @@ function runTests() {
         testsSummaryDiv.innerText = `Performed ${all} tests${failed > 0 ? ` (${failed} failed)` : ''}. Click for details.`;
     }
 
-    tests.forEach(test => {
-    });
+    for (const test of tests) {
+        const resultObj = {
+            id: test.id,
+            value: null
+        };
+        results.results.push(resultObj);
 
+        const li = document.createElement('li');
+        li.id = `test-${test.id.replace(' ', '-')}`;
+        li.innerHTML = `${test.id} - <span class='value'>…</span>`;
+        const valueSpan = li.querySelector('.value');
+
+        testsDetailsDiv.appendChild(li);
+
+        try {
+            const result = test.run();
+
+            if (result instanceof Promise) {
+                result
+                    .then(data => {
+                        valueSpan.innerHTML = resultToHTML(data);
+                        resultObj.value = data || null;
+                    })
+                    .catch(e => {
+                        failed++;
+                        valueSpan.innerHTML = `❌ error thrown ("${e.message ? e.message : e}")`;
+                        updateSummary();
+                    });
+            } else {
+                valueSpan.innerHTML = resultToHTML(data);;
+                resultObj.value = result || null;
+            }
+        } catch(e) {
+            failed++;
+            valueSpan.innerHTML = `❌ error thrown ("${e.message ? e.message : e}")`;
+        }
+
+        all++;
+    }
 
     updateSummary();
 

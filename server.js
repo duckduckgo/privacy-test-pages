@@ -2,6 +2,15 @@ const express = require('express');
 const ws = require('ws');
 const app = express();
 const port = process.env.PORT || 3000;
+const url = require('url');
+
+function fullUrl(req) {
+  return url.format({
+    protocol: req.protocol,
+    host: req.get('host'),
+    pathname: req.originalUrl
+  });
+}
 
 // start server
 const listener = app.listen(port, () => {
@@ -66,13 +75,13 @@ app.post('/block-me/csp', (req, res) => {
     return res.sendStatus(200);
 });
 
-// reflects request headers back
+// reflects request headers and request url back
 app.get('/reflect-headers', (req, res) => {
     res.set('Access-Control-Allow-Origin', req.headers.origin || '*');
     res.set('Access-Control-Allow-Credentials', 'true');
     res.set('Timing-Allow-Origin', '*');
 
-    return res.json({headers: req.headers});
+    return res.json({url: fullUrl(req), headers: req.headers});
 });
 
 // sets a cookie with provided value
@@ -108,9 +117,9 @@ app.get('/come-back', (req, res) => {
 <body>
 <script>
     const jsReferrer = document.referrer;
-    document.body.innerHTML += '<p>header: <strong>${req.headers.referer}</strong></p><p>js: <strong>' + jsReferrer + '</strong></p>';
+    document.body.innerHTML += '<p>header: <strong>${req.headers.referer || ''}</strong></p><p>js: <strong>' + jsReferrer + '</strong></p>';
     setTimeout(() => {
-        location.href = 'https://privacy-test-pages.glitch.me/privacy-protections/referrer-trimming/?run&header=${req.headers.referer}&js=' + jsReferrer;
+        location.href = 'https://privacy-test-pages.glitch.me/privacy-protections/referrer-trimming/?run&header=${req.headers.referer || ''}&js=' + jsReferrer;
     }, 1000);
 </script>
 </body>

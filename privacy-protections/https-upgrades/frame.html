@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iframe HTTPS Upgrade Test</title>
+</head>
+<body>
+    <script>
+        const onMessage = msg => {
+            if (msg.data.action && msg.data.action === 'url') {
+                if (window.opener) {
+                    window.opener.postMessage({url: document.location.href, type: msg.data.type}, '*');
+                } else if (window.parent) {
+                    window.parent.postMessage({url: document.location.href, type: msg.data.type}, '*');
+                }
+            }
+        };
+
+        window.addEventListener('message', onMessage);
+    </script>
+</body>
+</html>

@@ -1,7 +1,7 @@
 {
   "name": "privacy-test-pages",
   "version": "1.0.0",
-  "description": "A collection of pages with known content (trackers, web functionality) for testing with the mobile apps and extensions.",
+  "description": "This project contains a collection of pages that are meant to be used for testing various privacy and security features of browsers and browser extensions.",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

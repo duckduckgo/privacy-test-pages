@@ -318,7 +318,11 @@ downloadButton.addEventListener('click', () => downloadTheResults());
 storeButton.addEventListener('click', () => storeData());
 retriveButton.addEventListener('click', () => retrieveData());
 
-// if url contains 'run-tests'
-if (document.location.search === '?run') {
+// if url query is '?store' store the data immadiatelly
+if (document.location.search === '?store') {
     storeData();
+}
+// if url query is '?retrive' retrieve the data immadiatelly
+if (document.location.search === '?retrive') {
+    retrieveData();
 }

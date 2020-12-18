@@ -18,6 +18,7 @@
   "homepage": "https://github.com/duckduckgo/privacy-test-pages#readme",
   "dependencies": {
     "express": "^4.17.1",
+    "node-cmd": "^4.0.0",
     "ws": "^7.4.0"
   }
 }

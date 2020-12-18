@@ -3,6 +3,8 @@ const ws = require('ws');
 const app = express();
 const port = process.env.PORT || 3000;
 const url = require('url');
+const cmd = require('node-cmd');
+const crypto = require('crypto');
 
 function fullUrl(req) {
   return url.format({
@@ -35,14 +37,26 @@ app.use(express.static('.', {
     }
 }));
 
-// // endpoint for updating the app
-// app.post('/git', (req, res) => {
-//     if (req.headers['x-github-event'] == "push") { 
-//         /* Here will be our updating code */
-//     }
+// endpoint for updating the app (https://support.glitch.com/t/tutorial-how-to-auto-update-your-project-with-github/8124)
+app.post('/git', (req, res) => {
+    const hmac = crypto.createHmac('sha1', process.env.SECRET);
+    const sig  = 'sha1=' + hmac.update(JSON.stringify(req.body)).digest('hex');
 
-//     return res.sendStatus(200);
-// });
+    if (req.headers['x-github-event'] === 'push' && crypto.timingSafeEqual(sig, req.headers['x-hub-signature'])) { 
+        cmd.run('chmod 777 git.sh'); /* :/ Fix no perms after updating */
+        cmd.get('./git.sh', (err, data) => {  // Run our script
+          if (data) console.log(data);
+          if (err) console.log(err);
+        });
+        cmd.run('refresh');  // Refresh project
+      
+        console.log('> [GIT] Updated with origin/gh-pages');
+
+        return res.sendStatus(200);
+    } else {
+        return res.sendStatus(403);
+    }
+});
 
 // dummy websocket server
 const wss = new ws.Server({server: listener, path: '/block-me/web-socket'});

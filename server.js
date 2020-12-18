@@ -5,6 +5,7 @@ const port = process.env.PORT || 3000;
 const url = require('url');
 const cmd = require('node-cmd');
 const crypto = require('crypto');
+const fs = require('fs');
 
 function fullUrl(req) {
   return url.format({
@@ -18,6 +19,8 @@ function fullUrl(req) {
 const listener = app.listen(port, () => {
   console.log(`Server listening at port ${listener.address().port}`)
 });
+
+app.use(express.json());
 
 // serve all static files
 app.use(express.static('.', {
@@ -42,8 +45,8 @@ app.post('/git', (req, res) => {
     const hmac = crypto.createHmac('sha1', process.env.SECRET);
     const sig  = 'sha1=' + hmac.update(JSON.stringify(req.body)).digest('hex');
 
-    if (req.headers['x-github-event'] === 'push' && crypto.timingSafeEqual(sig, req.headers['x-hub-signature'])) { 
-        cmd.run('chmod 777 git.sh'); /* :/ Fix no perms after updating */
+    if (req.headers['x-github-event'] === 'push' && crypto.timingSafeEqual(Buffer.from(sig, 'utf8'), Buffer.from(req.headers['x-hub-signature'], 'utf8'))) { 
+        fs.chmodSync('git.sh', '777'); /* :/ Fix no perms after updating */
         cmd.get('./git.sh', (err, data) => {  // Run our script
           if (data) console.log(data);
           if (err) console.log(err);

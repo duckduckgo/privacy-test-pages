@@ -5,84 +5,15 @@ const testsDiv = document.querySelector('#tests');
 const testsSummaryDiv = document.querySelector('#tests-summary');
 const testsDetailsDiv = document.querySelector('#tests-details');
 
-const TEST_DOMAIN = 'good.third-party.site';
-
 const tests = [
     {
-        id: 'upgrade-navigation',
+        id: 'test-test',
         run: () => {
-            let resolve, reject;
-            const promise = new Promise((res, rej) => {resolve = res; reject = rej});
-            const otherWindow = window.open(`http://${TEST_DOMAIN}/privacy-protections/https-upgrades/frame.html`);
-
-            const interval = setInterval(() => {
-                otherWindow.postMessage({action: 'url', type: 'navigation'}, `http://${TEST_DOMAIN}/`);
-                otherWindow.postMessage({action: 'url', type: 'navigation'}, `https://${TEST_DOMAIN}/`);
-            }, 500);
-
-            function onMessage(m) {
-                if (m.data && m.data.type === 'navigation') {
-                    clearInterval(interval);
-                    otherWindow.close();
-                    window.removeEventListener('message', onMessage);
-                    resolve(m.data.url);
-                }
-            }
-
-            window.addEventListener('message', onMessage);
-
-            return promise;
-        }
-    },
-    {
-        id: 'upgrade-iframe',
-        run: () => {
+            // function returning either a value or a promise
             let resolve, reject;
             const promise = new Promise((res, rej) => {resolve = res; reject = rej});
 
-            const iframe = document.createElement('iframe');
-
-            iframe.addEventListener('load', i => {
-                iframe.contentWindow.postMessage({action: 'url', type: 'frame'}, `http://${TEST_DOMAIN}/`);
-                iframe.contentWindow.postMessage({action: 'url', type: 'frame'}, `https://${TEST_DOMAIN}/`);
-            });
-
-            iframe.src = `http://${TEST_DOMAIN}/privacy-protections/https-upgrades/frame.html`;
-
-            document.body.appendChild(iframe);
-
-            function onMessage(m) {
-                if (m.data && m.data.type === 'frame') {
-                    window.removeEventListener('message', onMessage);
-                    document.body.removeChild(iframe);
-                    resolve(m.data.url);
-                }
-            }
-
-            window.addEventListener('message', onMessage);
-
-            return promise;
-        }
-    },
-    {
-        id: 'upgrade-subrequest',
-        run: () => {
-            return fetch(`http://${TEST_DOMAIN}/reflect-headers`)
-                .then(r => r.json())
-                .then(data => data.url);
-        }
-    },
-    {
-        id: 'upgrade-websocket',
-        run: () => {
-            let resolve, reject;
-            const promise = new Promise((res, rej) => {resolve = res; reject = rej});
-
-            const websocketUrl = `ws://${TEST_DOMAIN}/block-me/web-socket`;
-            const socket = new WebSocket(websocketUrl);
-            socket.addEventListener('message', () => {
-                resolve(socket.url);
-            });
+            setTimeout(() => resolve('ok'), 1000);
 
             return promise;
         }
@@ -91,7 +22,7 @@ const tests = [
 
 // object that contains results of all tests
 const results = {
-    page: 'https-upgrades',
+    page: 'name-of-the-test',// FILL ME OUT!
     date: null,
     results: []
 };
@@ -189,7 +120,7 @@ downloadButton.addEventListener('click', () => downloadTheResults());
 // run tests if button was clicked or…
 startButton.addEventListener('click', () => runTests());
 
-// if url query is '?run' start tests imadiatelly
+// if url query is '?run'
 if (document.location.search === '?run') {
     runTests();
 }

@@ -224,7 +224,7 @@ downloadButton.addEventListener('click', () => downloadTheResults());
 // run tests if button was clicked or…
 startButton.addEventListener('click', () => runTests());
 
-// if url contains 'run-tests'
+// if url query is '?run' start tests imadiatelly
 if (document.location.search === '?run') {
     runTests();
 }

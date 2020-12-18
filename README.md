@@ -1,5 +1,6 @@
 # Privacy Test Pages
-This project contains a collection of pages that are meant to be used for testing various privacy and security features of browsers and browser extensions.
+🛡 Collection of pages for testing various privacy and security features of browsers and browser extensions.
+
 ## How to use it?
 The site with all tests is live [here](https://privacy-test-pages.glitch.me/). All tests run either on page load or provide instructions on how to run them.
 
@@ -10,6 +11,7 @@ Those tests by default require clicking a button to start, but can be run immadi
 ## Contributing
 
 Please note that we are not taking external contributions for new test pages, but we welcome all bug reports.
+
 ### How to create a new test?
 
 - Templates for both simple and complex tests (Privacy Protections Tests) can be found in the [TEMPLATES](./TEMPLATES) directory.

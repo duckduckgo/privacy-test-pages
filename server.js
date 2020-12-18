@@ -42,7 +42,7 @@ app.post('/git', (req, res) => {
     const hmac = crypto.createHmac('sha1', process.env.SECRET);
     const sig  = 'sha1=' + hmac.update(JSON.stringify(req.body)).digest('hex');
 
-    if (req.headers['x-github-event'] == 'push' && crypto.timingSafeEqual(sig, req.headers['x-hub-signature'])) { 
+    if (req.headers['x-github-event'] === 'push' && crypto.timingSafeEqual(sig, req.headers['x-hub-signature'])) { 
         cmd.run('chmod 777 git.sh'); /* :/ Fix no perms after updating */
         cmd.get('./git.sh', (err, data) => {  // Run our script
           if (data) console.log(data);

@@ -3,7 +3,12 @@ const commonTests = [
     {
         id: 'JS cookie',
         store: (data) => {
-            document.cookie = `jsdata=${data}; expires= Wed, 21 Aug 2030 20:00:00 UTC; Secure; SameSite=Lax`;
+            // we are using same set of tests for main frame and an iframe
+            // we want to set 'Lax' in the main frame for the cookie not to be suspicious
+            // we want to set 'None' in an iframe for cookie to be accessible to us
+            const sameSite = (window !== window.top) ? 'None' : 'Lax';
+
+            document.cookie = `jsdata=${data}; expires= Wed, 21 Aug 2030 20:00:00 UTC; Secure; SameSite=${sameSite}`;
         },
         retrive: () => {
             return document.cookie.match(/jsdata\=([0-9]+)/)[1];

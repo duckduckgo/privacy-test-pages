@@ -211,7 +211,7 @@ const tests = [
 
             const checkResource = resource => {
                 if (resource.name.includes('cssbg.jpg')) {
-                    if (resource.duration === 0 && resource.nextHopProtocol === '') {
+                    if (resource.serverTiming.length === 0) {
                         callback('failed');
                     } else {
                         callback('loaded');
@@ -309,7 +309,7 @@ const tests = [
 
             const checkResource = resource => {
                 if (resource.name.includes('favicon.ico?')) {
-                    if (resource.duration === 0 && resource.nextHopProtocol === '') {
+                    if (resource.serverTiming.length === 0) {
                         callback('failed');
                     } else {
                         callback('loaded');
@@ -423,7 +423,7 @@ const tests = [
 
             const checkResource = resource => {
                 if (resource.name.includes('/csp')) {
-                    if (resource.duration === 0 && resource.nextHopProtocol === '') {
+                    if (resource.serverTiming.length === 0) {
                         callback('failed');
                     } else {
                         callback('loaded');

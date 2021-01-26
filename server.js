@@ -28,6 +28,7 @@ app.use(express.static('.', {
     setHeaders: (res, path) => {
         res.set('Access-Control-Allow-Origin', '*');
         res.set('Timing-Allow-Origin', '*');
+        res.set('Server-Timing', 'loaded');
 
         // send CSP header when fetching request blocking test site
         if (path.endsWith('privacy-protections/request-blocking/index.html')) {
@@ -90,6 +91,7 @@ app.get('/block-me/server-sent-events', (req, res) => {
 // dummy CSP report endopoint
 app.post('/block-me/csp', (req, res) => {
     res.set('Timing-Allow-Origin', '*');
+    res.set('Server-Timing', 'loaded');
     return res.sendStatus(200);
 });
 

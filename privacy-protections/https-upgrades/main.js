@@ -68,8 +68,7 @@ const tests = [
         id: 'upgrade-subrequest',
         run: () => {
             return fetch(`http://${TEST_DOMAIN}/reflect-headers`)
-                .then(r => r.json())
-                .then(data => data.url);
+                .then(r => r.url);
         }
     },
     {

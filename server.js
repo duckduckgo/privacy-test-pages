@@ -9,6 +9,7 @@ const fs = require('fs');
 
 function fullUrl(req) {
   return url.format({
+    // note: if server is behind a proxy, and it probably is, you may see 'http' here even if request was 'https'
     protocol: req.protocol,
     host: req.get('host'),
     pathname: req.originalUrl

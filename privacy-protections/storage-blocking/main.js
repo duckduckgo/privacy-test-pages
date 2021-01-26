@@ -249,7 +249,7 @@ function retrieveData() {
         testsSummaryDiv.innerText = `Retrieved data from ${all} storage mechanisms${failed > 0 ? ` (${failed} failed)` : ''}. Click for details.`;
     }
 
-    tests.forEach(test => {
+    tests.concat(commonTests).forEach(test => {
         all++;
 
         const resultObj = {

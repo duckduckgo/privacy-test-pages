@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Stack tracing</title>
+</head>
+<body>
+<p><a href="../../index.html">[Home]</a></p>
+
+<p>This test page writes out various test stack traces as they are slightly different per browser.</p>
+
+<style>
+  #error-output {
+    overflow: scroll;
+    border: 1px solid #000;
+  }
+  #error-output dl {
+    margin: 1rem;
+  }
+  #error-output dd {
+    white-space: pre;
+  }
+</style>
+
+<p>Error stack trace output:</p>
+<div id="error-output">
+</div>
+
+<script>
+  let errorOutput = document.getElementById('error-output');
+  function log(source, stackValue) {
+    let valueElement = document.createElement('dl');
+
+    let dtElement = document.createElement('dt');
+    dtElement.textContent = source;
+    dtElement.title = 'Source of stack trace';
+    valueElement.appendChild(dtElement);
+
+    let ddElement = document.createElement('dd');
+    ddElement.textContent = stackValue;
+    ddElement.title = 'Stack trace value';
+    valueElement.appendChild(ddElement);
+
+    errorOutput.appendChild(valueElement);
+  }
+  let sourceName = 'HTML <script>';
+  log(sourceName, new Error().stack);
+  setTimeout(() => {
+    log(`${sourceName} setTimeout`, new Error().stack);
+  }, 0)
+</script>
+
+<script src="./script.js"></script>
+<script>
+  const TEST_DOMAIN = `${window.location.protocol}//good.third-party.site`;
+  document.write(`<script src="${TEST_DOMAIN}/features/stack-tracing/script.js"></${'script'}>`);
+</script>
+
+</body>
+</html>

@@ -1,49 +1,54 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta encoding='utf-8'/>
-    <title>Headless detector</title>
-  </head>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Crawler Detectability test</title>
+</head>  
 
-  <body>
-    <table>
-        <tr>
-            <th>Test</th>
-            <th>Result</th>
-        </tr>
-        <tbody id="results"></tbody>
-    </table>
-    <template id="result-row">
-        <tr>
-            <td class="key"></td>
-            <td class="value"></td>
-        </tr>
-    </template>
-    <script>
-        (async () => {
-            const ul = document.getElementById('results');
-            const template = document.getElementById('result-row');
-            
-            function displayResult(test, result, detectValue) {
-                const listEntry = template.content.cloneNode(true);
-                listEntry.querySelector('.key').textContent = test;
-                listEntry.querySelector('.value').textContent = result ? 'fail' : 'pass';
-                ul.appendChild(listEntry)
-                if (result) {
-                    fetch(`./fail.json?test=${test}&${detectValue}`);
-                }
-            }
+<body>
+<p><a href="../index.html">[Home]</a></p>
 
-            displayResult('userAgent', /HeadlessChrome/.test(window.navigator.userAgent), window.navigator.userAgent);
-            displayResult('plugins', navigator.plugins.length == 0, navigator.plugins.length);
-            displayResult('languages', navigator.languages == "", navigator.languages);
-            displayResult('webdriver', !!navigator.webdriver, navigator.webdriver)
-            displayResult('window.chrome', !window.chrome || !window.chrome.runtime, JSON.stringify(window.chrome))
+<p>This page tests against common ways of detecting headless browsers.</p>
 
-            const permissionStatus = await navigator.permissions.query({ name: 'notifications' });
-            const isHeadless = Notification.permission === 'denied' && permissionStatus.state === 'prompt'
-            displayResult('Notification.permission', isHeadless, `${Notification.permission} - ${permissionStatus.state}`)
-        })()
-    </script>
-  </body>
+<table>
+    <tr>
+        <th>Test</th>
+        <th>Result</th>
+    </tr>
+    <tbody id="results"></tbody>
+</table>
+<template id="result-row">
+    <tr>
+        <td class="key"></td>
+        <td class="value"></td>
+    </tr>
+</template>
+<script>
+  (async () => {
+    const ul = document.getElementById('results');
+    const template = document.getElementById('result-row');
+    
+    function displayResult(test, result, detectValue) {
+      const listEntry = template.content.cloneNode(true);
+      listEntry.querySelector('.key').textContent = test;
+      listEntry.querySelector('.value').textContent = result ? 'fail' : 'pass';
+      ul.appendChild(listEntry)
+      if (result) {
+        // this is used to allow the crawler to log test failures via its network log
+        fetch(`./fail.json?test=${test}&${detectValue}`);
+      }
+    }
+
+    displayResult('userAgent', /HeadlessChrome/.test(window.navigator.userAgent), window.navigator.userAgent);
+    displayResult('plugins', navigator.plugins.length == 0, navigator.plugins.length);
+    displayResult('languages', navigator.languages == "", navigator.languages);
+    displayResult('webdriver', !!navigator.webdriver, navigator.webdriver)
+    displayResult('window.chrome', !window.chrome || !window.chrome.runtime, JSON.stringify(window.chrome))
+
+    const permissionStatus = await navigator.permissions.query({ name: 'notifications' });
+    const isHeadless = Notification.permission === 'denied' && permissionStatus.state === 'prompt'
+    displayResult('Notification.permission', isHeadless, `${Notification.permission} - ${permissionStatus.state}`)
+  })()
+</script>
+</body>
 </html>

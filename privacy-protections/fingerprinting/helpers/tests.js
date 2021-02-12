@@ -1,3 +1,19 @@
+async function sha256(str) {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder("utf-8").encode(str))
+  return Array.prototype.map.call(new Uint8Array(buf), x=>(('00'+x.toString(16)).slice(-2))).join('')
+}
+
+function addCanvasToPage(canvas, reason) {
+    const canvasCheck = document.getElementById('canvas-check')
+    canvasCheck.removeAttribute('hidden')
+    const containerElement = document.createElement('div')
+    const headerElement = document.createElement('h2')
+    headerElement.textContent = reason
+    containerElement.appendChild(headerElement)
+    containerElement.appendChild(canvas)
+    canvasCheck.appendChild(containerElement)
+}
+
 const tests = [
     // headers
     {
@@ -1018,62 +1034,70 @@ const tests = [
         }
     },
     {
-        id: 'canvas-2d',
+        id: 'canvas-2d-todataurl',
         category: 'full-fingerprints',
         getValue: () => {
-            // Very simple now, need to make it more complex (geo shapes etc)
+            const canvas = document.createElement('canvas')
+            canvas.width = 2000
+            canvas.height = 200
+            canvas.style.display = 'inline'
+
+            applyFpExampleDataToCanvas(canvas)
+
+            return canvas.toDataURL();
+        }
+    },
+    {
+        id: 'canvas-2d-imagedata',
+        category: 'full-fingerprints',
+        getValue: () => {
+            const canvas = document.createElement('canvas')
+            canvas.width = 2000
+            canvas.height = 200
+            canvas.style.display = 'inline'
+
+            applyFpExampleDataToCanvas(canvas)
+            addCanvasToPage(canvas, 'Normal check')
+
+            const ctx = canvas.getContext('2d')
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+
+            const image = new Image()
+            image.src = canvas.toDataURL()
+            addCanvasToPage(image, 'Image data url')
+
+            // Verify that once the method is used that it looks the same once rendered to the screen
+            const canvasCopy = document.createElement('canvas')
+            canvasCopy.width = 2000
+            canvasCopy.height = 200
+            canvasCopy.style.display = 'inline'
+            const ctxCopy = canvasCopy.getContext('2d')
+            ctxCopy.putImageData(imageData, 0, 0)
+            addCanvasToPage(canvasCopy, 'Image data check')
+
+            return sha256(JSON.stringify([...imageData.data]));
+        }
+    },
+    {
+        id: 'canvas-2d-offscreen-todataurl',
+        category: 'full-fingerprints',
+        getValue: () => {
+            const offscreen = new OffscreenCanvas(2000, 200)
+
+            applyFpExampleDataToCanvas(offscreen)
+
+            // As we can't get the result directly from the offscreen canvas
+            // we then push it through to an on-screen canvas
+            const imageBitmap = offscreen.transferToImageBitmap()
+
             const canvas = document.createElement('canvas')
             canvas.width = 2000
             canvas.height = 200
             canvas.style.display = 'inline'
             const ctx = canvas.getContext('2d')
-            // detect browser support of canvas winding
-            // http://blogs.adobe.com/webplatform/2013/01/30/winding-rules-in-canvas/
-            // https://github.com/Modernizr/Modernizr/blob/master/feature-detects/canvas/winding.js
-            ctx.rect(0, 0, 10, 10)
-            ctx.rect(2, 2, 6, 6)
-        
-            ctx.textBaseline = 'alphabetic'
-            ctx.fillStyle = '#f60'
-            ctx.fillRect(125, 1, 62, 20)
-            ctx.fillStyle = '#069'
-            // https://github.com/Valve/fingerprintjs2/issues/66
-            // if (this.options.dontUseFakeFontInCanvas) {
-            // ctx.font = '11pt Arial'
-            // } else {
-            ctx.font = '11pt no-real-font-123'
-            // }
-            ctx.fillText('Cwm fjordbank glyphs vext quiz, \ud83d\ude03', 2, 15)
-            ctx.fillStyle = 'rgba(102, 204, 0, 0.2)'
-            ctx.font = '18pt Arial'
-            ctx.fillText('Cwm fjordbank glyphs vext quiz, \ud83d\ude03', 4, 45)
-        
-            // canvas blending
-            // http://blogs.adobe.com/webplatform/2013/01/28/blending-features-in-canvas/
-            // http://jsfiddle.net/NDYV8/16/
-            ctx.globalCompositeOperation = 'multiply'
-            ctx.fillStyle = 'rgb(255,0,255)'
-            ctx.beginPath()
-            ctx.arc(50, 50, 50, 0, Math.PI * 2, true)
-            ctx.closePath()
-            ctx.fill()
-            ctx.fillStyle = 'rgb(0,255,255)'
-            ctx.beginPath()
-            ctx.arc(100, 50, 50, 0, Math.PI * 2, true)
-            ctx.closePath()
-            ctx.fill()
-            ctx.fillStyle = 'rgb(255,255,0)'
-            ctx.beginPath()
-            ctx.arc(75, 100, 50, 0, Math.PI * 2, true)
-            ctx.closePath()
-            ctx.fill()
-            ctx.fillStyle = 'rgb(255,0,255)'
-            // canvas winding
-            // http://blogs.adobe.com/webplatform/2013/01/30/winding-rules-in-canvas/
-            // http://jsfiddle.net/NDYV8/19/
-            ctx.arc(75, 75, 75, 0, Math.PI * 2, true)
-            ctx.arc(75, 75, 25, 0, Math.PI * 2, true)
-            ctx.fill('evenodd')
+            ctx.drawImage(imageBitmap, 0, 0)
+
+            addCanvasToPage(canvas, 'Offscreen canvas')
 
             return canvas.toDataURL();
         }
@@ -1281,4 +1305,56 @@ function extractSimplePropsFromObject(object, options) {
     }
 
     return result;
+}
+
+function applyFpExampleDataToCanvas(canvas) {
+    // Very simple now, need to make it more complex (geo shapes etc)
+    const ctx = canvas.getContext('2d')
+    // detect browser support of canvas winding
+    // http://blogs.adobe.com/webplatform/2013/01/30/winding-rules-in-canvas/
+    // https://github.com/Modernizr/Modernizr/blob/master/feature-detects/canvas/winding.js
+    ctx.rect(0, 0, 10, 10)
+    ctx.rect(2, 2, 6, 6)
+
+    ctx.textBaseline = 'alphabetic'
+    ctx.fillStyle = '#f60'
+    ctx.fillRect(125, 1, 62, 20)
+    ctx.fillStyle = '#069'
+    // https://github.com/Valve/fingerprintjs2/issues/66
+    // if (this.options.dontUseFakeFontInCanvas) {
+    // ctx.font = '11pt Arial'
+    // } else {
+    ctx.font = '11pt no-real-font-123'
+    // }
+    ctx.fillText('Cwm fjordbank glyphs vext quiz, \ud83d\ude03', 2, 15)
+    ctx.fillStyle = 'rgba(102, 204, 0, 0.2)'
+    ctx.font = '18pt Arial'
+    ctx.fillText('Cwm fjordbank glyphs vext quiz, \ud83d\ude03', 4, 45)
+
+    // canvas blending
+    // http://blogs.adobe.com/webplatform/2013/01/28/blending-features-in-canvas/
+    // http://jsfiddle.net/NDYV8/16/
+    ctx.globalCompositeOperation = 'multiply'
+    ctx.fillStyle = 'rgb(255,0,255)'
+    ctx.beginPath()
+    ctx.arc(50, 50, 50, 0, Math.PI * 2, true)
+    ctx.closePath()
+    ctx.fill()
+    ctx.fillStyle = 'rgb(0,255,255)'
+    ctx.beginPath()
+    ctx.arc(100, 50, 50, 0, Math.PI * 2, true)
+    ctx.closePath()
+    ctx.fill()
+    ctx.fillStyle = 'rgb(255,255,0)'
+    ctx.beginPath()
+    ctx.arc(75, 100, 50, 0, Math.PI * 2, true)
+    ctx.closePath()
+    ctx.fill()
+    ctx.fillStyle = 'rgb(255,0,255)'
+    // canvas winding
+    // http://blogs.adobe.com/webplatform/2013/01/30/winding-rules-in-canvas/
+    // http://jsfiddle.net/NDYV8/19/
+    ctx.arc(75, 75, 75, 0, Math.PI * 2, true)
+    ctx.arc(75, 75, 25, 0, Math.PI * 2, true)
+    ctx.fill('evenodd')
 }

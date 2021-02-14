@@ -1,17 +1,17 @@
-function log(source, stackValue) {
-  postMessage({ source, stackValue });
+function log (source, stackValue) {
+    postMessage({ source, stackValue })
 }
 
 self.addEventListener('message', msg => {
-  if (msg.data.action && msg.data.action === 'setup') {
-    setup();
-  }
-});
+    if (msg.data.action && msg.data.action === 'setup') {
+        setup()
+    }
+})
 
-function setup() {
-  log("worker", new Error().stack)
+function setup () {
+    log('worker', new Error().stack)
 
-  setTimeout(() => {
-    log("worker setTimeout", new Error().stack)
-  }, 0);
+    setTimeout(() => {
+        log('worker setTimeout', new Error().stack)
+    }, 0)
 }

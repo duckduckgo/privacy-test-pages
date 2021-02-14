@@ -4,7 +4,7 @@
   "description": "This project contains a collection of pages that are meant to be used for testing various privacy and security features of browsers and browser extensions.",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "eslint .",
     "start": "node server.js"
   },
   "repository": {
@@ -20,5 +20,12 @@
     "express": "^4.17.1",
     "node-cmd": "^4.0.0",
     "ws": "^7.4.0"
+  },
+  "devDependencies": {
+    "eslint": "^7.20.0",
+    "eslint-config-standard": "^16.0.2",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^4.3.1"
   }
 }

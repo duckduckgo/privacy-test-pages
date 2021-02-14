@@ -1,0 +1,11 @@
+{
+    "globals": {
+        "data": "writable"
+    },
+    "parserOptions": {
+        "sourceType": "script",
+        "ecmaFeatures": {
+            "globalReturn": false
+        }
+    },
+}

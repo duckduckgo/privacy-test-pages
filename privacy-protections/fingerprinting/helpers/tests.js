@@ -1,9 +1,11 @@
-async function sha256(str) {
-  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder("utf-8").encode(str))
-  return Array.prototype.map.call(new Uint8Array(buf), x=>(('00'+x.toString(16)).slice(-2))).join('')
+/* eslint-disable promise/param-names, no-return-assign */
+/* globals AmbientLightSensor, Gyroscope, Magnetometer, chrome, webkitOfflineAudioContext */
+async function sha256 (str) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder('utf-8').encode(str))
+    return Array.prototype.map.call(new Uint8Array(buf), x => (('00' + x.toString(16)).slice(-2))).join('')
 }
 
-function addCanvasToPage(canvas, reason) {
+function addCanvasToPage (canvas, reason) {
     const canvasCheck = document.getElementById('canvas-check')
     canvasCheck.removeAttribute('hidden')
     const containerElement = document.createElement('div')
@@ -19,7 +21,7 @@ const tests = [
     {
         id: 'headers - accept',
         category: 'headers',
-        getValue: () => headers.then(res => res.headers['accept'])
+        getValue: () => headers.then(res => res.headers.accept)
     },
     {
         id: 'headers - accept-encoding',
@@ -34,7 +36,7 @@ const tests = [
     {
         id: 'headers - dnt',
         category: 'headers',
-        getValue: () => headers.then(res => res.headers['dnt'])
+        getValue: () => headers.then(res => res.headers.dnt)
     },
     {
         id: 'headers - user-agent',
@@ -112,11 +114,11 @@ const tests = [
         id: 'navigator.mimeTypes',
         category: 'navigator',
         getValue: () => {
-            const results = {};
-    
-            Array.from(navigator.mimeTypes).forEach(mtype => results[mtype.type] = true);
+            const results = {}
 
-            return results;
+            Array.from(navigator.mimeTypes).forEach(mtype => results[mtype.type] = true)
+
+            return results
         }
     },
     {
@@ -141,7 +143,7 @@ const tests = [
             effectiveType: navigator.connection.effectiveType,
             downlink: navigator.connection.downlink,
             rtt: navigator.connection.rtt,
-            saveData: navigator.connection.saveData,
+            saveData: navigator.connection.saveData
         })
     },
     {
@@ -155,7 +157,7 @@ const tests = [
         getValue: () => Array.from(navigator.plugins).map(p => ({
             name: p.name,
             filename: p.filename,
-            description: p.description,
+            description: p.description
         }))
     },
     {
@@ -178,25 +180,25 @@ const tests = [
         getValue: () => {
             return Array.from(navigator.getGamepads()).map(gamepad => {
                 if (!gamepad) {
-                    return null;
+                    return null
                 }
-        
+
                 return {
                     id: gamepad.id,
                     buttons: gamepad.buttons.length,
                     axes: gamepad.axes.length
                 }
-            });
+            })
         }
     },
     {
         id: 'navigator.permissions.query()',
         category: 'navigator',
         getValue: () => {
-            function getPermissionIfKnown(pName) {
-                return navigator.permissions.query({name: pName})
-                    .then(r => ({name: pName, state: r.state}))
-                    .catch(e => ({name: pName, state: 'failure'}))
+            function getPermissionIfKnown (pName) {
+                return navigator.permissions.query({ name: pName })
+                    .then(r => ({ name: pName, state: r.state }))
+                    .catch(e => ({ name: pName, state: 'failure' }))
             }
 
             return Promise.all([
@@ -211,14 +213,14 @@ const tests = [
                 getPermissionIfKnown('notifications'),
                 getPermissionIfKnown('persistent-storage'),
                 getPermissionIfKnown('push'),
-                getPermissionIfKnown('speaker'),
+                getPermissionIfKnown('speaker')
             ]).then(results => {
-                const resultsObj = {};
+                const resultsObj = {}
 
-                results.forEach(r => resultsObj[r.name] = r.state);
+                results.forEach(r => resultsObj[r.name] = r.state)
 
-                return resultsObj;
-            });
+                return resultsObj
+            })
         }
     },
     {
@@ -249,32 +251,32 @@ const tests = [
                             kind: device.kind,
                             label: device.label
                         }
-                    });
-                });
+                    })
+                })
         }
     },
     {
         id: 'navigator.webkitTemporaryStorage.queryUsageAndQuota',
         category: 'navigator',
         getValue: () => {
-            let resolve, reject;
-            const promise = new Promise((res, rej) => {resolve = res; reject = rej});
+            let resolve
+            const promise = new Promise((res, rej) => { resolve = res })
 
-            navigator.webkitTemporaryStorage.queryUsageAndQuota((usage, quota) => resolve({usage: usage, quota: quota}));
+            navigator.webkitTemporaryStorage.queryUsageAndQuota((usage, quota) => resolve({ usage: usage, quota: quota }))
 
-            return promise;
+            return promise
         }
     },
     {
         id: 'navigator.webkitPersistentStorage.queryUsageAndQuota',
         category: 'navigator',
         getValue: () => {
-            let resolve, reject;
-            const promise = new Promise((res, rej) => {resolve = res; reject = rej});
+            let resolve
+            const promise = new Promise((res, rej) => { resolve = res })
 
-            navigator.webkitPersistentStorage.queryUsageAndQuota((usage, quota) => resolve({usage: usage, quota: quota}));
+            navigator.webkitPersistentStorage.queryUsageAndQuota((usage, quota) => resolve({ usage: usage, quota: quota }))
 
-            return promise;
+            return promise
         }
     },
 
@@ -322,7 +324,7 @@ const tests = [
     {
         id: 'window.openDatabase("test", "1.0", "test", 1024)',
         category: 'window',
-        getValue: () => Boolean(window.openDatabase("test", "1.0", "test", 1024))
+        getValue: () => Boolean(window.openDatabase('test', '1.0', 'test', 1024))
     },
     {
         id: 'window.locationbar.visible',
@@ -359,7 +361,6 @@ const tests = [
         category: 'window',
         getValue: () => window.offscreenBuffering
     },
-
 
     // console
     {
@@ -478,56 +479,56 @@ const tests = [
             VERTEX_SHADER: WebGLRenderingContext.VERTEX_SHADER,
             FRAGMENT_SHADER: WebGLRenderingContext.FRAGMENT_SHADER,
             COLOR_BUFFER_BIT: WebGLRenderingContext.COLOR_BUFFER_BIT,
-            DEPTH_BUFFER_BIT: WebGLRenderingContext.DEPTH_BUFFER_BIT,
+            DEPTH_BUFFER_BIT: WebGLRenderingContext.DEPTH_BUFFER_BIT
         })
     },
     {
         id: 'WebGLRenderingContext.getSupportedExtensions()',
         category: 'webgl',
         getValue: () => {
-            const c = document.createElement("canvas");
-            const results = {};
+            const c = document.createElement('canvas')
+            const results = {}
 
-            c.getContext("webgl").getSupportedExtensions().forEach(extension => results[extension] = true);
+            c.getContext('webgl').getSupportedExtensions().forEach(extension => results[extension] = true)
 
-            return results;
+            return results
         }
     },
     {
         id: 'WebGLRenderingContext.getContextAttributes()',
         category: 'webgl',
         getValue: () => {
-            const c = document.createElement("canvas");
-            return c.getContext("webgl").getContextAttributes();
+            const c = document.createElement('canvas')
+            return c.getContext('webgl').getContextAttributes()
         }
     },
     {
         id: 'WebGLRenderingContext.getShaderPrecisionFormat()',
         category: 'webgl',
         getValue: () => {
-            const c = document.createElement("canvas");
-            const result = c.getContext("webgl").getShaderPrecisionFormat(WebGLRenderingContext.FRAGMENT_SHADER, WebGLRenderingContext.LOW_FLOAT);
+            const c = document.createElement('canvas')
+            const result = c.getContext('webgl').getShaderPrecisionFormat(WebGLRenderingContext.FRAGMENT_SHADER, WebGLRenderingContext.LOW_FLOAT)
 
             return {
                 precision: result.precision,
                 rangeMin: result.rangeMin,
                 rangeMax: result.rangeMax
-            };
+            }
         }
     },
     {
         id: 'WebGLRenderingContext.getParameter()',
         category: 'webgl',
         getValue: () => {
-            const elem = document.createElement("canvas");
-            const context = elem.getContext("webgl");
-            const result = {};
+            const elem = document.createElement('canvas')
+            const context = elem.getContext('webgl')
+            const result = {}
 
             webglConstantsList.forEach(name => {
-                result[name] = context.getParameter(context[name]);
-            });
+                result[name] = context.getParameter(context[name])
+            })
 
-            return result;
+            return result
         }
     },
 
@@ -536,27 +537,27 @@ const tests = [
         id: 'RTCIceCandidate.candiate',
         category: 'webrtc',
         getValue: () => {
-            let resolve, reject;
-            const promise = new Promise((res, rej) => {resolve = res; reject = rej});
+            let resolve
+            const promise = new Promise((res, rej) => { resolve = res })
 
             const c = new RTCPeerConnection({
-                iceServers: [{urls: "stun:stun.l.google.com:19302?transport=udp"}]
-            });
-            
+                iceServers: [{ urls: 'stun:stun.l.google.com:19302?transport=udp' }]
+            })
+
             c.onicecandidate = result => {
-                console.log(result.candidate);
+                console.log(result.candidate)
                 if (result.candidate !== null) {
-                    resolve(result.candidate.candidate);
-                    c.close();
+                    resolve(result.candidate.candidate)
+                    c.close()
                 }
-            };
-            c.createDataChannel("");
-        
+            }
+            c.createDataChannel('')
+
             c.createOffer().then(a => {
                 c.setLocalDescription(a, () => {}, () => {})
-            });
+            })
 
-            return promise;
+            return promise
         }
     },
 
@@ -575,52 +576,52 @@ const tests = [
             // inspiration: https://www.kirupa.com/html5/detect_whether_font_is_installed.htm
 
             // creating our in-memory Canvas element where the magic happens
-            const canvas = document.createElement("canvas");
-            const context = canvas.getContext("2d");
-            
-            // the text whose final pixel size I want to measure
-            const text = "abcdefghijklmnopqrstuvwxyz0123456789 !@#$%^&*()_-+=";
-            
-            // specifying the baseline font
-            context.font = "72px monospace";
-            
-            // checking the size of the baseline text
-            const baselineSize = context.measureText(text);
+            const canvas = document.createElement('canvas')
+            const context = canvas.getContext('2d')
 
-            const result = {};
+            // the text whose final pixel size I want to measure
+            const text = 'abcdefghijklmnopqrstuvwxyz0123456789 !@#$%^&*()_-+='
+
+            // specifying the baseline font
+            context.font = '72px monospace'
+
+            // checking the size of the baseline text
+            const baselineSize = context.measureText(text)
+
+            const result = {}
 
             fontList.forEach(fontName => {
                 // specifying the font whose existence we want to check
-                context.font = "72px '" + fontName + "', monospace";
+                context.font = "72px '" + fontName + "', monospace"
 
                 // checking the size of the font we want to check
-                const newSize = context.measureText(text);
+                const newSize = context.measureText(text)
 
                 //
                 // If the size of the two text instances is the same, the font does not exist because it is being rendered
                 // using the default sans-serif font
                 //
                 if ((newSize.width !== baselineSize.width) || (newSize.height !== baselineSize.height)) {
-                    result[fontName] = true;
+                    result[fontName] = true
                 }
-            });
+            })
 
-            return result;
+            return result
         }
     },
     {
         id: 'document.fonts.check',
         category: 'fonts',
         getValue: () => {
-            const result = {};
+            const result = {}
 
             fontList.forEach(font => {
-                if(document.fonts.check(`small "${font}"`)) {
-                    result[font] = true;
+                if (document.fonts.check(`small "${font}"`)) {
+                    result[font] = true
                 }
-            });
+            })
 
-            return result;
+            return result
         }
     },
 
@@ -629,64 +630,68 @@ const tests = [
         id: 'HTMLVideoElement.canPlayType()',
         category: 'codecs',
         getValue: () => {
-            const video = document.createElement("video");
-            const result = {};
+            const video = document.createElement('video')
+            const result = {}
 
             codecsList.forEach(codec => {
-                result[codec] = video.canPlayType(codec);
-            });
+                result[codec] = video.canPlayType(codec)
+            })
 
-            return result;
+            return result
         }
     },
     {
         id: 'MediaSource.isTypeSupported()',
         category: 'codecs',
         getValue: () => {
-            const result = {};
+            const result = {}
 
             codecsList.forEach(codec => {
-                result[codec] = MediaSource.isTypeSupported(codec);
-            });
+                result[codec] = MediaSource.isTypeSupported(codec)
+            })
 
-            return result;
+            return result
         }
     },
     {
         id: 'navigator.mediaCapabilities.encodingInfo()',
         category: 'codecs',
         getValue: () => {
-            const result = {};
+            const result = {}
             const promises = codecsList.map(codec => {
                 const mediaConfig = {
                     type: 'file',
-                    video: codec.startsWith('video') ? {
-                        contentType : codec,
-                        width : 1920,
-                        height : 1080,
-                        bitrate : 120000,
-                        framerate : 48
-                    } : undefined,
-                    audio: codec.startsWith('audio') ? {
-                        contentType : codec,
-                        channels : 2,
-                        bitrate : 132700,
-                        samplerate : 5200
-                    } : undefined,
-                }; 
+                    video: codec.startsWith('video')
+                        ? {
+                            contentType: codec,
+                            width: 1920,
+                            height: 1080,
+                            bitrate: 120000,
+                            framerate: 48
+                        }
+                        : undefined,
+                    audio: codec.startsWith('audio')
+                        ? {
+                            contentType: codec,
+                            channels: 2,
+                            bitrate: 132700,
+                            samplerate: 5200
+                        }
+                        : undefined
+                }
 
                 return navigator.mediaCapabilities.decodingInfo(mediaConfig).then(support => {
                     result[codec] = {
                         supported: support.supported,
                         smooth: support.smooth,
                         powerEfficient: support.powerEfficient
-                    };
+                    }
                 }).catch(e => {
-                    result[codec] = e.message;
+                    result[codec] = e.message
                 })
-            });
+            })
 
-            return Promise.all(promises).then(() => result);
+            return Promise.all(promises).then(() => result)
         }
     },
 
@@ -695,35 +700,35 @@ const tests = [
         id: 'speechSynthesis.getVoices()',
         category: 'speechSynthesis',
         getValue: () => {
-            let resolve, reject;
-            const promise = new Promise((res, rej) => {resolve = res; reject = rej});
+            let resolve
+            const promise = new Promise((res, rej) => { resolve = res })
 
             // why timeout and calling the API twice? It's a workaround for a chromium bug of some sorts where first call to getVoices returns empty array
-            speechSynthesis.getVoices();
+            speechSynthesis.getVoices()
             setTimeout(() => {
-                const result = {};
+                const result = {}
 
                 speechSynthesis.getVoices().forEach(voice => {
                     const item = {
                         name: voice.name,
-                        lang: voice.lang,
-                    };
-            
+                        lang: voice.lang
+                    }
+
                     if (voice.default) {
-                        item.default = true;
+                        item.default = true
                     }
-            
+
                     if (!voice.localService) {
-                        item.external = true;
+                        item.external = true
                     }
 
-                    result[voice.voiceURI] = item;
-                });
+                    result[voice.voiceURI] = item
+                })
 
-                resolve(result);
-            }, 300);
+                resolve(result)
+            }, 300)
 
-            return promise;
+            return promise
         }
     },
 
@@ -739,65 +744,65 @@ const tests = [
         id: 'AmbientLightSensor',
         category: 'sensors',
         getValue: () => {
-            let resolve, reject;
-            const promise = new Promise((res, rej) => {resolve = res; reject = rej});
+            let resolve, reject
+            const promise = new Promise((res, rej) => { resolve = res; reject = rej })
 
-            const sensor = new AmbientLightSensor();
+            const sensor = new AmbientLightSensor()
             sensor.onreading = () => {
-              resolve({illuminance: sensor.illuminance});
-            };
+                resolve({ illuminance: sensor.illuminance })
+            }
             sensor.onerror = (event) => {
-              reject(event.error.name + ': ' + event.error.message);
-            };
-            sensor.start();
+                reject(event.error.name + ': ' + event.error.message)
+            }
+            sensor.start()
 
-            return promise;
+            return promise
         }
     },
     {
         id: 'Gyroscope',
         category: 'sensors',
         getValue: () => {
-            let resolve, reject;
-            const promise = new Promise((res, rej) => {resolve = res; reject = rej});
+            let resolve, reject
+            const promise = new Promise((res, rej) => { resolve = res; reject = rej })
 
-            const sensor = new Gyroscope();
+            const sensor = new Gyroscope()
             sensor.onreading = () => {
-              resolve({
-                  x: sensor.x,
-                  y: sensor.y,
-                  z: sensor.z
-              });
-            };
+                resolve({
+                    x: sensor.x,
+                    y: sensor.y,
+                    z: sensor.z
+                })
+            }
             sensor.onerror = (event) => {
-              reject(event.error.name + ': ' + event.error.message);
-            };
-            sensor.start();
+                reject(event.error.name + ': ' + event.error.message)
+            }
+            sensor.start()
 
-            return promise;
+            return promise
         }
     },
     {
         id: 'Magnetometer',
         category: 'sensors',
         getValue: () => {
-            let resolve, reject;
-            const promise = new Promise((res, rej) => {resolve = res; reject = rej});
+            let resolve, reject
+            const promise = new Promise((res, rej) => { resolve = res; reject = rej })
 
-            const sensor = new Magnetometer();
+            const sensor = new Magnetometer()
             sensor.onreading = () => {
-              resolve({
-                  x: sensor.x,
-                  y: sensor.y,
-                  z: sensor.z
-              });
-            };
+                resolve({
+                    x: sensor.x,
+                    y: sensor.y,
+                    z: sensor.z
+                })
+            }
             sensor.onerror = (event) => {
-              reject(event.error.name + ': ' + event.error.message);
-            };
-            sensor.start();
+                reject(event.error.name + ': ' + event.error.message)
+            }
+            sensor.start()
 
-            return promise;
+            return promise
         }
     },
 
@@ -806,7 +811,7 @@ const tests = [
         id: 'chrome.loadTimes()',
         category: 'chrome',
         getValue: () => {
-            const lt = chrome.loadTimes();
+            const lt = chrome.loadTimes()
 
             return {
                 connectionInfo: lt.connectionInfo,
@@ -814,7 +819,7 @@ const tests = [
                 wasAlternateProtocolAvailable: lt.wasAlternateProtocolAvailable,
                 wasFetchedViaSpdy: lt.wasFetchedViaSpdy,
                 wasNpnNegotiated: lt.wasNpnNegotiated
-            };
+            }
         }
     },
 
@@ -822,165 +827,166 @@ const tests = [
     {
         id: 'any-hover: hover',
         category: 'css',
-        getValue: () => window.matchMedia("(any-hover: hover)").matches
+        getValue: () => window.matchMedia('(any-hover: hover)').matches
     },
     {
         id: 'any-pointer',
         category: 'css',
         getValue: () => ({
-            fine: window.matchMedia("(any-pointer: fine)").matches,
-            coarse: window.matchMedia("(any-pointer: coarse)").matches,
-            none: window.matchMedia("(any-pointer: none)").matches,
+            fine: window.matchMedia('(any-pointer: fine)').matches,
+            coarse: window.matchMedia('(any-pointer: coarse)').matches,
+            none: window.matchMedia('(any-pointer: none)').matches
         })
     },
     {
         id: 'color',
         category: 'css',
-        getValue: () => window.matchMedia("(color)").matches
+        getValue: () => window.matchMedia('(color)').matches
     },
     {
         id: 'color-gamut',
         category: 'css',
         getValue: () => ({
-            srgb: window.matchMedia("(color-gamut: srgb)").matches,
-            p3: window.matchMedia("(color-gamut: p3)").matches,
-            rec2020: window.matchMedia("(color-gamut: rec2020)").matches,
+            srgb: window.matchMedia('(color-gamut: srgb)').matches,
+            p3: window.matchMedia('(color-gamut: p3)').matches,
+            rec2020: window.matchMedia('(color-gamut: rec2020)').matches
         })
     },
     {
         id: 'color-index',
         category: 'css',
-        getValue: () => window.matchMedia("(color-index)").matches
+        getValue: () => window.matchMedia('(color-index)').matches
     },
     {
         id: 'display-mode',
         category: 'css',
         getValue: () => ({
-            fullscreen: window.matchMedia("(display-mode: fullscreen)").matches,
-            standalone: window.matchMedia("(display-mode: standalone)").matches,
-            minimalui: window.matchMedia("(display-mode: minimal-ui)").matches,
-            browser: window.matchMedia("(display-mode: browser)").matches,
+            fullscreen: window.matchMedia('(display-mode: fullscreen)').matches,
+            standalone: window.matchMedia('(display-mode: standalone)').matches,
+            minimalui: window.matchMedia('(display-mode: minimal-ui)').matches,
+            browser: window.matchMedia('(display-mode: browser)').matches
         })
     },
     {
         id: 'forced-colors: active',
         category: 'css',
-        getValue: () => window.matchMedia("(forced-colors: active)").matches
+        getValue: () => window.matchMedia('(forced-colors: active)').matches
     },
     {
         id: 'grid: 1',
         category: 'css',
-        getValue: () => window.matchMedia("(grid: 1)").matches
+        getValue: () => window.matchMedia('(grid: 1)').matches
     },
     {
         id: 'hover: hover',
         category: 'css',
-        getValue: () => window.matchMedia("(hover: hover)").matches
+        getValue: () => window.matchMedia('(hover: hover)').matches
     },
     {
         id: 'inverted-colors: inverted',
         category: 'css',
-        getValue: () => window.matchMedia("(inverted-colors: inverted)").matches
+        getValue: () => window.matchMedia('(inverted-colors: inverted)').matches
     },
     {
         id: 'monochrome',
         category: 'css',
-        getValue: () => window.matchMedia("(monochrome)").matches
+        getValue: () => window.matchMedia('(monochrome)').matches
     },
     {
         id: 'orientation: landscape',
         category: 'css',
-        getValue: () => window.matchMedia("(orientation: landscape)").matches
+        getValue: () => window.matchMedia('(orientation: landscape)').matches
     },
     {
         id: 'overflow-block',
         category: 'css',
         getValue: () => ({
-            scroll: window.matchMedia("(overflow-block: scroll)").matches,
-            optionalpaged: window.matchMedia("(overflow-block: optional-paged)").matches,
-            paged: window.matchMedia("(overflow-block: paged)").matches,
-            none: window.matchMedia("(overflow-block: none)").matches,
+            scroll: window.matchMedia('(overflow-block: scroll)').matches,
+            optionalpaged: window.matchMedia('(overflow-block: optional-paged)').matches,
+            paged: window.matchMedia('(overflow-block: paged)').matches,
+            none: window.matchMedia('(overflow-block: none)').matches
         })
     },
     {
         id: 'overflow-inline: scroll',
         category: 'css',
-        getValue: () => window.matchMedia("(overflow-inline: scroll)").matches
+        getValue: () => window.matchMedia('(overflow-inline: scroll)').matches
     },
     {
         id: 'pointer',
         category: 'css',
         getValue: () => ({
-            fine: window.matchMedia("(pointer: fine)").matches,
-            coarse: window.matchMedia("(pointer: coarse)").matches,
-            none: window.matchMedia("(pointer: none)").matches,
+            fine: window.matchMedia('(pointer: fine)').matches,
+            coarse: window.matchMedia('(pointer: coarse)').matches,
+            none: window.matchMedia('(pointer: none)').matches
         })
     },
     {
         id: 'prefers-color-scheme',
         category: 'css',
         getValue: () => ({
-            dark: window.matchMedia("(prefers-color-scheme: dark)").matches,
-            light: window.matchMedia("(prefers-color-scheme: light)").matches,
+            dark: window.matchMedia('(prefers-color-scheme: dark)').matches,
+            light: window.matchMedia('(prefers-color-scheme: light)').matches
         })
     },
     {
         id: 'prefers-contrast',
         category: 'css',
         getValue: () => ({
-            more: window.matchMedia("(prefers-contrast: more)").matches,
-            less: window.matchMedia("(prefers-contrast: less)").matches,
-            nopreference: window.matchMedia("(prefers-contrast: no-preference)").matches,
+            more: window.matchMedia('(prefers-contrast: more)').matches,
+            less: window.matchMedia('(prefers-contrast: less)').matches,
+            nopreference: window.matchMedia('(prefers-contrast: no-preference)').matches
         })
     },
     {
         id: 'prefers-reduced-motion: reduce',
         category: 'css',
-        getValue: () => window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        getValue: () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
     },
     {
         id: 'prefers-reduced-transparency: reduce',
         category: 'css',
-        getValue: () => window.matchMedia("(prefers-reduced-transparency: reduce)").matches
+        getValue: () => window.matchMedia('(prefers-reduced-transparency: reduce)').matches
     },
     {
         id: 'scan: interlace',
         category: 'css',
-        getValue: () => window.matchMedia("(scan: interlace)").matches
+        getValue: () => window.matchMedia('(scan: interlace)').matches
     },
     {
         id: 'scripting',
         category: 'css',
         getValue: () => ({
-            none: window.matchMedia("(scripting: none)").matches,
-            initialonly: window.matchMedia("(scripting: initial-only)").matches,
-            enabled: window.matchMedia("(scripting: enabled)").matches,
+            none: window.matchMedia('(scripting: none)').matches,
+            initialonly: window.matchMedia('(scripting: initial-only)').matches,
+            enabled: window.matchMedia('(scripting: enabled)').matches
         })
     },
     {
         id: 'update',
         category: 'css',
         getValue: () => ({
-            none: window.matchMedia("(update: none)").matches,
-            slow: window.matchMedia("(update: slow)").matches,
-            fast: window.matchMedia("(update: fast)").matches,
+            none: window.matchMedia('(update: none)').matches,
+            slow: window.matchMedia('(update: slow)').matches,
+            fast: window.matchMedia('(update: fast)').matches
         })
     },
     {
         id: 'system-colors',
         category: 'css',
         getValue: () => {
-            const colors = ["ActiveCaption", "AppWorkspace", "Background", "ButtonFace", "ButtonHighlight", "ButtonShadow", "ButtonText", "CaptionText", "GrayText", "Highlight", "HighlightText", "InactiveBorder", "InactiveCaption", "InactiveCaptionText", "InfoBackground", "InfoText", "Menu", "MenuText", "Scrollbar", "ThreeDDarkShadow", "ThreeDFace", "ThreeDHighlight", "ThreeDLightShadow", "ThreeDShadow", "Window", "WindowFrame", "WindowText", "ActiveBorder"];
-            const results = {};
+            const colors = ['ActiveCaption', 'AppWorkspace', 'Background', 'ButtonFace', 'ButtonHighlight', 'ButtonShadow', 'ButtonText', 'CaptionText', 'GrayText', 'Highlight', 'HighlightText', 'InactiveBorder', 'InactiveCaption', 'InactiveCaptionText', 'InfoBackground', 'InfoText', 'Menu', 'MenuText', 'Scrollbar', 'ThreeDDarkShadow', 'ThreeDFace', 'ThreeDHighlight', 'ThreeDLightShadow', 'ThreeDShadow', 'Window', 'WindowFrame', 'WindowText', 'ActiveBorder']
+            const results = {}
+            const startButton = document.querySelector('#start')
 
             colors.forEach(color => {
-                startButton.style.backgroundColor = color;
+                startButton.style.backgroundColor = color
                 results[color] = window.getComputedStyle(startButton).backgroundColor
-            });
+            })
 
-            startButton.removeAttribute('style');
+            startButton.removeAttribute('style')
 
-            return results;
+            return results
         }
     },
 
@@ -989,15 +995,16 @@ const tests = [
         id: 'audio',
         category: 'full-fingerprints',
         getValue: () => {
-            let resolve, reject;
-            const promise = new Promise((res, rej) => {resolve = res; reject = rej});
+            let resolve
+            const promise = new Promise((res, rej) => { resolve = res })
 
             // still pefixed in Safari
-            const context = window.OfflineAudioContext ? new OfflineAudioContext(1, 44100, 44100) : new webkitOfflineAudioContext(1, 44100, 44100);
+            // eslint-disable-next-line new-cap
+            const context = window.OfflineAudioContext ? new OfflineAudioContext(1, 44100, 44100) : new webkitOfflineAudioContext(1, 44100, 44100)
 
-            const oscillator = context.createOscillator();
-            oscillator.type = 'triangle';
-            oscillator.frequency.setValueAtTime(10000, context.currentTime);
+            const oscillator = context.createOscillator()
+            oscillator.type = 'triangle'
+            oscillator.frequency.setValueAtTime(10000, context.currentTime)
 
             const compressor = context.createDynamicsCompressor();
 
@@ -1010,27 +1017,27 @@ const tests = [
                 ['release', 0.25]
             ].forEach(function (item) {
                 if (compressor[item[0]] !== undefined && typeof compressor[item[0]].setValueAtTime === 'function') {
-                    compressor[item[0]].setValueAtTime(item[1], context.currentTime);
+                    compressor[item[0]].setValueAtTime(item[1], context.currentTime)
                 }
-            });
+            })
 
             context.oncomplete = (event) => {
                 const fingerprint = event.renderedBuffer.getChannelData(0)
                     .slice(4500, 5000)
                     .reduce(function (acc, val) { return acc + Math.abs(val) }, 0)
-                    .toString();
-                oscillator.disconnect();
-                compressor.disconnect();
+                    .toString()
+                oscillator.disconnect()
+                compressor.disconnect()
 
-                resolve(fingerprint);
-            };
+                resolve(fingerprint)
+            }
 
-            oscillator.connect(compressor);
-            compressor.connect(context.destination);
-            oscillator.start(0);
-            context.startRendering();
+            oscillator.connect(compressor)
+            compressor.connect(context.destination)
+            oscillator.start(0)
+            context.startRendering()
 
-            return promise;
+            return promise
         }
     },
     {
@@ -1044,7 +1051,7 @@ const tests = [
 
             applyFpExampleDataToCanvas(canvas)
 
-            return canvas.toDataURL();
+            return canvas.toDataURL()
         }
     },
     {
@@ -1075,7 +1082,7 @@ const tests = [
             ctxCopy.putImageData(imageData, 0, 0)
             addCanvasToPage(canvasCopy, 'Image data check')
 
-            return sha256(JSON.stringify([...imageData.data]));
+            return sha256(JSON.stringify([...imageData.data]))
         }
     },
     {
@@ -1099,7 +1106,7 @@ const tests = [
 
             addCanvasToPage(canvas, 'Offscreen canvas')
 
-            return canvas.toDataURL();
+            return canvas.toDataURL()
         }
     },
     {
@@ -1137,7 +1144,7 @@ const tests = [
             gl.uniform2f(program.offsetUniform, 1, 1)
             gl.drawArrays(gl.TRIANGLE_STRIP, 0, vertexPosBuffer.numItems)
 
-            return gl.canvas.toDataURL();
+            return gl.canvas.toDataURL()
         }
     },
 
@@ -1147,8 +1154,8 @@ const tests = [
         category: 'all-props',
         getValue: () => {
             // ignore props that we already test
-            const testedProps = tests.filter(t => t.category === 'window').map(t => t.id.match('window\.([^.(]*).*')[1]);
-            return extractSimplePropsFromObject(window, {excludeProps: testedProps});
+            const testedProps = tests.filter(t => t.category === 'window').map(t => t.id.match('window.([^.(]*).*')[1])
+            return extractSimplePropsFromObject(window, { excludeProps: testedProps })
         }
     },
     {
@@ -1156,8 +1163,8 @@ const tests = [
         category: 'all-props',
         getValue: () => {
             // ignore props that we already test
-            const testedProps = tests.filter(t => t.category === 'navigator').map(t => t.id.match('navigator\.([^.(]*).*')[1]);
-            return extractSimplePropsFromObject(window.navigator, {excludeProps: testedProps});
+            const testedProps = tests.filter(t => t.category === 'navigator').map(t => t.id.match('navigator.([^.(]*).*')[1])
+            return extractSimplePropsFromObject(window.navigator, { excludeProps: testedProps })
         }
     },
     {
@@ -1165,24 +1172,24 @@ const tests = [
         category: 'all-props',
         getValue: () => {
             // ignore props that we already test
-            const testedProps = tests.filter(t => t.category === 'screen').map(t => t.id.match('screen\.([^.(]*).*')[1]);
-            return extractSimplePropsFromObject(window.screen, {excludeProps: testedProps});
+            const testedProps = tests.filter(t => t.category === 'screen').map(t => t.id.match('screen.([^.(]*).*')[1])
+            return extractSimplePropsFromObject(window.screen, { excludeProps: testedProps })
         }
     },
     {
         id: 'headers',
         category: 'all-props',
         getValue: () => headers.then(res => {
-            const testedHeaders = tests.filter(t => t.category === 'headers').map(t => t.id.match('headers - (.*)')[1]);
-            const other = {};
+            const testedHeaders = tests.filter(t => t.category === 'headers').map(t => t.id.match('headers - (.*)')[1])
+            const other = {}
 
             Object.keys(res.headers).forEach(k => {
                 if (!testedHeaders.includes(k)) {
-                    other[k] = res.headers[k];
+                    other[k] = res.headers[k]
                 }
             })
 
-            return other;
+            return other
         })
     },
 
@@ -1191,26 +1198,26 @@ const tests = [
         id: 'deviceorientation',
         category: 'events',
         getValue: () => {
-            let resolve, reject;
-            const promise = new Promise((res, rej) => {resolve = res; reject = rej});
+            let resolve
+            const promise = new Promise((res, rej) => { resolve = res })
 
             window.addEventListener('deviceorientation', (event) => {
                 resolve({
                     alpha: event.alpha,
                     beta: event.beta,
                     gamma: event.gamma
-                });
-            });
+                })
+            })
 
-            return promise;
+            return promise
         }
     },
     {
         id: 'devicemotion',
         category: 'events',
         getValue: () => {
-            let resolve, reject;
-            const promise = new Promise((res, rej) => {resolve = res; reject = rej});
+            let resolve
+            const promise = new Promise((res, rej) => { resolve = res })
 
             window.addEventListener('devicemotion', (event) => {
                 resolve({
@@ -1219,18 +1226,18 @@ const tests = [
                     accelerationZ: event.acceleration.z,
                     rotationRate: event.rotationRate,
                     interval: event.interval
-                });
-            });
+                })
+            })
 
-            return promise;
+            return promise
         }
     },
     {
         id: 'wheel',
         category: 'events',
         getValue: () => {
-            let resolve, reject;
-            const promise = new Promise((res, rej) => {resolve = res; reject = rej});
+            let resolve
+            const promise = new Promise((res, rej) => { resolve = res })
 
             window.addEventListener('wheel', (event) => {
                 resolve({
@@ -1238,18 +1245,18 @@ const tests = [
                     deltaY: event.deltaY,
                     deltaZ: event.deltaZ,
                     deltaMode: event.deltaMode
-                });
-            });
+                })
+            })
 
-            return promise;
+            return promise
         }
     },
     {
         id: 'touchstart',
         category: 'events',
         getValue: () => {
-            let resolve, reject;
-            const promise = new Promise((res, rej) => {resolve = res; reject = rej});
+            let resolve
+            const promise = new Promise((res, rej) => { resolve = res })
 
             window.addEventListener('touchstart', (event) => {
                 resolve({
@@ -1258,56 +1265,56 @@ const tests = [
                     radiusY: event.touches[0].radiusY,
                     rotationAngle: event.touches[0].rotationAngle,
                     force: event.touches[0].force
-                });
-            });
+                })
+            })
 
-            return promise;
+            return promise
         }
     },
     {
         id: 'ondevicelight',
         category: 'events',
         getValue: () => {
-            let resolve, reject;
-            const promise = new Promise((res, rej) => {resolve = res; reject = rej});
+            let resolve
+            const promise = new Promise((res, rej) => { resolve = res })
 
             window.addEventListener('ondevicelight', (event) => {
                 resolve({
                     value: event.value
-                });
-            });
+                })
+            })
 
-            return promise;
+            return promise
         }
-    },
-];
+    }
+]
 
-function extractSimplePropsFromObject(object, options) {
-    const ignoredTypes = options.ignoredTypes || ['object', 'function', 'undefined'];
-    const excludeProps = options.excludeProps || [];
+function extractSimplePropsFromObject (object, options) {
+    const ignoredTypes = options.ignoredTypes || ['object', 'function', 'undefined']
+    const excludeProps = options.excludeProps || []
 
-    const result = {};
+    const result = {}
 
     for (const propName in object) {
         if (excludeProps.includes(propName)) {
-            continue;
+            continue
         }
 
-        const propType = typeof object[propName];
+        const propType = typeof object[propName]
 
         // ignore values of complex types
         if (ignoredTypes.includes(propType)) {
-            result[propName] = `~${propType}~`;
-            continue;
+            result[propName] = `~${propType}~`
+            continue
         }
 
-        result[propName] = object[propName];
+        result[propName] = object[propName]
     }
 
-    return result;
+    return result
 }
 
-function applyFpExampleDataToCanvas(canvas) {
+function applyFpExampleDataToCanvas (canvas) {
     // Very simple now, need to make it more complex (geo shapes etc)
     const ctx = canvas.getContext('2d')
     // detect browser support of canvas winding

@@ -1,0 +1,16 @@
+{
+    "globals": {
+        "tests": "writable",
+        "DeepDiff": "writable",
+        "headers": "writable",
+        "fontList": "writable",
+        "codecsList": "writable",
+        "webglConstantsList": "writable"
+    },
+    "parserOptions": {
+        "sourceType": "script",
+        "ecmaFeatures": {
+            "globalReturn": false
+        }
+    },
+}

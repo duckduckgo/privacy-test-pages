@@ -1,3 +1,4 @@
+/* globals commonTests */
 const THIRD_PARTY_ORIGIN = 'https://good.third-party.site';
 
 const storeButton = document.querySelector('#store');
@@ -28,29 +29,29 @@ const tests = [
         retrive: () => {
             return fetch('/reflect-headers')
                 .then(r => r.json())
-                .then(data => data.headers.cookie.match(/headerdata\=([0-9]+)/)[1]);
+                .then(data => data.headers.cookie.match(/headerdata=([0-9]+)/)[1]);
         }
     },
     {
         id: 'third party header cookie',
         store: (data) => {
-            return fetch(`${THIRD_PARTY_ORIGIN}/set-cookie?value=${data}`, {credentials: 'include'}).then(r => {
+            return fetch(`${THIRD_PARTY_ORIGIN}/set-cookie?value=${data}`, { credentials: 'include' }).then(r => {
                 if (!r.ok) {
                     throw new Error('Request failed.');
                 }
             });
         },
         retrive: () => {
-            return fetch(`${THIRD_PARTY_ORIGIN}/reflect-headers`, {credentials: 'include'})
+            return fetch(`${THIRD_PARTY_ORIGIN}/reflect-headers`, { credentials: 'include' })
                 .then(r => r.json())
-                .then(data => data.headers.cookie.match(/headerdata\=([0-9]+)/)[1]);
+                .then(data => data.headers.cookie.match(/headerdata=([0-9]+)/)[1]);
         }
     },
     {
         id: 'third party iframe',
         store: (data) => {
-            let resolve, reject;
-            const promise = new Promise((res, rej) => {resolve = res; reject = rej});
+            let res, rej;
+            const promise = new Promise((resolve, reject) => { res = resolve; rej = reject; });
 
             const iframe = document.createElement('iframe');
             iframe.src = `${THIRD_PARTY_ORIGIN}/privacy-protections/storage-blocking/iframe.html?data=${data}`;
@@ -58,9 +59,9 @@ const tests = [
             iframe.style.height = '10px';
             let failTimeout = null;
 
-            function cleanUp(msg) {
+            function cleanUp (msg) {
                 if (msg.data) {
-                    resolve(msg.data);
+                    res(msg.data);
 
                     clearTimeout(failTimeout);
                     document.body.removeChild(iframe);
@@ -70,7 +71,7 @@ const tests = [
 
             window.addEventListener('message', cleanUp);
             iframe.addEventListener('load', () => {
-                failTimeout = setTimeout(() => reject('timeout'), 1000);
+                failTimeout = setTimeout(() => rej('timeout'), 1000);
             });
 
             document.body.appendChild(iframe);
@@ -78,8 +79,8 @@ const tests = [
             return promise;
         },
         retrive: () => {
-            let resolve, reject;
-            const promise = new Promise((res, rej) => {resolve = res; reject = rej});
+            let res, rej;
+            const promise = new Promise((resolve, reject) => { res = resolve; rej = reject; });
 
             const iframe = document.createElement('iframe');
             iframe.src = `${THIRD_PARTY_ORIGIN}/privacy-protections/storage-blocking/iframe.html`;
@@ -87,9 +88,9 @@ const tests = [
             iframe.style.height = '10px';
             let failTimeout = null;
 
-            function cleanUp(msg) {
+            function cleanUp (msg) {
                 if (msg.data) {
-                    resolve(msg.data);
+                    res(msg.data);
 
                     clearTimeout(failTimeout);
                     document.body.removeChild(iframe);
@@ -99,7 +100,7 @@ const tests = [
 
             window.addEventListener('message', cleanUp);
             iframe.addEventListener('load', () => {
-                failTimeout = setTimeout(() => reject('timeout'), 1000);
+                failTimeout = setTimeout(() => rej('timeout'), 1000);
             });
 
             document.body.appendChild(iframe);
@@ -113,7 +114,7 @@ const tests = [
             // already done before all tests
         },
         retrive: () => {
-            return fetch('/cached-random-number', {cache: 'force-cache'}).then(r => r.text());
+            return fetch('/cached-random-number', { cache: 'force-cache' }).then(r => r.text());
         }
     },
     {
@@ -137,7 +138,7 @@ const tests = [
     {
         id: 'history',
         store: (data) => {
-            history.pushState({data: data}, 'data', `#${data}`);
+            history.pushState({ data: data }, 'data', `#${data}`);
         },
         retrive: () => {
             if (history.state) {
@@ -154,7 +155,7 @@ const tests = [
     {
         id: 'service worker',
         store: (data) => {
-            return navigator.serviceWorker.register(`./service-worker.js?data=${data}`, {scope: './'})
+            return navigator.serviceWorker.register(`./service-worker.js?data=${data}`, { scope: './' })
                 .then(() => 'OK')
                 .catch((error) => {
                     console.log('Registration failed with ' + error);
@@ -173,7 +174,7 @@ const tests = [
     }
 ];
 
-function storeData() {
+function storeData () {
     storeButton.setAttribute('disabled', 'disabled');
     downloadButton.setAttribute('disabled', 'disabled');
     testsDiv.removeAttribute('hidden');
@@ -183,11 +184,11 @@ function storeData() {
 
     testsDetailsElement.innerHTML = '';
 
-    function updateSummary(data) {
+    function updateSummary (data) {
         testsSummaryDiv.innerText = `Stored random number "${data}" using ${all} storage mechanisms${failed > 0 ? ` (${failed} failed)` : ''}. Click for details.`;
     }
 
-    fetch('/cached-random-number', {cache: 'reload'})
+    fetch('/cached-random-number', { cache: 'reload' })
         .then(r => r.text())
         .then(randomNumber => {
             tests.concat(commonTests).forEach(test => {
@@ -202,7 +203,7 @@ function storeData() {
 
                 try {
                     const result = test.store(randomNumber);
-        
+
                     if (result instanceof Promise) {
                         valueSpan.innerText = '…';
 
@@ -220,10 +221,10 @@ function storeData() {
                                 valueSpan.innerHTML = `❌ error thrown ("${e.message ? e.message : e}")`;
 
                                 failed++;
-                                updateSummary(randomNumber)
+                                updateSummary(randomNumber);
                             });
                     }
-                } catch(e) {
+                } catch (e) {
                     valueSpan.innerHTML = `❌ error thrown ("${e.message ? e.message : e}")`;
                     failed++;
                 }
@@ -234,7 +235,7 @@ function storeData() {
         });
 }
 
-function retrieveData() {
+function retrieveData () {
     testsDiv.removeAttribute('hidden');
 
     results.results.length = 0;
@@ -245,7 +246,7 @@ function retrieveData() {
 
     testsDetailsElement.innerHTML = '';
 
-    function updateSummary() {
+    function updateSummary () {
         testsSummaryDiv.innerText = `Retrieved data from ${all} storage mechanisms${failed > 0 ? ` (${failed} failed)` : ''}. Click for details.`;
     }
 
@@ -288,7 +289,7 @@ function retrieveData() {
                 valueSpan.innerText = JSON.stringify(result, null, 2) || undefined;
                 resultObj.value = result || null;
             }
-        } catch(e) {
+        } catch (e) {
             failed++;
             valueSpan.innerHTML = `❌ error thrown ("${e.message ? e.message : e}")`;
         }
@@ -298,13 +299,13 @@ function retrieveData() {
     downloadButton.removeAttribute('disabled');
 }
 
-function downloadTheResults() {
+function downloadTheResults () {
     const data = JSON.stringify(results, null, 2);
     const a = document.createElement('a');
-    const url = window.URL.createObjectURL(new Blob([data], {type: 'application/json'}));
+    const url = window.URL.createObjectURL(new Blob([data], { type: 'application/json' }));
     a.href = url;
     a.download = 'storage-blocking-results.json';
-    
+
     document.body.appendChild(a);
     a.click();
 

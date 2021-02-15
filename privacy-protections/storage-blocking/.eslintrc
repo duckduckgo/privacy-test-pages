@@ -1,0 +1,12 @@
+{
+    "globals": {
+        "commonTests": "writable",
+        "DB": "writable"
+    },
+    "parserOptions": {
+        "sourceType": "script",
+        "ecmaFeatures": {
+            "globalReturn": false
+        }
+    },
+}

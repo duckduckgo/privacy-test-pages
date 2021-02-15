@@ -1,9 +1,11 @@
+/* eslint-env serviceworker */
+
 self.addEventListener('install', (evt) => {
     self.skipWaiting();
 });
 
 self.addEventListener('activate', (evt) => {
-    evt.waitUntil(clients.claim());
+    evt.waitUntil(self.clients.claim());
 });
 
 self.addEventListener('message', (event) => {
@@ -19,6 +21,6 @@ self.addEventListener('message', (event) => {
             .catch(() => {
                 event.source.postMessage('service worker fetch failed');
                 self.registration.unregister();
-            })
+            });
     }
 });

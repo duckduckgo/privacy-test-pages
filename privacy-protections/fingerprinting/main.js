@@ -1,3 +1,4 @@
+/* exported headers */
 const startButton = document.querySelector('#start');
 const downloadButton = document.querySelector('#download');
 
@@ -28,7 +29,7 @@ const results = {
 /**
  * Test runner
  */
-function runTests() {
+function runTests () {
     startButton.setAttribute('disabled', 'disabled');
     downloadButton.removeAttribute('disabled');
     testsDiv.removeAttribute('hidden');
@@ -40,7 +41,7 @@ function runTests() {
 
     testsDetailsDiv.innerHTML = '';
 
-    function updateSummary() {
+    function updateSummary () {
         testsSummaryDiv.innerText = `Collected ${all} datapoints${failed > 0 ? ` (${failed} failed)` : ''}. Click for details.`;
     }
 
@@ -113,13 +114,13 @@ function runTests() {
     }
 }
 
-function downloadTheResults() {
+function downloadTheResults () {
     const data = JSON.stringify(results, null, 2);
     const a = document.createElement('a');
-    const url = window.URL.createObjectURL(new Blob([data], {type: 'application/json'}));
+    const url = window.URL.createObjectURL(new Blob([data], { type: 'application/json' }));
     a.href = url;
     a.download = 'fingerprinting-results.json';
-    
+
     document.body.appendChild(a);
     a.click();
 
@@ -127,12 +128,16 @@ function downloadTheResults() {
     a.remove();
 }
 
-function compareResults(resultsA, resultsB) {
+function compareResults (resultsA, resultsB) {
     const resultsAObj = {};
     const resultsBObj = {};
 
-    resultsA.results.forEach(result => resultsAObj[result.id] = result);
-    resultsB.results.forEach(result => resultsBObj[result.id] = result);
+    resultsA.results.forEach(result => {
+        resultsAObj[result.id] = result;
+    });
+    resultsB.results.forEach(result => {
+        resultsBObj[result.id] = result;
+    });
 
     const diff = DeepDiff(resultsAObj, resultsBObj).filter(item => {
         // filter out differences where on object A property doesn't exist, but on object B it exists with value 'undefined'
@@ -151,7 +156,7 @@ function compareResults(resultsA, resultsB) {
         diffSummaryDiv.innerText = `There are ${diff.length} difference${diff.length === 1 ? '' : 's'} between those results. Click for details.`;
 
         diff.forEach(change => {
-            const li = document.createElement('li'); 
+            const li = document.createElement('li');
 
             const testId = change.path[0];
             let path = '';
@@ -164,7 +169,7 @@ function compareResults(resultsA, resultsB) {
                 path += '→ ' + segment;
             });
 
-            const testA = resultsAObj[testId];
+            // const testA = resultsAObj[testId]
             const testB = resultsBObj[testId];
 
             if (change.kind === 'E') { // modified property
@@ -212,12 +217,12 @@ compareWithLS.addEventListener('click', () => {
 compareWithFile.addEventListener('change', event => {
     const reader = new FileReader();
     reader.onload = () => {
-      const oldResults = JSON.parse(reader.result);
+        const oldResults = JSON.parse(reader.result);
 
-      compareResults(oldResults, results);
+        compareResults(oldResults, results);
     };
     reader.readAsText(compareWithFile.files[0]);
-})
+});
 
 downloadButton.addEventListener('click', () => downloadTheResults());
 

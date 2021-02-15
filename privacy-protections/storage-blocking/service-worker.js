@@ -1,9 +1,11 @@
+/* eslint-env serviceworker */
+
 self.addEventListener('install', (evt) => {
     self.skipWaiting();
 });
 
 self.addEventListener('activate', (evt) => {
-    evt.waitUntil(clients.claim());
+    evt.waitUntil(self.clients.claim());
 });
 
 self.addEventListener('fetch', (event) => {

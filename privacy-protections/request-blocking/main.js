@@ -1,4 +1,4 @@
-const urlObj = new URL(location.href);
+/* eslint-disable node/no-callback-literal */
 const random = Math.random();
 const debugDiv = document.querySelector('#debug');
 const startButton = document.querySelector('#start');
@@ -103,7 +103,7 @@ const tests = [
                     return 'loaded';
                 }
             }
-        }  
+        }
     },
     {
         category: 'html',
@@ -116,7 +116,7 @@ const tests = [
             if (item && item.duration > 0) {
                 return 'loaded';
             }
-        }  
+        }
     },
     {
         category: 'html',
@@ -129,7 +129,7 @@ const tests = [
             if (item && item.duration > 0) {
                 return 'loaded';
             }
-        }  
+        }
     },
     {
         category: 'html',
@@ -207,7 +207,7 @@ const tests = [
         }</style>
         <div id='css-bg-test'></div>`,
         checkAsync: callback => {
-            const observer = new PerformanceObserver(observed); 
+            const observer = new PerformanceObserver(observed);
 
             const checkResource = resource => {
                 if (resource.name.includes('cssbg.jpg')) {
@@ -220,11 +220,11 @@ const tests = [
                 }
             };
 
-            function observed(list) { 
+            function observed (list) {
                 list.getEntries().forEach(checkResource);
-            } 
+            }
 
-            observer.observe({entryTypes: ["resource", "navigation"]});
+            observer.observe({ entryTypes: ['resource', 'navigation'] });
         }
     },
     {
@@ -275,7 +275,7 @@ const tests = [
                 })
                 .catch(e => {
                     callback('failed');
-                })
+                });
         }
     },
     {
@@ -285,12 +285,12 @@ const tests = [
         checkAsync: (callback) => {
             const ajax = new XMLHttpRequest();
             ajax.onreadystatechange = () => {
-                if (ajax.readyState == 4 && ajax.status == 200) {
-                   const data = JSON.parse(ajax.responseText);
+                if (ajax.readyState === 4 && ajax.status === 200) {
+                    const data = JSON.parse(ajax.responseText);
 
-                   if (data.data.includes('ajax loaded')) {
-                       callback('loaded');
-                   }
+                    if (data.data.includes('ajax loaded')) {
+                        callback('loaded');
+                    }
                 }
             };
             ajax.onerror = () => {
@@ -305,7 +305,7 @@ const tests = [
         id: 'favicon',
         description: 'Try loading an image using <code>&lt;link rel="shortcut icon" …</code>.',
         checkAsync: (callback) => {
-            const observer = new PerformanceObserver(observed); 
+            const observer = new PerformanceObserver(observed);
 
             const checkResource = resource => {
                 if (resource.name.includes('favicon.ico?')) {
@@ -318,11 +318,11 @@ const tests = [
                 }
             };
 
-            function observed(list) { 
+            function observed (list) {
                 list.getEntries().forEach(checkResource);
-            } 
+            }
 
-            observer.observe({entryTypes: ["resource", "navigation"]});
+            observer.observe({ entryTypes: ['resource', 'navigation'] });
 
             document.head.innerHTML += `<link rel="shortcut icon" type="image/icon" href="${TRACKER_RESOURCES_URL}/favicon.ico?${random}" />`;
         }
@@ -337,7 +337,7 @@ const tests = [
 
             if (item) {
                 item.addEventListener('load', () => {
-                    item.contentWindow.postMessage({action: 'fetch', url: `${TRACKER_RESOURCES_URL}/fetch.json?iframe-${Math.random()}`});
+                    item.contentWindow.postMessage({ action: 'fetch', url: `${TRACKER_RESOURCES_URL}/fetch.json?iframe-${Math.random()}` });
                 });
 
                 const onMessage = msg => {
@@ -361,7 +361,7 @@ const tests = [
         checkAsync: (callback) => {
             const worker = new Worker('./worker.js');
 
-            worker.postMessage({action: 'fetch', url: `${TRACKER_RESOURCES_URL}/fetch.json?webworker-${Math.random()}`});
+            worker.postMessage({ action: 'fetch', url: `${TRACKER_RESOURCES_URL}/fetch.json?webworker-${Math.random()}` });
 
             worker.addEventListener('message', msg => {
                 if (msg.data.includes('worker fetch loaded')) {
@@ -390,21 +390,21 @@ const tests = [
             };
 
             navigator.serviceWorker.addEventListener('message', onMessage);
-            navigator.serviceWorker.register('./service-worker.js', {scope: './'})
+            navigator.serviceWorker.register('./service-worker.js', { scope: './' })
                 .then(registration => {
                     if (registration.active) {
                         registration.active.addEventListener('message', () => {
                             console.log('client received message');
                         });
-                        registration.active.postMessage({action: 'fetch', url: `${TRACKER_RESOURCES_URL}/fetch.json?serviceworker-${Math.random()}`});
+                        registration.active.postMessage({ action: 'fetch', url: `${TRACKER_RESOURCES_URL}/fetch.json?serviceworker-${Math.random()}` });
                     } else if (registration.installing) {
                         registration.installing.addEventListener('statechange', () => {
                             if (registration.active) {
                                 registration.active.addEventListener('message', () => {
                                     console.log('client received message');
                                 });
-                                registration.active.postMessage({action: 'fetch', url: `${TRACKER_RESOURCES_URL}/fetch.json?serviceworker-${Math.random()}`});
-                            } 
+                                registration.active.postMessage({ action: 'fetch', url: `${TRACKER_RESOURCES_URL}/fetch.json?serviceworker-${Math.random()}` });
+                            }
                         });
                     }
                 })
@@ -417,9 +417,9 @@ const tests = [
         category: 'other',
         id: 'csp-report',
         description: 'Try sending data via CSP report.',
-        html: `<img src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=='/>`,// causes CSP violation which triggers a report
+        html: '<img src=\'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==\'/>', // causes CSP violation which triggers a report
         checkAsync: (callback) => {
-            const observer = new PerformanceObserver(observed); 
+            const observer = new PerformanceObserver(observed);
 
             const checkResource = resource => {
                 if (resource.name.includes('/csp')) {
@@ -432,11 +432,11 @@ const tests = [
                 }
             };
 
-            function observed(list) { 
+            function observed (list) {
                 list.getEntries().forEach(checkResource);
-            } 
+            }
 
-            observer.observe({entryTypes: ["resource", "navigation"]});
+            observer.observe({ entryTypes: ['resource', 'navigation'] });
         }
     }
 ];
@@ -444,7 +444,7 @@ const tests = [
 /**
  * Test runner
  */
-function runTests() {
+function runTests () {
     startButton.setAttribute('disabled', 'disabled');
     downloadButton.removeAttribute('disabled');
     results.results.length = 0;
@@ -482,7 +482,7 @@ function runTests() {
         if (test.check) {
             const interval = setInterval(() => {
                 const testResult = test.check();
-                
+
                 if (testResult === 'loaded' || testResult === 'failed') {
                     status.classList.add(testResult);
                     status.setAttribute('title', testResult);
@@ -505,13 +505,13 @@ function runTests() {
     });
 }
 
-function downloadTheResults() {
+function downloadTheResults () {
     const data = JSON.stringify(results, null, 2);
     const a = document.createElement('a');
-    const url = window.URL.createObjectURL(new Blob([data], {type: 'application/json'}));
+    const url = window.URL.createObjectURL(new Blob([data], { type: 'application/json' }));
     a.href = url;
     a.download = 'request-blocking-results.json';
-    
+
     debugDiv.appendChild(a);
     a.click();
 

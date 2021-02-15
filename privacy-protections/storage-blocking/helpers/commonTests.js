@@ -1,3 +1,4 @@
+/* exported commonTests */
 // tests that are common for both main frame and an iframe
 const commonTests = [
     {
@@ -11,7 +12,7 @@ const commonTests = [
             document.cookie = `jsdata=${data}; expires= Wed, 21 Aug 2030 20:00:00 UTC; Secure; SameSite=${sameSite}`;
         },
         retrive: () => {
-            return document.cookie.match(/jsdata\=([0-9]+)/)[1];
+            return document.cookie.match(/jsdata=([0-9]+)/)[1];
         }
     },
     {
@@ -35,7 +36,7 @@ const commonTests = [
     {
         id: 'IndexedDB',
         store: (data) => {
-            return DB('data').then(db => Promise.all([db.deleteAll(), db.put({ id: data })])).then(() => "OK");
+            return DB('data').then(db => Promise.all([db.deleteAll(), db.put({ id: data })])).then(() => 'OK');
         },
         retrive: () => {
             return DB('data').then(db => db.getAll()).then(data => data[0].id);
@@ -44,31 +45,31 @@ const commonTests = [
     {
         id: 'WebSQL',
         store: (data) => {
-            let resolve, reject;
-            const promise = new Promise((res, rej) => {resolve = res; reject = rej});
+            let res, rej;
+            const promise = new Promise((resolve, reject) => { res = resolve; rej = reject; });
 
             const db = openDatabase('data', '1.0', 'data', 2 * 1024 * 1024);
 
-            db.transaction(tx => {   
+            db.transaction(tx => {
                 tx.executeSql('CREATE TABLE IF NOT EXISTS data (value)', [], () => {
                     tx.executeSql('DELETE FROM data;', [], () => {
-                            tx.executeSql('INSERT INTO data (value) VALUES (?)', [data], () => resolve(), (sql, e) => reject('err - insert ' + e.message));
-                    }, (sql, e) => reject('err - delete ' + e.message)); 
-                }, (sql, e) => reject('err - create ' + e.message)); 
+                        tx.executeSql('INSERT INTO data (value) VALUES (?)', [data], () => res(), (sql, e) => rej('err - insert ' + e.message));
+                    }, (sql, e) => rej('err - delete ' + e.message));
+                }, (sql, e) => rej('err - create ' + e.message));
             });
 
             return promise;
         },
         retrive: () => {
-            let resolve, reject;
-            const promise = new Promise((res, rej) => {resolve = res; reject = rej});
+            let res, rej;
+            const promise = new Promise((resolve, reject) => { res = resolve; rej = reject; });
 
             const db = openDatabase('data', '1.0', 'data', 2 * 1024 * 1024);
 
-            db.transaction(tx => {   
+            db.transaction(tx => {
                 tx.executeSql('SELECT * FROM data', [], (tx, d) => {
-                    resolve(d.rows[0].value);
-                }, (sql, e) => reject('err - select ' + e.message));
+                    res(d.rows[0].value);
+                }, (sql, e) => rej('err - select ' + e.message));
             });
 
             return promise;

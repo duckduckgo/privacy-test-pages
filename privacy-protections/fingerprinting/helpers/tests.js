@@ -1,17 +1,19 @@
-async function sha256(str) {
-  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder("utf-8").encode(str))
-  return Array.prototype.map.call(new Uint8Array(buf), x=>(('00'+x.toString(16)).slice(-2))).join('')
+/* eslint-disable promise/param-names, no-return-assign */
+/* globals AmbientLightSensor, Gyroscope, Magnetometer, chrome, webkitOfflineAudioContext */
+async function sha256 (str) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder('utf-8').encode(str));
+    return Array.prototype.map.call(new Uint8Array(buf), x => (('00' + x.toString(16)).slice(-2))).join('');
 }
 
-function addCanvasToPage(canvas, reason) {
-    const canvasCheck = document.getElementById('canvas-check')
-    canvasCheck.removeAttribute('hidden')
-    const containerElement = document.createElement('div')
-    const headerElement = document.createElement('h2')
-    headerElement.textContent = reason
-    containerElement.appendChild(headerElement)
-    containerElement.appendChild(canvas)
-    canvasCheck.appendChild(containerElement)
+function addCanvasToPage (canvas, reason) {
+    const canvasCheck = document.getElementById('canvas-check');
+    canvasCheck.removeAttribute('hidden');
+    const containerElement = document.createElement('div');
+    const headerElement = document.createElement('h2');
+    headerElement.textContent = reason;
+    containerElement.appendChild(headerElement);
+    containerElement.appendChild(canvas);
+    canvasCheck.appendChild(containerElement);
 }
 
 const tests = [
@@ -19,7 +21,7 @@ const tests = [
     {
         id: 'headers - accept',
         category: 'headers',
-        getValue: () => headers.then(res => res.headers['accept'])
+        getValue: () => headers.then(res => res.headers.accept)
     },
     {
         id: 'headers - accept-encoding',
@@ -34,7 +36,7 @@ const tests = [
     {
         id: 'headers - dnt',
         category: 'headers',
-        getValue: () => headers.then(res => res.headers['dnt'])
+        getValue: () => headers.then(res => res.headers.dnt)
     },
     {
         id: 'headers - user-agent',
@@ -113,7 +115,7 @@ const tests = [
         category: 'navigator',
         getValue: () => {
             const results = {};
-    
+
             Array.from(navigator.mimeTypes).forEach(mtype => results[mtype.type] = true);
 
             return results;
@@ -141,7 +143,7 @@ const tests = [
             effectiveType: navigator.connection.effectiveType,
             downlink: navigator.connection.downlink,
             rtt: navigator.connection.rtt,
-            saveData: navigator.connection.saveData,
+            saveData: navigator.connection.saveData
         })
     },
     {
@@ -155,7 +157,7 @@ const tests = [
         getValue: () => Array.from(navigator.plugins).map(p => ({
             name: p.name,
             filename: p.filename,
-            description: p.description,
+            description: p.description
         }))
     },
     {
@@ -180,12 +182,12 @@ const tests = [
                 if (!gamepad) {
                     return null;
                 }
-        
+
                 return {
                     id: gamepad.id,
                     buttons: gamepad.buttons.length,
                     axes: gamepad.axes.length
-                }
+                };
             });
         }
     },
@@ -193,10 +195,10 @@ const tests = [
         id: 'navigator.permissions.query()',
         category: 'navigator',
         getValue: () => {
-            function getPermissionIfKnown(pName) {
-                return navigator.permissions.query({name: pName})
-                    .then(r => ({name: pName, state: r.state}))
-                    .catch(e => ({name: pName, state: 'failure'}))
+            function getPermissionIfKnown (pName) {
+                return navigator.permissions.query({ name: pName })
+                    .then(r => ({ name: pName, state: r.state }))
+                    .catch(e => ({ name: pName, state: 'failure' }));
             }
 
             return Promise.all([
@@ -211,7 +213,7 @@ const tests = [
                 getPermissionIfKnown('notifications'),
                 getPermissionIfKnown('persistent-storage'),
                 getPermissionIfKnown('push'),
-                getPermissionIfKnown('speaker'),
+                getPermissionIfKnown('speaker')
             ]).then(results => {
                 const resultsObj = {};
 
@@ -248,7 +250,7 @@ const tests = [
                             groupId: device.groupId,
                             kind: device.kind,
                             label: device.label
-                        }
+                        };
                     });
                 });
         }
@@ -257,10 +259,10 @@ const tests = [
         id: 'navigator.webkitTemporaryStorage.queryUsageAndQuota',
         category: 'navigator',
         getValue: () => {
-            let resolve, reject;
-            const promise = new Promise((res, rej) => {resolve = res; reject = rej});
+            let resolve;
+            const promise = new Promise((res, rej) => { resolve = res; });
 
-            navigator.webkitTemporaryStorage.queryUsageAndQuota((usage, quota) => resolve({usage: usage, quota: quota}));
+            navigator.webkitTemporaryStorage.queryUsageAndQuota((usage, quota) => resolve({ usage: usage, quota: quota }));
 
             return promise;
         }
@@ -269,10 +271,10 @@ const tests = [
         id: 'navigator.webkitPersistentStorage.queryUsageAndQuota',
         category: 'navigator',
         getValue: () => {
-            let resolve, reject;
-            const promise = new Promise((res, rej) => {resolve = res; reject = rej});
+            let resolve;
+            const promise = new Promise((res, rej) => { resolve = res; });
 
-            navigator.webkitPersistentStorage.queryUsageAndQuota((usage, quota) => resolve({usage: usage, quota: quota}));
+            navigator.webkitPersistentStorage.queryUsageAndQuota((usage, quota) => resolve({ usage: usage, quota: quota }));
 
             return promise;
         }
@@ -322,7 +324,7 @@ const tests = [
     {
         id: 'window.openDatabase("test", "1.0", "test", 1024)',
         category: 'window',
-        getValue: () => Boolean(window.openDatabase("test", "1.0", "test", 1024))
+        getValue: () => Boolean(window.openDatabase('test', '1.0', 'test', 1024))
     },
     {
         id: 'window.locationbar.visible',
@@ -359,7 +361,6 @@ const tests = [
         category: 'window',
         getValue: () => window.offscreenBuffering
     },
-
 
     // console
     {
@@ -478,17 +479,17 @@ const tests = [
             VERTEX_SHADER: WebGLRenderingContext.VERTEX_SHADER,
             FRAGMENT_SHADER: WebGLRenderingContext.FRAGMENT_SHADER,
             COLOR_BUFFER_BIT: WebGLRenderingContext.COLOR_BUFFER_BIT,
-            DEPTH_BUFFER_BIT: WebGLRenderingContext.DEPTH_BUFFER_BIT,
+            DEPTH_BUFFER_BIT: WebGLRenderingContext.DEPTH_BUFFER_BIT
         })
     },
     {
         id: 'WebGLRenderingContext.getSupportedExtensions()',
         category: 'webgl',
         getValue: () => {
-            const c = document.createElement("canvas");
+            const c = document.createElement('canvas');
             const results = {};
 
-            c.getContext("webgl").getSupportedExtensions().forEach(extension => results[extension] = true);
+            c.getContext('webgl').getSupportedExtensions().forEach(extension => results[extension] = true);
 
             return results;
         }
@@ -497,16 +498,16 @@ const tests = [
         id: 'WebGLRenderingContext.getContextAttributes()',
         category: 'webgl',
         getValue: () => {
-            const c = document.createElement("canvas");
-            return c.getContext("webgl").getContextAttributes();
+            const c = document.createElement('canvas');
+            return c.getContext('webgl').getContextAttributes();
         }
     },
     {
         id: 'WebGLRenderingContext.getShaderPrecisionFormat()',
         category: 'webgl',
         getValue: () => {
-            const c = document.createElement("canvas");
-            const result = c.getContext("webgl").getShaderPrecisionFormat(WebGLRenderingContext.FRAGMENT_SHADER, WebGLRenderingContext.LOW_FLOAT);
+            const c = document.createElement('canvas');
+            const result = c.getContext('webgl').getShaderPrecisionFormat(WebGLRenderingContext.FRAGMENT_SHADER, WebGLRenderingContext.LOW_FLOAT);
 
             return {
                 precision: result.precision,
@@ -519,8 +520,8 @@ const tests = [
         id: 'WebGLRenderingContext.getParameter()',
         category: 'webgl',
         getValue: () => {
-            const elem = document.createElement("canvas");
-            const context = elem.getContext("webgl");
+            const elem = document.createElement('canvas');
+            const context = elem.getContext('webgl');
             const result = {};
 
             webglConstantsList.forEach(name => {
@@ -536,13 +537,13 @@ const tests = [
         id: 'RTCIceCandidate.candiate',
         category: 'webrtc',
         getValue: () => {
-            let resolve, reject;
-            const promise = new Promise((res, rej) => {resolve = res; reject = rej});
+            let resolve;
+            const promise = new Promise((res, rej) => { resolve = res; });
 
             const c = new RTCPeerConnection({
-                iceServers: [{urls: "stun:stun.l.google.com:19302?transport=udp"}]
+                iceServers: [{ urls: 'stun:stun.l.google.com:19302?transport=udp' }]
             });
-            
+
             c.onicecandidate = result => {
                 console.log(result.candidate);
                 if (result.candidate !== null) {
@@ -550,10 +551,10 @@ const tests = [
                     c.close();
                 }
             };
-            c.createDataChannel("");
-        
+            c.createDataChannel('');
+
             c.createOffer().then(a => {
-                c.setLocalDescription(a, () => {}, () => {})
+                c.setLocalDescription(a, () => {}, () => {});
             });
 
             return promise;
@@ -575,15 +576,15 @@ const tests = [
             // inspiration: https://www.kirupa.com/html5/detect_whether_font_is_installed.htm
 
             // creating our in-memory Canvas element where the magic happens
-            const canvas = document.createElement("canvas");
-            const context = canvas.getContext("2d");
-            
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+
             // the text whose final pixel size I want to measure
-            const text = "abcdefghijklmnopqrstuvwxyz0123456789 !@#$%^&*()_-+=";
-            
+            const text = 'abcdefghijklmnopqrstuvwxyz0123456789 !@#$%^&*()_-+=';
+
             // specifying the baseline font
-            context.font = "72px monospace";
-            
+            context.font = '72px monospace';
+
             // checking the size of the baseline text
             const baselineSize = context.measureText(text);
 
@@ -615,7 +616,7 @@ const tests = [
             const result = {};
 
             fontList.forEach(font => {
-                if(document.fonts.check(`small "${font}"`)) {
+                if (document.fonts.check(`small "${font}"`)) {
                     result[font] = true;
                 }
             });
@@ -629,7 +630,7 @@ const tests = [
         id: 'HTMLVideoElement.canPlayType()',
         category: 'codecs',
         getValue: () => {
-            const video = document.createElement("video");
+            const video = document.createElement('video');
             const result = {};
 
             codecsList.forEach(codec => {
@@ -660,20 +661,24 @@ const tests = [
             const promises = codecsList.map(codec => {
                 const mediaConfig = {
                     type: 'file',
-                    video: codec.startsWith('video') ? {
-                        contentType : codec,
-                        width : 1920,
-                        height : 1080,
-                        bitrate : 120000,
-                        framerate : 48
-                    } : undefined,
-                    audio: codec.startsWith('audio') ? {
-                        contentType : codec,
-                        channels : 2,
-                        bitrate : 132700,
-                        samplerate : 5200
-                    } : undefined,
-                }; 
+                    video: codec.startsWith('video')
+                        ? {
+                            contentType: codec,
+                            width: 1920,
+                            height: 1080,
+                            bitrate: 120000,
+                            framerate: 48
+                        }
+                        : undefined,
+                    audio: codec.startsWith('audio')
+                        ? {
+                            contentType: codec,
+                            channels: 2,
+                            bitrate: 132700,
+                            samplerate: 5200
+                        }
+                        : undefined
+                };
 
                 return navigator.mediaCapabilities.decodingInfo(mediaConfig).then(support => {
                     result[codec] = {
@@ -683,7 +688,7 @@ const tests = [
                     };
                 }).catch(e => {
                     result[codec] = e.message;
-                })
+                });
             });
 
             return Promise.all(promises).then(() => result);
@@ -695,8 +700,8 @@ const tests = [
         id: 'speechSynthesis.getVoices()',
         category: 'speechSynthesis',
         getValue: () => {
-            let resolve, reject;
-            const promise = new Promise((res, rej) => {resolve = res; reject = rej});
+            let resolve;
+            const promise = new Promise((res, rej) => { resolve = res; });
 
             // why timeout and calling the API twice? It's a workaround for a chromium bug of some sorts where first call to getVoices returns empty array
             speechSynthesis.getVoices();
@@ -706,13 +711,13 @@ const tests = [
                 speechSynthesis.getVoices().forEach(voice => {
                     const item = {
                         name: voice.name,
-                        lang: voice.lang,
+                        lang: voice.lang
                     };
-            
+
                     if (voice.default) {
                         item.default = true;
                     }
-            
+
                     if (!voice.localService) {
                         item.external = true;
                     }
@@ -740,14 +745,14 @@ const tests = [
         category: 'sensors',
         getValue: () => {
             let resolve, reject;
-            const promise = new Promise((res, rej) => {resolve = res; reject = rej});
+            const promise = new Promise((res, rej) => { resolve = res; reject = rej; });
 
             const sensor = new AmbientLightSensor();
             sensor.onreading = () => {
-              resolve({illuminance: sensor.illuminance});
+                resolve({ illuminance: sensor.illuminance });
             };
             sensor.onerror = (event) => {
-              reject(event.error.name + ': ' + event.error.message);
+                reject(event.error.name + ': ' + event.error.message);
             };
             sensor.start();
 
@@ -759,18 +764,18 @@ const tests = [
         category: 'sensors',
         getValue: () => {
             let resolve, reject;
-            const promise = new Promise((res, rej) => {resolve = res; reject = rej});
+            const promise = new Promise((res, rej) => { resolve = res; reject = rej; });
 
             const sensor = new Gyroscope();
             sensor.onreading = () => {
-              resolve({
-                  x: sensor.x,
-                  y: sensor.y,
-                  z: sensor.z
-              });
+                resolve({
+                    x: sensor.x,
+                    y: sensor.y,
+                    z: sensor.z
+                });
             };
             sensor.onerror = (event) => {
-              reject(event.error.name + ': ' + event.error.message);
+                reject(event.error.name + ': ' + event.error.message);
             };
             sensor.start();
 
@@ -782,18 +787,18 @@ const tests = [
         category: 'sensors',
         getValue: () => {
             let resolve, reject;
-            const promise = new Promise((res, rej) => {resolve = res; reject = rej});
+            const promise = new Promise((res, rej) => { resolve = res; reject = rej; });
 
             const sensor = new Magnetometer();
             sensor.onreading = () => {
-              resolve({
-                  x: sensor.x,
-                  y: sensor.y,
-                  z: sensor.z
-              });
+                resolve({
+                    x: sensor.x,
+                    y: sensor.y,
+                    z: sensor.z
+                });
             };
             sensor.onerror = (event) => {
-              reject(event.error.name + ': ' + event.error.message);
+                reject(event.error.name + ': ' + event.error.message);
             };
             sensor.start();
 
@@ -822,160 +827,161 @@ const tests = [
     {
         id: 'any-hover: hover',
         category: 'css',
-        getValue: () => window.matchMedia("(any-hover: hover)").matches
+        getValue: () => window.matchMedia('(any-hover: hover)').matches
     },
     {
         id: 'any-pointer',
         category: 'css',
         getValue: () => ({
-            fine: window.matchMedia("(any-pointer: fine)").matches,
-            coarse: window.matchMedia("(any-pointer: coarse)").matches,
-            none: window.matchMedia("(any-pointer: none)").matches,
+            fine: window.matchMedia('(any-pointer: fine)').matches,
+            coarse: window.matchMedia('(any-pointer: coarse)').matches,
+            none: window.matchMedia('(any-pointer: none)').matches
         })
     },
     {
         id: 'color',
         category: 'css',
-        getValue: () => window.matchMedia("(color)").matches
+        getValue: () => window.matchMedia('(color)').matches
     },
     {
         id: 'color-gamut',
         category: 'css',
         getValue: () => ({
-            srgb: window.matchMedia("(color-gamut: srgb)").matches,
-            p3: window.matchMedia("(color-gamut: p3)").matches,
-            rec2020: window.matchMedia("(color-gamut: rec2020)").matches,
+            srgb: window.matchMedia('(color-gamut: srgb)').matches,
+            p3: window.matchMedia('(color-gamut: p3)').matches,
+            rec2020: window.matchMedia('(color-gamut: rec2020)').matches
         })
     },
     {
         id: 'color-index',
         category: 'css',
-        getValue: () => window.matchMedia("(color-index)").matches
+        getValue: () => window.matchMedia('(color-index)').matches
     },
     {
         id: 'display-mode',
         category: 'css',
         getValue: () => ({
-            fullscreen: window.matchMedia("(display-mode: fullscreen)").matches,
-            standalone: window.matchMedia("(display-mode: standalone)").matches,
-            minimalui: window.matchMedia("(display-mode: minimal-ui)").matches,
-            browser: window.matchMedia("(display-mode: browser)").matches,
+            fullscreen: window.matchMedia('(display-mode: fullscreen)').matches,
+            standalone: window.matchMedia('(display-mode: standalone)').matches,
+            minimalui: window.matchMedia('(display-mode: minimal-ui)').matches,
+            browser: window.matchMedia('(display-mode: browser)').matches
         })
     },
     {
         id: 'forced-colors: active',
         category: 'css',
-        getValue: () => window.matchMedia("(forced-colors: active)").matches
+        getValue: () => window.matchMedia('(forced-colors: active)').matches
     },
     {
         id: 'grid: 1',
         category: 'css',
-        getValue: () => window.matchMedia("(grid: 1)").matches
+        getValue: () => window.matchMedia('(grid: 1)').matches
     },
     {
         id: 'hover: hover',
         category: 'css',
-        getValue: () => window.matchMedia("(hover: hover)").matches
+        getValue: () => window.matchMedia('(hover: hover)').matches
     },
     {
         id: 'inverted-colors: inverted',
         category: 'css',
-        getValue: () => window.matchMedia("(inverted-colors: inverted)").matches
+        getValue: () => window.matchMedia('(inverted-colors: inverted)').matches
     },
     {
         id: 'monochrome',
         category: 'css',
-        getValue: () => window.matchMedia("(monochrome)").matches
+        getValue: () => window.matchMedia('(monochrome)').matches
     },
     {
         id: 'orientation: landscape',
         category: 'css',
-        getValue: () => window.matchMedia("(orientation: landscape)").matches
+        getValue: () => window.matchMedia('(orientation: landscape)').matches
     },
     {
         id: 'overflow-block',
         category: 'css',
         getValue: () => ({
-            scroll: window.matchMedia("(overflow-block: scroll)").matches,
-            optionalpaged: window.matchMedia("(overflow-block: optional-paged)").matches,
-            paged: window.matchMedia("(overflow-block: paged)").matches,
-            none: window.matchMedia("(overflow-block: none)").matches,
+            scroll: window.matchMedia('(overflow-block: scroll)').matches,
+            optionalpaged: window.matchMedia('(overflow-block: optional-paged)').matches,
+            paged: window.matchMedia('(overflow-block: paged)').matches,
+            none: window.matchMedia('(overflow-block: none)').matches
         })
     },
     {
         id: 'overflow-inline: scroll',
         category: 'css',
-        getValue: () => window.matchMedia("(overflow-inline: scroll)").matches
+        getValue: () => window.matchMedia('(overflow-inline: scroll)').matches
     },
     {
         id: 'pointer',
         category: 'css',
         getValue: () => ({
-            fine: window.matchMedia("(pointer: fine)").matches,
-            coarse: window.matchMedia("(pointer: coarse)").matches,
-            none: window.matchMedia("(pointer: none)").matches,
+            fine: window.matchMedia('(pointer: fine)').matches,
+            coarse: window.matchMedia('(pointer: coarse)').matches,
+            none: window.matchMedia('(pointer: none)').matches
         })
     },
     {
         id: 'prefers-color-scheme',
         category: 'css',
         getValue: () => ({
-            dark: window.matchMedia("(prefers-color-scheme: dark)").matches,
-            light: window.matchMedia("(prefers-color-scheme: light)").matches,
+            dark: window.matchMedia('(prefers-color-scheme: dark)').matches,
+            light: window.matchMedia('(prefers-color-scheme: light)').matches
         })
     },
     {
         id: 'prefers-contrast',
         category: 'css',
         getValue: () => ({
-            more: window.matchMedia("(prefers-contrast: more)").matches,
-            less: window.matchMedia("(prefers-contrast: less)").matches,
-            nopreference: window.matchMedia("(prefers-contrast: no-preference)").matches,
+            more: window.matchMedia('(prefers-contrast: more)').matches,
+            less: window.matchMedia('(prefers-contrast: less)').matches,
+            nopreference: window.matchMedia('(prefers-contrast: no-preference)').matches
         })
     },
     {
         id: 'prefers-reduced-motion: reduce',
         category: 'css',
-        getValue: () => window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        getValue: () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
     },
     {
         id: 'prefers-reduced-transparency: reduce',
         category: 'css',
-        getValue: () => window.matchMedia("(prefers-reduced-transparency: reduce)").matches
+        getValue: () => window.matchMedia('(prefers-reduced-transparency: reduce)').matches
     },
     {
         id: 'scan: interlace',
         category: 'css',
-        getValue: () => window.matchMedia("(scan: interlace)").matches
+        getValue: () => window.matchMedia('(scan: interlace)').matches
     },
     {
         id: 'scripting',
         category: 'css',
         getValue: () => ({
-            none: window.matchMedia("(scripting: none)").matches,
-            initialonly: window.matchMedia("(scripting: initial-only)").matches,
-            enabled: window.matchMedia("(scripting: enabled)").matches,
+            none: window.matchMedia('(scripting: none)').matches,
+            initialonly: window.matchMedia('(scripting: initial-only)').matches,
+            enabled: window.matchMedia('(scripting: enabled)').matches
         })
     },
     {
         id: 'update',
         category: 'css',
         getValue: () => ({
-            none: window.matchMedia("(update: none)").matches,
-            slow: window.matchMedia("(update: slow)").matches,
-            fast: window.matchMedia("(update: fast)").matches,
+            none: window.matchMedia('(update: none)').matches,
+            slow: window.matchMedia('(update: slow)').matches,
+            fast: window.matchMedia('(update: fast)').matches
         })
     },
     {
         id: 'system-colors',
         category: 'css',
         getValue: () => {
-            const colors = ["ActiveCaption", "AppWorkspace", "Background", "ButtonFace", "ButtonHighlight", "ButtonShadow", "ButtonText", "CaptionText", "GrayText", "Highlight", "HighlightText", "InactiveBorder", "InactiveCaption", "InactiveCaptionText", "InfoBackground", "InfoText", "Menu", "MenuText", "Scrollbar", "ThreeDDarkShadow", "ThreeDFace", "ThreeDHighlight", "ThreeDLightShadow", "ThreeDShadow", "Window", "WindowFrame", "WindowText", "ActiveBorder"];
+            const colors = ['ActiveCaption', 'AppWorkspace', 'Background', 'ButtonFace', 'ButtonHighlight', 'ButtonShadow', 'ButtonText', 'CaptionText', 'GrayText', 'Highlight', 'HighlightText', 'InactiveBorder', 'InactiveCaption', 'InactiveCaptionText', 'InfoBackground', 'InfoText', 'Menu', 'MenuText', 'Scrollbar', 'ThreeDDarkShadow', 'ThreeDFace', 'ThreeDHighlight', 'ThreeDLightShadow', 'ThreeDShadow', 'Window', 'WindowFrame', 'WindowText', 'ActiveBorder'];
             const results = {};
+            const startButton = document.querySelector('#start');
 
             colors.forEach(color => {
                 startButton.style.backgroundColor = color;
-                results[color] = window.getComputedStyle(startButton).backgroundColor
+                results[color] = window.getComputedStyle(startButton).backgroundColor;
             });
 
             startButton.removeAttribute('style');
@@ -989,10 +995,11 @@ const tests = [
         id: 'audio',
         category: 'full-fingerprints',
         getValue: () => {
-            let resolve, reject;
-            const promise = new Promise((res, rej) => {resolve = res; reject = rej});
+            let resolve;
+            const promise = new Promise((res, rej) => { resolve = res; });
 
             // still pefixed in Safari
+            // eslint-disable-next-line new-cap
             const context = window.OfflineAudioContext ? new OfflineAudioContext(1, 44100, 44100) : new webkitOfflineAudioContext(1, 44100, 44100);
 
             const oscillator = context.createOscillator();
@@ -1017,7 +1024,7 @@ const tests = [
             context.oncomplete = (event) => {
                 const fingerprint = event.renderedBuffer.getChannelData(0)
                     .slice(4500, 5000)
-                    .reduce(function (acc, val) { return acc + Math.abs(val) }, 0)
+                    .reduce(function (acc, val) { return acc + Math.abs(val); }, 0)
                     .toString();
                 oscillator.disconnect();
                 compressor.disconnect();
@@ -1037,12 +1044,12 @@ const tests = [
         id: 'canvas-2d-todataurl',
         category: 'full-fingerprints',
         getValue: () => {
-            const canvas = document.createElement('canvas')
-            canvas.width = 2000
-            canvas.height = 200
-            canvas.style.display = 'inline'
+            const canvas = document.createElement('canvas');
+            canvas.width = 2000;
+            canvas.height = 200;
+            canvas.style.display = 'inline';
 
-            applyFpExampleDataToCanvas(canvas)
+            applyFpExampleDataToCanvas(canvas);
 
             return canvas.toDataURL();
         }
@@ -1051,29 +1058,29 @@ const tests = [
         id: 'canvas-2d-imagedata',
         category: 'full-fingerprints',
         getValue: () => {
-            const canvas = document.createElement('canvas')
-            canvas.width = 2000
-            canvas.height = 200
-            canvas.style.display = 'inline'
+            const canvas = document.createElement('canvas');
+            canvas.width = 2000;
+            canvas.height = 200;
+            canvas.style.display = 'inline';
 
-            applyFpExampleDataToCanvas(canvas)
-            addCanvasToPage(canvas, 'Normal check')
+            applyFpExampleDataToCanvas(canvas);
+            addCanvasToPage(canvas, 'Normal check');
 
-            const ctx = canvas.getContext('2d')
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+            const ctx = canvas.getContext('2d');
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
-            const image = new Image()
-            image.src = canvas.toDataURL()
-            addCanvasToPage(image, 'Image data url')
+            const image = new Image();
+            image.src = canvas.toDataURL();
+            addCanvasToPage(image, 'Image data url');
 
             // Verify that once the method is used that it looks the same once rendered to the screen
-            const canvasCopy = document.createElement('canvas')
-            canvasCopy.width = 2000
-            canvasCopy.height = 200
-            canvasCopy.style.display = 'inline'
-            const ctxCopy = canvasCopy.getContext('2d')
-            ctxCopy.putImageData(imageData, 0, 0)
-            addCanvasToPage(canvasCopy, 'Image data check')
+            const canvasCopy = document.createElement('canvas');
+            canvasCopy.width = 2000;
+            canvasCopy.height = 200;
+            canvasCopy.style.display = 'inline';
+            const ctxCopy = canvasCopy.getContext('2d');
+            ctxCopy.putImageData(imageData, 0, 0);
+            addCanvasToPage(canvasCopy, 'Image data check');
 
             return sha256(JSON.stringify([...imageData.data]));
         }
@@ -1082,22 +1089,22 @@ const tests = [
         id: 'canvas-2d-offscreen-todataurl',
         category: 'full-fingerprints',
         getValue: () => {
-            const offscreen = new OffscreenCanvas(2000, 200)
+            const offscreen = new OffscreenCanvas(2000, 200);
 
-            applyFpExampleDataToCanvas(offscreen)
+            applyFpExampleDataToCanvas(offscreen);
 
             // As we can't get the result directly from the offscreen canvas
             // we then push it through to an on-screen canvas
-            const imageBitmap = offscreen.transferToImageBitmap()
+            const imageBitmap = offscreen.transferToImageBitmap();
 
-            const canvas = document.createElement('canvas')
-            canvas.width = 2000
-            canvas.height = 200
-            canvas.style.display = 'inline'
-            const ctx = canvas.getContext('2d')
-            ctx.drawImage(imageBitmap, 0, 0)
+            const canvas = document.createElement('canvas');
+            canvas.width = 2000;
+            canvas.height = 200;
+            canvas.style.display = 'inline';
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(imageBitmap, 0, 0);
 
-            addCanvasToPage(canvas, 'Offscreen canvas')
+            addCanvasToPage(canvas, 'Offscreen canvas');
 
             return canvas.toDataURL();
         }
@@ -1106,36 +1113,36 @@ const tests = [
         id: 'canvas-webgl',
         category: 'full-fingerprints',
         getValue: () => {
-            const canvas = document.createElement('canvas')
-            canvas.width = 2000
-            canvas.height = 200
-            const gl = canvas.getContext('webgl')
+            const canvas = document.createElement('canvas');
+            canvas.width = 2000;
+            canvas.height = 200;
+            const gl = canvas.getContext('webgl');
 
-            const vShaderTemplate = 'attribute vec2 attrVertex;varying vec2 varyinTexCoordinate;uniform vec2 uniformOffset;void main(){varyinTexCoordinate=attrVertex+uniformOffset;gl_Position=vec4(attrVertex,0,1);}'
-            const fShaderTemplate = 'precision mediump float;varying vec2 varyinTexCoordinate;void main() {gl_FragColor=vec4(varyinTexCoordinate,0,1);}'
-            const vertexPosBuffer = gl.createBuffer()
-            gl.bindBuffer(gl.ARRAY_BUFFER, vertexPosBuffer)
-            const vertices = new Float32Array([-0.2, -0.9, 0, 0.4, -0.26, 0, 0, 0.732134444, 0])
-            gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW)
-            vertexPosBuffer.itemSize = 3
-            vertexPosBuffer.numItems = 3
-            const program = gl.createProgram()
-            const vshader = gl.createShader(gl.VERTEX_SHADER)
-            gl.shaderSource(vshader, vShaderTemplate)
-            gl.compileShader(vshader)
-            const fshader = gl.createShader(gl.FRAGMENT_SHADER)
-            gl.shaderSource(fshader, fShaderTemplate)
-            gl.compileShader(fshader)
-            gl.attachShader(program, vshader)
-            gl.attachShader(program, fshader)
-            gl.linkProgram(program)
-            gl.useProgram(program)
-            program.vertexPosAttrib = gl.getAttribLocation(program, 'attrVertex')
-            program.offsetUniform = gl.getUniformLocation(program, 'uniformOffset')
-            gl.enableVertexAttribArray(program.vertexPosArray)
-            gl.vertexAttribPointer(program.vertexPosAttrib, vertexPosBuffer.itemSize, gl.FLOAT, !1, 0, 0)
-            gl.uniform2f(program.offsetUniform, 1, 1)
-            gl.drawArrays(gl.TRIANGLE_STRIP, 0, vertexPosBuffer.numItems)
+            const vShaderTemplate = 'attribute vec2 attrVertex;varying vec2 varyinTexCoordinate;uniform vec2 uniformOffset;void main(){varyinTexCoordinate=attrVertex+uniformOffset;gl_Position=vec4(attrVertex,0,1);}';
+            const fShaderTemplate = 'precision mediump float;varying vec2 varyinTexCoordinate;void main() {gl_FragColor=vec4(varyinTexCoordinate,0,1);}';
+            const vertexPosBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, vertexPosBuffer);
+            const vertices = new Float32Array([-0.2, -0.9, 0, 0.4, -0.26, 0, 0, 0.732134444, 0]);
+            gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+            vertexPosBuffer.itemSize = 3;
+            vertexPosBuffer.numItems = 3;
+            const program = gl.createProgram();
+            const vshader = gl.createShader(gl.VERTEX_SHADER);
+            gl.shaderSource(vshader, vShaderTemplate);
+            gl.compileShader(vshader);
+            const fshader = gl.createShader(gl.FRAGMENT_SHADER);
+            gl.shaderSource(fshader, fShaderTemplate);
+            gl.compileShader(fshader);
+            gl.attachShader(program, vshader);
+            gl.attachShader(program, fshader);
+            gl.linkProgram(program);
+            gl.useProgram(program);
+            program.vertexPosAttrib = gl.getAttribLocation(program, 'attrVertex');
+            program.offsetUniform = gl.getUniformLocation(program, 'uniformOffset');
+            gl.enableVertexAttribArray(program.vertexPosArray);
+            gl.vertexAttribPointer(program.vertexPosAttrib, vertexPosBuffer.itemSize, gl.FLOAT, !1, 0, 0);
+            gl.uniform2f(program.offsetUniform, 1, 1);
+            gl.drawArrays(gl.TRIANGLE_STRIP, 0, vertexPosBuffer.numItems);
 
             return gl.canvas.toDataURL();
         }
@@ -1147,8 +1154,8 @@ const tests = [
         category: 'all-props',
         getValue: () => {
             // ignore props that we already test
-            const testedProps = tests.filter(t => t.category === 'window').map(t => t.id.match('window\.([^.(]*).*')[1]);
-            return extractSimplePropsFromObject(window, {excludeProps: testedProps});
+            const testedProps = tests.filter(t => t.category === 'window').map(t => t.id.match('window.([^.(]*).*')[1]);
+            return extractSimplePropsFromObject(window, { excludeProps: testedProps });
         }
     },
     {
@@ -1156,8 +1163,8 @@ const tests = [
         category: 'all-props',
         getValue: () => {
             // ignore props that we already test
-            const testedProps = tests.filter(t => t.category === 'navigator').map(t => t.id.match('navigator\.([^.(]*).*')[1]);
-            return extractSimplePropsFromObject(window.navigator, {excludeProps: testedProps});
+            const testedProps = tests.filter(t => t.category === 'navigator').map(t => t.id.match('navigator.([^.(]*).*')[1]);
+            return extractSimplePropsFromObject(window.navigator, { excludeProps: testedProps });
         }
     },
     {
@@ -1165,8 +1172,8 @@ const tests = [
         category: 'all-props',
         getValue: () => {
             // ignore props that we already test
-            const testedProps = tests.filter(t => t.category === 'screen').map(t => t.id.match('screen\.([^.(]*).*')[1]);
-            return extractSimplePropsFromObject(window.screen, {excludeProps: testedProps});
+            const testedProps = tests.filter(t => t.category === 'screen').map(t => t.id.match('screen.([^.(]*).*')[1]);
+            return extractSimplePropsFromObject(window.screen, { excludeProps: testedProps });
         }
     },
     {
@@ -1180,7 +1187,7 @@ const tests = [
                 if (!testedHeaders.includes(k)) {
                     other[k] = res.headers[k];
                 }
-            })
+            });
 
             return other;
         })
@@ -1191,8 +1198,8 @@ const tests = [
         id: 'deviceorientation',
         category: 'events',
         getValue: () => {
-            let resolve, reject;
-            const promise = new Promise((res, rej) => {resolve = res; reject = rej});
+            let resolve;
+            const promise = new Promise((res, rej) => { resolve = res; });
 
             window.addEventListener('deviceorientation', (event) => {
                 resolve({
@@ -1209,8 +1216,8 @@ const tests = [
         id: 'devicemotion',
         category: 'events',
         getValue: () => {
-            let resolve, reject;
-            const promise = new Promise((res, rej) => {resolve = res; reject = rej});
+            let resolve;
+            const promise = new Promise((res, rej) => { resolve = res; });
 
             window.addEventListener('devicemotion', (event) => {
                 resolve({
@@ -1229,8 +1236,8 @@ const tests = [
         id: 'wheel',
         category: 'events',
         getValue: () => {
-            let resolve, reject;
-            const promise = new Promise((res, rej) => {resolve = res; reject = rej});
+            let resolve;
+            const promise = new Promise((res, rej) => { resolve = res; });
 
             window.addEventListener('wheel', (event) => {
                 resolve({
@@ -1248,8 +1255,8 @@ const tests = [
         id: 'touchstart',
         category: 'events',
         getValue: () => {
-            let resolve, reject;
-            const promise = new Promise((res, rej) => {resolve = res; reject = rej});
+            let resolve;
+            const promise = new Promise((res, rej) => { resolve = res; });
 
             window.addEventListener('touchstart', (event) => {
                 resolve({
@@ -1268,8 +1275,8 @@ const tests = [
         id: 'ondevicelight',
         category: 'events',
         getValue: () => {
-            let resolve, reject;
-            const promise = new Promise((res, rej) => {resolve = res; reject = rej});
+            let resolve;
+            const promise = new Promise((res, rej) => { resolve = res; });
 
             window.addEventListener('ondevicelight', (event) => {
                 resolve({
@@ -1279,10 +1286,10 @@ const tests = [
 
             return promise;
         }
-    },
+    }
 ];
 
-function extractSimplePropsFromObject(object, options) {
+function extractSimplePropsFromObject (object, options) {
     const ignoredTypes = options.ignoredTypes || ['object', 'function', 'undefined'];
     const excludeProps = options.excludeProps || [];
 
@@ -1307,54 +1314,54 @@ function extractSimplePropsFromObject(object, options) {
     return result;
 }
 
-function applyFpExampleDataToCanvas(canvas) {
+function applyFpExampleDataToCanvas (canvas) {
     // Very simple now, need to make it more complex (geo shapes etc)
-    const ctx = canvas.getContext('2d')
+    const ctx = canvas.getContext('2d');
     // detect browser support of canvas winding
     // http://blogs.adobe.com/webplatform/2013/01/30/winding-rules-in-canvas/
     // https://github.com/Modernizr/Modernizr/blob/master/feature-detects/canvas/winding.js
-    ctx.rect(0, 0, 10, 10)
-    ctx.rect(2, 2, 6, 6)
+    ctx.rect(0, 0, 10, 10);
+    ctx.rect(2, 2, 6, 6);
 
-    ctx.textBaseline = 'alphabetic'
-    ctx.fillStyle = '#f60'
-    ctx.fillRect(125, 1, 62, 20)
-    ctx.fillStyle = '#069'
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = '#f60';
+    ctx.fillRect(125, 1, 62, 20);
+    ctx.fillStyle = '#069';
     // https://github.com/Valve/fingerprintjs2/issues/66
     // if (this.options.dontUseFakeFontInCanvas) {
     // ctx.font = '11pt Arial'
     // } else {
-    ctx.font = '11pt no-real-font-123'
+    ctx.font = '11pt no-real-font-123';
     // }
-    ctx.fillText('Cwm fjordbank glyphs vext quiz, \ud83d\ude03', 2, 15)
-    ctx.fillStyle = 'rgba(102, 204, 0, 0.2)'
-    ctx.font = '18pt Arial'
-    ctx.fillText('Cwm fjordbank glyphs vext quiz, \ud83d\ude03', 4, 45)
+    ctx.fillText('Cwm fjordbank glyphs vext quiz, \ud83d\ude03', 2, 15);
+    ctx.fillStyle = 'rgba(102, 204, 0, 0.2)';
+    ctx.font = '18pt Arial';
+    ctx.fillText('Cwm fjordbank glyphs vext quiz, \ud83d\ude03', 4, 45);
 
     // canvas blending
     // http://blogs.adobe.com/webplatform/2013/01/28/blending-features-in-canvas/
     // http://jsfiddle.net/NDYV8/16/
-    ctx.globalCompositeOperation = 'multiply'
-    ctx.fillStyle = 'rgb(255,0,255)'
-    ctx.beginPath()
-    ctx.arc(50, 50, 50, 0, Math.PI * 2, true)
-    ctx.closePath()
-    ctx.fill()
-    ctx.fillStyle = 'rgb(0,255,255)'
-    ctx.beginPath()
-    ctx.arc(100, 50, 50, 0, Math.PI * 2, true)
-    ctx.closePath()
-    ctx.fill()
-    ctx.fillStyle = 'rgb(255,255,0)'
-    ctx.beginPath()
-    ctx.arc(75, 100, 50, 0, Math.PI * 2, true)
-    ctx.closePath()
-    ctx.fill()
-    ctx.fillStyle = 'rgb(255,0,255)'
+    ctx.globalCompositeOperation = 'multiply';
+    ctx.fillStyle = 'rgb(255,0,255)';
+    ctx.beginPath();
+    ctx.arc(50, 50, 50, 0, Math.PI * 2, true);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = 'rgb(0,255,255)';
+    ctx.beginPath();
+    ctx.arc(100, 50, 50, 0, Math.PI * 2, true);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = 'rgb(255,255,0)';
+    ctx.beginPath();
+    ctx.arc(75, 100, 50, 0, Math.PI * 2, true);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = 'rgb(255,0,255)';
     // canvas winding
     // http://blogs.adobe.com/webplatform/2013/01/30/winding-rules-in-canvas/
     // http://jsfiddle.net/NDYV8/19/
-    ctx.arc(75, 75, 75, 0, Math.PI * 2, true)
-    ctx.arc(75, 75, 25, 0, Math.PI * 2, true)
-    ctx.fill('evenodd')
+    ctx.arc(75, 75, 75, 0, Math.PI * 2, true);
+    ctx.arc(75, 75, 25, 0, Math.PI * 2, true);
+    ctx.fill('evenodd');
 }

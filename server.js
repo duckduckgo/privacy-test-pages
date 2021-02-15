@@ -7,18 +7,18 @@ const cmd = require('node-cmd');
 const crypto = require('crypto');
 const fs = require('fs');
 
-function fullUrl(req) {
-  return url.format({
+function fullUrl (req) {
+    return url.format({
     // note: if server is behind a proxy, and it probably is, you may see 'http' here even if request was 'https'
-    protocol: req.protocol,
-    host: req.get('host'),
-    pathname: req.originalUrl
-  });
+        protocol: req.protocol,
+        host: req.get('host'),
+        pathname: req.originalUrl
+    });
 }
 
 // start server
 const listener = app.listen(port, () => {
-  console.log(`Server listening at port ${listener.address().port}`)
+    console.log(`Server listening at port ${listener.address().port}`);
 });
 
 app.use(express.json());
@@ -45,16 +45,16 @@ app.use(express.static('.', {
 // endpoint for updating the app (https://support.glitch.com/t/tutorial-how-to-auto-update-your-project-with-github/8124)
 app.post('/git', (req, res) => {
     const hmac = crypto.createHmac('sha1', process.env.SECRET);
-    const sig  = 'sha1=' + hmac.update(JSON.stringify(req.body)).digest('hex');
+    const sig = 'sha1=' + hmac.update(JSON.stringify(req.body)).digest('hex');
 
-    if (req.headers['x-github-event'] === 'push' && crypto.timingSafeEqual(Buffer.from(sig, 'utf8'), Buffer.from(req.headers['x-hub-signature'], 'utf8'))) { 
+    if (req.headers['x-github-event'] === 'push' && crypto.timingSafeEqual(Buffer.from(sig, 'utf8'), Buffer.from(req.headers['x-hub-signature'], 'utf8'))) {
         fs.chmodSync('git.sh', '777'); /* :/ Fix no perms after updating */
-        cmd.get('./git.sh', (err, data) => {  // Run our script
-          if (data) console.log(data);
-          if (err) console.log(err);
+        cmd.get('./git.sh', (err, data) => { // Run our script
+            if (data) console.log(data);
+            if (err) console.log(err);
         });
-        cmd.run('refresh');  // Refresh project
-      
+        cmd.run('refresh'); // Refresh project
+
         console.log('> [GIT] Updated with origin/gh-pages');
 
         return res.sendStatus(200);
@@ -64,7 +64,7 @@ app.post('/git', (req, res) => {
 });
 
 // dummy websocket server
-const wss = new ws.Server({server: listener, path: '/block-me/web-socket'});
+const wss = new ws.Server({ server: listener, path: '/block-me/web-socket' });
 
 wss.on('connection', (ws) => {
     ws.send('It works 👍');
@@ -81,10 +81,10 @@ app.get('/block-me/server-sent-events', (req, res) => {
     });
     res.flushHeaders();
 
-    res.write(`data: It works 👍\n\n`);
-  
+    res.write('data: It works 👍\n\n');
+
     setTimeout(() => {
-      res.end();
+        res.end();
     }, 1000);
 });
 
@@ -101,7 +101,7 @@ app.get('/reflect-headers', (req, res) => {
     res.set('Access-Control-Allow-Credentials', 'true');
     res.set('Timing-Allow-Origin', '*');
 
-    return res.json({url: fullUrl(req), headers: req.headers});
+    return res.json({ url: fullUrl(req), headers: req.headers });
 });
 
 // sets a cookie with provided value
@@ -111,11 +111,11 @@ app.get('/set-cookie', (req, res) => {
     res.set('Timing-Allow-Origin', '*');
 
     const expires = new Date((Date.now() + (7 * 24 * 60 * 60 * 1000)));
-    
-    if (!req.query['value']) {
+
+    if (!req.query.value) {
         return res.sendStatus(401);
     }
-    return res.cookie('headerdata', req.query['value'], {expires, httpOnly: true, sameSite: 'none', secure: true}).sendStatus(200);
+    return res.cookie('headerdata', req.query.value, { expires, httpOnly: true, sameSite: 'none', secure: true }).sendStatus(200);
 });
 
 // returns a random number and sets caching for a year

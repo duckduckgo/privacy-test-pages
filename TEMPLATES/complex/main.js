@@ -10,10 +10,10 @@ const tests = [
         id: 'test-test',
         run: () => {
             // function returning either a value or a promise
-            let resolve, reject;
-            const promise = new Promise((res, rej) => {resolve = res; reject = rej});
+            let res;
+            const promise = new Promise((resolve, reject) => { res = resolve; });
 
-            setTimeout(() => resolve('ok'), 1000);
+            setTimeout(() => res('ok'), 1000);
 
             return promise;
         }
@@ -22,12 +22,12 @@ const tests = [
 
 // object that contains results of all tests
 const results = {
-    page: 'name-of-the-test',// FILL ME OUT!
+    page: 'name-of-the-test', // FILL ME OUT!
     date: null,
     results: []
 };
 
-function resultToHTML(data) {
+function resultToHTML (data) {
     if (Array.isArray(data)) {
         return `<ul>${data.map(r => `<li>${r.test} - ${r.result}</li>`).join('')}</ul>`;
     } else if (data) {
@@ -40,7 +40,7 @@ function resultToHTML(data) {
 /**
  * Test runner
  */
-function runTests() {
+function runTests () {
     startButton.setAttribute('disabled', 'disabled');
     downloadButton.removeAttribute('disabled');
     testsDiv.removeAttribute('hidden');
@@ -52,7 +52,7 @@ function runTests() {
 
     testsDetailsDiv.innerHTML = '';
 
-    function updateSummary() {
+    function updateSummary () {
         testsSummaryDiv.innerText = `Performed ${all} tests${failed > 0 ? ` (${failed} failed)` : ''}. Click for details.`;
     }
 
@@ -85,10 +85,10 @@ function runTests() {
                         updateSummary();
                     });
             } else {
-                valueSpan.innerHTML = resultToHTML(data);;
+                valueSpan.innerHTML = resultToHTML(data);
                 resultObj.value = result || null;
             }
-        } catch(e) {
+        } catch (e) {
             failed++;
             valueSpan.innerHTML = `❌ error thrown ("${e.message ? e.message : e}")`;
         }
@@ -101,13 +101,13 @@ function runTests() {
     startButton.removeAttribute('disabled');
 }
 
-function downloadTheResults() {
+function downloadTheResults () {
     const data = JSON.stringify(results, null, 2);
     const a = document.createElement('a');
-    const url = window.URL.createObjectURL(new Blob([data], {type: 'application/json'}));
+    const url = window.URL.createObjectURL(new Blob([data], { type: 'application/json' }));
     a.href = url;
     a.download = 'fingerprinting-results.json';
-    
+
     document.body.appendChild(a);
     a.click();
 

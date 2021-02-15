@@ -15,14 +15,14 @@ const results = {
 // list of localStorage entries with partial test results that we need to clear at the end of all testing
 const lsEntriesToClear = [];
 
-function generateNavigationTest(url) {
+function generateNavigationTest (url) {
     const key = `referrer-trimming-${url}`;
     lsEntriesToClear.push(key);
     const currentURL = new URL(location.href);
 
-    if (localStorage[key]) {// test already finished before
+    if (localStorage[key]) { // test already finished before
         return JSON.parse(localStorage[key]);
-    } else if(currentURL.searchParams.get('js') !== null) {// test finished now
+    } else if (currentURL.searchParams.get('js') !== null) { // test finished now
         const result = [
             {
                 test: 'js',
@@ -39,7 +39,7 @@ function generateNavigationTest(url) {
         history.pushState(null, '', '/privacy-protections/referrer-trimming/');
 
         return result;
-    } else {// test haven't run yet
+    } else { // test haven't run yet
         window.location.href = url;
 
         // let test runner know that it should not run other tests
@@ -47,9 +47,9 @@ function generateNavigationTest(url) {
     }
 }
 
-function generateFrameTest(url) {
-    let resolve, reject;
-    const promise = new Promise((res, rej) => {resolve = res; reject = rej});
+function generateFrameTest (url) {
+    let res;
+    const promise = new Promise((resolve, reject) => { res = resolve; });
 
     const origin = (new URL(url, document.location.href)).origin;
 
@@ -61,7 +61,7 @@ function generateFrameTest(url) {
     const onMessage = msg => {
         // check message and if it's comming from the right origin
         if (msg.data.referrer && msg.origin === origin) {
-            resolve(msg.data.referrer);
+            res(msg.data.referrer);
             window.removeEventListener('message', onMessage);
             document.body.removeChild(iframe);
         }
@@ -72,7 +72,7 @@ function generateFrameTest(url) {
     document.body.appendChild(iframe);
 
     iframe.addEventListener('load', () => {
-        iframe.contentWindow.postMessage({action: 'referrer'}, origin);
+        iframe.contentWindow.postMessage({ action: 'referrer' }, origin);
     });
 
     return promise;
@@ -132,7 +132,7 @@ const tests = [
 /**
  * Test runner
  */
-function runTests() {
+function runTests () {
     startButton.setAttribute('disabled', 'disabled');
     downloadButton.removeAttribute('disabled');
     testsDiv.removeAttribute('hidden');
@@ -144,7 +144,7 @@ function runTests() {
 
     testsDetailsDiv.innerHTML = '';
 
-    function updateSummary() {
+    function updateSummary () {
         testsSummaryDiv.innerText = `Performed ${all} tests${failed > 0 ? ` (${failed} failed)` : ''}. Click for details.`;
     }
 
@@ -193,7 +193,7 @@ function runTests() {
 
                 resultObj.value = result || null;
             }
-        } catch(e) {
+        } catch (e) {
             failed++;
             valueSpan.innerHTML = `❌ error thrown ("${e.message ? e.message : e}")`;
         }
@@ -202,20 +202,20 @@ function runTests() {
     }
 
     // clear partial results from navigational tests
-    lsEntriesToClear.forEach(key => localStorage.removeItem(key))
+    lsEntriesToClear.forEach(key => localStorage.removeItem(key));
 
     updateSummary();
 
     startButton.removeAttribute('disabled');
 }
 
-function downloadTheResults() {
+function downloadTheResults () {
     const data = JSON.stringify(results, null, 2);
     const a = document.createElement('a');
-    const url = window.URL.createObjectURL(new Blob([data], {type: 'application/json'}));
+    const url = window.URL.createObjectURL(new Blob([data], { type: 'application/json' }));
     a.href = url;
     a.download = 'referrer-trimming-results.json';
-    
+
     document.body.appendChild(a);
     a.click();
 

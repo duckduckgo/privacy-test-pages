@@ -1,19 +1,19 @@
 /* eslint-disable promise/param-names, no-return-assign */
 /* globals AmbientLightSensor, Gyroscope, Magnetometer, chrome, webkitOfflineAudioContext */
 async function sha256 (str) {
-    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder('utf-8').encode(str))
-    return Array.prototype.map.call(new Uint8Array(buf), x => (('00' + x.toString(16)).slice(-2))).join('')
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder('utf-8').encode(str));
+    return Array.prototype.map.call(new Uint8Array(buf), x => (('00' + x.toString(16)).slice(-2))).join('');
 }
 
 function addCanvasToPage (canvas, reason) {
-    const canvasCheck = document.getElementById('canvas-check')
-    canvasCheck.removeAttribute('hidden')
-    const containerElement = document.createElement('div')
-    const headerElement = document.createElement('h2')
-    headerElement.textContent = reason
-    containerElement.appendChild(headerElement)
-    containerElement.appendChild(canvas)
-    canvasCheck.appendChild(containerElement)
+    const canvasCheck = document.getElementById('canvas-check');
+    canvasCheck.removeAttribute('hidden');
+    const containerElement = document.createElement('div');
+    const headerElement = document.createElement('h2');
+    headerElement.textContent = reason;
+    containerElement.appendChild(headerElement);
+    containerElement.appendChild(canvas);
+    canvasCheck.appendChild(containerElement);
 }
 
 const tests = [
@@ -114,11 +114,11 @@ const tests = [
         id: 'navigator.mimeTypes',
         category: 'navigator',
         getValue: () => {
-            const results = {}
+            const results = {};
 
-            Array.from(navigator.mimeTypes).forEach(mtype => results[mtype.type] = true)
+            Array.from(navigator.mimeTypes).forEach(mtype => results[mtype.type] = true);
 
-            return results
+            return results;
         }
     },
     {
@@ -180,15 +180,15 @@ const tests = [
         getValue: () => {
             return Array.from(navigator.getGamepads()).map(gamepad => {
                 if (!gamepad) {
-                    return null
+                    return null;
                 }
 
                 return {
                     id: gamepad.id,
                     buttons: gamepad.buttons.length,
                     axes: gamepad.axes.length
-                }
-            })
+                };
+            });
         }
     },
     {
@@ -198,7 +198,7 @@ const tests = [
             function getPermissionIfKnown (pName) {
                 return navigator.permissions.query({ name: pName })
                     .then(r => ({ name: pName, state: r.state }))
-                    .catch(e => ({ name: pName, state: 'failure' }))
+                    .catch(e => ({ name: pName, state: 'failure' }));
             }
 
             return Promise.all([
@@ -215,12 +215,12 @@ const tests = [
                 getPermissionIfKnown('push'),
                 getPermissionIfKnown('speaker')
             ]).then(results => {
-                const resultsObj = {}
+                const resultsObj = {};
 
-                results.forEach(r => resultsObj[r.name] = r.state)
+                results.forEach(r => resultsObj[r.name] = r.state);
 
-                return resultsObj
-            })
+                return resultsObj;
+            });
         }
     },
     {
@@ -250,33 +250,33 @@ const tests = [
                             groupId: device.groupId,
                             kind: device.kind,
                             label: device.label
-                        }
-                    })
-                })
+                        };
+                    });
+                });
         }
     },
     {
         id: 'navigator.webkitTemporaryStorage.queryUsageAndQuota',
         category: 'navigator',
         getValue: () => {
-            let resolve
-            const promise = new Promise((res, rej) => { resolve = res })
+            let resolve;
+            const promise = new Promise((res, rej) => { resolve = res; });
 
-            navigator.webkitTemporaryStorage.queryUsageAndQuota((usage, quota) => resolve({ usage: usage, quota: quota }))
+            navigator.webkitTemporaryStorage.queryUsageAndQuota((usage, quota) => resolve({ usage: usage, quota: quota }));
 
-            return promise
+            return promise;
         }
     },
     {
         id: 'navigator.webkitPersistentStorage.queryUsageAndQuota',
         category: 'navigator',
         getValue: () => {
-            let resolve
-            const promise = new Promise((res, rej) => { resolve = res })
+            let resolve;
+            const promise = new Promise((res, rej) => { resolve = res; });
 
-            navigator.webkitPersistentStorage.queryUsageAndQuota((usage, quota) => resolve({ usage: usage, quota: quota }))
+            navigator.webkitPersistentStorage.queryUsageAndQuota((usage, quota) => resolve({ usage: usage, quota: quota }));
 
-            return promise
+            return promise;
         }
     },
 
@@ -486,49 +486,49 @@ const tests = [
         id: 'WebGLRenderingContext.getSupportedExtensions()',
         category: 'webgl',
         getValue: () => {
-            const c = document.createElement('canvas')
-            const results = {}
+            const c = document.createElement('canvas');
+            const results = {};
 
-            c.getContext('webgl').getSupportedExtensions().forEach(extension => results[extension] = true)
+            c.getContext('webgl').getSupportedExtensions().forEach(extension => results[extension] = true);
 
-            return results
+            return results;
         }
     },
     {
         id: 'WebGLRenderingContext.getContextAttributes()',
         category: 'webgl',
         getValue: () => {
-            const c = document.createElement('canvas')
-            return c.getContext('webgl').getContextAttributes()
+            const c = document.createElement('canvas');
+            return c.getContext('webgl').getContextAttributes();
         }
     },
     {
         id: 'WebGLRenderingContext.getShaderPrecisionFormat()',
         category: 'webgl',
         getValue: () => {
-            const c = document.createElement('canvas')
-            const result = c.getContext('webgl').getShaderPrecisionFormat(WebGLRenderingContext.FRAGMENT_SHADER, WebGLRenderingContext.LOW_FLOAT)
+            const c = document.createElement('canvas');
+            const result = c.getContext('webgl').getShaderPrecisionFormat(WebGLRenderingContext.FRAGMENT_SHADER, WebGLRenderingContext.LOW_FLOAT);
 
             return {
                 precision: result.precision,
                 rangeMin: result.rangeMin,
                 rangeMax: result.rangeMax
-            }
+            };
         }
     },
     {
         id: 'WebGLRenderingContext.getParameter()',
         category: 'webgl',
         getValue: () => {
-            const elem = document.createElement('canvas')
-            const context = elem.getContext('webgl')
-            const result = {}
+            const elem = document.createElement('canvas');
+            const context = elem.getContext('webgl');
+            const result = {};
 
             webglConstantsList.forEach(name => {
-                result[name] = context.getParameter(context[name])
-            })
+                result[name] = context.getParameter(context[name]);
+            });
 
-            return result
+            return result;
         }
     },
 
@@ -537,27 +537,27 @@ const tests = [
         id: 'RTCIceCandidate.candiate',
         category: 'webrtc',
         getValue: () => {
-            let resolve
-            const promise = new Promise((res, rej) => { resolve = res })
+            let resolve;
+            const promise = new Promise((res, rej) => { resolve = res; });
 
             const c = new RTCPeerConnection({
                 iceServers: [{ urls: 'stun:stun.l.google.com:19302?transport=udp' }]
-            })
+            });
 
             c.onicecandidate = result => {
-                console.log(result.candidate)
+                console.log(result.candidate);
                 if (result.candidate !== null) {
-                    resolve(result.candidate.candidate)
-                    c.close()
+                    resolve(result.candidate.candidate);
+                    c.close();
                 }
-            }
-            c.createDataChannel('')
+            };
+            c.createDataChannel('');
 
             c.createOffer().then(a => {
-                c.setLocalDescription(a, () => {}, () => {})
-            })
+                c.setLocalDescription(a, () => {}, () => {});
+            });
 
-            return promise
+            return promise;
         }
     },
 
@@ -576,52 +576,52 @@ const tests = [
             // inspiration: https://www.kirupa.com/html5/detect_whether_font_is_installed.htm
 
             // creating our in-memory Canvas element where the magic happens
-            const canvas = document.createElement('canvas')
-            const context = canvas.getContext('2d')
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
 
             // the text whose final pixel size I want to measure
-            const text = 'abcdefghijklmnopqrstuvwxyz0123456789 !@#$%^&*()_-+='
+            const text = 'abcdefghijklmnopqrstuvwxyz0123456789 !@#$%^&*()_-+=';
 
             // specifying the baseline font
-            context.font = '72px monospace'
+            context.font = '72px monospace';
 
             // checking the size of the baseline text
-            const baselineSize = context.measureText(text)
+            const baselineSize = context.measureText(text);
 
-            const result = {}
+            const result = {};
 
             fontList.forEach(fontName => {
                 // specifying the font whose existence we want to check
-                context.font = "72px '" + fontName + "', monospace"
+                context.font = "72px '" + fontName + "', monospace";
 
                 // checking the size of the font we want to check
-                const newSize = context.measureText(text)
+                const newSize = context.measureText(text);
 
                 //
                 // If the size of the two text instances is the same, the font does not exist because it is being rendered
                 // using the default sans-serif font
                 //
                 if ((newSize.width !== baselineSize.width) || (newSize.height !== baselineSize.height)) {
-                    result[fontName] = true
+                    result[fontName] = true;
                 }
-            })
+            });
 
-            return result
+            return result;
         }
     },
     {
         id: 'document.fonts.check',
         category: 'fonts',
         getValue: () => {
-            const result = {}
+            const result = {};
 
             fontList.forEach(font => {
                 if (document.fonts.check(`small "${font}"`)) {
-                    result[font] = true
+                    result[font] = true;
                 }
-            })
+            });
 
-            return result
+            return result;
         }
     },
 
@@ -630,34 +630,34 @@ const tests = [
         id: 'HTMLVideoElement.canPlayType()',
         category: 'codecs',
         getValue: () => {
-            const video = document.createElement('video')
-            const result = {}
+            const video = document.createElement('video');
+            const result = {};
 
             codecsList.forEach(codec => {
-                result[codec] = video.canPlayType(codec)
-            })
+                result[codec] = video.canPlayType(codec);
+            });
 
-            return result
+            return result;
         }
     },
     {
         id: 'MediaSource.isTypeSupported()',
         category: 'codecs',
         getValue: () => {
-            const result = {}
+            const result = {};
 
             codecsList.forEach(codec => {
-                result[codec] = MediaSource.isTypeSupported(codec)
-            })
+                result[codec] = MediaSource.isTypeSupported(codec);
+            });
 
-            return result
+            return result;
         }
     },
     {
         id: 'navigator.mediaCapabilities.encodingInfo()',
         category: 'codecs',
         getValue: () => {
-            const result = {}
+            const result = {};
             const promises = codecsList.map(codec => {
                 const mediaConfig = {
                     type: 'file',
@@ -678,20 +678,20 @@ const tests = [
                             samplerate: 5200
                         }
                         : undefined
-                }
+                };
 
                 return navigator.mediaCapabilities.decodingInfo(mediaConfig).then(support => {
                     result[codec] = {
                         supported: support.supported,
                         smooth: support.smooth,
                         powerEfficient: support.powerEfficient
-                    }
+                    };
                 }).catch(e => {
-                    result[codec] = e.message
-                })
-            })
+                    result[codec] = e.message;
+                });
+            });
 
-            return Promise.all(promises).then(() => result)
+            return Promise.all(promises).then(() => result);
         }
     },
 
@@ -700,35 +700,35 @@ const tests = [
         id: 'speechSynthesis.getVoices()',
         category: 'speechSynthesis',
         getValue: () => {
-            let resolve
-            const promise = new Promise((res, rej) => { resolve = res })
+            let resolve;
+            const promise = new Promise((res, rej) => { resolve = res; });
 
             // why timeout and calling the API twice? It's a workaround for a chromium bug of some sorts where first call to getVoices returns empty array
-            speechSynthesis.getVoices()
+            speechSynthesis.getVoices();
             setTimeout(() => {
-                const result = {}
+                const result = {};
 
                 speechSynthesis.getVoices().forEach(voice => {
                     const item = {
                         name: voice.name,
                         lang: voice.lang
-                    }
+                    };
 
                     if (voice.default) {
-                        item.default = true
+                        item.default = true;
                     }
 
                     if (!voice.localService) {
-                        item.external = true
+                        item.external = true;
                     }
 
-                    result[voice.voiceURI] = item
-                })
+                    result[voice.voiceURI] = item;
+                });
 
-                resolve(result)
-            }, 300)
+                resolve(result);
+            }, 300);
 
-            return promise
+            return promise;
         }
     },
 
@@ -744,65 +744,65 @@ const tests = [
         id: 'AmbientLightSensor',
         category: 'sensors',
         getValue: () => {
-            let resolve, reject
-            const promise = new Promise((res, rej) => { resolve = res; reject = rej })
+            let resolve, reject;
+            const promise = new Promise((res, rej) => { resolve = res; reject = rej; });
 
-            const sensor = new AmbientLightSensor()
+            const sensor = new AmbientLightSensor();
             sensor.onreading = () => {
-                resolve({ illuminance: sensor.illuminance })
-            }
+                resolve({ illuminance: sensor.illuminance });
+            };
             sensor.onerror = (event) => {
-                reject(event.error.name + ': ' + event.error.message)
-            }
-            sensor.start()
+                reject(event.error.name + ': ' + event.error.message);
+            };
+            sensor.start();
 
-            return promise
+            return promise;
         }
     },
     {
         id: 'Gyroscope',
         category: 'sensors',
         getValue: () => {
-            let resolve, reject
-            const promise = new Promise((res, rej) => { resolve = res; reject = rej })
+            let resolve, reject;
+            const promise = new Promise((res, rej) => { resolve = res; reject = rej; });
 
-            const sensor = new Gyroscope()
+            const sensor = new Gyroscope();
             sensor.onreading = () => {
                 resolve({
                     x: sensor.x,
                     y: sensor.y,
                     z: sensor.z
-                })
-            }
+                });
+            };
             sensor.onerror = (event) => {
-                reject(event.error.name + ': ' + event.error.message)
-            }
-            sensor.start()
+                reject(event.error.name + ': ' + event.error.message);
+            };
+            sensor.start();
 
-            return promise
+            return promise;
         }
     },
     {
         id: 'Magnetometer',
         category: 'sensors',
         getValue: () => {
-            let resolve, reject
-            const promise = new Promise((res, rej) => { resolve = res; reject = rej })
+            let resolve, reject;
+            const promise = new Promise((res, rej) => { resolve = res; reject = rej; });
 
-            const sensor = new Magnetometer()
+            const sensor = new Magnetometer();
             sensor.onreading = () => {
                 resolve({
                     x: sensor.x,
                     y: sensor.y,
                     z: sensor.z
-                })
-            }
+                });
+            };
             sensor.onerror = (event) => {
-                reject(event.error.name + ': ' + event.error.message)
-            }
-            sensor.start()
+                reject(event.error.name + ': ' + event.error.message);
+            };
+            sensor.start();
 
-            return promise
+            return promise;
         }
     },
 
@@ -811,7 +811,7 @@ const tests = [
         id: 'chrome.loadTimes()',
         category: 'chrome',
         getValue: () => {
-            const lt = chrome.loadTimes()
+            const lt = chrome.loadTimes();
 
             return {
                 connectionInfo: lt.connectionInfo,
@@ -819,7 +819,7 @@ const tests = [
                 wasAlternateProtocolAvailable: lt.wasAlternateProtocolAvailable,
                 wasFetchedViaSpdy: lt.wasFetchedViaSpdy,
                 wasNpnNegotiated: lt.wasNpnNegotiated
-            }
+            };
         }
     },
 
@@ -975,18 +975,18 @@ const tests = [
         id: 'system-colors',
         category: 'css',
         getValue: () => {
-            const colors = ['ActiveCaption', 'AppWorkspace', 'Background', 'ButtonFace', 'ButtonHighlight', 'ButtonShadow', 'ButtonText', 'CaptionText', 'GrayText', 'Highlight', 'HighlightText', 'InactiveBorder', 'InactiveCaption', 'InactiveCaptionText', 'InfoBackground', 'InfoText', 'Menu', 'MenuText', 'Scrollbar', 'ThreeDDarkShadow', 'ThreeDFace', 'ThreeDHighlight', 'ThreeDLightShadow', 'ThreeDShadow', 'Window', 'WindowFrame', 'WindowText', 'ActiveBorder']
-            const results = {}
-            const startButton = document.querySelector('#start')
+            const colors = ['ActiveCaption', 'AppWorkspace', 'Background', 'ButtonFace', 'ButtonHighlight', 'ButtonShadow', 'ButtonText', 'CaptionText', 'GrayText', 'Highlight', 'HighlightText', 'InactiveBorder', 'InactiveCaption', 'InactiveCaptionText', 'InfoBackground', 'InfoText', 'Menu', 'MenuText', 'Scrollbar', 'ThreeDDarkShadow', 'ThreeDFace', 'ThreeDHighlight', 'ThreeDLightShadow', 'ThreeDShadow', 'Window', 'WindowFrame', 'WindowText', 'ActiveBorder'];
+            const results = {};
+            const startButton = document.querySelector('#start');
 
             colors.forEach(color => {
-                startButton.style.backgroundColor = color
-                results[color] = window.getComputedStyle(startButton).backgroundColor
-            })
+                startButton.style.backgroundColor = color;
+                results[color] = window.getComputedStyle(startButton).backgroundColor;
+            });
 
-            startButton.removeAttribute('style')
+            startButton.removeAttribute('style');
 
-            return results
+            return results;
         }
     },
 
@@ -995,16 +995,16 @@ const tests = [
         id: 'audio',
         category: 'full-fingerprints',
         getValue: () => {
-            let resolve
-            const promise = new Promise((res, rej) => { resolve = res })
+            let resolve;
+            const promise = new Promise((res, rej) => { resolve = res; });
 
             // still pefixed in Safari
             // eslint-disable-next-line new-cap
-            const context = window.OfflineAudioContext ? new OfflineAudioContext(1, 44100, 44100) : new webkitOfflineAudioContext(1, 44100, 44100)
+            const context = window.OfflineAudioContext ? new OfflineAudioContext(1, 44100, 44100) : new webkitOfflineAudioContext(1, 44100, 44100);
 
-            const oscillator = context.createOscillator()
-            oscillator.type = 'triangle'
-            oscillator.frequency.setValueAtTime(10000, context.currentTime)
+            const oscillator = context.createOscillator();
+            oscillator.type = 'triangle';
+            oscillator.frequency.setValueAtTime(10000, context.currentTime);
 
             const compressor = context.createDynamicsCompressor();
 
@@ -1017,134 +1017,134 @@ const tests = [
                 ['release', 0.25]
             ].forEach(function (item) {
                 if (compressor[item[0]] !== undefined && typeof compressor[item[0]].setValueAtTime === 'function') {
-                    compressor[item[0]].setValueAtTime(item[1], context.currentTime)
+                    compressor[item[0]].setValueAtTime(item[1], context.currentTime);
                 }
-            })
+            });
 
             context.oncomplete = (event) => {
                 const fingerprint = event.renderedBuffer.getChannelData(0)
                     .slice(4500, 5000)
-                    .reduce(function (acc, val) { return acc + Math.abs(val) }, 0)
-                    .toString()
-                oscillator.disconnect()
-                compressor.disconnect()
+                    .reduce(function (acc, val) { return acc + Math.abs(val); }, 0)
+                    .toString();
+                oscillator.disconnect();
+                compressor.disconnect();
 
-                resolve(fingerprint)
-            }
+                resolve(fingerprint);
+            };
 
-            oscillator.connect(compressor)
-            compressor.connect(context.destination)
-            oscillator.start(0)
-            context.startRendering()
+            oscillator.connect(compressor);
+            compressor.connect(context.destination);
+            oscillator.start(0);
+            context.startRendering();
 
-            return promise
+            return promise;
         }
     },
     {
         id: 'canvas-2d-todataurl',
         category: 'full-fingerprints',
         getValue: () => {
-            const canvas = document.createElement('canvas')
-            canvas.width = 2000
-            canvas.height = 200
-            canvas.style.display = 'inline'
+            const canvas = document.createElement('canvas');
+            canvas.width = 2000;
+            canvas.height = 200;
+            canvas.style.display = 'inline';
 
-            applyFpExampleDataToCanvas(canvas)
+            applyFpExampleDataToCanvas(canvas);
 
-            return canvas.toDataURL()
+            return canvas.toDataURL();
         }
     },
     {
         id: 'canvas-2d-imagedata',
         category: 'full-fingerprints',
         getValue: () => {
-            const canvas = document.createElement('canvas')
-            canvas.width = 2000
-            canvas.height = 200
-            canvas.style.display = 'inline'
+            const canvas = document.createElement('canvas');
+            canvas.width = 2000;
+            canvas.height = 200;
+            canvas.style.display = 'inline';
 
-            applyFpExampleDataToCanvas(canvas)
-            addCanvasToPage(canvas, 'Normal check')
+            applyFpExampleDataToCanvas(canvas);
+            addCanvasToPage(canvas, 'Normal check');
 
-            const ctx = canvas.getContext('2d')
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+            const ctx = canvas.getContext('2d');
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 
-            const image = new Image()
-            image.src = canvas.toDataURL()
-            addCanvasToPage(image, 'Image data url')
+            const image = new Image();
+            image.src = canvas.toDataURL();
+            addCanvasToPage(image, 'Image data url');
 
             // Verify that once the method is used that it looks the same once rendered to the screen
-            const canvasCopy = document.createElement('canvas')
-            canvasCopy.width = 2000
-            canvasCopy.height = 200
-            canvasCopy.style.display = 'inline'
-            const ctxCopy = canvasCopy.getContext('2d')
-            ctxCopy.putImageData(imageData, 0, 0)
-            addCanvasToPage(canvasCopy, 'Image data check')
+            const canvasCopy = document.createElement('canvas');
+            canvasCopy.width = 2000;
+            canvasCopy.height = 200;
+            canvasCopy.style.display = 'inline';
+            const ctxCopy = canvasCopy.getContext('2d');
+            ctxCopy.putImageData(imageData, 0, 0);
+            addCanvasToPage(canvasCopy, 'Image data check');
 
-            return sha256(JSON.stringify([...imageData.data]))
+            return sha256(JSON.stringify([...imageData.data]));
         }
     },
     {
         id: 'canvas-2d-offscreen-todataurl',
         category: 'full-fingerprints',
         getValue: () => {
-            const offscreen = new OffscreenCanvas(2000, 200)
+            const offscreen = new OffscreenCanvas(2000, 200);
 
-            applyFpExampleDataToCanvas(offscreen)
+            applyFpExampleDataToCanvas(offscreen);
 
             // As we can't get the result directly from the offscreen canvas
             // we then push it through to an on-screen canvas
-            const imageBitmap = offscreen.transferToImageBitmap()
+            const imageBitmap = offscreen.transferToImageBitmap();
 
-            const canvas = document.createElement('canvas')
-            canvas.width = 2000
-            canvas.height = 200
-            canvas.style.display = 'inline'
-            const ctx = canvas.getContext('2d')
-            ctx.drawImage(imageBitmap, 0, 0)
+            const canvas = document.createElement('canvas');
+            canvas.width = 2000;
+            canvas.height = 200;
+            canvas.style.display = 'inline';
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(imageBitmap, 0, 0);
 
-            addCanvasToPage(canvas, 'Offscreen canvas')
+            addCanvasToPage(canvas, 'Offscreen canvas');
 
-            return canvas.toDataURL()
+            return canvas.toDataURL();
         }
     },
     {
         id: 'canvas-webgl',
         category: 'full-fingerprints',
         getValue: () => {
-            const canvas = document.createElement('canvas')
-            canvas.width = 2000
-            canvas.height = 200
-            const gl = canvas.getContext('webgl')
+            const canvas = document.createElement('canvas');
+            canvas.width = 2000;
+            canvas.height = 200;
+            const gl = canvas.getContext('webgl');
 
-            const vShaderTemplate = 'attribute vec2 attrVertex;varying vec2 varyinTexCoordinate;uniform vec2 uniformOffset;void main(){varyinTexCoordinate=attrVertex+uniformOffset;gl_Position=vec4(attrVertex,0,1);}'
-            const fShaderTemplate = 'precision mediump float;varying vec2 varyinTexCoordinate;void main() {gl_FragColor=vec4(varyinTexCoordinate,0,1);}'
-            const vertexPosBuffer = gl.createBuffer()
-            gl.bindBuffer(gl.ARRAY_BUFFER, vertexPosBuffer)
-            const vertices = new Float32Array([-0.2, -0.9, 0, 0.4, -0.26, 0, 0, 0.732134444, 0])
-            gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW)
-            vertexPosBuffer.itemSize = 3
-            vertexPosBuffer.numItems = 3
-            const program = gl.createProgram()
-            const vshader = gl.createShader(gl.VERTEX_SHADER)
-            gl.shaderSource(vshader, vShaderTemplate)
-            gl.compileShader(vshader)
-            const fshader = gl.createShader(gl.FRAGMENT_SHADER)
-            gl.shaderSource(fshader, fShaderTemplate)
-            gl.compileShader(fshader)
-            gl.attachShader(program, vshader)
-            gl.attachShader(program, fshader)
-            gl.linkProgram(program)
-            gl.useProgram(program)
-            program.vertexPosAttrib = gl.getAttribLocation(program, 'attrVertex')
-            program.offsetUniform = gl.getUniformLocation(program, 'uniformOffset')
-            gl.enableVertexAttribArray(program.vertexPosArray)
-            gl.vertexAttribPointer(program.vertexPosAttrib, vertexPosBuffer.itemSize, gl.FLOAT, !1, 0, 0)
-            gl.uniform2f(program.offsetUniform, 1, 1)
-            gl.drawArrays(gl.TRIANGLE_STRIP, 0, vertexPosBuffer.numItems)
+            const vShaderTemplate = 'attribute vec2 attrVertex;varying vec2 varyinTexCoordinate;uniform vec2 uniformOffset;void main(){varyinTexCoordinate=attrVertex+uniformOffset;gl_Position=vec4(attrVertex,0,1);}';
+            const fShaderTemplate = 'precision mediump float;varying vec2 varyinTexCoordinate;void main() {gl_FragColor=vec4(varyinTexCoordinate,0,1);}';
+            const vertexPosBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, vertexPosBuffer);
+            const vertices = new Float32Array([-0.2, -0.9, 0, 0.4, -0.26, 0, 0, 0.732134444, 0]);
+            gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+            vertexPosBuffer.itemSize = 3;
+            vertexPosBuffer.numItems = 3;
+            const program = gl.createProgram();
+            const vshader = gl.createShader(gl.VERTEX_SHADER);
+            gl.shaderSource(vshader, vShaderTemplate);
+            gl.compileShader(vshader);
+            const fshader = gl.createShader(gl.FRAGMENT_SHADER);
+            gl.shaderSource(fshader, fShaderTemplate);
+            gl.compileShader(fshader);
+            gl.attachShader(program, vshader);
+            gl.attachShader(program, fshader);
+            gl.linkProgram(program);
+            gl.useProgram(program);
+            program.vertexPosAttrib = gl.getAttribLocation(program, 'attrVertex');
+            program.offsetUniform = gl.getUniformLocation(program, 'uniformOffset');
+            gl.enableVertexAttribArray(program.vertexPosArray);
+            gl.vertexAttribPointer(program.vertexPosAttrib, vertexPosBuffer.itemSize, gl.FLOAT, !1, 0, 0);
+            gl.uniform2f(program.offsetUniform, 1, 1);
+            gl.drawArrays(gl.TRIANGLE_STRIP, 0, vertexPosBuffer.numItems);
 
-            return gl.canvas.toDataURL()
+            return gl.canvas.toDataURL();
         }
     },
 
@@ -1154,8 +1154,8 @@ const tests = [
         category: 'all-props',
         getValue: () => {
             // ignore props that we already test
-            const testedProps = tests.filter(t => t.category === 'window').map(t => t.id.match('window.([^.(]*).*')[1])
-            return extractSimplePropsFromObject(window, { excludeProps: testedProps })
+            const testedProps = tests.filter(t => t.category === 'window').map(t => t.id.match('window.([^.(]*).*')[1]);
+            return extractSimplePropsFromObject(window, { excludeProps: testedProps });
         }
     },
     {
@@ -1163,8 +1163,8 @@ const tests = [
         category: 'all-props',
         getValue: () => {
             // ignore props that we already test
-            const testedProps = tests.filter(t => t.category === 'navigator').map(t => t.id.match('navigator.([^.(]*).*')[1])
-            return extractSimplePropsFromObject(window.navigator, { excludeProps: testedProps })
+            const testedProps = tests.filter(t => t.category === 'navigator').map(t => t.id.match('navigator.([^.(]*).*')[1]);
+            return extractSimplePropsFromObject(window.navigator, { excludeProps: testedProps });
         }
     },
     {
@@ -1172,24 +1172,24 @@ const tests = [
         category: 'all-props',
         getValue: () => {
             // ignore props that we already test
-            const testedProps = tests.filter(t => t.category === 'screen').map(t => t.id.match('screen.([^.(]*).*')[1])
-            return extractSimplePropsFromObject(window.screen, { excludeProps: testedProps })
+            const testedProps = tests.filter(t => t.category === 'screen').map(t => t.id.match('screen.([^.(]*).*')[1]);
+            return extractSimplePropsFromObject(window.screen, { excludeProps: testedProps });
         }
     },
     {
         id: 'headers',
         category: 'all-props',
         getValue: () => headers.then(res => {
-            const testedHeaders = tests.filter(t => t.category === 'headers').map(t => t.id.match('headers - (.*)')[1])
-            const other = {}
+            const testedHeaders = tests.filter(t => t.category === 'headers').map(t => t.id.match('headers - (.*)')[1]);
+            const other = {};
 
             Object.keys(res.headers).forEach(k => {
                 if (!testedHeaders.includes(k)) {
-                    other[k] = res.headers[k]
+                    other[k] = res.headers[k];
                 }
-            })
+            });
 
-            return other
+            return other;
         })
     },
 
@@ -1198,26 +1198,26 @@ const tests = [
         id: 'deviceorientation',
         category: 'events',
         getValue: () => {
-            let resolve
-            const promise = new Promise((res, rej) => { resolve = res })
+            let resolve;
+            const promise = new Promise((res, rej) => { resolve = res; });
 
             window.addEventListener('deviceorientation', (event) => {
                 resolve({
                     alpha: event.alpha,
                     beta: event.beta,
                     gamma: event.gamma
-                })
-            })
+                });
+            });
 
-            return promise
+            return promise;
         }
     },
     {
         id: 'devicemotion',
         category: 'events',
         getValue: () => {
-            let resolve
-            const promise = new Promise((res, rej) => { resolve = res })
+            let resolve;
+            const promise = new Promise((res, rej) => { resolve = res; });
 
             window.addEventListener('devicemotion', (event) => {
                 resolve({
@@ -1226,18 +1226,18 @@ const tests = [
                     accelerationZ: event.acceleration.z,
                     rotationRate: event.rotationRate,
                     interval: event.interval
-                })
-            })
+                });
+            });
 
-            return promise
+            return promise;
         }
     },
     {
         id: 'wheel',
         category: 'events',
         getValue: () => {
-            let resolve
-            const promise = new Promise((res, rej) => { resolve = res })
+            let resolve;
+            const promise = new Promise((res, rej) => { resolve = res; });
 
             window.addEventListener('wheel', (event) => {
                 resolve({
@@ -1245,18 +1245,18 @@ const tests = [
                     deltaY: event.deltaY,
                     deltaZ: event.deltaZ,
                     deltaMode: event.deltaMode
-                })
-            })
+                });
+            });
 
-            return promise
+            return promise;
         }
     },
     {
         id: 'touchstart',
         category: 'events',
         getValue: () => {
-            let resolve
-            const promise = new Promise((res, rej) => { resolve = res })
+            let resolve;
+            const promise = new Promise((res, rej) => { resolve = res; });
 
             window.addEventListener('touchstart', (event) => {
                 resolve({
@@ -1265,103 +1265,103 @@ const tests = [
                     radiusY: event.touches[0].radiusY,
                     rotationAngle: event.touches[0].rotationAngle,
                     force: event.touches[0].force
-                })
-            })
+                });
+            });
 
-            return promise
+            return promise;
         }
     },
     {
         id: 'ondevicelight',
         category: 'events',
         getValue: () => {
-            let resolve
-            const promise = new Promise((res, rej) => { resolve = res })
+            let resolve;
+            const promise = new Promise((res, rej) => { resolve = res; });
 
             window.addEventListener('ondevicelight', (event) => {
                 resolve({
                     value: event.value
-                })
-            })
+                });
+            });
 
-            return promise
+            return promise;
         }
     }
-]
+];
 
 function extractSimplePropsFromObject (object, options) {
-    const ignoredTypes = options.ignoredTypes || ['object', 'function', 'undefined']
-    const excludeProps = options.excludeProps || []
+    const ignoredTypes = options.ignoredTypes || ['object', 'function', 'undefined'];
+    const excludeProps = options.excludeProps || [];
 
-    const result = {}
+    const result = {};
 
     for (const propName in object) {
         if (excludeProps.includes(propName)) {
-            continue
+            continue;
         }
 
-        const propType = typeof object[propName]
+        const propType = typeof object[propName];
 
         // ignore values of complex types
         if (ignoredTypes.includes(propType)) {
-            result[propName] = `~${propType}~`
-            continue
+            result[propName] = `~${propType}~`;
+            continue;
         }
 
-        result[propName] = object[propName]
+        result[propName] = object[propName];
     }
 
-    return result
+    return result;
 }
 
 function applyFpExampleDataToCanvas (canvas) {
     // Very simple now, need to make it more complex (geo shapes etc)
-    const ctx = canvas.getContext('2d')
+    const ctx = canvas.getContext('2d');
     // detect browser support of canvas winding
     // http://blogs.adobe.com/webplatform/2013/01/30/winding-rules-in-canvas/
     // https://github.com/Modernizr/Modernizr/blob/master/feature-detects/canvas/winding.js
-    ctx.rect(0, 0, 10, 10)
-    ctx.rect(2, 2, 6, 6)
+    ctx.rect(0, 0, 10, 10);
+    ctx.rect(2, 2, 6, 6);
 
-    ctx.textBaseline = 'alphabetic'
-    ctx.fillStyle = '#f60'
-    ctx.fillRect(125, 1, 62, 20)
-    ctx.fillStyle = '#069'
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = '#f60';
+    ctx.fillRect(125, 1, 62, 20);
+    ctx.fillStyle = '#069';
     // https://github.com/Valve/fingerprintjs2/issues/66
     // if (this.options.dontUseFakeFontInCanvas) {
     // ctx.font = '11pt Arial'
     // } else {
-    ctx.font = '11pt no-real-font-123'
+    ctx.font = '11pt no-real-font-123';
     // }
-    ctx.fillText('Cwm fjordbank glyphs vext quiz, \ud83d\ude03', 2, 15)
-    ctx.fillStyle = 'rgba(102, 204, 0, 0.2)'
-    ctx.font = '18pt Arial'
-    ctx.fillText('Cwm fjordbank glyphs vext quiz, \ud83d\ude03', 4, 45)
+    ctx.fillText('Cwm fjordbank glyphs vext quiz, \ud83d\ude03', 2, 15);
+    ctx.fillStyle = 'rgba(102, 204, 0, 0.2)';
+    ctx.font = '18pt Arial';
+    ctx.fillText('Cwm fjordbank glyphs vext quiz, \ud83d\ude03', 4, 45);
 
     // canvas blending
     // http://blogs.adobe.com/webplatform/2013/01/28/blending-features-in-canvas/
     // http://jsfiddle.net/NDYV8/16/
-    ctx.globalCompositeOperation = 'multiply'
-    ctx.fillStyle = 'rgb(255,0,255)'
-    ctx.beginPath()
-    ctx.arc(50, 50, 50, 0, Math.PI * 2, true)
-    ctx.closePath()
-    ctx.fill()
-    ctx.fillStyle = 'rgb(0,255,255)'
-    ctx.beginPath()
-    ctx.arc(100, 50, 50, 0, Math.PI * 2, true)
-    ctx.closePath()
-    ctx.fill()
-    ctx.fillStyle = 'rgb(255,255,0)'
-    ctx.beginPath()
-    ctx.arc(75, 100, 50, 0, Math.PI * 2, true)
-    ctx.closePath()
-    ctx.fill()
-    ctx.fillStyle = 'rgb(255,0,255)'
+    ctx.globalCompositeOperation = 'multiply';
+    ctx.fillStyle = 'rgb(255,0,255)';
+    ctx.beginPath();
+    ctx.arc(50, 50, 50, 0, Math.PI * 2, true);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = 'rgb(0,255,255)';
+    ctx.beginPath();
+    ctx.arc(100, 50, 50, 0, Math.PI * 2, true);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = 'rgb(255,255,0)';
+    ctx.beginPath();
+    ctx.arc(75, 100, 50, 0, Math.PI * 2, true);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = 'rgb(255,0,255)';
     // canvas winding
     // http://blogs.adobe.com/webplatform/2013/01/30/winding-rules-in-canvas/
     // http://jsfiddle.net/NDYV8/19/
-    ctx.arc(75, 75, 75, 0, Math.PI * 2, true)
-    ctx.arc(75, 75, 25, 0, Math.PI * 2, true)
-    ctx.fill('evenodd')
+    ctx.arc(75, 75, 75, 0, Math.PI * 2, true);
+    ctx.arc(75, 75, 25, 0, Math.PI * 2, true);
+    ctx.fill('evenodd');
 }

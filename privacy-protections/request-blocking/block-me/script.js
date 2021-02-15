@@ -1,3 +1,3 @@
 if (window.scriptLoadedCallback) {
-    window.scriptLoadedCallback()
+    window.scriptLoadedCallback();
 }

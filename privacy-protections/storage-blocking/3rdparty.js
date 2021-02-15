@@ -7,9 +7,9 @@
 commonTests.push({
     id: 'JS cookie (3rd party script)',
     store: (data) => {
-        document.cookie = `tpdata=${data}; expires= Wed, 21 Aug 2030 20:00:00 UTC;`
+        document.cookie = `tpdata=${data}; expires= Wed, 21 Aug 2030 20:00:00 UTC;`;
     },
     retrive: () => {
-        return document.cookie.match(/tpdata=([0-9]+)/)[1]
+        return document.cookie.match(/tpdata=([0-9]+)/)[1];
     }
-})
+});

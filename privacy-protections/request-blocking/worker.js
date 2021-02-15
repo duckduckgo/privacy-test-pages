@@ -4,9 +4,9 @@ self.addEventListener('message', msg => {
             .then(r => r.json())
             .then(data => {
                 if (data.data.includes('fetch loaded')) {
-                    postMessage('worker fetch loaded 👍')
+                    postMessage('worker fetch loaded 👍');
                 }
             })
-            .catch(e => postMessage('worker fetch failed'))
+            .catch(e => postMessage('worker fetch failed'));
     }
-})
+});

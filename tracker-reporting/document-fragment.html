@@ -6,10 +6,9 @@
   <title>Tracker created via a document fragment</title>
 
   <script>
-
-	function loadTracker() {		
-
-        /* Original code:
+// eslint-disable-next-line no-unused-vars
+function loadTracker () {
+    /* Original code:
 
         appendMarkup: function appendMarkup(a) {
             if (this.trackingFooterEl) {
@@ -27,23 +26,21 @@
 
         */
 
-        var targetElement = document.getElementById("target-div");
+    const targetElement = document.getElementById('target-div');
 
-        var markup = "<img src='//facebook.com/tr?test=1'>"
+    const markup = "<img src='//facebook.com/tr?test=1'>";
 
-        var fragment = document.createDocumentFragment();
-        var div = document.createElement('div');
-        div.innerHTML = markup;
-        // var d = _.map(c.getElementsByTagName('script'), _.identity);
-        while (div.firstChild) {
-            fragment.appendChild(div.firstChild);
-        }
-        targetElement.appendChild(fragment);
+    const fragment = document.createDocumentFragment();
+    const div = document.createElement('div');
+    div.innerHTML = markup;
+    // var d = _.map(c.getElementsByTagName('script'), _.identity);
+    while (div.firstChild) {
+        fragment.appendChild(div.firstChild);
+    }
+    targetElement.appendChild(fragment);
 
-        // loadScripts(d, 0);
-
-	}
-
+    // loadScripts(d, 0);
+}
   </script>
 
 </head>

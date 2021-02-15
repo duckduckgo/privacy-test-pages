@@ -13,39 +13,39 @@
 <p id="demo"></p>
 
 <script>
-const demo = document.getElementById("demo");
+const demo = document.getElementById('demo');
 
-function getLocation() {
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(showPosition, currentPositionError);
-  } else { 
-    demo.innerHTML = "Geolocation is not supported by this browser.";
-  }
+function getLocation () {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(showPosition, currentPositionError);
+    } else {
+        demo.innerHTML = 'Geolocation is not supported by this browser.';
+    }
 }
 
-function currentPositionError(err) {
+function currentPositionError (err) {
     demo.innerHTML = `🛑 Location not available ("${err.message}").<br/>${demo.innerHTML}`;
 }
-  
+
 let lastUpdate = null;
 
-function showPosition(position) {
-  let diff = 0;
-  if (lastUpdate !== null) {
-    diff = Date.now() - lastUpdate;
-  }
- 
-  lastUpdate = Date.now();
-  const diffSec = Math.round(diff/1000);
-  const color = diffSec > 1 ? 'red' : 'green';
-  
-  if (diffSec === 0) {
-    return;
-  }
-  
-  demo.innerHTML = `Last update <span style='color: ${color}'>${diffSec}s</span> ago (lat ${position.coords.latitude} lon ${position.coords.longitude})<br/>${demo.innerHTML}`;
+function showPosition (position) {
+    let diff = 0;
+    if (lastUpdate !== null) {
+        diff = Date.now() - lastUpdate;
+    }
+
+    lastUpdate = Date.now();
+    const diffSec = Math.round(diff / 1000);
+    const color = diffSec > 1 ? 'red' : 'green';
+
+    if (diffSec === 0) {
+        return;
+    }
+
+    demo.innerHTML = `Last update <span style='color: ${color}'>${diffSec}s</span> ago (lat ${position.coords.latitude} lon ${position.coords.longitude})<br/>${demo.innerHTML}`;
 }
-  
+
 setInterval(getLocation, 1000);
 </script>
 

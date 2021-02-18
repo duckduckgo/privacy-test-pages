@@ -4,10 +4,6 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width">
   <title>Facebook click to load</title>
-
-  <style>
-      /* styles, if needed */
-  </style>
 </head>
 <body>
   <!-- Load the facebook SDK in the recommended way -->
@@ -18,7 +14,7 @@
 <p>This page embeds the facebook SDK, and several facebook iFrames. It also attempts to create 
 a variety of social elements using the SDK.</P>
 
-<p>The page will count how many facebook requests have been sent. For initial click to load, 0 should be sent. Once elements are clicked, the count should increase and elements should display (in most cases - this page does not use a valid SDK APP ID, so not all functions work correctly, in particular)</p>
+<p>The page will count how many facebook requests have been sent. For initial click to load, 0 should be sent. Once elements are clicked, the count should increase and elements should display (in most cases - this page does not use a valid SDK APP ID, so not all functions work correctly, login in particular.).</p>
 
 <h2> Metrics </h2>
 <div id="facebook_calls"> Facebook: <span id="facebook_call_count">-</span></div>
@@ -89,20 +85,22 @@ window.fbAsyncInit = function() {
   loginButton.addEventListener('click', fbLogin)
 }
 
-function displayFacebookCalls() {
-  let resourceLoads = window.performance.getEntriesByType("resource")
-  let count = 0
-  for (resource of resourceLoads) {
-    if (resource.name.match(/facebook.com|facebook.net/)) {
-      count += 1
-    }
-  }
-  facebookCalls = count
-  document.getElementById('facebook_call_count').innerHTML = facebookCalls
+function displayFacebookCalls(callCount) {
+  document.getElementById('facebook_call_count').innerHTML = callCount
 }
 
-// Calls happen over time, so periodically check calls
-setInterval(displayFacebookCalls, 500)
+function facebookObserver(list, observer) {
+  const resourceLoads = list.getEntriesByType("resource")
+  for (resource of resourceLoads) {
+    if (resource.name.match(/facebook.com|facebook.net/)) {
+      facebookCalls += 1
+    }
+  }
+  displayFacebookCalls(facebookCalls)
+}
+
+const observer = new PerformanceObserver(facebookObserver)
+observer.observe({ entryTypes: ["resource"] })
 
 function fbLogin() {
   displayArea = document.getElementById('loginResponse')

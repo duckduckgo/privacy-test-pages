@@ -6,21 +6,19 @@
   <title>Tracker loaded via fetch</title>
 
   <script>
+// eslint-disable-next-line no-unused-vars
+function loadTracker () {
+    const targetElement = document.getElementById('target-div');
 
-	function loadTracker() {		
-
-        var targetElement = document.getElementById("target-div");
-
-        fetch('https://facebook.com/tr?test=1', {mode: 'no-cors'})
-          .then(resp => {
+    fetch('https://facebook.com/tr?test=1', { mode: 'no-cors' })
+        .then(resp => {
             targetElement.innerText = 'Tracker loaded';
-          })
-          .catch(err => {
+        })
+        // eslint-disable-next-line node/handle-callback-err
+        .catch(err => {
             targetElement.innerText = 'Tracker not loaded';
-          });
-
-	}
-
+        });
+}
   </script>
 
 </head>

@@ -78,7 +78,7 @@
               this.drawSame.addEventListener('click', this);
           }
 
-          debugLog(methodName, args = []) {
+          debugLog (methodName, args = []) {
               if (this.logInstructions) {
                   this.outputData.value += `${methodName} ${JSON.stringify(args)}\n`;
               }
@@ -93,7 +93,7 @@
           }
 
           setStrokeColor (r, g, b, a) {
-              this.debugLog("setStrokeColor", [r,g,b,a]);
+              this.debugLog('setStrokeColor', [r, g, b, a]);
               this.context.strokeStyle = `rgba(${r},${g},${b},${a})`;
               this.context.fillStyle = `rgba(${r},${g},${b},${a})`;
           }
@@ -133,9 +133,8 @@
               this.addStatsRow('Output ImageData', ofpid, fpid === ofpid);
           }
 
-
-          dragPoint(x, y) {
-              this.debugLog("dragPoint", [x, y]);
+          dragPoint (x, y) {
+              this.debugLog('dragPoint', [x, y]);
               this.context.lineTo(x, y);
               this.context.stroke();
               this.context.beginPath();
@@ -145,8 +144,8 @@
               this.context.moveTo(x, y);
           }
 
-          endPoint() {
-              this.debugLog("endPoint");
+          endPoint () {
+              this.debugLog('endPoint');
               this.context.beginPath();
           }
 
@@ -179,15 +178,15 @@
 
           async rawDataChange () {
               const permittedMethods = [
-                "setStrokeColor",
-                "dragPoint",
-                "endPoint",
+                  'setStrokeColor',
+                  'dragPoint',
+                  'endPoint'
               ];
               const instructions = this.outputData.value.trim().split('\n');
               // Disable logging output whilst we reproduce the draw calls
               this.logInstructions = false;
-              for (let instruction of instructions) {
-                  let [methodName, args] = instruction.split(' ');
+              for (const instruction of instructions) {
+                  const [methodName, args] = instruction.split(' ');
                   if (permittedMethods.includes(methodName)) {
                       this[methodName](...JSON.parse(args));
                   }
@@ -202,51 +201,51 @@
               this.outputContext.putImageData(imageData, 0, 0);
           }
 
-          drawSamePattern() {
+          drawSamePattern () {
               [
-                  ['setStrokeColor', [10,124,217,150]],
-                  ['dragPoint', [75,72]],
+                  ['setStrokeColor', [10, 124, 217, 150]],
+                  ['dragPoint', [75, 72]],
                   ['endPoint', []],
-                  ['setStrokeColor', [6,69,246,165]],
-                  ['dragPoint', [155,76]],
+                  ['setStrokeColor', [6, 69, 246, 165]],
+                  ['dragPoint', [155, 76]],
                   ['endPoint', []],
-                  ['setStrokeColor', [112,33,85,20]],
-                  ['dragPoint', [41,139]],
-                  ['dragPoint', [42,140]],
-                  ['dragPoint', [43,142]],
-                  ['dragPoint', [45,147]],
-                  ['dragPoint', [50,152]],
-                  ['dragPoint', [55,157]],
-                  ['dragPoint', [61,163]],
-                  ['dragPoint', [67,167]],
-                  ['dragPoint', [78,174]],
-                  ['dragPoint', [88,179]],
-                  ['dragPoint', [92,180]],
-                  ['dragPoint', [107,185]],
-                  ['dragPoint', [116,187]],
-                  ['dragPoint', [132,189]],
-                  ['dragPoint', [147,191]],
-                  ['dragPoint', [164,191]],
-                  ['dragPoint', [174,192]],
-                  ['dragPoint', [191,192]],
-                  ['dragPoint', [213,191]],
-                  ['dragPoint', [225,190]],
-                  ['dragPoint', [234,186]],
-                  ['dragPoint', [236,185]],
-                  ['dragPoint', [243,178]],
-                  ['dragPoint', [247,172]],
-                  ['dragPoint', [250,165]],
-                  ['dragPoint', [253,158]],
-                  ['dragPoint', [254,153]],
-                  ['dragPoint', [256,148]],
-                  ['dragPoint', [257,145]],
-                  ['dragPoint', [257,145]],
-                  ['dragPoint', [257,143]],
-                  ['dragPoint', [257,141]],
-                  ['dragPoint', [257,141]],
-                  ['dragPoint', [256,140]],
-                  ['dragPoint', [256,139]],
-                  ['dragPoint', [256,138]],
+                  ['setStrokeColor', [112, 33, 85, 20]],
+                  ['dragPoint', [41, 139]],
+                  ['dragPoint', [42, 140]],
+                  ['dragPoint', [43, 142]],
+                  ['dragPoint', [45, 147]],
+                  ['dragPoint', [50, 152]],
+                  ['dragPoint', [55, 157]],
+                  ['dragPoint', [61, 163]],
+                  ['dragPoint', [67, 167]],
+                  ['dragPoint', [78, 174]],
+                  ['dragPoint', [88, 179]],
+                  ['dragPoint', [92, 180]],
+                  ['dragPoint', [107, 185]],
+                  ['dragPoint', [116, 187]],
+                  ['dragPoint', [132, 189]],
+                  ['dragPoint', [147, 191]],
+                  ['dragPoint', [164, 191]],
+                  ['dragPoint', [174, 192]],
+                  ['dragPoint', [191, 192]],
+                  ['dragPoint', [213, 191]],
+                  ['dragPoint', [225, 190]],
+                  ['dragPoint', [234, 186]],
+                  ['dragPoint', [236, 185]],
+                  ['dragPoint', [243, 178]],
+                  ['dragPoint', [247, 172]],
+                  ['dragPoint', [250, 165]],
+                  ['dragPoint', [253, 158]],
+                  ['dragPoint', [254, 153]],
+                  ['dragPoint', [256, 148]],
+                  ['dragPoint', [257, 145]],
+                  ['dragPoint', [257, 145]],
+                  ['dragPoint', [257, 143]],
+                  ['dragPoint', [257, 141]],
+                  ['dragPoint', [257, 141]],
+                  ['dragPoint', [256, 140]],
+                  ['dragPoint', [256, 139]],
+                  ['dragPoint', [256, 138]],
                   ['endPoint', []]
               ].map(([method, args]) => this.debugLog(method, args));
               this.rawDataChange();
@@ -255,9 +254,8 @@
 
       const instance = new Draw(document.getElementById('canvas'));
       if (document.location.search.indexOf('?run') === 0) {
-        instance.drawSamePattern();
+          instance.drawSamePattern();
       }
-
   </script>
 
 </body>

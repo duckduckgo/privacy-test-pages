@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Canvas draw</title>
+</head>
+<body>
+<p><a href="../index.html">[Home]</a></p>
+
+  <p>For testing fingerprinting, ensure that both the input drawing looks the same as the output, also ensure that the input and output hashes don't match</p>
+
+  <main>
+  	<canvas id="canvas" width=300 height=300>
+   	</canvas>
+  	<canvas id="output" width=300 height=300>
+   	</canvas>
+    <div id="stats">
+    </div>
+  </main>
+
+  <aside>
+    <button id="draw-same">Draw pattern</button>
+    <p>Raw mathod calls, paste from another draw to replicate:</p>
+    <textarea id="output-data">
+    </textarea>
+  </aside>
+
+  <style>
+      #canvas, #output {
+          width: 300px;
+          height: 300px;
+          border: 1px solid black;
+      }
+      #canvas {
+          border-color: red;
+      }
+      #stats {
+          white-space: pre;
+      }
+      textarea {
+          width: 600px;
+          height: 600px;
+      }
+  </style>
+  <script>
+      const radius = 5;
+      const start = 0;
+      const end = Math.PI * 2;
+
+      async function sha256 (str) {
+          const buf = await crypto.subtle.digest('SHA-256', new TextEncoder('utf-8').encode(str));
+          return Array.prototype.map.call(new Uint8Array(buf), x => (('00' + x.toString(16)).slice(-2))).join('');
+      }
+      
+      class Draw {
+          constructor (canvasElement, outputElement) {
+              this.canvas = canvasElement;
+              this.context = this.canvas.getContext('2d');
+
+              this.logInstructions = true;
+
+              this.context.lineWidth = radius * 2;
+              this.dragging = false;
+              this.canvas.addEventListener('mousedown', this);
+              this.canvas.addEventListener('mousemove', this);
+              this.canvas.addEventListener('mouseup', this);
+
+              this.output = document.getElementById('output');
+              this.outputContext = this.output.getContext('2d');
+              this.stats = document.getElementById('stats');
+
+              this.outputData = document.getElementById('output-data');
+              this.outputData.addEventListener('change', this);
+              this.outputData.value = '';
+
+              this.drawSame = document.getElementById('draw-same');
+              this.drawSame.addEventListener('click', this);
+          }
+
+          debugLog(methodName, args = []) {
+              if (this.logInstructions) {
+                  this.outputData.value += `${methodName} ${JSON.stringify(args)}\n`;
+              }
+          }
+
+          setRandomStrokeColor () {
+              const r = Math.random() * 255;
+              const g = Math.random() * 255;
+              const b = Math.random() * 255;
+              const a = Math.random() * 255;
+              this.setStrokeColor(Math.round(r), Math.round(g), Math.round(b), Math.round(a));
+          }
+
+          setStrokeColor (r, g, b, a) {
+              this.debugLog("setStrokeColor", [r,g,b,a]);
+              this.context.strokeStyle = `rgba(${r},${g},${b},${a})`;
+              this.context.fillStyle = `rgba(${r},${g},${b},${a})`;
+          }
+
+          addStatsRow (title, desc, match) {
+              const rowElement = document.createElement('div');
+              const titleElement = document.createElement('dt');
+              titleElement.innerText = title;
+
+              const descElement = document.createElement('dd');
+              descElement.innerText = desc;
+              if (match !== undefined) {
+                  const matchElement = document.createElement('strong');
+                  if (match) {
+                      matchElement.textContent += ' Match';
+                  } else {
+                      matchElement.textContent += ' No match';
+                  }
+                  descElement.appendChild(matchElement);
+              }
+
+              rowElement.appendChild(titleElement);
+              rowElement.appendChild(descElement);
+              this.stats.appendChild(rowElement);
+          }
+
+          async outputStats () {
+              const fp = await sha256(this.canvas.toDataURL());
+              const ofp = await sha256(this.output.toDataURL());
+              const fpid = await sha256(JSON.stringify(this.context.getImageData(0, 0, this.canvas.width, this.canvas.height).data));
+              const ofpid = await sha256(JSON.stringify(this.outputContext.getImageData(0, 0, this.output.width, this.output.height).data));
+      
+              this.stats.textContent = '';
+              this.addStatsRow('Canvas DataURL', fp);
+              this.addStatsRow('Output DataURL', ofp, fp === ofp);
+              this.addStatsRow('Canvas ImageData', fpid);
+              this.addStatsRow('Output ImageData', ofpid, fpid === ofpid);
+          }
+
+
+          dragPoint(x, y) {
+              this.debugLog("dragPoint", [x, y]);
+              this.context.lineTo(x, y);
+              this.context.stroke();
+              this.context.beginPath();
+              this.context.arc(x, y, radius, start, end);
+              this.context.fill();
+              this.context.beginPath();
+              this.context.moveTo(x, y);
+          }
+
+          endPoint() {
+              this.debugLog("endPoint");
+              this.context.beginPath();
+          }
+
+          async handleEvent (e) {
+              switch (e.type) {
+              case 'mousedown':
+                  this.dragging = true;
+                  this.setRandomStrokeColor();
+              // eslint-disable-next-line no-fallthrough
+              case 'mousemove':
+                  if (this.dragging) {
+                      const x = e.offsetX;
+                      const y = e.offsetY;
+                      this.dragPoint(x, y);
+                  }
+                  break;
+              case 'mouseup':
+                  this.dragging = false;
+                  this.endPoint();
+                  this.replicate();
+                  await this.outputStats();
+                  break;
+              case 'change':
+                  this.rawDataChange();
+                  break;
+              case 'click':
+                  this.drawSamePattern();
+              }
+          }
+
+          async rawDataChange () {
+              const permittedMethods = [
+                "setStrokeColor",
+                "dragPoint",
+                "endPoint",
+              ];
+              const instructions = this.outputData.value.trim().split('\n');
+              // Disable logging output whilst we reproduce the draw calls
+              this.logInstructions = false;
+              for (let instruction of instructions) {
+                  let [methodName, args] = instruction.split(' ');
+                  if (permittedMethods.includes(methodName)) {
+                      this[methodName](...JSON.parse(args));
+                  }
+              }
+              this.logInstructions = true;
+              this.replicate();
+              await this.outputStats();
+          }
+
+          replicate () {
+              const imageData = this.context.getImageData(0, 0, this.canvas.height, this.canvas.width);
+              this.outputContext.putImageData(imageData, 0, 0);
+          }
+
+          drawSamePattern() {
+              [
+                  ['setStrokeColor', [10,124,217,150]],
+                  ['dragPoint', [75,72]],
+                  ['endPoint', []],
+                  ['setStrokeColor', [6,69,246,165]],
+                  ['dragPoint', [155,76]],
+                  ['endPoint', []],
+                  ['setStrokeColor', [112,33,85,20]],
+                  ['dragPoint', [41,139]],
+                  ['dragPoint', [42,140]],
+                  ['dragPoint', [43,142]],
+                  ['dragPoint', [45,147]],
+                  ['dragPoint', [50,152]],
+                  ['dragPoint', [55,157]],
+                  ['dragPoint', [61,163]],
+                  ['dragPoint', [67,167]],
+                  ['dragPoint', [78,174]],
+                  ['dragPoint', [88,179]],
+                  ['dragPoint', [92,180]],
+                  ['dragPoint', [107,185]],
+                  ['dragPoint', [116,187]],
+                  ['dragPoint', [132,189]],
+                  ['dragPoint', [147,191]],
+                  ['dragPoint', [164,191]],
+                  ['dragPoint', [174,192]],
+                  ['dragPoint', [191,192]],
+                  ['dragPoint', [213,191]],
+                  ['dragPoint', [225,190]],
+                  ['dragPoint', [234,186]],
+                  ['dragPoint', [236,185]],
+                  ['dragPoint', [243,178]],
+                  ['dragPoint', [247,172]],
+                  ['dragPoint', [250,165]],
+                  ['dragPoint', [253,158]],
+                  ['dragPoint', [254,153]],
+                  ['dragPoint', [256,148]],
+                  ['dragPoint', [257,145]],
+                  ['dragPoint', [257,145]],
+                  ['dragPoint', [257,143]],
+                  ['dragPoint', [257,141]],
+                  ['dragPoint', [257,141]],
+                  ['dragPoint', [256,140]],
+                  ['dragPoint', [256,139]],
+                  ['dragPoint', [256,138]],
+                  ['endPoint', []]
+              ].map(([method, args]) => this.debugLog(method, args));
+              this.rawDataChange();
+          }
+      }
+
+      const instance = new Draw(document.getElementById('canvas'));
+      if (document.location.search.indexOf('?run') === 0) {
+        instance.drawSamePattern();
+      }
+
+  </script>
+
+</body>
+</html>

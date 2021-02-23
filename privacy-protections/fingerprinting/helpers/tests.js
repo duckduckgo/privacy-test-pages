@@ -994,50 +994,91 @@ const tests = [
     {
         id: 'audio',
         category: 'full-fingerprints',
-        getValue: () => {
-            let resolve;
-            const promise = new Promise((res, rej) => { resolve = res; });
-
-            // still pefixed in Safari
+        getValue: async () => {
             // eslint-disable-next-line new-cap
             const context = window.OfflineAudioContext ? new OfflineAudioContext(1, 44100, 44100) : new webkitOfflineAudioContext(1, 44100, 44100);
+            const renderedBuffer = await applyFpExampleDataToAudio(context);
+            const fingerprint = renderedBuffer.getChannelData(0)
+                .slice(4500, 5000)
+                .reduce(function (acc, val) { return acc + Math.abs(val); }, 0)
+                .toString();
+            return fingerprint;
+        }
+    },
+    {
+        id: 'audio-copyFromChannel',
+        category: 'full-fingerprints',
+        getValue: async () => {
+            // eslint-disable-next-line new-cap
+            const context = window.OfflineAudioContext ? new OfflineAudioContext(1, 44100, 44100) : new webkitOfflineAudioContext(1, 44100, 44100);
+            const renderedBuffer = await applyFpExampleDataToAudio(context);
+            const copiedData = new Float32Array(renderedBuffer.length);
+            renderedBuffer.copyFromChannel(copiedData, 0, 0);
 
-            const oscillator = context.createOscillator();
-            oscillator.type = 'triangle';
-            oscillator.frequency.setValueAtTime(10000, context.currentTime);
+            const fingerprint = copiedData.slice(4500, 5000)
+                .reduce(function (acc, val) { return acc + Math.abs(val); }, 0)
+                .toString();
+            return fingerprint;
+        }
+    },
+    {
+        id: 'audio-analyserNode-getByteTimeDomainData',
+        category: 'full-fingerprints',
+        getValue: async () => {
+            // eslint-disable-next-line new-cap
+            const context = window.OfflineAudioContext ? new OfflineAudioContext(1, 44100, 44100) : new webkitOfflineAudioContext(1, 44100, 44100);
+            const analyser = context.createAnalyser();
+            const dataArray = new Uint8Array(analyser.fftSize);
 
-            const compressor = context.createDynamicsCompressor();
+            await applyFpExampleDataToAudio(context, analyser);
 
-            [
-                ['threshold', -50],
-                ['knee', 40],
-                ['ratio', 12],
-                ['reduction', -20],
-                ['attack', 0],
-                ['release', 0.25]
-            ].forEach(function (item) {
-                if (compressor[item[0]] !== undefined && typeof compressor[item[0]].setValueAtTime === 'function') {
-                    compressor[item[0]].setValueAtTime(item[1], context.currentTime);
-                }
-            });
+            analyser.getByteTimeDomainData(dataArray);
+            return dataArray.reduce((acc, val) => { return acc + Math.abs(val); }, 0);
+        }
+    },
+    {
+        id: 'audio-analyserNode-getFloatTimeDomainData',
+        category: 'full-fingerprints',
+        getValue: async () => {
+            // eslint-disable-next-line new-cap
+            const context = window.OfflineAudioContext ? new OfflineAudioContext(1, 44100, 44100) : new webkitOfflineAudioContext(1, 44100, 44100);
+            const analyser = context.createAnalyser();
+            const dataArray = new Float32Array(analyser.fftSize);
 
-            context.oncomplete = (event) => {
-                const fingerprint = event.renderedBuffer.getChannelData(0)
-                    .slice(4500, 5000)
-                    .reduce(function (acc, val) { return acc + Math.abs(val); }, 0)
-                    .toString();
-                oscillator.disconnect();
-                compressor.disconnect();
+            await applyFpExampleDataToAudio(context, analyser);
 
-                resolve(fingerprint);
-            };
+            analyser.getFloatTimeDomainData(dataArray);
+            return dataArray.reduce((acc, val) => { return acc + Math.abs(val); }, 0);
+        }
+    },
+    {
+        id: 'audio-analyserNode-getByteFrequencyData',
+        category: 'full-fingerprints',
+        getValue: async () => {
+            // eslint-disable-next-line new-cap
+            const context = window.OfflineAudioContext ? new OfflineAudioContext(1, 44100, 44100) : new webkitOfflineAudioContext(1, 44100, 44100);
+            const analyser = context.createAnalyser();
+            const dataArray = new Uint8Array(analyser.frequencyBinCount);
 
-            oscillator.connect(compressor);
-            compressor.connect(context.destination);
-            oscillator.start(0);
-            context.startRendering();
+            await applyFpExampleDataToAudio(context, analyser);
 
-            return promise;
+            analyser.getByteFrequencyData(dataArray);
+            return dataArray.reduce((acc, val) => { return acc + Math.abs(val); }, 0);
+        }
+    },
+    {
+        id: 'audio-analyserNode-getFloatFrequencyData',
+        category: 'full-fingerprints',
+        getValue: async () => {
+            // eslint-disable-next-line new-cap
+            const context = window.OfflineAudioContext ? new OfflineAudioContext(1, 44100, 44100) : new webkitOfflineAudioContext(1, 44100, 44100);
+            const analyser = context.createAnalyser();
+            const dataArray = new Float32Array(analyser.frequencyBinCount);
+
+            await applyFpExampleDataToAudio(context, analyser);
+
+            analyser.getFloatFrequencyData(dataArray);
+            return dataArray.reduce((acc, val) => { return acc + Math.abs(val); }, 0);
         }
     },
     {
@@ -1364,4 +1405,47 @@ function applyFpExampleDataToCanvas (canvas) {
     ctx.arc(75, 75, 75, 0, Math.PI * 2, true);
     ctx.arc(75, 75, 25, 0, Math.PI * 2, true);
     ctx.fill('evenodd');
+}
+
+function applyFpExampleDataToAudio (context, analyzerNode) {
+    let resolve;
+    const promise = new Promise((res, rej) => { resolve = res; });
+
+    const oscillator = context.createOscillator();
+    oscillator.type = 'triangle';
+    oscillator.frequency.setValueAtTime(10000, context.currentTime);
+
+    const compressor = context.createDynamicsCompressor();
+
+    [
+        ['threshold', -50],
+        ['knee', 40],
+        ['ratio', 12],
+        ['reduction', -20],
+        ['attack', 0],
+        ['release', 0.25]
+    ].forEach(function (item) {
+        if (compressor[item[0]] !== undefined && typeof compressor[item[0]].setValueAtTime === 'function') {
+            compressor[item[0]].setValueAtTime(item[1], context.currentTime);
+        }
+    });
+
+    context.oncomplete = (event) => {
+        oscillator.disconnect();
+        compressor.disconnect();
+
+        resolve(event.renderedBuffer);
+    };
+
+    oscillator.connect(compressor);
+    if (analyzerNode) {
+        compressor.connect(analyzerNode);
+        analyzerNode.connect(context.destination);
+    } else {
+        compressor.connect(context.destination);
+    }
+    oscillator.start(0);
+    context.startRendering();
+
+    return promise;
 }

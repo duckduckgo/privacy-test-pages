@@ -1,5 +1,6 @@
 /* globals commonTests */
 const THIRD_PARTY_ORIGIN = 'https://good.third-party.site';
+const THIRD_PARTY_TRACKER_ORIGIN = 'https://broken.third-party.site';
 
 const storeButton = document.querySelector('#store');
 const retriveButton = document.querySelector('#retrive');
@@ -16,9 +17,73 @@ const results = {
     results: []
 };
 
+function create3pIframeTest (name, origin) {
+    return {
+        id: `${name} third party iframe`,
+        store: (data) => {
+            let res, rej;
+            const promise = new Promise((resolve, reject) => { res = resolve; rej = reject; });
+
+            const iframe = document.createElement('iframe');
+            iframe.src = `${origin}/privacy-protections/storage-blocking/iframe.html?data=${data}`;
+            iframe.style.width = '10px';
+            iframe.style.height = '10px';
+            let failTimeout = null;
+
+            function cleanUp (msg) {
+                if (msg.origin === origin && msg.data) {
+                    res(msg.data);
+
+                    clearTimeout(failTimeout);
+                    document.body.removeChild(iframe);
+                    window.removeEventListener('message', cleanUp);
+                }
+            }
+
+            window.addEventListener('message', cleanUp);
+            iframe.addEventListener('load', () => {
+                failTimeout = setTimeout(() => rej('timeout'), 1000);
+            });
+
+            document.body.appendChild(iframe);
+
+            return promise;
+        },
+        retrive: () => {
+            let res, rej;
+            const promise = new Promise((resolve, reject) => { res = resolve; rej = reject; });
+
+            const iframe = document.createElement('iframe');
+            iframe.src = `${origin}/privacy-protections/storage-blocking/iframe.html`;
+            iframe.style.width = '10px';
+            iframe.style.height = '10px';
+            let failTimeout = null;
+
+            function cleanUp (msg) {
+                if (msg.data) {
+                    res(msg.data);
+
+                    clearTimeout(failTimeout);
+                    document.body.removeChild(iframe);
+                    window.removeEventListener('message', cleanUp);
+                }
+            }
+
+            window.addEventListener('message', cleanUp);
+            iframe.addEventListener('load', () => {
+                failTimeout = setTimeout(() => rej('timeout'), 1000);
+            });
+
+            document.body.appendChild(iframe);
+
+            return promise;
+        }
+    };
+}
+
 const tests = [
     {
-        id: 'header cookie',
+        id: 'first party header cookie',
         store: (data) => {
             return fetch(`/set-cookie?value=${data}`).then(r => {
                 if (!r.ok) {
@@ -33,7 +98,7 @@ const tests = [
         }
     },
     {
-        id: 'third party header cookie',
+        id: 'safe third party header cookie',
         store: (data) => {
             return fetch(`${THIRD_PARTY_ORIGIN}/set-cookie?value=${data}`, { credentials: 'include' }).then(r => {
                 if (!r.ok) {
@@ -48,66 +113,22 @@ const tests = [
         }
     },
     {
-        id: 'third party iframe',
+        id: 'tracking third party header cookie',
         store: (data) => {
-            let res, rej;
-            const promise = new Promise((resolve, reject) => { res = resolve; rej = reject; });
-
-            const iframe = document.createElement('iframe');
-            iframe.src = `${THIRD_PARTY_ORIGIN}/privacy-protections/storage-blocking/iframe.html?data=${data}`;
-            iframe.style.width = '10px';
-            iframe.style.height = '10px';
-            let failTimeout = null;
-
-            function cleanUp (msg) {
-                if (msg.data) {
-                    res(msg.data);
-
-                    clearTimeout(failTimeout);
-                    document.body.removeChild(iframe);
-                    window.removeEventListener('message', cleanUp);
+            return fetch(`${THIRD_PARTY_TRACKER_ORIGIN}/set-cookie?value=${data}`, { credentials: 'include' }).then(r => {
+                if (!r.ok) {
+                    throw new Error('Request failed.');
                 }
-            }
-
-            window.addEventListener('message', cleanUp);
-            iframe.addEventListener('load', () => {
-                failTimeout = setTimeout(() => rej('timeout'), 1000);
             });
-
-            document.body.appendChild(iframe);
-
-            return promise;
         },
         retrive: () => {
-            let res, rej;
-            const promise = new Promise((resolve, reject) => { res = resolve; rej = reject; });
-
-            const iframe = document.createElement('iframe');
-            iframe.src = `${THIRD_PARTY_ORIGIN}/privacy-protections/storage-blocking/iframe.html`;
-            iframe.style.width = '10px';
-            iframe.style.height = '10px';
-            let failTimeout = null;
-
-            function cleanUp (msg) {
-                if (msg.data) {
-                    res(msg.data);
-
-                    clearTimeout(failTimeout);
-                    document.body.removeChild(iframe);
-                    window.removeEventListener('message', cleanUp);
-                }
-            }
-
-            window.addEventListener('message', cleanUp);
-            iframe.addEventListener('load', () => {
-                failTimeout = setTimeout(() => rej('timeout'), 1000);
-            });
-
-            document.body.appendChild(iframe);
-
-            return promise;
+            return fetch(`${THIRD_PARTY_TRACKER_ORIGIN}/reflect-headers`, { credentials: 'include' })
+                .then(r => r.json())
+                .then(data => data.headers.cookie.match(/headerdata=([0-9]+)/)[1]);
         }
     },
+    create3pIframeTest('safe', THIRD_PARTY_ORIGIN),
+    create3pIframeTest('tracking', THIRD_PARTY_TRACKER_ORIGIN),
     {
         id: 'browser cache',
         store: (data) => {

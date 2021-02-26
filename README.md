@@ -18,6 +18,14 @@ Please note that we are not taking external contributions for new test pages, bu
 - Please remember to link new test page from [index.html](./index.html).
 - Once you have a PR with a new page please assign it to one of the AoR DRIs (@brindy, @kdzwinel).
 
+### Test domains
+
+We have couple of test domains, that all resolve to `privacy-test-pages.glitch.me`, which help us simulate various scenarios:
+
+- `good.third-party.site` - non-tracking third party, it's not on our blocklist and will not be blocked by our clients
+- `broken.third-party.site` - tracking third party that we can't block (e.g. due to brekage), it's on our blocklist, but it will not be blocked by our clients
+- `bad.third-party.site` - tracking third party that's on our blocklist and our clients will block
+
 ### How to test it locally
 
 If you are working on a simple page you can start any local server (e.g. `python -m SimpleHTTPServer 8000`) in the main folder of the project.

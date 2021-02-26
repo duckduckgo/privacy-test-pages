@@ -11,10 +11,10 @@
     commonTests.push({
         id: `JS cookie (3rd party ${trackingDomain ? 'tracking' : 'safe'} script)`,
         store: (data) => {
-            document.cookie = `tpdata=${data}; expires= Wed, 21 Aug 2030 20:00:00 UTC;`;
+            document.cookie = `tp${trackingDomain ? 't' : 's'}data=${data}; expires= Wed, 21 Aug 2030 20:00:00 UTC;`;
         },
         retrive: () => {
-            return document.cookie.match(/tpdata=([0-9]+)/)[1];
+            return trackingDomain ? document.cookie.match(/tptdata=([0-9]+)/)[1] : document.cookie.match(/tpsdata=([0-9]+)/)[1];
         }
     });
 })();

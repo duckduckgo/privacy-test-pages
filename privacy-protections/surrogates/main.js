@@ -1,4 +1,4 @@
-const results = {}
+const results = {};
 
 function updateTable ({ name, testData, error }) {
     const table = document.getElementById('results-table');
@@ -15,8 +15,8 @@ function updateTable ({ name, testData, error }) {
     row.style.backgroundColor = '#f97268';
     note.style.backgroundColor = '#ffff';
 
-    results[name] = {pass: true};
-    
+    results[name] = { pass: true };
+
     if (!error || testData.shouldFail) {
         loaded.innerText = 'pass';
 
@@ -69,7 +69,11 @@ const surrogates = {
 (function loadSurrogates () {
     for (const [name, testData] of Object.entries(surrogates)) {
         const s = document.createElement('script');
-        testData.crossOrigin ? s.crossOrigin = testData.crossOrigin : '';
+
+        if (testData.crossOrigin) {
+            s.crossOrigin = testData.crossOrigin;
+        }
+
         s.src = testData.url;
 
         s.onload = () => updateTable({ name, testData });
@@ -77,5 +81,4 @@ const surrogates = {
 
         document.body.appendChild(s);
     }
-})()
-
+})();

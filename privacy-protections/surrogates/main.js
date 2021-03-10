@@ -35,8 +35,8 @@ function updateTable ({ name, testData, error }) {
         note.innerText = testData.notes;
     }
 
-    if (testData.cleanup) {
-        testData.cleanup();
+    if (testData.cleanUp) {
+        testData.cleanUp();
     }
 }
 
@@ -45,18 +45,13 @@ const surrogates = {
         url: 'https://google-analytics.com/analytics.js',
         crossOrigin: 'anonymous',
         notes: 'Test loading with crossOrigin set on element (should fail on Firefox) https://bugzilla.mozilla.org/show_bug.cgi?id=1694679',
-        test: () => { return window.ga.answer === 42; },
+        test: () => { return !!(window.ga && Object.keys(window.ga.create()).length === 0); },
         cleanUp: () => { delete window.ga; }
     },
     'google-analytics.com/analytics.js': {
         url: 'https://google-analytics.com/analytics.js',
-        test: () => { return window.ga.answer === 42; },
+        test: () => { return !!(window.ga && Object.keys(window.ga.create()).length === 0); },
         cleanUp: () => { delete window.ga; }
-    },
-    'google-analytics, ga.js': {
-        url: 'https://google-analytics.com/ga.js',
-        test: () => { return !!window._gaq; },
-        cleanUp: () => { delete window._gaq; }
     },
     'Directly accessing a web resouce': {
         url: 'chrome-extension://bkdgflcldnnnapblkhphbgpggdiikppg/web_accessible_resources/analytics.js',
@@ -66,19 +61,28 @@ const surrogates = {
     }
 };
 
-(function loadSurrogates () {
+(async function loadSurrogates () {
     for (const [name, testData] of Object.entries(surrogates)) {
-        const s = document.createElement('script');
+        await new Promise((resolve, reject) => {
+            const s = document.createElement('script');
 
-        if (testData.crossOrigin) {
-            s.crossOrigin = testData.crossOrigin;
-        }
+            if (testData.crossOrigin) {
+                s.crossOrigin = testData.crossOrigin;
+            }
 
-        s.src = testData.url;
+            s.onload = () => {
+                updateTable({ name, testData });
+                resolve();
+            };
 
-        s.onload = () => updateTable({ name, testData });
-        s.onerror = (error) => updateTable({ name, testData, error });
+            s.onerror = (error) => {
+                updateTable({ name, testData, error });
+                resolve();
+            };
 
-        document.body.appendChild(s);
+            s.src = testData.url;
+
+            document.body.appendChild(s);
+        });
     }
 })();

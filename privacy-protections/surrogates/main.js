@@ -17,7 +17,13 @@ function updateTable ({ name, testData, error }) {
 
     results[name] = { pass: true };
 
-    if (!error || testData.shouldFail) {
+    let testPassed = true;
+
+    if (!error && testData.shouldFail) {
+        testPassed = false;
+    }
+
+    if (testPassed) {
         loaded.innerText = 'pass';
 
         const result = testData.test();
@@ -45,11 +51,13 @@ const surrogates = {
         url: 'https://google-analytics.com/analytics.js',
         crossOrigin: 'anonymous',
         notes: 'Test loading with crossOrigin set on element (should fail on Firefox) https://bugzilla.mozilla.org/show_bug.cgi?id=1694679',
+        shouldFail: false,
         test: () => { return !!(window.ga && Object.keys(window.ga.create()).length === 0); },
         cleanUp: () => { delete window.ga; }
     },
     'google-analytics.com/analytics.js': {
         url: 'https://google-analytics.com/analytics.js',
+        shouldFail: false,
         test: () => { return !!(window.ga && Object.keys(window.ga.create()).length === 0); },
         cleanUp: () => { delete window.ga; }
     },

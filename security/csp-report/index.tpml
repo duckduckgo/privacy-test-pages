@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>CSP Report leak</title>
+</head>
+<body>
+<p><a href="../index.html">[Home]</a></p>
+
+<p>Leaked CSP report sources:</p>
+
+<ul id="reports">
+
+</ul>
+
+<script id="csp-script" nonce="%%UID%%">
+const uid = document.querySelector('#csp-script').nonce;
+
+window.addEventListener('load', () => {
+  fetch(`/security/csp-report/reports?id=${uid}`).then(async (req) => {
+    const reports = await req.json();
+    console.log('received reports for this page', reports);
+    const ul = document.querySelector('#reports');
+    reports.forEach((report) => {
+        const li = document.createElement('li');
+        li.innerText = report['source-file'];
+        ul.appendChild(li);
+    });
+  });
+});
+</script>
+</body>
+</html>

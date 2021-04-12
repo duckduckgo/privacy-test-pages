@@ -6,6 +6,7 @@ const url = require('url');
 const cmd = require('node-cmd');
 const crypto = require('crypto');
 const fs = require('fs');
+const { json } = require('body-parser');
 
 function fullUrl (req) {
     return url.format({
@@ -20,8 +21,12 @@ function fullUrl (req) {
 const listener = app.listen(port, () => {
     console.log(`Server listening at port ${listener.address().port}`);
 });
+const origin = 'https://privacy-test-pages.glitch.me';
 
 app.use(express.json());
+app.use(json({
+    type: 'application/csp-report'
+}));
 
 // serve all static files
 app.use(express.static('.', {
@@ -144,4 +149,36 @@ app.get('/come-back', (req, res) => {
 </script>
 </body>
 </html>`);
+});
+
+const cspIds = new Map();
+app.get('/security/csp-report/index.html', (req, res) => {
+    const id = crypto.randomInt(2 ** 32).toString(16);
+    cspIds.set(id, []);
+    const policy = `default-src 'self'; img-src 'self'; media-src 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' 'nonce-${id}'; style-src 'self' 'unsafe-inline'; worker-src 'self' blob:; report-uri ${origin}/security/csp-report/csp-report?id=${id}`;
+    res.set('content-security-policy', policy);
+    // res.set('set-cookie', `uid=${id}; Samesite=Strict; path=/security/csp-report/`);
+    fs.readFile('./security/csp-report/index.tpml', { encoding: 'utf-8' }, (err, contents) => {
+        if (err) {
+            res.statusCode = 500;
+            return res.end('error');
+        }
+        res.end(contents.replace('%%UID%%', id));
+    });
+});
+
+app.post('/security/csp-report/csp-report', (req, res) => {
+    const reports = cspIds.get(req.query.id);
+    if (reports) {
+        reports.push(req.body['csp-report']);
+    }
+    res.end();
+});
+
+app.get('/security/csp-report/reports', (req, res) => {
+    if (cspIds.has(req.query.id)) {
+        const reports = cspIds.get(req.query.id);
+        res.json(reports);
+        cspIds.delete(req.query.id);
+    }
 });

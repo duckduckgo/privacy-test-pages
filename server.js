@@ -170,7 +170,10 @@ app.get('/security/csp-report/index.html', (req, res) => {
 app.post('/security/csp-report/csp-report', (req, res) => {
     const reports = cspIds.get(req.query.id);
     if (reports) {
-        reports.push(req.body['csp-report']);
+        const report = req.body['csp-report'];
+        if (report['source-file'] && !report['source-file'].startsWith(origin)) {
+            reports.push(req.body['csp-report']);
+        }
     }
     res.end();
 });

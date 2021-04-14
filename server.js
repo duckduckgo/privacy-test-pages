@@ -10,7 +10,7 @@ const { json } = require('body-parser');
 
 function fullUrl (req) {
     return url.format({
-    // note: if server is behind a proxy, and it probably is, you may see 'http' here even if request was 'https'
+        // note: if server is behind a proxy, and it probably is, you may see 'http' here even if request was 'https'
         protocol: req.protocol,
         host: req.get('host'),
         pathname: req.originalUrl
@@ -155,7 +155,9 @@ const cspIds = new Map();
 app.get('/security/csp-report/index.html', (req, res) => {
     const id = crypto.randomInt(2 ** 32).toString(16);
     cspIds.set(id, []);
-    const origin = `${req.protocol}://${req.get('host')}`;
+    // req.protocol is always 'http' on glitch (beause proxy) - let's default to 'https' here (unless localhost)
+    const protocol = (req.protocol === 'http' && !req.get('host').startsWith('localhost')) ? 'https' : req.protocol;
+    const origin = `${protocol}://${req.get('host')}`;
     const policy = `default-src 'self'; img-src 'self'; media-src 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' 'nonce-${id}'; style-src 'self' 'unsafe-inline'; worker-src 'self' blob:; report-uri ${origin}/security/csp-report/csp-report?id=${id}`;
     res.set('content-security-policy', policy);
     fs.readFile('./security/csp-report/index-template.html', { encoding: 'utf-8' }, (err, contents) => {
@@ -170,7 +172,9 @@ app.get('/security/csp-report/index.html', (req, res) => {
 });
 
 app.post('/security/csp-report/csp-report', (req, res) => {
-    const origin = `${req.protocol}://${req.get('host')}`;
+    // req.protocol is always 'http' on glitch (beause proxy) - let's default to 'https' here (unless localhost)
+    const protocol = (req.protocol === 'http' && !req.get('host').startsWith('localhost')) ? 'https' : req.protocol;
+    const origin = `${protocol}://${req.get('host')}`;
     const reports = cspIds.get(req.query.id);
     if (reports) {
         const report = req.body['csp-report'];

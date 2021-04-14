@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "This project contains a collection of pages that are meant to be used for testing various privacy and security features of browsers and browser extensions.",
   "main": "server.js",
+  "engines": {
+    "node": ">=12.19"
+  },
   "scripts": {
     "test": "npm run lint-js && npm run lint-html",
     "lint-js": "eslint .",

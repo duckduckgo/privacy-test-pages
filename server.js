@@ -21,9 +21,9 @@ function fullUrl (req) {
 const listener = app.listen(port, () => {
     console.log(`Server listening at port ${listener.address().port}`);
 });
-const origin = 'https://privacy-test-pages.glitch.me';
 
 app.use(express.json());
+// Parse post request data as JSON for requests with content-type 'application/csp-report'
 app.use(json({
     type: 'application/csp-report'
 }));
@@ -155,19 +155,22 @@ const cspIds = new Map();
 app.get('/security/csp-report/index.html', (req, res) => {
     const id = crypto.randomInt(2 ** 32).toString(16);
     cspIds.set(id, []);
+    const origin = `${req.protocol}://${req.get('host')}`;
     const policy = `default-src 'self'; img-src 'self'; media-src 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' 'nonce-${id}'; style-src 'self' 'unsafe-inline'; worker-src 'self' blob:; report-uri ${origin}/security/csp-report/csp-report?id=${id}`;
     res.set('content-security-policy', policy);
-    // res.set('set-cookie', `uid=${id}; Samesite=Strict; path=/security/csp-report/`);
-    fs.readFile('./security/csp-report/index.tpml', { encoding: 'utf-8' }, (err, contents) => {
+    fs.readFile('./security/csp-report/index-template.html', { encoding: 'utf-8' }, (err, contents) => {
         if (err) {
             res.statusCode = 500;
             return res.end('error');
         }
         res.end(contents.replace('%%UID%%', id));
     });
+    // ensure IDs get deleted after 60s
+    setTimeout(() => cspIds.delete(id), 60000);
 });
 
 app.post('/security/csp-report/csp-report', (req, res) => {
+    const origin = `${req.protocol}://${req.get('host')}`;
     const reports = cspIds.get(req.query.id);
     if (reports) {
         const report = req.body['csp-report'];

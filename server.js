@@ -192,3 +192,29 @@ app.get('/security/csp-report/reports', (req, res) => {
         cspIds.delete(req.query.id);
     }
 });
+
+function downloadPDF (res) {
+    res.download('./features/download.pdf');
+}
+
+function downloadJSON (res) {
+    const json = JSON.stringify({ example: 'test' });
+    const buf = Buffer.from(json);
+    res.writeHead(200, {
+        'Content-Type': 'application/octet-stream',
+        'Content-disposition': 'attachment; filename=data.json'
+    });
+    res.write(buf);
+    res.end();
+}
+
+app.get('/features/download/:type', (req, res) => {
+    switch (req.params.type) {
+    case 'json':
+        downloadJSON(res);
+        break;
+    case 'pdf':
+        downloadPDF(res);
+        break;
+    }
+});

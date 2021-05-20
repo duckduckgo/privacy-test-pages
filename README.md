@@ -6,7 +6,7 @@ The site with all tests is live [here](https://privacy-test-pages.glitch.me/). A
 
 ### Privacy Protections Tests
 
-Those tests by default require clicking a button to start, but can be run immadiatelly on page load when loaded with a `?run` query or by calling a global `runTests()` function. Results from those pages are available in the global `results` object that can be downloaded as JSON using "download results" button.
+Those tests by default require clicking a button to start, but can be run immediately on page load when loaded with a `?run` query or by calling a global `runTests()` function. Results from those pages are available in the global `results` object that can be downloaded as JSON using "download results" button.
 
 ## Contributing
 

@@ -97,7 +97,15 @@ function facebookObserver (list, observer) {
     const resourceLoads = list.getEntriesByType('resource');
     for (const resource of resourceLoads) {
         if (resource.name.match(/facebook.com|facebook.net/)) {
-            facebookCalls += 1;
+            /* Observer still counts calls that fail, but the duration is less. In testing,
+             * failed iFrames always returned in around 100 or less, with success generally being
+             * above 200. Occasionally, a loaded resource comes in around 150. If Facebook requests
+             * are allowed, there will also be other resources that load - scripts and content
+             * which will always be counted.
+            */
+            if (resource.initiatorType !== 'iframe' || resource.duration > 150) {
+                facebookCalls += 1;
+            }
         }
     }
     displayFacebookCalls(facebookCalls);

@@ -14,10 +14,11 @@
 <p>This page embeds the facebook SDK, and several facebook iFrames. It also attempts to create 
 a variety of social elements using the SDK.</P>
 
-<p>The page will count how many facebook requests have been sent. For initial click to load, 0 should be sent. Once elements are clicked, the count should increase and elements should display (in most cases - this page does not use a valid SDK APP ID, so not all functions work correctly, login in particular.).</p>
+<p>The page will count how many facebook requests have been sent. In some cases, the browser may start requesting iFrame links, which should be blocked by the extension (but will be counted in the Facebook calls). Calls should not exceed iFrames (and manual verification that those network calls were blocked is a good practice). Once elements are clicked, the count should increase and elements should display (in most cases - this page does not use a valid SDK APP ID, so not all functions work correctly, login in particular.).</p>
 
 <h2> Metrics </h2>
-<div id="facebook_calls"> Facebook: <span id="facebook_call_count">0</span></div>
+<div id="facebook_calls"> Facebook Calls: <span id="facebook_call_count">0</span></div>
+<div id="facebook_calls"> Facebook iFrames: <span id="facebook_iFrames">0</span></div>
 <p><button id='download'>Download the result</button></p>
 
 <h2> All the social buttons from the SDK </h2>
@@ -57,6 +58,12 @@ a variety of social elements using the SDK.</P>
 
 <script>
 let facebookCalls = 0;
+let fbIFrames = 0;
+
+// Find all the iFrames currently on page.
+const frameNodes = document.querySelectorAll('iFrame');
+fbIFrames = frameNodes.length
+document.getElementById('facebook_iFrames').innerHTML = fbIFrames;
 
 // This initializes the facebook SDK.
 window.fbAsyncInit = function () {
@@ -115,7 +122,7 @@ const observer = new PerformanceObserver(facebookObserver);
 observer.observe({ entryTypes: ['resource'] });
 
 function downloadTheResults () {
-    const data = JSON.stringify({ facebookCalls: facebookCalls });
+    const data = JSON.stringify({ facebookCalls: facebookCalls, facebookIframes: fbIFrames });
     const a = document.createElement('a');
     const url = window.URL.createObjectURL(new Blob([data], { type: 'application/json' }));
     a.href = url;

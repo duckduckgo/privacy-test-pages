@@ -59,7 +59,7 @@ const surrogates = {
         url: 'https://google-analytics.com/analytics.js',
         crossOrigin: 'anonymous',
         integrity: 'sha512-1xNTXD/ZeaKg/Xjb6De9la7CXo5gC1lMk+beyKo691KJrjlj0HbZG6frzK0Wo6bm96i9Cp6w/WB4vSN/8zDBLQ==',
-        notes: 'Fails loading in all browsers despite we think it should be possible for the extension to load this.',
+        notes: 'Surrogate will fail to load due to integrity check. We think this check should not apply to extensions.',
         shouldFail: false,
         test: () => { return !!(window.ga && Object.keys(window.ga.create()).length === 0); },
         cleanUp: () => { delete window.ga; }

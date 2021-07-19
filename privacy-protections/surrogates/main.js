@@ -55,6 +55,15 @@ const surrogates = {
         test: () => { return !!(window.ga && Object.keys(window.ga.create()).length === 0); },
         cleanUp: () => { delete window.ga; }
     },
+    'google-analytics.com/analytics.js broken integrity': {
+        url: 'https://google-analytics.com/analytics.js',
+        crossOrigin: 'anonymous',
+        integrity: 'sha512-1xNTXD/ZeaKg/Xjb6De9la7CXo5gC1lMk+beyKo691KJrjlj0HbZG6frzK0Wo6bm96i9Cp6w/WB4vSN/8zDBLQ==',
+        notes: 'Surrogate will fail to load due to integrity check. We think this check should not apply to extensions.',
+        shouldFail: false,
+        test: () => { return !!(window.ga && Object.keys(window.ga.create()).length === 0); },
+        cleanUp: () => { delete window.ga; }
+    },
     'google-analytics.com/analytics.js': {
         url: 'https://google-analytics.com/analytics.js',
         shouldFail: false,
@@ -76,6 +85,9 @@ const surrogates = {
 
             if (testData.crossOrigin) {
                 s.crossOrigin = testData.crossOrigin;
+            }
+            if (testData.integrity) {
+                s.integrity = testData.integrity;
             }
 
             s.onload = () => {

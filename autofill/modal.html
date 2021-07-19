@@ -28,21 +28,21 @@
   <script>
     const dialog = document.querySelector('.dialog');
     window.addEventListener('click', (e) => {
-      // If the click is outside the modal, hide it
-      if (!dialog.contains(e.target)) {
-        dialog.setAttribute('hidden', 'true');
-      }
-      // Allow only navigational clicks
-      if (e.target.nodeName !== 'A') {
-        e.stopImmediatePropagation();
-        e.preventDefault();
-      }
-    }, true)
+        // If the click is outside the modal, hide it
+        if (!dialog.contains(e.target)) {
+            dialog.setAttribute('hidden', 'true');
+        }
+        // Allow only navigational clicks
+        if (e.target.nodeName !== 'A') {
+            e.stopImmediatePropagation();
+            e.preventDefault();
+        }
+    }, true);
 
     // Prevent form submission anyway
     const form = document.querySelector('form');
     form.addEventListener('submit', (e) => {
-      e.preventDefault();
+        e.preventDefault();
     }, true);
   </script>
 

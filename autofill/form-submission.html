@@ -30,10 +30,10 @@
       const clickForm = document.getElementById('click-form');
       const clickFormButton = clickForm.querySelector('button');
       clickFormButton?.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopImmediatePropagation();
-        // Note that form.submit() does not fire a submit event
-        clickForm.submit();
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          // Note that form.submit() does not fire a submit event
+          clickForm.submit();
       }, true);
     </script>
     
@@ -53,9 +53,9 @@
     <script>
       const submitForm = document.getElementById('submit-form');
       submitForm?.addEventListener('submit', (e) => {
-        e.preventDefault();
-        e.stopImmediatePropagation();
-        submitForm.innerHTML = '<h1>Done!</h1>';
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          submitForm.innerHTML = '<h1>Done!</h1>';
       }, true);
     </script>
 
@@ -75,10 +75,10 @@
       const fakeBtnForm = document.getElementById('fake-btn-form');
       const fakeBtnFormButton = fakeBtnForm.querySelector('.button');
       fakeBtnFormButton?.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopImmediatePropagation();
-        fetch('/login-action').catch(e => {});
-        fakeBtnForm.innerHTML = '<h1>Done!</h1>';
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          fetch('/login-action').catch(e => {});
+          fakeBtnForm.innerHTML = '<h1>Done!</h1>';
       }, true);
     </script>
   </div>

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Email autofill form within self-closing modal</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+
+<body>
+  <p><a href="../index.html">[Home]</a></p>
+
+  <p id="demo"></p>
+
+  <div class="dialog">
+    <p>Try autofilling the field below. The form should autofill normally instead of closing the modal.</P>
+    <form action="/signup">
+      <h2>Sign up for our newsletter</h2>
+      <fieldset>
+        <label for="email">Email</label>
+        <input id="email" type="email">
+        <button type="submit">Sign up</button>
+      </fieldset>
+    </form>
+  </div>
+
+  <script>
+    const dialog = document.querySelector('.dialog');
+    window.addEventListener('click', (e) => {
+        // If the click is outside the modal, hide it
+        if (!dialog.contains(e.target)) {
+            dialog.setAttribute('hidden', 'true');
+        }
+        // Allow only navigational clicks
+        if (e.target.nodeName !== 'A') {
+            e.stopImmediatePropagation();
+            e.preventDefault();
+        }
+    }, true);
+
+    // Prevent form submission anyway
+    const form = document.querySelector('form');
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+    }, true);
+  </script>
+
+</body>
+
+</html>

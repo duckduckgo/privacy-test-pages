@@ -81,6 +81,29 @@
           fakeBtnForm.innerHTML = '<h1>Done!</h1>';
       }, true);
     </script>
+
+    <hr>
+
+    <form id="covered-btn-form" novalidate action="/autofill/form-submission.html">
+      <h3>Sign in form where button has covering child element</h3>
+      <fieldset>
+        <label for="email">Email</label>
+        <input id="email" type="email">
+        <label for="password">Password</label>
+        <input id="password" type="password">
+        <div class="button button-with-child" role="button"><i>Sign in</i></div>
+      </fieldset>
+    </form>
+    <script>
+      const coveredBtnForm = document.getElementById('covered-btn-form i');
+      const coveredBtnFormButton = coveredBtnForm.querySelector('.button');
+      coveredBtnFormButton?.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          fetch('/login-action').catch((e) => {});
+          coveredBtnForm.innerHTML = '<h1>Done!</h1>';
+      }, true);
+    </script>
   </div>
 
 </body>

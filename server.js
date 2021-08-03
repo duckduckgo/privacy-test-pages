@@ -100,6 +100,13 @@ app.post('/block-me/csp', (req, res) => {
     return res.sendStatus(200);
 });
 
+// dummy sednBeacon endopoint
+app.post('/block-me/beacon', (req, res) => {
+    res.set('Timing-Allow-Origin', '*');
+    res.set('Server-Timing', 'loaded');
+    return res.sendStatus(204);
+});
+
 // reflects request headers and request url back
 app.get('/reflect-headers', (req, res) => {
     res.set('Access-Control-Allow-Origin', req.headers.origin || '*');

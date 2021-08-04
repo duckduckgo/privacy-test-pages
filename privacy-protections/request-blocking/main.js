@@ -301,6 +301,33 @@ const tests = [
         }
     },
     {
+        category: 'js',
+        id: 'sendBeacon',
+        description: 'Try sending data using <code>sendBeacon</code>.',
+        checkAsync: (callback) => {
+            const observer = new PerformanceObserver(observed);
+
+            const checkResource = resource => {
+                if (resource.name.includes(`beacon?${random}`)) {
+                    if (resource.serverTiming.length === 0) {
+                        callback('failed');
+                    } else {
+                        callback('loaded');
+                    }
+                    observer.disconnect();
+                }
+            };
+
+            function observed (list) {
+                list.getEntries().forEach(checkResource);
+            }
+
+            observer.observe({ entryTypes: ['resource'] });
+
+            navigator.sendBeacon(`https://${TRACKER_DOMAIN}/block-me/beacon?${random}`, 'fake=data');
+        }
+    },
+    {
         category: 'other',
         id: 'favicon',
         description: 'Try loading an image using <code>&lt;link rel="shortcut icon" …</code>.',

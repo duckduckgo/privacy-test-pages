@@ -53,16 +53,18 @@ app.post('/git', (req, res) => {
     const sig = 'sha1=' + hmac.update(JSON.stringify(req.body)).digest('hex');
 
     if (req.headers['x-github-event'] === 'push' && crypto.timingSafeEqual(Buffer.from(sig, 'utf8'), Buffer.from(req.headers['x-hub-signature'], 'utf8'))) {
-        fs.chmodSync('git.sh', '777'); /* :/ Fix no perms after updating */
-        cmd.get('./git.sh', (err, data) => { // Run our script
-            if (data) console.log(data);
-            if (err) console.log(err);
-        });
-        cmd.run('refresh'); // Refresh project
+        try {
+            fs.chmodSync('git.sh', '777'); /* Fix no perms after updating */
+            cmd.runSync('./git.sh');
+            cmd.runSync('refresh'); // Refresh project
 
-        console.log('> [GIT] Updated with origin/gh-pages');
+            console.log('> 💚 Deploy successful!');
 
-        return res.sendStatus(200);
+            return res.sendStatus(200);
+        } catch (e) {
+            console.log('> 💥 Error deploying: ', e);
+            return res.sendStatus(500);
+        }
     } else {
         return res.sendStatus(403);
     }

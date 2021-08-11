@@ -216,7 +216,7 @@ function storeData () {
                 all++;
 
                 const li = document.createElement('li');
-                li.id = `test-${test.id.replace(' ', '-')}`;
+                li.id = `test-${test.id.replace(/ /g, '-')}`;
                 li.innerHTML = `${test.id} - <span class='value'>OK</span>`;
                 const valueSpan = li.querySelector('.value');
 

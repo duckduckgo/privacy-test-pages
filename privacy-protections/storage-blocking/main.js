@@ -60,7 +60,7 @@ function create3pIframeTest (name, origin) {
             let failTimeout = null;
 
             function cleanUp (msg) {
-                if (msg.data) {
+                if (msg.origin === origin && msg.data) {
                     res(msg.data);
 
                     clearTimeout(failTimeout);

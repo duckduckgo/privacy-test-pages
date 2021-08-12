@@ -1,4 +1,5 @@
 window.addEventListener('load', async () => {
+    const downloadButton = document.getElementById('download');
     const sections = {};
     ['added', 'removed', 'changed'].forEach((s) => {
         sections[s] = document.getElementById(s);
@@ -162,6 +163,7 @@ window.addEventListener('load', async () => {
         }
 
         compareObjects(platformExpected.window, window.collectedProps.window, ['window']);
+        downloadButton.removeAttribute('disabled');
     }
 
     document.querySelector('#run').addEventListener('click', run);
@@ -169,4 +171,24 @@ window.addEventListener('load', async () => {
         document.querySelector('#browser-select').value = document.location.hash.slice(1);
         run();
     }
+
+    function download (data, name) {
+        const a = document.createElement('a');
+        const url = window.URL.createObjectURL(new Blob([data], { type: 'application/json' }));
+        a.href = url;
+        a.download = `${name}.json`;
+
+        document.getElementById('debug').appendChild(a);
+        a.click();
+
+        window.URL.revokeObjectURL(url);
+        a.remove();
+    }
+
+    downloadButton.addEventListener('click', () => {
+        download(JSON.stringify(window.results, null, 2), 'results')
+    });
+    document.getElementById('profile-download').addEventListener('click', () => {
+        download(JSON.stringify(window.collectedProps, null, 2), 'profile')
+    });
 });

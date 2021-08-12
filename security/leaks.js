@@ -71,6 +71,8 @@ window.addEventListener('load', async () => {
       document.querySelector('#browser-select').value;
         const platformExpected = await (await fetch(`./browser-profiles/${engine}.json`)).json();
         const results = window.results = {
+            page: 'security-js-leaks',
+            date: (new Date()).toUTCString(),
             reference_engine: engine,
             added: [],
             removed: [],

@@ -1,0 +1,2129 @@
+{
+    "window": {
+        "addEventListener": {
+            "type": "function"
+        },
+        "alert": {
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "applicationCache": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object",
+            "properties": {
+                "CHECKING": {
+                    "type": "number"
+                },
+                "DOWNLOADING": {
+                    "type": "number"
+                },
+                "IDLE": {
+                    "type": "number"
+                },
+                "OBSOLETE": {
+                    "type": "number"
+                },
+                "UNCACHED": {
+                    "type": "number"
+                },
+                "UPDATEREADY": {
+                    "type": "number"
+                },
+                "abort": {
+                    "type": "function"
+                },
+                "addEventListener": {
+                    "type": "function"
+                },
+                "dispatchEvent": {
+                    "type": "function"
+                },
+                "oncached": {
+                    "type": "object",
+                    "properties": {}
+                },
+                "onchecking": {
+                    "type": "object"
+                },
+                "ondownloading": {
+                    "type": "object"
+                },
+                "onerror": {
+                    "type": "object"
+                },
+                "onnoupdate": {
+                    "type": "object"
+                },
+                "onobsolete": {
+                    "type": "object"
+                },
+                "onprogress": {
+                    "type": "object"
+                },
+                "onupdateready": {
+                    "type": "object"
+                },
+                "removeEventListener": {
+                    "type": "function"
+                },
+                "status": {
+                    "type": "number"
+                },
+                "swapCache": {
+                    "type": "function"
+                },
+                "update": {
+                    "type": "function"
+                }
+            }
+        },
+        "atob": {
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "blur": {
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "btoa": {
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "caches": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object",
+            "properties": {
+                "delete": {
+                    "type": "function"
+                },
+                "has": {
+                    "type": "function"
+                },
+                "keys": {
+                    "type": "function"
+                },
+                "match": {
+                    "type": "function"
+                },
+                "open": {
+                    "type": "function"
+                }
+            }
+        },
+        "cancelAnimationFrame": {
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "captureEvents": {
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "clearInterval": {
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "clearTimeout": {
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "clientInformation": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object",
+            "properties": {
+                "appCodeName": {
+                    "type": "string"
+                },
+                "appName": {
+                    "type": "string"
+                },
+                "appVersion": {
+                    "type": "string"
+                },
+                "canShare": {
+                    "type": "function"
+                },
+                "clipboard": {
+                    "type": "object",
+                    "properties": {
+                        "addEventListener": {
+                            "type": "function"
+                        },
+                        "dispatchEvent": {
+                            "type": "function"
+                        },
+                        "read": {
+                            "type": "function"
+                        },
+                        "readText": {
+                            "type": "function"
+                        },
+                        "removeEventListener": {
+                            "type": "function"
+                        },
+                        "write": {
+                            "type": "function"
+                        },
+                        "writeText": {
+                            "type": "function"
+                        }
+                    }
+                },
+                "cookieEnabled": {
+                    "type": "boolean"
+                },
+                "credentials": {
+                    "type": "object",
+                    "properties": {
+                        "create": {
+                            "type": "function"
+                        },
+                        "get": {
+                            "type": "function"
+                        },
+                        "preventSilentAccess": {
+                            "type": "function"
+                        },
+                        "store": {
+                            "type": "function"
+                        }
+                    }
+                },
+                "geolocation": {
+                    "type": "object",
+                    "properties": {
+                        "clearWatch": {
+                            "type": "function"
+                        },
+                        "getCurrentPosition": {
+                            "type": "function"
+                        },
+                        "watchPosition": {
+                            "type": "function"
+                        }
+                    }
+                },
+                "getGamepads": {
+                    "type": "function"
+                },
+                "getStorageUpdates": {
+                    "type": "function"
+                },
+                "javaEnabled": {
+                    "type": "function"
+                },
+                "language": {
+                    "type": "string"
+                },
+                "languages": {
+                    "type": "object",
+                    "properties": {
+                        "0": {
+                            "writable": false,
+                            "enumerable": true,
+                            "configurable": false,
+                            "type": "string"
+                        }
+                    }
+                },
+                "maxTouchPoints": {
+                    "type": "number"
+                },
+                "mediaCapabilities": {
+                    "type": "object",
+                    "properties": {
+                        "decodingInfo": {
+                            "type": "function"
+                        }
+                    }
+                },
+                "mediaDevices": {
+                    "type": "object",
+                    "properties": {
+                        "addEventListener": {
+                            "type": "function"
+                        },
+                        "dispatchEvent": {
+                            "type": "function"
+                        },
+                        "enumerateDevices": {
+                            "type": "function"
+                        },
+                        "getDisplayMedia": {
+                            "type": "function"
+                        },
+                        "getSupportedConstraints": {
+                            "type": "function"
+                        },
+                        "getUserMedia": {
+                            "type": "function"
+                        },
+                        "ondevicechange": {
+                            "type": "object"
+                        },
+                        "removeEventListener": {
+                            "type": "function"
+                        }
+                    }
+                },
+                "mimeTypes": {
+                    "type": "object",
+                    "properties": {
+                        "0": {
+                            "writable": false,
+                            "enumerable": true,
+                            "configurable": true,
+                            "type": "object",
+                            "properties": {
+                                "description": {
+                                    "type": "string"
+                                },
+                                "enabledPlugin": {
+                                    "type": "object",
+                                    "properties": {
+                                        "0": {
+                                            "writable": false,
+                                            "enumerable": true,
+                                            "configurable": true,
+                                            "type": "object"
+                                        },
+                                        "1": {
+                                            "writable": false,
+                                            "enumerable": true,
+                                            "configurable": true,
+                                            "type": "object",
+                                            "properties": {
+                                                "description": {
+                                                    "type": "string"
+                                                },
+                                                "enabledPlugin": {
+                                                    "type": "object"
+                                                },
+                                                "suffixes": {
+                                                    "type": "string"
+                                                },
+                                                "type": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        },
+                                        "2": {
+                                            "writable": false,
+                                            "enumerable": true,
+                                            "configurable": true,
+                                            "type": "object",
+                                            "properties": {
+                                                "description": {
+                                                    "type": "string"
+                                                },
+                                                "enabledPlugin": {
+                                                    "type": "object"
+                                                },
+                                                "suffixes": {
+                                                    "type": "string"
+                                                },
+                                                "type": {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        },
+                                        "description": {
+                                            "type": "string"
+                                        },
+                                        "filename": {
+                                            "type": "string"
+                                        },
+                                        "item": {
+                                            "type": "function"
+                                        },
+                                        "length": {
+                                            "type": "number"
+                                        },
+                                        "name": {
+                                            "type": "string"
+                                        },
+                                        "namedItem": {
+                                            "type": "function"
+                                        }
+                                    }
+                                },
+                                "suffixes": {
+                                    "type": "string"
+                                },
+                                "type": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "1": {
+                            "writable": false,
+                            "enumerable": true,
+                            "configurable": true,
+                            "type": "object"
+                        },
+                        "2": {
+                            "writable": false,
+                            "enumerable": true,
+                            "configurable": true,
+                            "type": "object"
+                        },
+                        "item": {
+                            "type": "function"
+                        },
+                        "length": {
+                            "type": "number"
+                        },
+                        "namedItem": {
+                            "type": "function"
+                        }
+                    }
+                },
+                "onLine": {
+                    "type": "boolean"
+                },
+                "platform": {
+                    "type": "string"
+                },
+                "plugins": {
+                    "type": "object",
+                    "properties": {
+                        "0": {
+                            "writable": false,
+                            "enumerable": true,
+                            "configurable": true,
+                            "type": "object"
+                        },
+                        "item": {
+                            "type": "function"
+                        },
+                        "length": {
+                            "type": "number"
+                        },
+                        "namedItem": {
+                            "type": "function"
+                        },
+                        "refresh": {
+                            "type": "function"
+                        }
+                    }
+                },
+                "product": {
+                    "type": "string"
+                },
+                "productSub": {
+                    "type": "string"
+                },
+                "requestMediaKeySystemAccess": {
+                    "type": "function"
+                },
+                "sendBeacon": {
+                    "type": "function"
+                },
+                "serviceWorker": {
+                    "type": "object",
+                    "properties": {
+                        "addEventListener": {
+                            "type": "function"
+                        },
+                        "controller": {
+                            "type": "object"
+                        },
+                        "dispatchEvent": {
+                            "type": "function"
+                        },
+                        "getRegistration": {
+                            "type": "function"
+                        },
+                        "getRegistrations": {
+                            "type": "function"
+                        },
+                        "oncontrollerchange": {
+                            "type": "object"
+                        },
+                        "onmessage": {
+                            "type": "object"
+                        },
+                        "onmessageerror": {
+                            "type": "object"
+                        },
+                        "ready": {
+                            "type": "object",
+                            "properties": {}
+                        },
+                        "register": {
+                            "type": "function"
+                        },
+                        "removeEventListener": {
+                            "type": "function"
+                        },
+                        "startMessages": {
+                            "type": "function"
+                        }
+                    }
+                },
+                "share": {
+                    "type": "function"
+                },
+                "userAgent": {
+                    "type": "string"
+                },
+                "vendor": {
+                    "type": "string"
+                },
+                "vendorSub": {
+                    "type": "string"
+                },
+                "webdriver": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "close": {
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "closed": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "boolean"
+        },
+        "confirm": {
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "crypto": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object",
+            "properties": {
+                "getRandomValues": {
+                    "type": "function"
+                },
+                "subtle": {
+                    "type": "object",
+                    "properties": {
+                        "decrypt": {
+                            "type": "function"
+                        },
+                        "deriveBits": {
+                            "type": "function"
+                        },
+                        "deriveKey": {
+                            "type": "function"
+                        },
+                        "digest": {
+                            "type": "function"
+                        },
+                        "encrypt": {
+                            "type": "function"
+                        },
+                        "exportKey": {
+                            "type": "function"
+                        },
+                        "generateKey": {
+                            "type": "function"
+                        },
+                        "importKey": {
+                            "type": "function"
+                        },
+                        "sign": {
+                            "type": "function"
+                        },
+                        "unwrapKey": {
+                            "type": "function"
+                        },
+                        "verify": {
+                            "type": "function"
+                        },
+                        "wrapKey": {
+                            "type": "function"
+                        }
+                    }
+                }
+            }
+        },
+        "customElements": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object",
+            "properties": {
+                "define": {
+                    "type": "function"
+                },
+                "get": {
+                    "type": "function"
+                },
+                "upgrade": {
+                    "type": "function"
+                },
+                "whenDefined": {
+                    "type": "function"
+                }
+            }
+        },
+        "defaultStatus": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "string"
+        },
+        "defaultstatus": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "string"
+        },
+        "devicePixelRatio": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "number"
+        },
+        "dispatchEvent": {
+            "type": "function"
+        },
+        "document": {
+            "enumerable": true,
+            "configurable": false,
+            "type": "object"
+        },
+        "event": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object",
+            "properties": {
+                "AT_TARGET": {
+                    "type": "number"
+                },
+                "BUBBLING_PHASE": {
+                    "type": "number"
+                },
+                "CAPTURING_PHASE": {
+                    "type": "number"
+                },
+                "NONE": {
+                    "type": "number"
+                },
+                "bubbles": {
+                    "type": "boolean"
+                },
+                "cancelBubble": {
+                    "type": "boolean"
+                },
+                "cancelable": {
+                    "type": "boolean"
+                },
+                "composed": {
+                    "type": "boolean"
+                },
+                "composedPath": {
+                    "type": "function"
+                },
+                "currentTarget": {
+                    "type": "object"
+                },
+                "defaultPrevented": {
+                    "type": "boolean"
+                },
+                "eventPhase": {
+                    "type": "number"
+                },
+                "initEvent": {
+                    "type": "function"
+                },
+                "isTrusted": {
+                    "enumerable": true,
+                    "configurable": false,
+                    "type": "boolean"
+                },
+                "preventDefault": {
+                    "type": "function"
+                },
+                "returnValue": {
+                    "type": "boolean"
+                },
+                "srcElement": {
+                    "type": "object"
+                },
+                "stopImmediatePropagation": {
+                    "type": "function"
+                },
+                "stopPropagation": {
+                    "type": "function"
+                },
+                "target": {
+                    "type": "object"
+                },
+                "timeStamp": {
+                    "type": "number"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "fetch": {
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "find": {
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "focus": {
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "frameElement": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "frames": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "getComputedStyle": {
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "getMatchedCSSRules": {
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "getSelection": {
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "history": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object",
+            "properties": {
+                "back": {
+                    "type": "function"
+                },
+                "forward": {
+                    "type": "function"
+                },
+                "go": {
+                    "type": "function"
+                },
+                "length": {
+                    "type": "number"
+                },
+                "pushState": {
+                    "type": "function"
+                },
+                "replaceState": {
+                    "type": "function"
+                },
+                "scrollRestoration": {
+                    "type": "string"
+                },
+                "state": {
+                    "type": "object"
+                }
+            }
+        },
+        "indexedDB": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object",
+            "properties": {
+                "cmp": {
+                    "type": "function"
+                },
+                "databases": {
+                    "type": "function"
+                },
+                "deleteDatabase": {
+                    "type": "function"
+                },
+                "open": {
+                    "type": "function"
+                }
+            }
+        },
+        "innerHeight": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "number"
+        },
+        "innerWidth": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "number"
+        },
+        "isSecureContext": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "boolean"
+        },
+        "length": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "number"
+        },
+        "localStorage": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object",
+            "properties": {
+                "clear": {
+                    "type": "function"
+                },
+                "getItem": {
+                    "type": "function"
+                },
+                "key": {
+                    "type": "function"
+                },
+                "length": {
+                    "type": "number"
+                },
+                "removeItem": {
+                    "type": "function"
+                },
+                "setItem": {
+                    "type": "function"
+                }
+            }
+        },
+        "location": {
+            "enumerable": true,
+            "configurable": false,
+            "type": "object",
+            "properties": {
+                "ancestorOrigins": {
+                    "enumerable": true,
+                    "configurable": false,
+                    "type": "object",
+                    "properties": {
+                        "contains": {
+                            "type": "function"
+                        },
+                        "item": {
+                            "type": "function"
+                        },
+                        "length": {
+                            "type": "number"
+                        }
+                    }
+                },
+                "assign": {
+                    "writable": false,
+                    "enumerable": true,
+                    "configurable": false,
+                    "type": "function"
+                },
+                "hash": {
+                    "enumerable": true,
+                    "configurable": false,
+                    "type": "string"
+                },
+                "host": {
+                    "enumerable": true,
+                    "configurable": false,
+                    "type": "string"
+                },
+                "hostname": {
+                    "enumerable": true,
+                    "configurable": false,
+                    "type": "string"
+                },
+                "href": {
+                    "enumerable": true,
+                    "configurable": false,
+                    "type": "string"
+                },
+                "origin": {
+                    "enumerable": true,
+                    "configurable": false,
+                    "type": "string"
+                },
+                "pathname": {
+                    "enumerable": true,
+                    "configurable": false,
+                    "type": "string"
+                },
+                "port": {
+                    "enumerable": true,
+                    "configurable": false,
+                    "type": "string"
+                },
+                "protocol": {
+                    "enumerable": true,
+                    "configurable": false,
+                    "type": "string"
+                },
+                "reload": {
+                    "writable": false,
+                    "enumerable": true,
+                    "configurable": false,
+                    "type": "function"
+                },
+                "replace": {
+                    "writable": false,
+                    "enumerable": true,
+                    "configurable": false,
+                    "type": "function"
+                },
+                "search": {
+                    "enumerable": true,
+                    "configurable": false,
+                    "type": "string"
+                },
+                "toString": {
+                    "writable": false,
+                    "enumerable": true,
+                    "configurable": false,
+                    "type": "function"
+                }
+            }
+        },
+        "locationbar": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object",
+            "properties": {
+                "visible": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "matchMedia": {
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "menubar": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object",
+            "properties": {
+                "visible": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "moveBy": {
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "moveTo": {
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "name": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "string"
+        },
+        "navigator": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object",
+            "properties": {
+                "appCodeName": {
+                    "type": "string"
+                },
+                "appName": {
+                    "type": "string"
+                },
+                "appVersion": {
+                    "type": "string"
+                },
+                "canShare": {
+                    "type": "function"
+                },
+                "clipboard": {
+                    "type": "object"
+                },
+                "cookieEnabled": {
+                    "type": "boolean"
+                },
+                "credentials": {
+                    "type": "object"
+                },
+                "geolocation": {
+                    "type": "object"
+                },
+                "getGamepads": {
+                    "type": "function"
+                },
+                "getStorageUpdates": {
+                    "type": "function"
+                },
+                "javaEnabled": {
+                    "type": "function"
+                },
+                "language": {
+                    "type": "string"
+                },
+                "languages": {
+                    "type": "object",
+                    "properties": {
+                        "0": {
+                            "writable": false,
+                            "enumerable": true,
+                            "configurable": false,
+                            "type": "string"
+                        }
+                    }
+                },
+                "maxTouchPoints": {
+                    "type": "number"
+                },
+                "mediaCapabilities": {
+                    "type": "object"
+                },
+                "mediaDevices": {
+                    "type": "object"
+                },
+                "mimeTypes": {
+                    "type": "object"
+                },
+                "onLine": {
+                    "type": "boolean"
+                },
+                "platform": {
+                    "type": "string"
+                },
+                "plugins": {
+                    "type": "object"
+                },
+                "product": {
+                    "type": "string"
+                },
+                "productSub": {
+                    "type": "string"
+                },
+                "requestMediaKeySystemAccess": {
+                    "type": "function"
+                },
+                "sendBeacon": {
+                    "type": "function"
+                },
+                "serviceWorker": {
+                    "type": "object"
+                },
+                "share": {
+                    "type": "function"
+                },
+                "userAgent": {
+                    "type": "string"
+                },
+                "vendor": {
+                    "type": "string"
+                },
+                "vendorSub": {
+                    "type": "string"
+                },
+                "webdriver": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "offscreenBuffering": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "boolean"
+        },
+        "onabort": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onafterprint": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onanimationcancel": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onanimationend": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onanimationiteration": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onanimationstart": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onbeforeprint": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onbeforeunload": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onblur": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "oncanplay": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "oncanplaythrough": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onchange": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onclick": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "oncontextmenu": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "oncuechange": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "ondblclick": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "ondrag": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "ondragend": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "ondragenter": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "ondragleave": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "ondragover": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "ondragstart": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "ondrop": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "ondurationchange": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onemptied": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onended": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onerror": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onfocus": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "ongotpointercapture": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onhashchange": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "oninput": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "oninvalid": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onkeydown": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onkeypress": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onkeyup": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onlanguagechange": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onload": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onloadeddata": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onloadedmetadata": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onloadstart": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onlostpointercapture": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onmessage": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onmousedown": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onmouseenter": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onmouseleave": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onmousemove": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onmouseout": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onmouseover": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onmouseup": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onmousewheel": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onoffline": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "ononline": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onpagehide": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onpageshow": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onpause": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onplay": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onplaying": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onpointercancel": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onpointerdown": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onpointerenter": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onpointerleave": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onpointermove": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onpointerout": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onpointerover": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onpointerup": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onpopstate": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onprogress": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onratechange": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onrejectionhandled": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onreset": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onresize": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onscroll": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onseeked": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onseeking": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onselect": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onselectionchange": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onselectstart": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onslotchange": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onstalled": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onstorage": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onsubmit": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onsuspend": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "ontimeupdate": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "ontoggle": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "ontransitioncancel": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "ontransitionend": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "ontransitionrun": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "ontransitionstart": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onunhandledrejection": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onunload": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onvolumechange": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onwaiting": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onwebkitanimationend": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onwebkitanimationiteration": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onwebkitanimationstart": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onwebkittransitionend": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onwheel": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "open": {
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "opener": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "origin": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "string"
+        },
+        "outerHeight": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "number"
+        },
+        "outerWidth": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "number"
+        },
+        "pageXOffset": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "number"
+        },
+        "pageYOffset": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "number"
+        },
+        "parent": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "performance": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object",
+            "properties": {
+                "addEventListener": {
+                    "type": "function"
+                },
+                "clearMarks": {
+                    "type": "function"
+                },
+                "clearMeasures": {
+                    "type": "function"
+                },
+                "clearResourceTimings": {
+                    "type": "function"
+                },
+                "dispatchEvent": {
+                    "type": "function"
+                },
+                "getEntries": {
+                    "type": "function"
+                },
+                "getEntriesByName": {
+                    "type": "function"
+                },
+                "getEntriesByType": {
+                    "type": "function"
+                },
+                "mark": {
+                    "type": "function"
+                },
+                "measure": {
+                    "type": "function"
+                },
+                "navigation": {
+                    "type": "object",
+                    "properties": {
+                        "TYPE_BACK_FORWARD": {
+                            "type": "number"
+                        },
+                        "TYPE_NAVIGATE": {
+                            "type": "number"
+                        },
+                        "TYPE_RELOAD": {
+                            "type": "number"
+                        },
+                        "TYPE_RESERVED": {
+                            "type": "number"
+                        },
+                        "redirectCount": {
+                            "type": "number"
+                        },
+                        "toJSON": {
+                            "type": "function"
+                        },
+                        "type": {
+                            "type": "number"
+                        }
+                    }
+                },
+                "now": {
+                    "type": "function"
+                },
+                "onresourcetimingbufferfull": {
+                    "type": "object"
+                },
+                "removeEventListener": {
+                    "type": "function"
+                },
+                "setResourceTimingBufferSize": {
+                    "type": "function"
+                },
+                "timing": {
+                    "type": "object",
+                    "properties": {
+                        "connectEnd": {
+                            "type": "number"
+                        },
+                        "connectStart": {
+                            "type": "number"
+                        },
+                        "domComplete": {
+                            "type": "number"
+                        },
+                        "domContentLoadedEventEnd": {
+                            "type": "number"
+                        },
+                        "domContentLoadedEventStart": {
+                            "type": "number"
+                        },
+                        "domInteractive": {
+                            "type": "number"
+                        },
+                        "domLoading": {
+                            "type": "number"
+                        },
+                        "domainLookupEnd": {
+                            "type": "number"
+                        },
+                        "domainLookupStart": {
+                            "type": "number"
+                        },
+                        "fetchStart": {
+                            "type": "number"
+                        },
+                        "loadEventEnd": {
+                            "type": "number"
+                        },
+                        "loadEventStart": {
+                            "type": "number"
+                        },
+                        "navigationStart": {
+                            "type": "number"
+                        },
+                        "redirectEnd": {
+                            "type": "number"
+                        },
+                        "redirectStart": {
+                            "type": "number"
+                        },
+                        "requestStart": {
+                            "type": "number"
+                        },
+                        "responseEnd": {
+                            "type": "number"
+                        },
+                        "responseStart": {
+                            "type": "number"
+                        },
+                        "secureConnectionStart": {
+                            "type": "number"
+                        },
+                        "toJSON": {
+                            "type": "function"
+                        },
+                        "unloadEventEnd": {
+                            "type": "number"
+                        },
+                        "unloadEventStart": {
+                            "type": "number"
+                        }
+                    }
+                },
+                "toJSON": {
+                    "type": "function"
+                }
+            }
+        },
+        "personalbar": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object",
+            "properties": {
+                "visible": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "postMessage": {
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "print": {
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "prompt": {
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "queueMicrotask": {
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "releaseEvents": {
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "removeEventListener": {
+            "type": "function"
+        },
+        "requestAnimationFrame": {
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "resizeBy": {
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "resizeTo": {
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "safari": {
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "object",
+            "properties": {
+                "pushNotification": {
+                    "writable": false,
+                    "enumerable": true,
+                    "configurable": false,
+                    "type": "object",
+                    "properties": {
+                        "permission": {
+                            "type": "function"
+                        },
+                        "requestPermission": {
+                            "type": "function"
+                        }
+                    }
+                }
+            }
+        },
+        "screen": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object",
+            "properties": {
+                "availHeight": {
+                    "type": "number"
+                },
+                "availLeft": {
+                    "type": "number"
+                },
+                "availTop": {
+                    "type": "number"
+                },
+                "availWidth": {
+                    "type": "number"
+                },
+                "colorDepth": {
+                    "type": "number"
+                },
+                "height": {
+                    "type": "number"
+                },
+                "pixelDepth": {
+                    "type": "number"
+                },
+                "width": {
+                    "type": "number"
+                }
+            }
+        },
+        "screenLeft": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "number"
+        },
+        "screenTop": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "number"
+        },
+        "screenX": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "number"
+        },
+        "screenY": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "number"
+        },
+        "scroll": {
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "scrollBy": {
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "scrollTo": {
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "scrollX": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "number"
+        },
+        "scrollY": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "number"
+        },
+        "scrollbars": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object",
+            "properties": {
+                "visible": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "self": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "sessionStorage": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object",
+            "properties": {
+                "clear": {
+                    "type": "function"
+                },
+                "getItem": {
+                    "type": "function"
+                },
+                "key": {
+                    "type": "function"
+                },
+                "length": {
+                    "type": "number"
+                },
+                "removeItem": {
+                    "type": "function"
+                },
+                "setItem": {
+                    "type": "function"
+                }
+            }
+        },
+        "setInterval": {
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "setTimeout": {
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "showModalDialog": {
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "speechSynthesis": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object",
+            "properties": {
+                "cancel": {
+                    "type": "function"
+                },
+                "getVoices": {
+                    "type": "function"
+                },
+                "pause": {
+                    "type": "function"
+                },
+                "paused": {
+                    "type": "boolean"
+                },
+                "pending": {
+                    "type": "boolean"
+                },
+                "resume": {
+                    "type": "function"
+                },
+                "speak": {
+                    "type": "function"
+                },
+                "speaking": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "status": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "string"
+        },
+        "statusbar": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object",
+            "properties": {
+                "visible": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "stop": {
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "styleMedia": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object",
+            "properties": {
+                "matchMedium": {
+                    "type": "function"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "toolbar": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object",
+            "properties": {
+                "visible": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "top": {
+            "enumerable": true,
+            "configurable": false,
+            "type": "object"
+        },
+        "visualViewport": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object",
+            "properties": {
+                "addEventListener": {
+                    "type": "function"
+                },
+                "dispatchEvent": {
+                    "type": "function"
+                },
+                "height": {
+                    "type": "number"
+                },
+                "offsetLeft": {
+                    "type": "number"
+                },
+                "offsetTop": {
+                    "type": "number"
+                },
+                "onresize": {
+                    "type": "object"
+                },
+                "onscroll": {
+                    "type": "object"
+                },
+                "pageLeft": {
+                    "type": "number"
+                },
+                "pageTop": {
+                    "type": "number"
+                },
+                "removeEventListener": {
+                    "type": "function"
+                },
+                "scale": {
+                    "type": "number"
+                },
+                "width": {
+                    "type": "number"
+                }
+            }
+        },
+        "webkitCancelAnimationFrame": {
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "webkitCancelRequestAnimationFrame": {
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "webkitConvertPointFromNodeToPage": {
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "webkitConvertPointFromPageToNode": {
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "webkitIndexedDB": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "webkitRequestAnimationFrame": {
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "window": {
+            "enumerable": true,
+            "configurable": false,
+            "type": "object"
+        }
+    }
+}

@@ -1,0 +1,2463 @@
+{
+    "window": {
+        "InstallTrigger": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object",
+            "properties": {
+                "CONTENT": {
+                    "type": "number"
+                },
+                "LOCALE": {
+                    "type": "number"
+                },
+                "PACKAGE": {
+                    "type": "number"
+                },
+                "SKIN": {
+                    "type": "number"
+                },
+                "enabled": {
+                    "type": "function",
+                    "value": "function enabled() {\n    [native code]\n}"
+                },
+                "install": {
+                    "type": "function",
+                    "value": "function install() {\n    [native code]\n}"
+                },
+                "installChrome": {
+                    "type": "function",
+                    "value": "function installChrome() {\n    [native code]\n}"
+                },
+                "startSoftwareUpdate": {
+                    "type": "function",
+                    "value": "function startSoftwareUpdate() {\n    [native code]\n}"
+                },
+                "updateEnabled": {
+                    "type": "function",
+                    "value": "function updateEnabled() {\n    [native code]\n}"
+                }
+            }
+        },
+        "addEventListener": {
+            "type": "function",
+            "value": "function addEventListener() {\n    [native code]\n}"
+        },
+        "alert": {
+            "value": "function alert() {\n    [native code]\n}",
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "atob": {
+            "value": "function atob() {\n    [native code]\n}",
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "blur": {
+            "value": "function blur() {\n    [native code]\n}",
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "btoa": {
+            "value": "function btoa() {\n    [native code]\n}",
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "caches": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object",
+            "properties": {
+                "delete": {
+                    "type": "function",
+                    "value": "function delete() {\n    [native code]\n}"
+                },
+                "has": {
+                    "type": "function",
+                    "value": "function has() {\n    [native code]\n}"
+                },
+                "keys": {
+                    "type": "function",
+                    "value": "function keys() {\n    [native code]\n}"
+                },
+                "match": {
+                    "type": "function",
+                    "value": "function match() {\n    [native code]\n}"
+                },
+                "open": {
+                    "type": "function",
+                    "value": "function open() {\n    [native code]\n}"
+                }
+            }
+        },
+        "cancelAnimationFrame": {
+            "value": "function cancelAnimationFrame() {\n    [native code]\n}",
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "cancelIdleCallback": {
+            "value": "function cancelIdleCallback() {\n    [native code]\n}",
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "captureEvents": {
+            "value": "function captureEvents() {\n    [native code]\n}",
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "clearInterval": {
+            "value": "function clearInterval() {\n    [native code]\n}",
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "clearTimeout": {
+            "value": "function clearTimeout() {\n    [native code]\n}",
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "clientInformation": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object",
+            "properties": {
+                "activeVRDisplays": {
+                    "type": "object",
+                    "properties": {}
+                },
+                "appCodeName": {
+                    "type": "string"
+                },
+                "appName": {
+                    "type": "string"
+                },
+                "appVersion": {
+                    "type": "string"
+                },
+                "buildID": {
+                    "type": "string"
+                },
+                "clipboard": {
+                    "type": "object",
+                    "properties": {
+                        "addEventListener": {
+                            "type": "function",
+                            "value": "function addEventListener() {\n    [native code]\n}"
+                        },
+                        "dispatchEvent": {
+                            "type": "function",
+                            "value": "function dispatchEvent() {\n    [native code]\n}"
+                        },
+                        "removeEventListener": {
+                            "type": "function",
+                            "value": "function removeEventListener() {\n    [native code]\n}"
+                        },
+                        "writeText": {
+                            "type": "function",
+                            "value": "function writeText() {\n    [native code]\n}"
+                        }
+                    }
+                },
+                "cookieEnabled": {
+                    "type": "boolean"
+                },
+                "credentials": {
+                    "type": "object",
+                    "properties": {
+                        "create": {
+                            "type": "function",
+                            "value": "function create() {\n    [native code]\n}"
+                        },
+                        "get": {
+                            "type": "function",
+                            "value": "function get() {\n    [native code]\n}"
+                        },
+                        "preventSilentAccess": {
+                            "type": "function",
+                            "value": "function preventSilentAccess() {\n    [native code]\n}"
+                        },
+                        "store": {
+                            "type": "function",
+                            "value": "function store() {\n    [native code]\n}"
+                        }
+                    }
+                },
+                "doNotTrack": {
+                    "type": "string"
+                },
+                "geolocation": {
+                    "type": "object",
+                    "properties": {
+                        "clearWatch": {
+                            "type": "function",
+                            "value": "function clearWatch() {\n    [native code]\n}"
+                        },
+                        "getCurrentPosition": {
+                            "type": "function",
+                            "value": "function getCurrentPosition() {\n    [native code]\n}"
+                        },
+                        "watchPosition": {
+                            "type": "function",
+                            "value": "function watchPosition() {\n    [native code]\n}"
+                        }
+                    }
+                },
+                "getGamepads": {
+                    "type": "function",
+                    "value": "function getGamepads() {\n    [native code]\n}"
+                },
+                "getVRDisplays": {
+                    "type": "function",
+                    "value": "function getVRDisplays() {\n    [native code]\n}"
+                },
+                "hardwareConcurrency": {
+                    "type": "number"
+                },
+                "javaEnabled": {
+                    "type": "function",
+                    "value": "function javaEnabled() {\n    [native code]\n}"
+                },
+                "language": {
+                    "type": "string"
+                },
+                "languages": {
+                    "type": "object",
+                    "properties": {
+                        "0": {
+                            "value": "en-US",
+                            "writable": false,
+                            "enumerable": true,
+                            "configurable": false,
+                            "type": "string"
+                        },
+                        "1": {
+                            "value": "en",
+                            "writable": false,
+                            "enumerable": true,
+                            "configurable": false,
+                            "type": "string"
+                        }
+                    }
+                },
+                "maxTouchPoints": {
+                    "type": "number"
+                },
+                "mediaCapabilities": {
+                    "type": "object",
+                    "properties": {
+                        "decodingInfo": {
+                            "type": "function",
+                            "value": "function decodingInfo() {\n    [native code]\n}"
+                        },
+                        "encodingInfo": {
+                            "type": "function",
+                            "value": "function encodingInfo() {\n    [native code]\n}"
+                        }
+                    }
+                },
+                "mediaDevices": {
+                    "type": "object",
+                    "properties": {
+                        "addEventListener": {
+                            "type": "function",
+                            "value": "function addEventListener() {\n    [native code]\n}"
+                        },
+                        "dispatchEvent": {
+                            "type": "function",
+                            "value": "function dispatchEvent() {\n    [native code]\n}"
+                        },
+                        "enumerateDevices": {
+                            "type": "function",
+                            "value": "function enumerateDevices() {\n    [native code]\n}"
+                        },
+                        "getDisplayMedia": {
+                            "type": "function",
+                            "value": "function getDisplayMedia() {\n    [native code]\n}"
+                        },
+                        "getSupportedConstraints": {
+                            "type": "function",
+                            "value": "function getSupportedConstraints() {\n    [native code]\n}"
+                        },
+                        "getUserMedia": {
+                            "type": "function",
+                            "value": "function getUserMedia() {\n    [native code]\n}"
+                        },
+                        "ondevicechange": {
+                            "type": "object",
+                            "properties": {}
+                        },
+                        "removeEventListener": {
+                            "type": "function",
+                            "value": "function removeEventListener() {\n    [native code]\n}"
+                        }
+                    }
+                },
+                "mediaSession": {
+                    "type": "object",
+                    "properties": {
+                        "metadata": {
+                            "type": "object"
+                        },
+                        "playbackState": {
+                            "type": "string"
+                        },
+                        "setActionHandler": {
+                            "type": "function",
+                            "value": "function setActionHandler() {\n    [native code]\n}"
+                        },
+                        "setPositionState": {
+                            "type": "function",
+                            "value": "function setPositionState() {\n    [native code]\n}"
+                        }
+                    }
+                },
+                "mimeTypes": {
+                    "type": "object",
+                    "properties": {
+                        "item": {
+                            "type": "function",
+                            "value": "function item() {\n    [native code]\n}"
+                        },
+                        "length": {
+                            "type": "number"
+                        },
+                        "namedItem": {
+                            "type": "function",
+                            "value": "function namedItem() {\n    [native code]\n}"
+                        }
+                    }
+                },
+                "mozGetUserMedia": {
+                    "type": "function",
+                    "value": "function mozGetUserMedia() {\n    [native code]\n}"
+                },
+                "onLine": {
+                    "type": "boolean"
+                },
+                "oscpu": {
+                    "type": "string"
+                },
+                "permissions": {
+                    "type": "object",
+                    "properties": {
+                        "query": {
+                            "type": "function",
+                            "value": "function query() {\n    [native code]\n}"
+                        }
+                    }
+                },
+                "platform": {
+                    "type": "string"
+                },
+                "plugins": {
+                    "type": "object",
+                    "properties": {
+                        "item": {
+                            "type": "function",
+                            "value": "function item() {\n    [native code]\n}"
+                        },
+                        "length": {
+                            "type": "number"
+                        },
+                        "namedItem": {
+                            "type": "function",
+                            "value": "function namedItem() {\n    [native code]\n}"
+                        },
+                        "refresh": {
+                            "type": "function",
+                            "value": "function refresh() {\n    [native code]\n}"
+                        }
+                    }
+                },
+                "product": {
+                    "type": "string"
+                },
+                "productSub": {
+                    "type": "string"
+                },
+                "registerProtocolHandler": {
+                    "type": "function",
+                    "value": "function registerProtocolHandler() {\n    [native code]\n}"
+                },
+                "requestMediaKeySystemAccess": {
+                    "type": "function",
+                    "value": "function requestMediaKeySystemAccess() {\n    [native code]\n}"
+                },
+                "sendBeacon": {
+                    "type": "function",
+                    "value": "function sendBeacon() {\n    [native code]\n}"
+                },
+                "serviceWorker": {
+                    "type": "object",
+                    "properties": {
+                        "addEventListener": {
+                            "type": "function",
+                            "value": "function addEventListener() {\n    [native code]\n}"
+                        },
+                        "controller": {
+                            "type": "object"
+                        },
+                        "dispatchEvent": {
+                            "type": "function",
+                            "value": "function dispatchEvent() {\n    [native code]\n}"
+                        },
+                        "getRegistration": {
+                            "type": "function",
+                            "value": "function getRegistration() {\n    [native code]\n}"
+                        },
+                        "getRegistrations": {
+                            "type": "function",
+                            "value": "function getRegistrations() {\n    [native code]\n}"
+                        },
+                        "oncontrollerchange": {
+                            "type": "object"
+                        },
+                        "onerror": {
+                            "type": "object"
+                        },
+                        "onmessage": {
+                            "type": "object"
+                        },
+                        "onmessageerror": {
+                            "type": "object"
+                        },
+                        "ready": {
+                            "type": "object",
+                            "properties": {}
+                        },
+                        "register": {
+                            "type": "function",
+                            "value": "function register() {\n    [native code]\n}"
+                        },
+                        "removeEventListener": {
+                            "type": "function",
+                            "value": "function removeEventListener() {\n    [native code]\n}"
+                        },
+                        "startMessages": {
+                            "type": "function",
+                            "value": "function startMessages() {\n    [native code]\n}"
+                        }
+                    }
+                },
+                "storage": {
+                    "type": "object",
+                    "properties": {
+                        "estimate": {
+                            "type": "function",
+                            "value": "function estimate() {\n    [native code]\n}"
+                        },
+                        "persist": {
+                            "type": "function",
+                            "value": "function persist() {\n    [native code]\n}"
+                        },
+                        "persisted": {
+                            "type": "function",
+                            "value": "function persisted() {\n    [native code]\n}"
+                        }
+                    }
+                },
+                "taintEnabled": {
+                    "type": "function",
+                    "value": "function taintEnabled() {\n    [native code]\n}"
+                },
+                "userAgent": {
+                    "type": "string"
+                },
+                "vendor": {
+                    "type": "string"
+                },
+                "vendorSub": {
+                    "type": "string"
+                },
+                "vibrate": {
+                    "type": "function",
+                    "value": "function vibrate() {\n    [native code]\n}"
+                },
+                "webdriver": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "close": {
+            "value": "function close() {\n    [native code]\n}",
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "closed": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "boolean"
+        },
+        "confirm": {
+            "value": "function confirm() {\n    [native code]\n}",
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "createImageBitmap": {
+            "value": "function createImageBitmap() {\n    [native code]\n}",
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "crossOriginIsolated": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "boolean"
+        },
+        "crypto": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object",
+            "properties": {
+                "getRandomValues": {
+                    "type": "function",
+                    "value": "function getRandomValues() {\n    [native code]\n}"
+                },
+                "subtle": {
+                    "type": "object",
+                    "properties": {
+                        "decrypt": {
+                            "type": "function",
+                            "value": "function decrypt() {\n    [native code]\n}"
+                        },
+                        "deriveBits": {
+                            "type": "function",
+                            "value": "function deriveBits() {\n    [native code]\n}"
+                        },
+                        "deriveKey": {
+                            "type": "function",
+                            "value": "function deriveKey() {\n    [native code]\n}"
+                        },
+                        "digest": {
+                            "type": "function",
+                            "value": "function digest() {\n    [native code]\n}"
+                        },
+                        "encrypt": {
+                            "type": "function",
+                            "value": "function encrypt() {\n    [native code]\n}"
+                        },
+                        "exportKey": {
+                            "type": "function",
+                            "value": "function exportKey() {\n    [native code]\n}"
+                        },
+                        "generateKey": {
+                            "type": "function",
+                            "value": "function generateKey() {\n    [native code]\n}"
+                        },
+                        "importKey": {
+                            "type": "function",
+                            "value": "function importKey() {\n    [native code]\n}"
+                        },
+                        "sign": {
+                            "type": "function",
+                            "value": "function sign() {\n    [native code]\n}"
+                        },
+                        "unwrapKey": {
+                            "type": "function",
+                            "value": "function unwrapKey() {\n    [native code]\n}"
+                        },
+                        "verify": {
+                            "type": "function",
+                            "value": "function verify() {\n    [native code]\n}"
+                        },
+                        "wrapKey": {
+                            "type": "function",
+                            "value": "function wrapKey() {\n    [native code]\n}"
+                        }
+                    }
+                }
+            }
+        },
+        "customElements": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object",
+            "properties": {
+                "define": {
+                    "type": "function",
+                    "value": "function define() {\n    [native code]\n}"
+                },
+                "get": {
+                    "type": "function",
+                    "value": "function get() {\n    [native code]\n}"
+                },
+                "upgrade": {
+                    "type": "function",
+                    "value": "function upgrade() {\n    [native code]\n}"
+                },
+                "whenDefined": {
+                    "type": "function",
+                    "value": "function whenDefined() {\n    [native code]\n}"
+                }
+            }
+        },
+        "devicePixelRatio": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "number"
+        },
+        "dispatchEvent": {
+            "type": "function",
+            "value": "function dispatchEvent() {\n    [native code]\n}"
+        },
+        "document": {
+            "enumerable": true,
+            "configurable": false,
+            "type": "object"
+        },
+        "dump": {
+            "value": "function dump() {\n    [native code]\n}",
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "event": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object",
+            "properties": {
+                "ALT_MASK": {
+                    "type": "number"
+                },
+                "AT_TARGET": {
+                    "type": "number"
+                },
+                "BUBBLING_PHASE": {
+                    "type": "number"
+                },
+                "CAPTURING_PHASE": {
+                    "type": "number"
+                },
+                "CONTROL_MASK": {
+                    "type": "number"
+                },
+                "META_MASK": {
+                    "type": "number"
+                },
+                "NONE": {
+                    "type": "number"
+                },
+                "SHIFT_MASK": {
+                    "type": "number"
+                },
+                "bubbles": {
+                    "type": "boolean"
+                },
+                "cancelBubble": {
+                    "type": "boolean"
+                },
+                "cancelable": {
+                    "type": "boolean"
+                },
+                "composed": {
+                    "type": "boolean"
+                },
+                "composedPath": {
+                    "type": "function",
+                    "value": "function composedPath() {\n    [native code]\n}"
+                },
+                "currentTarget": {
+                    "type": "object"
+                },
+                "defaultPrevented": {
+                    "type": "boolean"
+                },
+                "eventPhase": {
+                    "type": "number"
+                },
+                "explicitOriginalTarget": {
+                    "type": "object"
+                },
+                "initEvent": {
+                    "type": "function",
+                    "value": "function initEvent() {\n    [native code]\n}"
+                },
+                "isTrusted": {
+                    "enumerable": true,
+                    "configurable": false,
+                    "type": "boolean"
+                },
+                "originalTarget": {
+                    "type": "object"
+                },
+                "preventDefault": {
+                    "type": "function",
+                    "value": "function preventDefault() {\n    [native code]\n}"
+                },
+                "returnValue": {
+                    "type": "boolean"
+                },
+                "srcElement": {
+                    "type": "object"
+                },
+                "stopImmediatePropagation": {
+                    "type": "function",
+                    "value": "function stopImmediatePropagation() {\n    [native code]\n}"
+                },
+                "stopPropagation": {
+                    "type": "function",
+                    "value": "function stopPropagation() {\n    [native code]\n}"
+                },
+                "target": {
+                    "type": "object"
+                },
+                "timeStamp": {
+                    "type": "number"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "external": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object",
+            "properties": {
+                "AddSearchProvider": {
+                    "type": "function",
+                    "value": "function AddSearchProvider() {\n    [native code]\n}"
+                },
+                "IsSearchProviderInstalled": {
+                    "type": "function",
+                    "value": "function IsSearchProviderInstalled() {\n    [native code]\n}"
+                }
+            }
+        },
+        "fetch": {
+            "value": "function fetch() {\n    [native code]\n}",
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "find": {
+            "value": "function find() {\n    [native code]\n}",
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "focus": {
+            "value": "function focus() {\n    [native code]\n}",
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "frameElement": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "frames": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "fullScreen": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "boolean"
+        },
+        "getComputedStyle": {
+            "value": "function getComputedStyle() {\n    [native code]\n}",
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "getDefaultComputedStyle": {
+            "value": "function getDefaultComputedStyle() {\n    [native code]\n}",
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "getSelection": {
+            "value": "function getSelection() {\n    [native code]\n}",
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "history": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object",
+            "properties": {
+                "back": {
+                    "type": "function",
+                    "value": "function back() {\n    [native code]\n}"
+                },
+                "forward": {
+                    "type": "function",
+                    "value": "function forward() {\n    [native code]\n}"
+                },
+                "go": {
+                    "type": "function",
+                    "value": "function go() {\n    [native code]\n}"
+                },
+                "length": {
+                    "type": "number"
+                },
+                "pushState": {
+                    "type": "function",
+                    "value": "function pushState() {\n    [native code]\n}"
+                },
+                "replaceState": {
+                    "type": "function",
+                    "value": "function replaceState() {\n    [native code]\n}"
+                },
+                "scrollRestoration": {
+                    "type": "string"
+                },
+                "state": {
+                    "type": "object"
+                }
+            }
+        },
+        "indexedDB": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object",
+            "properties": {
+                "cmp": {
+                    "type": "function",
+                    "value": "function cmp() {\n    [native code]\n}"
+                },
+                "deleteDatabase": {
+                    "type": "function",
+                    "value": "function deleteDatabase() {\n    [native code]\n}"
+                },
+                "open": {
+                    "type": "function",
+                    "value": "function open() {\n    [native code]\n}"
+                }
+            }
+        },
+        "innerHeight": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "number"
+        },
+        "innerWidth": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "number"
+        },
+        "isSecureContext": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "boolean"
+        },
+        "length": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "number"
+        },
+        "localStorage": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object",
+            "properties": {
+                "clear": {
+                    "type": "function",
+                    "value": "function clear() {\n    [native code]\n}"
+                },
+                "getItem": {
+                    "type": "function",
+                    "value": "function getItem() {\n    [native code]\n}"
+                },
+                "key": {
+                    "type": "function",
+                    "value": "function key() {\n    [native code]\n}"
+                },
+                "length": {
+                    "type": "number"
+                },
+                "removeItem": {
+                    "type": "function",
+                    "value": "function removeItem() {\n    [native code]\n}"
+                },
+                "setItem": {
+                    "type": "function",
+                    "value": "function setItem() {\n    [native code]\n}"
+                }
+            }
+        },
+        "location": {
+            "enumerable": true,
+            "configurable": false,
+            "type": "object",
+            "properties": {
+                "assign": {
+                    "value": "function assign() {\n    [native code]\n}",
+                    "writable": false,
+                    "enumerable": true,
+                    "configurable": false,
+                    "type": "function"
+                },
+                "hash": {
+                    "enumerable": true,
+                    "configurable": false,
+                    "type": "string"
+                },
+                "host": {
+                    "enumerable": true,
+                    "configurable": false,
+                    "type": "string"
+                },
+                "hostname": {
+                    "enumerable": true,
+                    "configurable": false,
+                    "type": "string"
+                },
+                "href": {
+                    "enumerable": true,
+                    "configurable": false,
+                    "type": "string"
+                },
+                "origin": {
+                    "enumerable": true,
+                    "configurable": false,
+                    "type": "string"
+                },
+                "pathname": {
+                    "enumerable": true,
+                    "configurable": false,
+                    "type": "string"
+                },
+                "port": {
+                    "enumerable": true,
+                    "configurable": false,
+                    "type": "string"
+                },
+                "protocol": {
+                    "enumerable": true,
+                    "configurable": false,
+                    "type": "string"
+                },
+                "reload": {
+                    "value": "function reload() {\n    [native code]\n}",
+                    "writable": false,
+                    "enumerable": true,
+                    "configurable": false,
+                    "type": "function"
+                },
+                "replace": {
+                    "value": "function replace() {\n    [native code]\n}",
+                    "writable": false,
+                    "enumerable": true,
+                    "configurable": false,
+                    "type": "function"
+                },
+                "search": {
+                    "enumerable": true,
+                    "configurable": false,
+                    "type": "string"
+                }
+            }
+        },
+        "locationbar": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object",
+            "properties": {
+                "visible": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "matchMedia": {
+            "value": "function matchMedia() {\n    [native code]\n}",
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "menubar": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object",
+            "properties": {
+                "visible": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "moveBy": {
+            "value": "function moveBy() {\n    [native code]\n}",
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "moveTo": {
+            "value": "function moveTo() {\n    [native code]\n}",
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "mozInnerScreenX": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "number"
+        },
+        "mozInnerScreenY": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "number"
+        },
+        "name": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "string"
+        },
+        "navigator": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object",
+            "properties": {
+                "activeVRDisplays": {
+                    "type": "object"
+                },
+                "appCodeName": {
+                    "type": "string"
+                },
+                "appName": {
+                    "type": "string"
+                },
+                "appVersion": {
+                    "type": "string"
+                },
+                "buildID": {
+                    "type": "string"
+                },
+                "clipboard": {
+                    "type": "object"
+                },
+                "cookieEnabled": {
+                    "type": "boolean"
+                },
+                "credentials": {
+                    "type": "object"
+                },
+                "doNotTrack": {
+                    "type": "string"
+                },
+                "geolocation": {
+                    "type": "object"
+                },
+                "getGamepads": {
+                    "type": "function",
+                    "value": "function getGamepads() {\n    [native code]\n}"
+                },
+                "getVRDisplays": {
+                    "type": "function",
+                    "value": "function getVRDisplays() {\n    [native code]\n}"
+                },
+                "hardwareConcurrency": {
+                    "type": "number"
+                },
+                "javaEnabled": {
+                    "type": "function",
+                    "value": "function javaEnabled() {\n    [native code]\n}"
+                },
+                "language": {
+                    "type": "string"
+                },
+                "languages": {
+                    "type": "object"
+                },
+                "maxTouchPoints": {
+                    "type": "number"
+                },
+                "mediaCapabilities": {
+                    "type": "object"
+                },
+                "mediaDevices": {
+                    "type": "object"
+                },
+                "mediaSession": {
+                    "type": "object"
+                },
+                "mimeTypes": {
+                    "type": "object"
+                },
+                "mozGetUserMedia": {
+                    "type": "function",
+                    "value": "function mozGetUserMedia() {\n    [native code]\n}"
+                },
+                "onLine": {
+                    "type": "boolean"
+                },
+                "oscpu": {
+                    "type": "string"
+                },
+                "permissions": {
+                    "type": "object"
+                },
+                "platform": {
+                    "type": "string"
+                },
+                "plugins": {
+                    "type": "object"
+                },
+                "product": {
+                    "type": "string"
+                },
+                "productSub": {
+                    "type": "string"
+                },
+                "registerProtocolHandler": {
+                    "type": "function",
+                    "value": "function registerProtocolHandler() {\n    [native code]\n}"
+                },
+                "requestMediaKeySystemAccess": {
+                    "type": "function",
+                    "value": "function requestMediaKeySystemAccess() {\n    [native code]\n}"
+                },
+                "sendBeacon": {
+                    "type": "function",
+                    "value": "function sendBeacon() {\n    [native code]\n}"
+                },
+                "serviceWorker": {
+                    "type": "object"
+                },
+                "storage": {
+                    "type": "object"
+                },
+                "taintEnabled": {
+                    "type": "function",
+                    "value": "function taintEnabled() {\n    [native code]\n}"
+                },
+                "userAgent": {
+                    "type": "string"
+                },
+                "vendor": {
+                    "type": "string"
+                },
+                "vendorSub": {
+                    "type": "string"
+                },
+                "vibrate": {
+                    "type": "function",
+                    "value": "function vibrate() {\n    [native code]\n}"
+                },
+                "webdriver": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "onabort": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onabsolutedeviceorientation": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onafterprint": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onanimationcancel": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onanimationend": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onanimationiteration": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onanimationstart": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onauxclick": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onbeforeinput": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onbeforeprint": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onbeforeunload": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onblur": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "oncanplay": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "oncanplaythrough": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onchange": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onclick": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onclose": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "oncontextmenu": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "oncuechange": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "ondblclick": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "ondevicemotion": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "ondeviceorientation": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "ondrag": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "ondragend": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "ondragenter": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "ondragexit": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "ondragleave": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "ondragover": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "ondragstart": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "ondrop": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "ondurationchange": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onemptied": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onended": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onerror": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onfocus": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onformdata": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "ongamepadconnected": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "ongamepaddisconnected": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "ongotpointercapture": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onhashchange": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "oninput": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "oninvalid": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onkeydown": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onkeypress": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onkeyup": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onlanguagechange": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onload": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onloadeddata": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onloadedmetadata": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onloadend": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onloadstart": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onlostpointercapture": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onmessage": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onmessageerror": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onmousedown": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onmouseenter": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onmouseleave": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onmousemove": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onmouseout": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onmouseover": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onmouseup": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onmozfullscreenchange": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onmozfullscreenerror": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onoffline": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "ononline": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onpagehide": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onpageshow": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onpause": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onplay": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onplaying": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onpointercancel": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onpointerdown": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onpointerenter": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onpointerleave": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onpointermove": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onpointerout": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onpointerover": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onpointerup": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onpopstate": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onprogress": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onratechange": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onrejectionhandled": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onreset": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onresize": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onscroll": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onseeked": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onseeking": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onselect": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onselectionchange": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onselectstart": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onstalled": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onstorage": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onsubmit": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onsuspend": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "ontimeupdate": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "ontoggle": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "ontransitioncancel": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "ontransitionend": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "ontransitionrun": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "ontransitionstart": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onunhandledrejection": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onunload": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onvolumechange": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onvrdisplayactivate": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onvrdisplayconnect": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onvrdisplaydeactivate": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onvrdisplaydisconnect": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onvrdisplaypresentchange": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onwaiting": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onwebkitanimationend": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onwebkitanimationiteration": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onwebkitanimationstart": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onwebkittransitionend": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "onwheel": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "open": {
+            "value": "function open() {\n    [native code]\n}",
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "opener": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "origin": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "string"
+        },
+        "outerHeight": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "number"
+        },
+        "outerWidth": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "number"
+        },
+        "pageXOffset": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "number"
+        },
+        "pageYOffset": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "number"
+        },
+        "parent": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "performance": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object",
+            "properties": {
+                "addEventListener": {
+                    "type": "function",
+                    "value": "function addEventListener() {\n    [native code]\n}"
+                },
+                "clearMarks": {
+                    "type": "function",
+                    "value": "function clearMarks() {\n    [native code]\n}"
+                },
+                "clearMeasures": {
+                    "type": "function",
+                    "value": "function clearMeasures() {\n    [native code]\n}"
+                },
+                "clearResourceTimings": {
+                    "type": "function",
+                    "value": "function clearResourceTimings() {\n    [native code]\n}"
+                },
+                "dispatchEvent": {
+                    "type": "function",
+                    "value": "function dispatchEvent() {\n    [native code]\n}"
+                },
+                "eventCounts": {
+                    "type": "object",
+                    "properties": {}
+                },
+                "getEntries": {
+                    "type": "function",
+                    "value": "function getEntries() {\n    [native code]\n}"
+                },
+                "getEntriesByName": {
+                    "type": "function",
+                    "value": "function getEntriesByName() {\n    [native code]\n}"
+                },
+                "getEntriesByType": {
+                    "type": "function",
+                    "value": "function getEntriesByType() {\n    [native code]\n}"
+                },
+                "mark": {
+                    "type": "function",
+                    "value": "function mark() {\n    [native code]\n}"
+                },
+                "measure": {
+                    "type": "function",
+                    "value": "function measure() {\n    [native code]\n}"
+                },
+                "navigation": {
+                    "type": "object",
+                    "properties": {
+                        "TYPE_BACK_FORWARD": {
+                            "type": "number"
+                        },
+                        "TYPE_NAVIGATE": {
+                            "type": "number"
+                        },
+                        "TYPE_RELOAD": {
+                            "type": "number"
+                        },
+                        "TYPE_RESERVED": {
+                            "type": "number"
+                        },
+                        "redirectCount": {
+                            "type": "number"
+                        },
+                        "toJSON": {
+                            "type": "function",
+                            "value": "function toJSON() {\n    [native code]\n}"
+                        },
+                        "type": {
+                            "type": "number"
+                        }
+                    }
+                },
+                "now": {
+                    "type": "function",
+                    "value": "function now() {\n    [native code]\n}"
+                },
+                "onresourcetimingbufferfull": {
+                    "type": "object"
+                },
+                "removeEventListener": {
+                    "type": "function",
+                    "value": "function removeEventListener() {\n    [native code]\n}"
+                },
+                "setResourceTimingBufferSize": {
+                    "type": "function",
+                    "value": "function setResourceTimingBufferSize() {\n    [native code]\n}"
+                },
+                "timeOrigin": {
+                    "type": "number"
+                },
+                "timing": {
+                    "type": "object",
+                    "properties": {
+                        "connectEnd": {
+                            "type": "number"
+                        },
+                        "connectStart": {
+                            "type": "number"
+                        },
+                        "domComplete": {
+                            "type": "number"
+                        },
+                        "domContentLoadedEventEnd": {
+                            "type": "number"
+                        },
+                        "domContentLoadedEventStart": {
+                            "type": "number"
+                        },
+                        "domInteractive": {
+                            "type": "number"
+                        },
+                        "domLoading": {
+                            "type": "number"
+                        },
+                        "domainLookupEnd": {
+                            "type": "number"
+                        },
+                        "domainLookupStart": {
+                            "type": "number"
+                        },
+                        "fetchStart": {
+                            "type": "number"
+                        },
+                        "loadEventEnd": {
+                            "type": "number"
+                        },
+                        "loadEventStart": {
+                            "type": "number"
+                        },
+                        "navigationStart": {
+                            "type": "number"
+                        },
+                        "redirectEnd": {
+                            "type": "number"
+                        },
+                        "redirectStart": {
+                            "type": "number"
+                        },
+                        "requestStart": {
+                            "type": "number"
+                        },
+                        "responseEnd": {
+                            "type": "number"
+                        },
+                        "responseStart": {
+                            "type": "number"
+                        },
+                        "secureConnectionStart": {
+                            "type": "number"
+                        },
+                        "toJSON": {
+                            "type": "function",
+                            "value": "function toJSON() {\n    [native code]\n}"
+                        },
+                        "unloadEventEnd": {
+                            "type": "number"
+                        },
+                        "unloadEventStart": {
+                            "type": "number"
+                        }
+                    }
+                },
+                "toJSON": {
+                    "type": "function",
+                    "value": "function toJSON() {\n    [native code]\n}"
+                }
+            }
+        },
+        "personalbar": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object",
+            "properties": {
+                "visible": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "postMessage": {
+            "value": "function postMessage() {\n    [native code]\n}",
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "print": {
+            "value": "function print() {\n    [native code]\n}",
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "prompt": {
+            "value": "function prompt() {\n    [native code]\n}",
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "queueMicrotask": {
+            "value": "function queueMicrotask() {\n    [native code]\n}",
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "releaseEvents": {
+            "value": "function releaseEvents() {\n    [native code]\n}",
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "removeEventListener": {
+            "type": "function",
+            "value": "function removeEventListener() {\n    [native code]\n}"
+        },
+        "requestAnimationFrame": {
+            "value": "function requestAnimationFrame() {\n    [native code]\n}",
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "requestIdleCallback": {
+            "value": "function requestIdleCallback() {\n    [native code]\n}",
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "resizeBy": {
+            "value": "function resizeBy() {\n    [native code]\n}",
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "resizeTo": {
+            "value": "function resizeTo() {\n    [native code]\n}",
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "screen": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object",
+            "properties": {
+                "addEventListener": {
+                    "type": "function",
+                    "value": "function addEventListener() {\n    [native code]\n}"
+                },
+                "availHeight": {
+                    "type": "number"
+                },
+                "availLeft": {
+                    "type": "number"
+                },
+                "availTop": {
+                    "type": "number"
+                },
+                "availWidth": {
+                    "type": "number"
+                },
+                "colorDepth": {
+                    "type": "number"
+                },
+                "dispatchEvent": {
+                    "type": "function",
+                    "value": "function dispatchEvent() {\n    [native code]\n}"
+                },
+                "height": {
+                    "type": "number"
+                },
+                "left": {
+                    "type": "number"
+                },
+                "mozLockOrientation": {
+                    "type": "function",
+                    "value": "function mozLockOrientation() {\n    [native code]\n}"
+                },
+                "mozOrientation": {
+                    "type": "string"
+                },
+                "mozUnlockOrientation": {
+                    "type": "function",
+                    "value": "function mozUnlockOrientation() {\n    [native code]\n}"
+                },
+                "onmozorientationchange": {
+                    "type": "object"
+                },
+                "orientation": {
+                    "type": "object",
+                    "properties": {
+                        "addEventListener": {
+                            "type": "function",
+                            "value": "function addEventListener() {\n    [native code]\n}"
+                        },
+                        "angle": {
+                            "type": "number"
+                        },
+                        "dispatchEvent": {
+                            "type": "function",
+                            "value": "function dispatchEvent() {\n    [native code]\n}"
+                        },
+                        "lock": {
+                            "type": "function",
+                            "value": "function lock() {\n    [native code]\n}"
+                        },
+                        "onchange": {
+                            "type": "object"
+                        },
+                        "removeEventListener": {
+                            "type": "function",
+                            "value": "function removeEventListener() {\n    [native code]\n}"
+                        },
+                        "type": {
+                            "type": "string"
+                        },
+                        "unlock": {
+                            "type": "function",
+                            "value": "function unlock() {\n    [native code]\n}"
+                        }
+                    }
+                },
+                "pixelDepth": {
+                    "type": "number"
+                },
+                "removeEventListener": {
+                    "type": "function",
+                    "value": "function removeEventListener() {\n    [native code]\n}"
+                },
+                "top": {
+                    "type": "number"
+                },
+                "width": {
+                    "type": "number"
+                }
+            }
+        },
+        "screenLeft": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "number"
+        },
+        "screenTop": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "number"
+        },
+        "screenX": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "number"
+        },
+        "screenY": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "number"
+        },
+        "scroll": {
+            "value": "function scroll() {\n    [native code]\n}",
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "scrollBy": {
+            "value": "function scrollBy() {\n    [native code]\n}",
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "scrollByLines": {
+            "value": "function scrollByLines() {\n    [native code]\n}",
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "scrollByPages": {
+            "value": "function scrollByPages() {\n    [native code]\n}",
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "scrollMaxX": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "number"
+        },
+        "scrollMaxY": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "number"
+        },
+        "scrollTo": {
+            "value": "function scrollTo() {\n    [native code]\n}",
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "scrollX": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "number"
+        },
+        "scrollY": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "number"
+        },
+        "scrollbars": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object",
+            "properties": {
+                "visible": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "self": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object"
+        },
+        "sessionStorage": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object",
+            "properties": {
+                "clear": {
+                    "type": "function",
+                    "value": "function clear() {\n    [native code]\n}"
+                },
+                "getItem": {
+                    "type": "function",
+                    "value": "function getItem() {\n    [native code]\n}"
+                },
+                "key": {
+                    "type": "function",
+                    "value": "function key() {\n    [native code]\n}"
+                },
+                "length": {
+                    "type": "number"
+                },
+                "removeItem": {
+                    "type": "function",
+                    "value": "function removeItem() {\n    [native code]\n}"
+                },
+                "setItem": {
+                    "type": "function",
+                    "value": "function setItem() {\n    [native code]\n}"
+                }
+            }
+        },
+        "setInterval": {
+            "value": "function setInterval() {\n    [native code]\n}",
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "setResizable": {
+            "value": "function setResizable() {\n    [native code]\n}",
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "setTimeout": {
+            "value": "function setTimeout() {\n    [native code]\n}",
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "sizeToContent": {
+            "value": "function sizeToContent() {\n    [native code]\n}",
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "speechSynthesis": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object",
+            "properties": {
+                "addEventListener": {
+                    "type": "function",
+                    "value": "function addEventListener() {\n    [native code]\n}"
+                },
+                "cancel": {
+                    "type": "function",
+                    "value": "function cancel() {\n    [native code]\n}"
+                },
+                "dispatchEvent": {
+                    "type": "function",
+                    "value": "function dispatchEvent() {\n    [native code]\n}"
+                },
+                "getVoices": {
+                    "type": "function",
+                    "value": "function getVoices() {\n    [native code]\n}"
+                },
+                "onvoiceschanged": {
+                    "type": "object"
+                },
+                "pause": {
+                    "type": "function",
+                    "value": "function pause() {\n    [native code]\n}"
+                },
+                "paused": {
+                    "type": "boolean"
+                },
+                "pending": {
+                    "type": "boolean"
+                },
+                "removeEventListener": {
+                    "type": "function",
+                    "value": "function removeEventListener() {\n    [native code]\n}"
+                },
+                "resume": {
+                    "type": "function",
+                    "value": "function resume() {\n    [native code]\n}"
+                },
+                "speak": {
+                    "type": "function",
+                    "value": "function speak() {\n    [native code]\n}"
+                },
+                "speaking": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "status": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "string"
+        },
+        "statusbar": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object",
+            "properties": {
+                "visible": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "stop": {
+            "value": "function stop() {\n    [native code]\n}",
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "toolbar": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object",
+            "properties": {
+                "visible": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "top": {
+            "enumerable": true,
+            "configurable": false,
+            "type": "object"
+        },
+        "u2f": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object",
+            "properties": {
+                "BAD_REQUEST": {
+                    "type": "number"
+                },
+                "CONFIGURATION_UNSUPPORTED": {
+                    "type": "number"
+                },
+                "DEVICE_INELIGIBLE": {
+                    "type": "number"
+                },
+                "OK": {
+                    "type": "number"
+                },
+                "OTHER_ERROR": {
+                    "type": "number"
+                },
+                "TIMEOUT": {
+                    "type": "number"
+                },
+                "register": {
+                    "type": "function",
+                    "value": "function register() {\n    [native code]\n}"
+                },
+                "sign": {
+                    "type": "function",
+                    "value": "function sign() {\n    [native code]\n}"
+                }
+            }
+        },
+        "updateCommands": {
+            "value": "function updateCommands() {\n    [native code]\n}",
+            "writable": true,
+            "enumerable": true,
+            "configurable": true,
+            "type": "function"
+        },
+        "visualViewport": {
+            "enumerable": true,
+            "configurable": true,
+            "type": "object",
+            "properties": {
+                "addEventListener": {
+                    "type": "function",
+                    "value": "function addEventListener() {\n    [native code]\n}"
+                },
+                "dispatchEvent": {
+                    "type": "function",
+                    "value": "function dispatchEvent() {\n    [native code]\n}"
+                },
+                "height": {
+                    "type": "number"
+                },
+                "offsetLeft": {
+                    "type": "number"
+                },
+                "offsetTop": {
+                    "type": "number"
+                },
+                "onresize": {
+                    "type": "object"
+                },
+                "onscroll": {
+                    "type": "object"
+                },
+                "pageLeft": {
+                    "type": "number"
+                },
+                "pageTop": {
+                    "type": "number"
+                },
+                "removeEventListener": {
+                    "type": "function",
+                    "value": "function removeEventListener() {\n    [native code]\n}"
+                },
+                "scale": {
+                    "type": "number"
+                },
+                "width": {
+                    "type": "number"
+                }
+            }
+        },
+        "window": {
+            "enumerable": true,
+            "configurable": false,
+            "type": "object"
+        }
+    }
+}

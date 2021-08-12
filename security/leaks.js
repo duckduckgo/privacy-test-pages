@@ -13,23 +13,24 @@ window.addEventListener('load', async () => {
     function collectProps () {
         const objCache = new Set();
         // skip these
-        objCache.add(document);
         objCache.add(window.self);
+        // prevent us decending into the DOM
+        objCache.add(document);
         objCache.add(document.activeElement);
         objCache.add(event?.currentTarget);
         const recursionAllowed = new Set();
         recursionAllowed.add('navigator');
 
-        function extractObjectProps (obj, bc = []) {
+        function extractObjectProps (obj, breadcrumbs = [], depth = 0) {
+            if (depth >= 5) {
+                return {};
+            }
             const props = {};
             const proplist = [];
             for (const prop in obj) {
                 proplist.push(prop);
             }
             proplist.sort().forEach((prop) => {
-                if (bc.length === 0 && prop === 'collectProps') {
-                    return;
-                }
                 try {
                     const desc = Object.getOwnPropertyDescriptor(obj, prop) || {};
                     desc.type = typeof obj[prop];
@@ -38,13 +39,13 @@ window.addEventListener('load', async () => {
                     } else if (desc.type === 'object') {
                         if (!objCache.has(obj[prop]) || recursionAllowed.has(prop)) {
                             objCache.add(obj[prop]);
-                            desc.properties = extractObjectProps(obj[prop], [...bc, prop]);
+                            desc.properties = extractObjectProps(obj[prop], [...breadcrumbs, prop], depth + 1);
                         }
                         delete desc.value;
                     }
                     props[prop] = desc;
                 } catch (e) {
-                    console.warn(`Error for ${bc.join('.')}.${prop}`, e);
+                    console.warn(`Error for ${breadcrumbs.join('.')}.${prop}`, e);
                 }
             });
             return props;
@@ -67,8 +68,14 @@ window.addEventListener('load', async () => {
         });
 
         const engine =
-      document.querySelector('#browser-select').selectedOptions[0].value;
+      document.querySelector('#browser-select').value;
         const platformExpected = await (await fetch(`./browser-profiles/${engine}.json`)).json();
+        const results = window.results = {
+            reference_engine: engine,
+            added: [],
+            removed: [],
+            changed: []
+        };
 
         function compareObjects (expected, actual, breadcrumbs) {
             Object.keys(actual).forEach((k) => {
@@ -80,6 +87,10 @@ window.addEventListener('load', async () => {
                             <code>${JSON.stringify(actual[k], null, 2)}</code>
                         </details>
                     `, 'added');
+                    results.added.push({
+                        name: `${breadcrumbs.join('.')}.${k}`,
+                        ...actual[k]
+                    });
                     return;
                 }
                 const changed = ['configurable', 'enumerable', 'writable', 'type', 'value'].filter(attr => actual[k][attr] !== exp[attr]);
@@ -92,6 +103,10 @@ window.addEventListener('load', async () => {
                                 <li>Actual: <code>${JSON.stringify(actual[k][changed[0]], null, 2)}</code></li>
                             </ul>
                         </details>`, 'changed');
+                    results.changed.push({
+                        name: `${breadcrumbs.join('.')}.${k}`,
+                        ...actual[k]
+                    });
                 } else if (changed.length > 0) {
                     addBullet(`
                         <details>
@@ -101,6 +116,10 @@ window.addEventListener('load', async () => {
                                 <li>Actual: <code>${JSON.stringify(actual[k], null, 2)}</code></li>
                             </ul>
                         </details>`, 'changed');
+                    results.changed.push({
+                        name: `${breadcrumbs.join('.')}.${k}`,
+                        ...actual[k]
+                    });
                 }
 
                 if (actual[k].properties) {
@@ -113,6 +132,10 @@ window.addEventListener('load', async () => {
                                 <li>Actual: <code>${JSON.stringify(actual[k], null, 2)}</code></li>
                             </ul>
                         </details>`, 'changed');
+                        results.changed.push({
+                            name: `${breadcrumbs.join('.')}.${k}`,
+                            ...actual[k]
+                        });
                     } else {
                         compareObjects(exp.properties, actual[k].properties, [
                             ...breadcrumbs,
@@ -129,6 +152,9 @@ window.addEventListener('load', async () => {
                             <code>${JSON.stringify(expected[k], null, 2)}</code>
                         </details>
                     `, 'removed');
+                    results.removed.push({
+                        name: `${breadcrumbs.join('.')}.${k}`
+                    });
                 }
             });
         }
@@ -137,4 +163,8 @@ window.addEventListener('load', async () => {
     }
 
     document.querySelector('#run').addEventListener('click', run);
+    if (document.location.hash) {
+        document.querySelector('#browser-select').value = document.location.hash.slice(1);
+        run();
+    }
 });

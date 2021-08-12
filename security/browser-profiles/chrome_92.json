@@ -722,21 +722,7 @@
                     "type": "object",
                     "properties": {
                         "0": {
-                            "value": "en-GB",
-                            "writable": false,
-                            "enumerable": true,
-                            "configurable": false,
-                            "type": "string"
-                        },
-                        "1": {
                             "value": "en",
-                            "writable": false,
-                            "enumerable": true,
-                            "configurable": false,
-                            "type": "string"
-                        },
-                        "2": {
-                            "value": "de",
                             "writable": false,
                             "enumerable": true,
                             "configurable": false,

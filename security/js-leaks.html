@@ -3,17 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JS Global leak test</title>
+    <title>Detect changes to JS objects in global scope</title>
     <script src="./leaks.js"></script>
     <link href='./style.css' rel='stylesheet'></link>
 </head>
 
 <body>
-    <p><a href="../">[Home]</a> ↣ <strong>[JS Global leak Test Page]</strong></p>
+    <p><a href="../">[Home]</a> ↣ <strong>[Detect changes to JS objects in global scope]</strong></p>
 
     <p>
         This page checks the global window object for differences versus standard browsers. 
         This shows protections' footprint that are observable and potentially exploitable by the page.
+    </p>
+    <p>
+        To generate a profile for a new browser load this page there and export the <code>collectedProps</code> global. e.g. in most devtools you can write <code>copy(JSON.stringify(collectedProps))</code> to get the object on the clipboard.
     </p>
     <label for="browser-select">Compare this browser to:</label>
     <select name="browsers" id="browser-select">

@@ -186,9 +186,9 @@ window.addEventListener('load', async () => {
     }
 
     downloadButton.addEventListener('click', () => {
-        download(JSON.stringify(window.results, null, 2), 'results')
+        download(JSON.stringify(window.results, null, 2), 'results');
     });
     document.getElementById('profile-download').addEventListener('click', () => {
-        download(JSON.stringify(window.collectedProps, null, 2), 'profile')
+        download(JSON.stringify(window.collectedProps, null, 2), 'profile');
     });
 });

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detect changes to JS objects in global scope</title>
+    <script src="./leaks.js"></script>
+    <link href='./style.css' rel='stylesheet'></link>
+</head>
+
+<body>
+    <p><a href="../">[Home]</a> ↣ <strong>[Detect changes to JS objects in global scope]</strong></p>
+
+    <p>
+        This page checks the global window object for differences versus standard browsers. 
+        This shows protections' footprint that are observable and potentially exploitable by the page.
+    </p>
+    <p>
+        To generate a profile for a new browser load this page there and click "Download this browser's profile" below.
+    </p>
+    <p>
+        You can also run the test automatically by adding the target browser to the URL,
+        e.g. adding <code>#chrome_92</code> to the end of the URL will automatically run comparisons to Chrome.
+    </p>
+    <label for="browser-select">Compare this browser to:</label>
+    <select name="browsers" id="browser-select">
+        <option value="firefox_92">Firefox 92</option>
+        <option value="chrome_92">Chrome 92</option>
+        <option value="safari_14">Safari 14</option>
+        <option value="safari_14_ios">Safari iOS 14</option>
+        <option value="android_webview_83">Android Webview 83</option>
+    </select>
+    <button id="run">Check</button>
+    <button id="download" disabled>Download the results</button>
+    <div id="results">
+        <h3>Properties Added</h3>
+        <ul id="added">
+        </ul>
+        <h3>Properties Removed</h3>
+        <ul id="removed">
+        </ul>
+        <h3>Properties Changed</h3>
+        <ul id="changed">
+        </ul>
+        
+        <button id="profile-download">Download this browser's profile</button>
+        <div id="debug"></div>
+    </div>
+</body>

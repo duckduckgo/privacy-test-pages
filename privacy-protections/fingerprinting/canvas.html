@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fingerprinting canvas verification</title>
+
+    <link href='./style.css' rel='stylesheet'></link>
+    <style>
+        tr > td:first-child {
+            color: white;
+            padding: 1em;
+        }
+
+        .status-category > td:first-child {
+            color: black;
+            font-weight: bold;
+        }
+
+        .status-fail > td:first-child {
+            background-color: red;
+        }
+
+        .status-pass td:first-child {
+            background-color: green;
+        }
+    </style>
+</head>
+<body>
+    <p><a href="../../">[Home]</a> ↣ <a href="../">[Privacy Protections Tests]</a> ↣ <strong>[Fingerprinting Test Page]</strong></p>
+    <p>These checks verify the correctness and performance of canvas rendering. This is to ensure the browser behaves as specified and is used in various identity sites. <a href="../../features/canvas-draw.html">Canvas drawing</a> is used to visually verify the correctness.</p>
+    <table id="results-table">
+        <tr><th>Status</th><th>Notes</th></tr>
+    </table>
+
+    <script src="./helpers/canvas.js"></script>
+    <script src="./canvas.js"></script>
+    <script src="/helpers/runMenu.js"></script>
+</body>
+</html>

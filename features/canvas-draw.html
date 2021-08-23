@@ -8,7 +8,7 @@
 <body>
 <p><a href="../index.html">[Home]</a></p>
 
-  <p>For testing fingerprinting, ensure that both the input drawing looks the same as the output, also ensure that the input and output hashes don't match</p>
+  <p>For testing fingerprinting, ensure that both the input drawing looks the same as the output, also ensure that the input and output hashes don't match across hostnames.</p>
 
   <main>
   	<canvas id="canvas" width=300 height=300>
@@ -44,6 +44,11 @@
       }
   </style>
   <script>
+      const results = {
+          page: 'canvas-draw',
+          results: [],
+          complete: false
+      };
       const radius = 5;
       const start = 0;
       const end = Math.PI * 2;
@@ -98,13 +103,13 @@
               this.context.fillStyle = `rgba(${r},${g},${b},${a})`;
           }
 
-          addStatsRow (title, desc, match) {
+          addStatsRow (id, value, match) {
               const rowElement = document.createElement('div');
               const titleElement = document.createElement('dt');
-              titleElement.innerText = title;
+              titleElement.innerText = id;
 
               const descElement = document.createElement('dd');
-              descElement.innerText = desc;
+              descElement.innerText = value;
               if (match !== undefined) {
                   const matchElement = document.createElement('strong');
                   if (match) {
@@ -118,6 +123,7 @@
               rowElement.appendChild(titleElement);
               rowElement.appendChild(descElement);
               this.stats.appendChild(rowElement);
+              results.results.push({ id, value, category: 'correctness' });
           }
 
           async outputStats () {
@@ -127,10 +133,13 @@
               const ofpid = await sha256(JSON.stringify(this.outputContext.getImageData(0, 0, this.output.width, this.output.height).data));
       
               this.stats.textContent = '';
+              // Reset results
+              results.results = [];
               this.addStatsRow('Canvas DataURL', fp);
               this.addStatsRow('Output DataURL', ofp, fp === ofp);
               this.addStatsRow('Canvas ImageData', fpid);
               this.addStatsRow('Output ImageData', ofpid, fpid === ofpid);
+              results.complete = true;
           }
 
           dragPoint (x, y) {
@@ -257,6 +266,6 @@
           instance.drawSamePattern();
       }
   </script>
-
+  <script src="/helpers/runMenu.js"></script>
 </body>
 </html>

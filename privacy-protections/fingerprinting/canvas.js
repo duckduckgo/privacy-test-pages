@@ -37,12 +37,92 @@ function generateDataURLWithCode (codeInput, alpha = 255) {
 }
 
 const tests = [
+    // Ensures there is a distribution of differences on the canvas
+    {
+        id: 'layering comparison',
+        category: 'resistance',
+        value: async () => {
+            const size = 2000 * 200;
+            // Make a unique int per pixel for the channels
+            function checkPixel (d, i) {
+                return d[i] + (d[i + 1] * 10 ** 3) + (d[i + 2] * 10 ** 6) + (d[i + 3] * 10 ** 9);
+            }
+
+            function shouldIgnorePixel (d, i) {
+                if (d[i + 3] === 0) {
+                    return true;
+                }
+                return false;
+            }
+
+            const pixelData = [];
+            let randData;
+            // eslint-disable-next-line new-cap
+            const rng = new Math.seedrandom('something');
+            // Compare 10 canvases and ensure per pixel there is more than one result
+            for (let i = 0; i < 10; i++) {
+                const canvasElement = createCanvas(2000, 200);
+                const canvasContext = canvasElement.getContext('2d');
+
+                // Generate rand data for all canvases to use
+                if (i === 0) {
+                    const canvasDataBlank = canvasContext.getImageData(0, 0, canvasElement.width, canvasElement.height);
+                    for (let i = 0; i < size * 4; i += 4) {
+                        canvasDataBlank.data[i] = Math.floor(rng() * 256);
+                        canvasDataBlank.data[i + 1] = Math.floor(rng() * 256);
+                        canvasDataBlank.data[i + 2] = Math.floor(rng() * 256);
+                        canvasDataBlank.data[i + 3] = 255;
+                    }
+                    randData = canvasDataBlank;
+                }
+                canvasContext.putImageData(randData, 0, 0);
+
+                // Draw a unique pixel in top left corner
+                const ctx = canvasElement.getContext('2d');
+                ctx.fillStyle = `#f6${i}`;
+                ctx.fillRect(0, 0, 1, 1);
+
+                const canvasData = canvasContext.getImageData(0, 0, canvasElement.width, canvasElement.height);
+                // Start at pixel 1 as pixel 0 was used for making the canvas random
+                for (let j = 1; j < size; j++) {
+                    if (!shouldIgnorePixel(canvasData.data, j * 4)) {
+                        if (!(pixelData[j])) {
+                            pixelData[j] = new Set();
+                        }
+                        pixelData[j].add(checkPixel(canvasData.data, j * 4));
+                    }
+                }
+            }
+
+            const sizeCount = [];
+            for (let i = 1; i < size; i++) {
+                // The number of unique pixel data across the slices
+                const pixelSize = pixelData[i].size;
+                if (!(pixelSize in sizeCount)) {
+                    sizeCount[pixelSize] = 0;
+                }
+                sizeCount[pixelSize] += 1;
+            }
+            const zeroChange = sizeCount.shift();
+            ok(zeroChange === undefined, 'Sanity check on ignored pixels');
+            const singleChange = sizeCount.shift();
+            const changeCount = sizeCount.reduce((a, i) => a + i, 0);
+            const elegiblePixels = singleChange + changeCount;
+            ok(changeCount > 0, 'Should not only have single peturbed changes');
+            // This is set purposefully low to avoid false positives and also our elegible pixel algo is more complex and may change over time.
+            ok(changeCount > (elegiblePixels * 0.2), 'Should have more than 20% of elegiblePixels that are changed across multiple canvases');
+            return sizeCount;
+        }
+    },
+
     // Render a random 4k canvas and then get the performance of getting the pixels
     {
         id: 'random noise performance',
         category: 'performance',
         value: async () => {
             const limit = 300;
+            // eslint-disable-next-line new-cap
+            const rng = new Math.seedrandom('something');
             const canvasElement = createCanvas(3840, 2160);
             const canvasContext = canvasElement.getContext('2d');
             const before = performance.now();
@@ -52,7 +132,7 @@ const tests = [
             ok(time < limit, `Getting image data must be under ${limit}ms (${time})`);
 
             for (let i = 0; i < canvasData.data.length; i++) {
-                canvasData.data[i] = Math.floor(Math.random() * 256);
+                canvasData.data[i] = Math.floor(rng() * 256);
             }
             canvasContext.putImageData(canvasData, 0, 0);
 

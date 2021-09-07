@@ -59,6 +59,7 @@ const tests = [
             let randData;
             // eslint-disable-next-line new-cap
             const rng = new Math.seedrandom('something');
+            let eligiblePixels = 0;
             // Compare 10 canvases and ensure per pixel there is more than one result
             for (let i = 0; i < 10; i++) {
                 const canvasElement = createCanvas(2000, 200);
@@ -86,6 +87,10 @@ const tests = [
                 // Start at pixel 1 as pixel 0 was used for making the canvas random
                 for (let j = 1; j < size; j++) {
                     if (!shouldIgnorePixel(canvasData.data, j * 4)) {
+                        // Only in layer one check how many eligible pixels we have
+                        if (i === 0) {
+                            eligiblePixels++;
+                        }
                         if (!(pixelData[j])) {
                             pixelData[j] = new Set();
                         }
@@ -94,24 +99,26 @@ const tests = [
                 }
             }
 
-            const sizeCount = [];
+            // Calculates the number of unique pixel counts
+            // EG: If pixel at index 2 has 5 unique values accross the 10 canvas slices we would increment pixelChangeCounts[5] += 1
+            const pixelChangeCounts = [];
             for (let i = 1; i < size; i++) {
                 // The number of unique pixel data across the slices
-                const pixelSize = pixelData[i].size;
-                if (!(pixelSize in sizeCount)) {
-                    sizeCount[pixelSize] = 0;
+                const uniquePixelCount = pixelData[i].size;
+                if (!(uniquePixelCount in pixelChangeCounts)) {
+                    pixelChangeCounts[uniquePixelCount] = 0;
                 }
-                sizeCount[pixelSize] += 1;
+                pixelChangeCounts[uniquePixelCount] += 1;
             }
-            const zeroChange = sizeCount.shift();
+            const zeroChange = pixelChangeCounts.shift();
             ok(zeroChange === undefined, 'Sanity check on ignored pixels');
-            const singleChange = sizeCount.shift();
-            const changeCount = sizeCount.reduce((a, i) => a + i, 0);
-            const elegiblePixels = singleChange + changeCount;
-            ok(changeCount > 0, 'Should not only have single peturbed changes');
-            // This is set purposefully low to avoid false positives and also our elegible pixel algo is more complex and may change over time.
-            ok(changeCount > (elegiblePixels * 0.2), 'Should have more than 20% of elegiblePixels that are changed across multiple canvases');
-            return sizeCount;
+            // Remove single change counts
+            pixelChangeCounts.shift();
+            const changeCount = pixelChangeCounts.reduce((a, i) => a + i, 0);
+            ok(changeCount > 0, 'Should not only have single perturbed changes');
+            // This is set purposefully low to avoid false positives and also our eligible pixel algo is more complex and may change over time.
+            ok(changeCount > (eligiblePixels * 0.2), 'Should have more than 20% of eligiblePixels that are changed across multiple canvases');
+            return pixelChangeCounts;
         }
     },
 

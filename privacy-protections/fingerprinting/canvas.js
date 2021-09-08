@@ -37,12 +37,99 @@ function generateDataURLWithCode (codeInput, alpha = 255) {
 }
 
 const tests = [
+    // Ensures there is a distribution of differences on the canvas
+    {
+        id: 'layering comparison',
+        category: 'resistance',
+        value: async () => {
+            const size = 2000 * 200;
+            // Make a unique int per pixel for the channels
+            function checkPixel (d, i) {
+                return d[i] + (d[i + 1] * 10 ** 3) + (d[i + 2] * 10 ** 6) + (d[i + 3] * 10 ** 9);
+            }
+
+            function shouldIgnorePixel (d, i) {
+                if (d[i + 3] === 0) {
+                    return true;
+                }
+                return false;
+            }
+
+            const pixelData = [];
+            let randData;
+            // eslint-disable-next-line new-cap
+            const rng = new Math.seedrandom('something');
+            let eligiblePixels = 0;
+            // Compare 10 canvases and ensure per pixel there is more than one result
+            for (let i = 0; i < 10; i++) {
+                const canvasElement = createCanvas(2000, 200);
+                const canvasContext = canvasElement.getContext('2d');
+
+                // Generate rand data for all canvases to use
+                if (i === 0) {
+                    const canvasDataBlank = canvasContext.getImageData(0, 0, canvasElement.width, canvasElement.height);
+                    for (let i = 0; i < size * 4; i += 4) {
+                        canvasDataBlank.data[i] = Math.floor(rng() * 256);
+                        canvasDataBlank.data[i + 1] = Math.floor(rng() * 256);
+                        canvasDataBlank.data[i + 2] = Math.floor(rng() * 256);
+                        canvasDataBlank.data[i + 3] = 255;
+                    }
+                    randData = canvasDataBlank;
+                }
+                canvasContext.putImageData(randData, 0, 0);
+
+                // Draw a unique pixel in top left corner
+                const ctx = canvasElement.getContext('2d');
+                ctx.fillStyle = `#f6${i}`;
+                ctx.fillRect(0, 0, 1, 1);
+
+                const canvasData = canvasContext.getImageData(0, 0, canvasElement.width, canvasElement.height);
+                // Start at pixel 1 as pixel 0 was used for making the canvas random
+                for (let j = 1; j < size; j++) {
+                    if (!shouldIgnorePixel(canvasData.data, j * 4)) {
+                        // Only in layer one check how many eligible pixels we have
+                        if (i === 0) {
+                            eligiblePixels++;
+                        }
+                        if (!(pixelData[j])) {
+                            pixelData[j] = new Set();
+                        }
+                        pixelData[j].add(checkPixel(canvasData.data, j * 4));
+                    }
+                }
+            }
+
+            // Calculates the number of unique pixel counts
+            // EG: If pixel at index 2 has 5 unique values accross the 10 canvas slices we would increment pixelChangeCounts[5] += 1
+            const pixelChangeCounts = [];
+            for (let i = 1; i < size; i++) {
+                // The number of unique pixel data across the slices
+                const uniquePixelCount = pixelData[i].size;
+                if (!(uniquePixelCount in pixelChangeCounts)) {
+                    pixelChangeCounts[uniquePixelCount] = 0;
+                }
+                pixelChangeCounts[uniquePixelCount] += 1;
+            }
+            const zeroChange = pixelChangeCounts.shift();
+            ok(zeroChange === undefined, 'Sanity check on ignored pixels');
+            // Remove single change counts
+            pixelChangeCounts.shift();
+            const changeCount = pixelChangeCounts.reduce((a, i) => a + i, 0);
+            ok(changeCount > 0, 'Should not only have single perturbed changes');
+            // This is set purposefully low to avoid false positives and also our eligible pixel algo is more complex and may change over time.
+            ok(changeCount > (eligiblePixels * 0.2), 'Should have more than 20% of eligiblePixels that are changed across multiple canvases');
+            return pixelChangeCounts;
+        }
+    },
+
     // Render a random 4k canvas and then get the performance of getting the pixels
     {
         id: 'random noise performance',
         category: 'performance',
         value: async () => {
             const limit = 300;
+            // eslint-disable-next-line new-cap
+            const rng = new Math.seedrandom('something');
             const canvasElement = createCanvas(3840, 2160);
             const canvasContext = canvasElement.getContext('2d');
             const before = performance.now();
@@ -52,7 +139,7 @@ const tests = [
             ok(time < limit, `Getting image data must be under ${limit}ms (${time})`);
 
             for (let i = 0; i < canvasData.data.length; i++) {
-                canvasData.data[i] = Math.floor(Math.random() * 256);
+                canvasData.data[i] = Math.floor(rng() * 256);
             }
             canvasContext.putImageData(canvasData, 0, 0);
 

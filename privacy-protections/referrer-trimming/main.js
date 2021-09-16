@@ -110,7 +110,7 @@ const tests = [
     {
         id: '3p tracker request',
         run: () => {
-            return fetch('https://bad.third-party.site/reflect-headers')
+            return fetch('https://broken.third-party.site/reflect-headers')
                 .then(r => r.json())
                 .then(data => data.headers.referer);
         }
@@ -125,7 +125,7 @@ const tests = [
     },
     {
         id: '3p tracker iframe',
-        run: () => generateFrameTest('https://bad.third-party.site/privacy-protections/referrer-trimming/frame.html')
+        run: () => generateFrameTest('https://broken.third-party.site/privacy-protections/referrer-trimming/frame.html')
     }
 ];
 

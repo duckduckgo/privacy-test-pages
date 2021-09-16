@@ -16,7 +16,7 @@ Please note that we are not taking external contributions for new test pages, bu
 
 - Templates for both simple and complex tests (Privacy Protections Tests) can be found in the [TEMPLATES](./TEMPLATES) directory.
 - Please remember to link new test page from [index.html](./index.html).
-- Once you have a PR with a new page please assign it to one of the AoR DRIs (@brindy, @kdzwinel).
+- Once you have a PR with a new page please assign it to one of the AoR DRIs (@kdzwinel, @jonathanKingston).
 
 ### Test domains
 

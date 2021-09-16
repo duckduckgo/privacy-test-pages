@@ -192,3 +192,8 @@ startButton.addEventListener('click', () => runTests());
 if (document.location.search === '?run') {
     runTests();
 }
+
+// this page will only work when loaded over HTTP, otherwise mixed-content blocking will mess up the results
+if (location.protocol !== 'http:') {
+    location.protocol = 'http:';
+}

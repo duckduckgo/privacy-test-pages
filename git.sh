@@ -1,10 +1,10 @@
 #/bin/sh
 
 # Fetch the newest code
-git fetch origin gh-pages
+git fetch origin main
 
 # Hard reset
-git reset --hard origin/gh-pages
+git reset --hard origin/main
 
 # Force pull
-git pull origin gh-pages --force
+git pull origin main --force

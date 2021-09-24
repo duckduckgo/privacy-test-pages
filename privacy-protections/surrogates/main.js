@@ -1,108 +1,148 @@
-const results = {};
+const results = {
+    page: 'surrogates',
+    date: (new Date()).toUTCString(),
+    results: []
+};
 
 function updateTable ({ name, testData, error }) {
     const table = document.getElementById('results-table');
     const row = table.insertRow(-1);
-    const testName = row.insertCell(0);
-    const loaded = row.insertCell(1);
-    const passed = row.insertCell(2);
-    const note = row.insertCell(3);
+
+    const descriptionCell = row.insertCell(0);
+    const testCell = row.insertCell(1);
 
     // set default values and colors
-    testName.innerText = name;
-    loaded.innerText = 'failed';
-    passed.innerText = 'failed';
-    row.style.backgroundColor = '#f97268';
-    note.style.backgroundColor = '#ffff';
+    descriptionCell.innerText = testData.notes;
+    testCell.innerText = 'request failed';
+    testCell.style.backgroundColor = '#f97268';
 
-    results[name] = { pass: true };
+    const result = {
+        id: name,
+        loaded: false
+    };
 
-    let testPassed = true;
+    if (!error) {
+        const testResult = testData.test();
 
-    if (!error && testData.shouldFail) {
-        testPassed = false;
-    }
-
-    if (testPassed) {
-        loaded.innerText = 'pass';
-
-        const result = testData.test();
-        if (result) {
-            passed.innerText = 'pass';
-            row.style.backgroundColor = '#71bf69';
+        if (testResult) {
+            result.loaded = true;
+            testCell.innerText = 'surrogate loaded';
+            testCell.style.backgroundColor = '#71bf69';
         } else {
-            results[name].pass = false;
-            loaded.innerText = 'failed';
+            testCell.innerText = 'surrogate not loaded';
         }
-    }
-
-    if (testData.notes) {
-        results[name].notes = testData.notes;
-        note.innerText = testData.notes;
     }
 
     if (testData.cleanUp) {
         testData.cleanUp();
     }
+
+    results.results.push(result);
+}
+
+function checkSurrogate () {
+    if (window.ga && window.ga.name !== 'N' && window.ga.answer === 42) {
+        return true;
+    }
+
+    return false;
 }
 
 const surrogates = {
-    'google-analytics.com/analytics.js, crossOrigin': {
+    'main-frame': {
         url: 'https://google-analytics.com/analytics.js',
-        crossOrigin: 'anonymous',
-        notes: 'Test loading with crossOrigin set on element (should fail on Firefox) https://bugzilla.mozilla.org/show_bug.cgi?id=1694679',
-        shouldFail: false,
-        test: () => { return !!(window.ga && Object.keys(window.ga.create()).length === 0); },
+        notes: 'Surrogate loaded in the main frame.',
+        test: checkSurrogate,
         cleanUp: () => { delete window.ga; }
     },
-    'google-analytics.com/analytics.js broken integrity': {
+    'cross-origin': {
+        url: 'https://google-analytics.com/analytics.js',
+        crossOrigin: 'anonymous',
+        notes: 'Test loading with crossOrigin set on element. Will fail on Firefox due to https://bugzilla.mozilla.org/show_bug.cgi?id=1694679 .',
+        test: checkSurrogate,
+        cleanUp: () => { delete window.ga; }
+    },
+    'integrity-check': {
         url: 'https://google-analytics.com/analytics.js',
         crossOrigin: 'anonymous',
         integrity: 'sha512-1xNTXD/ZeaKg/Xjb6De9la7CXo5gC1lMk+beyKo691KJrjlj0HbZG6frzK0Wo6bm96i9Cp6w/WB4vSN/8zDBLQ==',
-        notes: 'Surrogate will fail to load due to integrity check. We think this check should not apply to extensions.',
-        shouldFail: false,
-        test: () => { return !!(window.ga && Object.keys(window.ga.create()).length === 0); },
+        notes: 'Surrogate will fail to load for extensions due to integrity check. We think this shoudn\'t be the case.',
+        test: checkSurrogate,
         cleanUp: () => { delete window.ga; }
     },
-    'google-analytics.com/analytics.js': {
-        url: 'https://google-analytics.com/analytics.js',
-        shouldFail: false,
-        test: () => { return !!(window.ga && Object.keys(window.ga.create()).length === 0); },
-        cleanUp: () => { delete window.ga; }
-    },
-    'Directly accessing a web resouce': {
+    'direct-access': {
         url: 'chrome-extension://bkdgflcldnnnapblkhphbgpggdiikppg/web_accessible_resources/analytics.js',
-        notes: 'Chromium browsers Only: need access key for web resources',
-        shouldFail: true,
+        notes: 'Chromium only - it should not be possible to access local surrogate file',
         test: () => { return true; }
+    },
+    'sub-frame': {
+        notes: 'Surrogate loaded in an iframe.',
+        load: () => {
+            const url = './frame.html';
+            let res;
+            const promise = new Promise((resolve, reject) => { res = resolve; });
+
+            const origin = (new URL(url, document.location.href)).origin;
+
+            const iframe = document.createElement('iframe');
+            iframe.src = url;
+            iframe.style.width = '10px';
+            iframe.style.height = '10px';
+
+            const onMessage = msg => {
+                // check message and if it's comming from the right origin
+                if (msg.data.surrogate && msg.origin === origin) {
+                    res(msg.data.surrogate);
+                    window.removeEventListener('message', onMessage);
+                    document.body.removeChild(iframe);
+                }
+            };
+
+            window.addEventListener('message', onMessage);
+
+            document.body.appendChild(iframe);
+
+            iframe.addEventListener('load', () => {
+                iframe.contentWindow.postMessage({ action: 'surrogate' }, origin);
+            });
+
+            return promise;
+        }
     }
 };
 
 (async function loadSurrogates () {
     for (const [name, testData] of Object.entries(surrogates)) {
-        await new Promise((resolve, reject) => {
-            const s = document.createElement('script');
+        if (testData.url) {
+            await new Promise((resolve, reject) => {
+                const s = document.createElement('script');
 
-            if (testData.crossOrigin) {
-                s.crossOrigin = testData.crossOrigin;
-            }
-            if (testData.integrity) {
-                s.integrity = testData.integrity;
-            }
+                if (testData.crossOrigin) {
+                    s.crossOrigin = testData.crossOrigin;
+                }
+                if (testData.integrity) {
+                    s.integrity = testData.integrity;
+                }
 
-            s.onload = () => {
+                s.onload = () => {
+                    updateTable({ name, testData });
+                    resolve();
+                };
+
+                s.onerror = (error) => {
+                    updateTable({ name, testData, error });
+                    resolve();
+                };
+
+                s.src = testData.url;
+
+                document.body.appendChild(s);
+            });
+        } else {
+            testData.load().then(result => {
+                testData.test = () => result;
                 updateTable({ name, testData });
-                resolve();
-            };
-
-            s.onerror = (error) => {
-                updateTable({ name, testData, error });
-                resolve();
-            };
-
-            s.src = testData.url;
-
-            document.body.appendChild(s);
-        });
+            });
+        }
     }
 })();

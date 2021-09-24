@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Tracker surrogates</title>
+
+  <script src='https://google-analytics.com/analytics.js' defer></script>
+  <script>
+        const onMessage = msg => {
+            if (msg.data.action && msg.data.action === 'surrogate') {
+                window.parent.postMessage({
+                    surrogate: (window.ga && window.ga.name !== 'N' && window.ga.answer === 42)
+                }, '*');
+            }
+        };
+
+        window.addEventListener('message', onMessage);
+  </script>
+</style>
+</head>
+<body>
+</body>
+</html>

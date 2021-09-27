@@ -19,7 +19,8 @@ const tests = [
             let res;
             const promise = new Promise((resolve, reject) => { res = resolve; });
 
-            const otherWindow = window.open('/reflect-headers');
+            // text=1 is here to avoid Firefox JSON viewer to kick in, see server.js for details
+            const otherWindow = window.open('/reflect-headers?text=1');
 
             otherWindow.addEventListener('load', () => {
                 const payload = JSON.parse(otherWindow.document.body.innerText);

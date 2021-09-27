@@ -51,7 +51,14 @@ function checkSurrogate () {
 const surrogates = {
     'main-frame': {
         url: 'https://google-analytics.com/analytics.js',
-        notes: 'Surrogate loaded in the main frame.',
+        notes: 'Loading surrogate in the main frame.',
+        test: checkSurrogate,
+        cleanUp: () => { delete window.ga; }
+    },
+    'cross-origin': {
+        url: 'https://google-analytics.com/analytics.js',
+        crossOrigin: 'anonymous',
+        notes: 'Loading surrogate with crossOrigin=anonymous set.',
         test: checkSurrogate,
         cleanUp: () => { delete window.ga; }
     },
@@ -59,7 +66,7 @@ const surrogates = {
         url: 'https://google-analytics.com/analytics.js',
         crossOrigin: 'anonymous',
         integrity: 'sha512-1xNTXD/ZeaKg/Xjb6De9la7CXo5gC1lMk+beyKo691KJrjlj0HbZG6frzK0Wo6bm96i9Cp6w/WB4vSN/8zDBLQ==',
-        notes: 'Surrogate will fail to load for extensions due to integrity check. We think this shoudn\'t be the case.',
+        notes: 'Loading surrogate with integrity=sha513-… set.',
         test: checkSurrogate,
         cleanUp: () => { delete window.ga; }
     },
@@ -69,7 +76,7 @@ const surrogates = {
         test: () => { return true; }
     },
     'sub-frame': {
-        notes: 'Surrogate loaded in an iframe.',
+        notes: 'Loading surrogate in an iframe.',
         load: () => {
             const url = './frame.html';
             let res;

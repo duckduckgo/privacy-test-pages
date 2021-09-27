@@ -174,7 +174,7 @@ function downloadTheResults () {
     const a = document.createElement('a');
     const url = window.URL.createObjectURL(new Blob([data], { type: 'application/json' }));
     a.href = url;
-    a.download = 'fingerprinting-results.json';
+    a.download = 'https-upgrades-results.json';
 
     document.body.appendChild(a);
     a.click();

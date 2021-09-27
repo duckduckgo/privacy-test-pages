@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTTPS upgrade loop protection</title>
+</head>
+<body>
+    <script>
+        const MAX = 15;
+        const newUrl = new URL(location.href);
+        const attempt = Number(newUrl.searchParams.get('attempt')) || 0;
+
+        document.body.innerText += `${location.protocol} - attempt ${attempt + 1}/${MAX}. ${attempt >= MAX ? 'Gave up.' : ''}`;
+
+        // force http, count attempts
+        if (location.protocol === 'https:' && attempt < MAX) {
+            newUrl.protocol = 'http:';
+            newUrl.searchParams.set('attempt', attempt + 1);
+            location.href = newUrl.href;
+        } else {
+            const onMessage = msg => {
+                if (msg.data.action && msg.data.action === 'url') {
+                    if (window.opener) {
+                        window.opener.postMessage({ url: document.location.href, type: msg.data.type }, '*');
+                    } else if (window.parent) {
+                        window.parent.postMessage({ url: document.location.href, type: msg.data.type }, '*');
+                    }
+                }
+            };
+
+            window.addEventListener('message', onMessage);
+        }
+    </script>
+</body>
+</html>

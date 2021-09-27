@@ -55,13 +55,6 @@ const surrogates = {
         test: checkSurrogate,
         cleanUp: () => { delete window.ga; }
     },
-    'cross-origin': {
-        url: 'https://google-analytics.com/analytics.js',
-        crossOrigin: 'anonymous',
-        notes: 'Test loading with crossOrigin set on element. Will fail on Firefox due to https://bugzilla.mozilla.org/show_bug.cgi?id=1694679 .',
-        test: checkSurrogate,
-        cleanUp: () => { delete window.ga; }
-    },
     'integrity-check': {
         url: 'https://google-analytics.com/analytics.js',
         crossOrigin: 'anonymous',

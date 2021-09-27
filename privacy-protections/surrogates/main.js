@@ -66,7 +66,7 @@ const surrogates = {
         url: 'https://google-analytics.com/analytics.js',
         crossOrigin: 'anonymous',
         integrity: 'sha512-1xNTXD/ZeaKg/Xjb6De9la7CXo5gC1lMk+beyKo691KJrjlj0HbZG6frzK0Wo6bm96i9Cp6w/WB4vSN/8zDBLQ==',
-        notes: 'Loading surrogate with integrity=sha513-… set.',
+        notes: 'Loading surrogate with integrity=sha512-… set.',
         test: checkSurrogate,
         cleanUp: () => { delete window.ga; }
     },

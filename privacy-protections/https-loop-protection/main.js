@@ -13,7 +13,7 @@ const tests = [
         run: () => {
             let res;
             const promise = new Promise((resolve, reject) => { res = resolve; });
-            const otherWindow = window.open(`http://${TEST_DOMAIN}/privacy-protections/https-loop-protection/http-only.html`);
+            const otherWindow = window.open(`http://${TEST_DOMAIN}/privacy-protections/https-loop-protection/http-only.html?start`);
 
             const interval = setInterval(() => {
                 otherWindow.postMessage({ action: 'url', type: 'navigation' }, `http://${TEST_DOMAIN}/`);

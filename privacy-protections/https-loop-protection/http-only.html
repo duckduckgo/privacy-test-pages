@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,17 +9,27 @@
 <body>
     <script>
         const MAX = 15;
+        const LS_ITEM_KEY = 'https-loop-protection-attempt';
         const newUrl = new URL(location.href);
-        const attempt = Number(newUrl.searchParams.get('attempt')) || 0;
+        const isStart = newUrl.searchParams.has('start');
 
-        document.body.innerText += `${location.protocol} - attempt ${attempt + 1}/${MAX}. ${attempt >= MAX ? 'Gave up.' : ''}`;
+        if (isStart) {
+            localStorage[LS_ITEM_KEY] = 0;
+        }
+        const attempt = Number.parseInt(localStorage[LS_ITEM_KEY], 10);
+        localStorage[LS_ITEM_KEY] = attempt + 1;
+
+        document.body.innerHTML += `<h1>${location.protocol}</h1>`;
 
         // force http, count attempts
         if (location.protocol === 'https:' && attempt < MAX) {
+            document.body.innerHTML += `<p>Attempt ${attempt + 1}/${MAX}</p>`;
+
             newUrl.protocol = 'http:';
-            newUrl.searchParams.set('attempt', attempt + 1);
+            newUrl.searchParams.delete('start');
             location.href = newUrl.href;
         } else {
+            localStorage.removeItem(LS_ITEM_KEY);
             const onMessage = msg => {
                 if (msg.data.action && msg.data.action === 'url') {
                     if (window.opener) {

@@ -115,7 +115,17 @@ app.get('/reflect-headers', (req, res) => {
     res.set('Access-Control-Allow-Credentials', 'true');
     res.set('Timing-Allow-Origin', '*');
 
-    return res.json({ url: fullUrl(req), headers: req.headers });
+    const result = { url: fullUrl(req), headers: req.headers };
+
+    // when navigating to this page firefox will show JSON in it's JSON viewer, sometimes we don't want that
+    // in those cases add ?text=1 to url and it will load as plain text and not trigger the viewer
+    if (req.query.text) {
+        res.write(JSON.stringify(result));
+
+        return res.end();
+    } else {
+        return res.json(result);
+    }
 });
 
 // sets a cookie with provided value

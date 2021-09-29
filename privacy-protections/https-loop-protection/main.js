@@ -13,7 +13,7 @@ const tests = [
         run: () => {
             let res;
             const promise = new Promise((resolve, reject) => { res = resolve; });
-            const otherWindow = window.open(`http://${TEST_DOMAIN}/privacy-protections/https-upgrades/frame.html`);
+            const otherWindow = window.open(`http://${TEST_DOMAIN}/privacy-protections/https-loop-protection/http-only.html?start`);
 
             const interval = setInterval(() => {
                 otherWindow.postMessage({ action: 'url', type: 'navigation' }, `http://${TEST_DOMAIN}/`);
@@ -33,64 +33,12 @@ const tests = [
 
             return promise;
         }
-    },
-    {
-        id: 'upgrade-iframe',
-        run: () => {
-            let res;
-            const promise = new Promise((resolve, reject) => { res = resolve; });
-
-            const iframe = document.createElement('iframe');
-
-            iframe.addEventListener('load', i => {
-                iframe.contentWindow.postMessage({ action: 'url', type: 'frame' }, `http://${TEST_DOMAIN}/`);
-                iframe.contentWindow.postMessage({ action: 'url', type: 'frame' }, `https://${TEST_DOMAIN}/`);
-            });
-
-            iframe.src = `http://${TEST_DOMAIN}/privacy-protections/https-upgrades/frame.html`;
-
-            document.body.appendChild(iframe);
-
-            function onMessage (m) {
-                if (m.data && m.data.type === 'frame') {
-                    window.removeEventListener('message', onMessage);
-                    document.body.removeChild(iframe);
-                    res(m.data.url);
-                }
-            }
-
-            window.addEventListener('message', onMessage);
-
-            return promise;
-        }
-    },
-    {
-        id: 'upgrade-subrequest',
-        run: () => {
-            return fetch(`http://${TEST_DOMAIN}/reflect-headers`)
-                .then(r => r.url);
-        }
-    },
-    {
-        id: 'upgrade-websocket',
-        run: () => {
-            let res;
-            const promise = new Promise((resolve, reject) => { res = resolve; });
-
-            const websocketUrl = `ws://${TEST_DOMAIN}/block-me/web-socket`;
-            const socket = new WebSocket(websocketUrl);
-            socket.addEventListener('message', () => {
-                res(socket.url);
-            });
-
-            return promise;
-        }
     }
 ];
 
 // object that contains results of all tests
 const results = {
-    page: 'https-upgrades',
+    page: 'https-loop-protection',
     date: null,
     results: []
 };
@@ -153,7 +101,7 @@ function runTests () {
                         updateSummary();
                     });
             } else {
-                valueSpan.innerHTML = resultToHTML(data);
+                valueSpan.innerHTML = resultToHTML(result);
                 resultObj.value = result || null;
             }
         } catch (e) {
@@ -174,7 +122,7 @@ function downloadTheResults () {
     const a = document.createElement('a');
     const url = window.URL.createObjectURL(new Blob([data], { type: 'application/json' }));
     a.href = url;
-    a.download = 'https-upgrades-results.json';
+    a.download = 'https-loop-protection-results.json';
 
     document.body.appendChild(a);
     a.click();
@@ -191,9 +139,4 @@ startButton.addEventListener('click', () => runTests());
 // if url query is '?run' start tests imadiatelly
 if (document.location.search === '?run') {
     runTests();
-}
-
-// this page will only work when loaded over HTTP, otherwise mixed-content blocking will mess up the results
-if (location.protocol !== 'http:') {
-    location.protocol = 'http:';
 }

@@ -26,11 +26,11 @@ function generateNavigationTest (url) {
         const result = [
             {
                 test: 'js',
-                result: currentURL.searchParams.get('js')
+                value: currentURL.searchParams.get('js')
             },
             {
                 test: 'header',
-                result: currentURL.searchParams.get('header')
+                value: currentURL.searchParams.get('header')
             }
         ];
         localStorage.setItem(key, JSON.stringify(result));

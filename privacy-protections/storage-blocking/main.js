@@ -271,14 +271,15 @@ function retrieveData () {
         testsSummaryDiv.innerText = `Retrieved data from ${all} storage mechanisms${failed > 0 ? ` (${failed} failed)` : ''}. Click for details.`;
     }
 
+    function addTestResult (testId, value) {
+        results.results.push({
+            id: testId,
+            value: value
+        });
+    }
+
     tests.concat(commonTests).forEach(test => {
         all++;
-
-        const resultObj = {
-            id: test.id,
-            value: null
-        };
-        results.results.push(resultObj);
 
         const li = document.createElement('li');
         li.id = `test-${test.id.replace(' ', '-')}`;
@@ -294,25 +295,31 @@ function retrieveData () {
                 result
                     .then(data => {
                         if (Array.isArray(data)) {
-                            valueSpan.innerHTML = `<ul>${data.map(r => `<li>${r.test} - ${r.result}</li>`).join('')}</ul>`;
-                        } else if (data) {
-                            valueSpan.innerHTML = JSON.stringify(data, null, 2);
-                        }
+                            valueSpan.innerHTML = `<ul>${data.map(r => `<li>${r.test} - ${r.result} ${r.error ? '(❌ ' + r.error + ')' : ''}</li>`).join('')}</ul>`;
 
-                        resultObj.value = data;
+                            data.forEach(item => addTestResult(`${test.id} - ${item.test}`, item.result));
+                        } else {
+                            if (data) {
+                                valueSpan.innerHTML = JSON.stringify(data, null, 2);
+                            }
+
+                            addTestResult(test.id, data);
+                        }
                     })
                     .catch(e => {
                         failed++;
                         valueSpan.innerHTML = `❌ error thrown ("${e.message ? e.message : e}")`;
+                        addTestResult(test.id, null);
                         updateSummary();
                     });
             } else {
                 valueSpan.innerText = JSON.stringify(result, null, 2) || undefined;
-                resultObj.value = result || null;
+                addTestResult(test.id, result || null);
             }
         } catch (e) {
             failed++;
             valueSpan.innerHTML = `❌ error thrown ("${e.message ? e.message : e}")`;
+            addTestResult(test.id, null);
         }
     });
 

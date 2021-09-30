@@ -43,7 +43,8 @@ function retrieveData () {
                     }))
                     .catch(e => ({
                         test: test.id,
-                        result: e.message
+                        result: null,
+                        error: e.message
                     }));
             } else {
                 return Promise.resolve({
@@ -54,7 +55,8 @@ function retrieveData () {
         } catch (e) {
             return Promise.resolve({
                 test: test.id,
-                result: e.message ? e.message : e
+                result: null,
+                error: e.message ? e.message : e
             });
         }
     }));

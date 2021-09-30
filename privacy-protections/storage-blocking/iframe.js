@@ -9,22 +9,22 @@ function storeData (randomNumber) {
                 return result
                     .then(() => ({
                         test: test.id,
-                        result: 'OK'
+                        value: 'OK'
                     }))
                     .catch(e => ({
                         test: test.id,
-                        result: e.message
+                        value: e.message
                     }));
             } else {
                 return Promise.resolve({
                     test: test.id,
-                    result: 'OK'
+                    value: 'OK'
                 });
             }
         } catch (e) {
             return Promise.resolve({
                 test: test.id,
-                result: e.message ? e.message : e
+                value: e.message ? e.message : e
             });
         }
     }));
@@ -39,23 +39,23 @@ function retrieveData () {
                 return result
                     .then(value => ({
                         test: test.id,
-                        result: value
+                        value: value
                     }))
                     .catch(e => ({
                         test: test.id,
-                        result: null,
+                        value: null,
                         error: e.message
                     }));
             } else {
                 return Promise.resolve({
                     test: test.id,
-                    result: result
+                    value: result
                 });
             }
         } catch (e) {
             return Promise.resolve({
                 test: test.id,
-                result: null,
+                value: null,
                 error: e.message ? e.message : e
             });
         }

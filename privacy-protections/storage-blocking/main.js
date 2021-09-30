@@ -231,7 +231,7 @@ function storeData () {
                         result
                             .then(result => {
                                 if (Array.isArray(result)) {
-                                    valueSpan.innerHTML = `<ul>${result.map(r => `<li>${r.test} - ${r.result}</li>`).join('')}</ul>`;
+                                    valueSpan.innerHTML = `<ul>${result.map(r => `<li>${r.test} - ${r.value}</li>`).join('')}</ul>`;
                                 } else if (result && result !== 'OK') {
                                     valueSpan.innerHTML = JSON.stringify(result, null, 2);
                                 } else {
@@ -295,9 +295,9 @@ function retrieveData () {
                 result
                     .then(data => {
                         if (Array.isArray(data)) {
-                            valueSpan.innerHTML = `<ul>${data.map(r => `<li>${r.test} - ${r.result} ${r.error ? '(❌ ' + r.error + ')' : ''}</li>`).join('')}</ul>`;
+                            valueSpan.innerHTML = `<ul>${data.map(r => `<li>${r.test} - ${r.value} ${r.error ? '(❌ ' + r.error + ')' : ''}</li>`).join('')}</ul>`;
 
-                            data.forEach(item => addTestResult(`${test.id} - ${item.test}`, item.result));
+                            data.forEach(item => addTestResult(`${test.id} - ${item.test}`, item.value));
                         } else {
                             if (data) {
                                 valueSpan.innerHTML = JSON.stringify(data, null, 2);

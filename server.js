@@ -52,6 +52,11 @@ app.post('/git', (req, res) => {
     const hmac = crypto.createHmac('sha1', process.env.SECRET);
     const sig = 'sha1=' + hmac.update(JSON.stringify(req.body)).digest('hex');
 
+    // don't deploy if push was to a branch other than main
+    if (req.body.ref !== 'refs/heads/main') {
+        return res.sendStatus(204);
+    }
+
     if (req.headers['x-github-event'] === 'push' && crypto.timingSafeEqual(Buffer.from(sig, 'utf8'), Buffer.from(req.headers['x-hub-signature'], 'utf8'))) {
         try {
             fs.chmodSync('git.sh', '777'); /* Fix no perms after updating */

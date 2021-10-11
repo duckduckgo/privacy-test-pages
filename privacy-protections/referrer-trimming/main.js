@@ -26,11 +26,11 @@ function generateNavigationTest (url) {
         const result = [
             {
                 test: 'js',
-                result: currentURL.searchParams.get('js')
+                value: currentURL.searchParams.get('js')
             },
             {
                 test: 'header',
-                result: currentURL.searchParams.get('header')
+                value: currentURL.searchParams.get('header')
             }
         ];
         localStorage.setItem(key, JSON.stringify(result));
@@ -148,13 +148,14 @@ function runTests () {
         testsSummaryDiv.innerText = `Performed ${all} tests${failed > 0 ? ` (${failed} failed)` : ''}. Click for details.`;
     }
 
-    for (const test of tests) {
-        const resultObj = {
-            id: test.id,
-            value: null
-        };
-        results.results.push(resultObj);
+    function addTestResult (testId, value) {
+        results.results.push({
+            id: testId,
+            value: value
+        });
+    }
 
+    for (const test of tests) {
         const li = document.createElement('li');
         li.id = `test-${test.id.replace(' ', '-')}`;
         li.innerHTML = `${test.id} - <span class='value'>…</span>`;
@@ -172,30 +173,40 @@ function runTests () {
                 result
                     .then(data => {
                         if (Array.isArray(data)) {
-                            valueSpan.innerHTML = `<ul>${data.map(r => `<li>${r.test} - ${r.result}</li>`).join('')}</ul>`;
-                        } else if (data) {
-                            valueSpan.innerHTML = JSON.stringify(data, null, 2);
-                        }
+                            valueSpan.innerHTML = `<ul>${data.map(r => `<li>${r.test} - ${r.value}</li>`).join('')}</ul>`;
 
-                        resultObj.value = data;
+                            data.forEach(item => addTestResult(`${test.id} - ${item.test}`, item.result));
+                        } else {
+                            if (data) {
+                                valueSpan.innerHTML = JSON.stringify(data, null, 2);
+                            }
+
+                            addTestResult(test.id, data);
+                        }
                     })
                     .catch(e => {
                         failed++;
                         valueSpan.innerHTML = `❌ error thrown ("${e.message ? e.message : e}")`;
+                        addTestResult(test.id, null);
                         updateSummary();
                     });
             } else {
                 if (Array.isArray(result)) {
-                    valueSpan.innerHTML = `<ul>${result.map(r => `<li>${r.test} - ${r.result}</li>`).join('')}</ul>`;
-                } else if (result) {
-                    valueSpan.innerHTML = JSON.stringify(result, null, 2);
-                }
+                    valueSpan.innerHTML = `<ul>${result.map(r => `<li>${r.test} - ${r.value}</li>`).join('')}</ul>`;
 
-                resultObj.value = result || null;
+                    result.forEach(item => addTestResult(`${test.id} - ${item.test}`, item.value));
+                } else {
+                    if (result) {
+                        valueSpan.innerHTML = JSON.stringify(result, null, 2);
+                    }
+
+                    addTestResult(test.id, result || null);
+                }
             }
         } catch (e) {
             failed++;
             valueSpan.innerHTML = `❌ error thrown ("${e.message ? e.message : e}")`;
+            addTestResult(test.id, null);
         }
 
         all++;

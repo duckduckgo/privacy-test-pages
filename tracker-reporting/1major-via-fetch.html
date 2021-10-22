@@ -5,8 +5,13 @@
   <meta name="viewport" content="width=device-width">
   <title>Tracker loaded via fetch</title>
 
+  <script src="./utils.js"></script>
   <script>
 // eslint-disable-next-line no-unused-vars
+function init () {
+    callAfterDelay(loadTracker);
+}
+
 function loadTracker () {
     const targetElement = document.getElementById('target-div');
 
@@ -22,7 +27,7 @@ function loadTracker () {
   </script>
 
 </head>
-<body onload="loadTracker()">
+<body onload="init()">
 <p><a href="../index.html">[Home]</a></p>
 
 <p>Tracker loaded via fetch</p>

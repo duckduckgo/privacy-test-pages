@@ -71,7 +71,11 @@ Object.keys(testSites).forEach((cmpName) => {
 });
 
 // dummy CMP
-document.getElementById('reject-all').addEventListener('click', (ev) => {
+const button = document.createElement('button');
+button.innerText = 'This should be clicked automatically.';
+button.id = 'reject-all';
+document.getElementById('privacy-test-page-cmp-test').appendChild(button);
+button.addEventListener('click', (ev) => {
     ev.target.innerText = 'I was clicked!';
     window.results.results.push('button_clicked');
 });

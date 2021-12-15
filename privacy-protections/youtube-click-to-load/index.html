@@ -36,12 +36,6 @@
       <li>
         Requests to <u>apis.google.com</u> are not expected to be blocked.
       </li>
-      <li>
-        Test with Firefox versions < 89 and ensure the YouTube Iframe API related
-        videos work correctly. That tests the workaround for
-        <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1694679">a CORS related bug</a>
-        in older versions of Firefox.
-      </li>
     </ul>
   </header>
   <main>
@@ -151,10 +145,7 @@
     <!-- For subscribe button. -->
     <script src="https://apis.google.com/js/platform.js"></script>
 
-    <!-- YouTube Iframe API. Note we use `crossorigin="anonymous"` to trigger -->
-    <!-- a bug in Firefox < 89 which results in a CORS error.
-    <!-- See https://bugzilla.mozilla.org/show_bug.cgi?id=1694679 -->
-    <script crossorigin="anonymous" src="https://www.youtube.com/iframe_api"></script>
+    <script src="https://www.youtube.com/iframe_api"></script>
     <script>
       // Examples based on the YouTube Iframe API documentation.
       // See https://developers.google.com/youtube/iframe_api_reference

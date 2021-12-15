@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+
+  <title>YouTube click to load</title>
+
+  <style>
+   div { border: 2px #000 solid; padding: 10px; margin: 10px; }
+   #short-container { height: 200px; overflow: hidden; }
+   .spherical-control { width: 80px; }
+  </style>
+</head>
+<body>
+  <header>
+    <p>
+      <a href="../../">[Home]</a> ↣
+      <a href="../">[Privacy Protections Tests]</a> ↣
+      <strong>[YouTube click to load]</strong>
+    </p>
+    <h1>YouTube click to load tests</h1>
+    <p>
+      Different types of embedded YouTube videos and playlists. Some are created
+      and/or controlled using <a href="https://developers.google.com/youtube/iframe_api_reference">the YouTube Iframe API</a>.
+    </p>
+    <ul>
+      <li>
+        Videos should behave the same when the extension is enabled (after they
+        are clicked to load), except where noted.
+      </li>
+      <li>
+        All requests to YouTube should be blocked until the first video is clicked
+        to load.
+      </li>
+      <li>
+        Requests to <u>apis.google.com</u> are not expected to be blocked.
+      </li>
+      <li>
+        Test with Firefox versions < 89 and ensure the YouTube Iframe API related
+        videos work correctly. That tests the workaround for
+        <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1694679">a CORS related bug</a>
+        in older versions of Firefox.
+      </li>
+    </ul>
+  </header>
+  <main>
+    <div id="short-container">
+      <p>www.youtube.com embedded video.</p>
+        <ul>
+          <li>Should be upgraded to youtube-nocookie.com.</li>
+          <li>Unblock button should be displayed in header, as container is short.</li>
+        </ul>
+      <iframe width="560" height="315" title="YouTube video player"
+              src="https://www.youtube.com/embed/DHfRfU3XUEo" frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen></iframe>
+    </div>
+    <div>
+      <p>
+        www.youtube-nocookie.com (muted) auto-play video.
+      </p>
+      <ul>
+        <li>Auto-play should be prevented.</li>
+      </ul>
+      </p>
+      <iframe width="560" height="315" title="YouTube video player" frameborder="0"
+              src="https://www.youtube-nocookie.com/embed/W85oD8FEF78?autoplay=1&mute=1"
+              allowfullscreen></iframe>
+    </div>
+    <div>
+      <p>youtube.com embedded playlist.</p>
+      <ul>
+        <li>Should be upgraded to youtube-nocookie.com.</li>
+      </ul>
+      <iframe width="560" height="315" title="YouTube video player" frameborder="0"
+              src="https://youtube.com/embed/videoseries?list=PLD72Ylz-Y01vcGTYmEaN9nz02o0yZMWy8"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    </div>
+    <div>
+      <p>YouTube subscribe button</p>
+      <ul>
+        <li>Subscribe button should be blocked.</li>
+      </ul>
+      <div class="g-ytsubscribe" data-channel="GoogleDevelopers"
+           data-layout="full" data-count="default"></div>
+    </div>
+    <div>
+      <p>youtube.com video created with YouTube Iframe API.</p>
+      <ul>
+        <li>Should be upgraded to youtube-nocookie.com.</li>
+        <li>Ensure the video jumps 5 minutes forward when first loaded.</li>
+        <li>Note: It is expected that the video will auto-play sometimes. Even
+            when using click to load.</li>
+      </ul>
+      <div id="dynamic-video"></div>
+    </div>
+    <div>
+      <p>youtube.com playlist created with YouTube Iframe API.</p>
+      <ul>
+        <li>Should be upgraded to youtube-nocookie.com.</li>
+      </ul>
+      <div id="dynamic-playlist"></div>
+    </div>
+    <div>
+      <p>Existing www.youtube.com embedded video which is controlled with YouTube Iframe API.</p>
+      <ul>
+        <li>Should be upgraded to youtube-nocookie.com.</li>
+        <li>Ensure the border colours change as the video is played/paused/loading.</li>
+        <li>Ensure the external Play/Pause buttons work.</li>
+      </ul>
+      <iframe width="560" height="315" title="YouTube video player" frameborder="0"
+              src="https://www.youtube.com/embed/tpiyEe_CqB4?enablejsapi=1" id="existing-video"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen></iframe>
+      <button id="play-existing-video">Play!</button>
+      <button id="pause-existing-video">Pause!</button>
+    </div>
+    <div>
+      <p>youtube-nocookie.com embedded 360 video with controls.</p>
+      <ul>
+        <li>
+          Ensure that the current value for yaw etc is updated when the video's
+          built-in controls are used.
+        </li>
+        <li>
+          Ensure that the video is flipped (+180 roll) when the external Flip
+          button is clicked.
+        </li>
+      </ul>
+      <div id="spherical-video"></div>
+      <label>
+        Yaw:
+        <input type="text" id="spherical-video-yaw" class="spherical-control">
+      </label>
+      <label>
+        Pitch:
+        <input type="text" id="spherical-video-pitch" class="spherical-control">
+      </label>
+      <label>
+        Roll:
+        <input type="text" id="spherical-video-roll" class="spherical-control">
+      </label>
+      <label>
+        Fov:
+        <input type="text" id="spherical-video-fov" class="spherical-control">
+      </label>
+      <button id="spherical-video-flip">Flip!</id>
+    </div>
+
+    <!-- For subscribe button. -->
+    <script src="https://apis.google.com/js/platform.js"></script>
+
+    <!-- YouTube Iframe API. Note we use `crossorigin="anonymous"` to trigger -->
+    <!-- a bug in Firefox < 89 which results in a CORS error.
+    <!-- See https://bugzilla.mozilla.org/show_bug.cgi?id=1694679 -->
+    <script crossorigin="anonymous" src="https://www.youtube.com/iframe_api"></script>
+    <script>
+      // Examples based on the YouTube Iframe API documentation.
+      // See https://developers.google.com/youtube/iframe_api_reference
+
+      const playerStateColours = {
+          UNSTARTED: 'gray',
+          ENDED: 'yellow',
+          PLAYING: 'green',
+          PAUSED: 'red',
+          BUFFERING: 'purple',
+          CUED: 'orange'
+      }
+
+      function onYouTubeIframeAPIReady() {
+          // Create the first dynamic video.
+          const dynamicVideo = new YT.Player('dynamic-video', {
+              height: '315',
+              width: '560',
+              videoId: '94PLgLKcGW8',
+              playerVars: {
+                  'playsinline': 1
+              },
+              events: {
+                  onReady(event) {
+                      event.target.seekTo(300, true)
+                  }
+              }
+          })
+
+          // Create the dynamic playlist.
+          const dynamicPlaylist = new YT.Player('dynamic-playlist', {
+              height: '315',
+              width: '560',
+              playerVars: {
+                  'list': 'PLC77007E23FF423C6'
+              }
+          })
+
+          // Setup the Play/Pause buttons + border colour for the existing video.
+          const colourByPlayerState = []
+          for (const [stateName, stateNumber] of Object.entries(YT.PlayerState)) {
+              colourByPlayerState[stateNumber] = playerStateColours[stateName]
+          }
+          const existingVideo = new YT.Player('existing-video', {
+              events: {
+                  onReady({ target }) {
+                      const videoElement = target.getIframe()
+                      videoElement.style.border = '5px solid'
+                      videoElement.style.borderColor = playerStateColours.CUED
+                  },
+                  onStateChange({ target, data: playerState }) {
+                      const videoElement = target.getIframe()
+                      videoElement.style.borderColor = colourByPlayerState[playerState]
+                  }
+              }
+          })
+          document.getElementById('play-existing-video').addEventListener('click', () => {
+              existingVideo.playVideo()
+          })
+          document.getElementById('pause-existing-video').addEventListener('click', () => {
+              existingVideo.pauseVideo()
+          })
+
+          // Setup the 360 video.
+          let sphericalVideo
+
+          const yawElement = document.getElementById('spherical-video-yaw')
+          const pitchElement = document.getElementById('spherical-video-pitch')
+          const rollElement = document.getElementById('spherical-video-roll')
+          const fovElement = document.getElementById('spherical-video-fov')
+          const updateSphericalControls = () => {
+              const { yaw = 0, pitch = 0, roll = 0 , fov = 0 } = sphericalVideo.getSphericalProperties()
+              yawElement.value = yaw.toFixed(4)
+              pitchElement.value = pitch.toFixed(4)
+              rollElement.value = roll.toFixed(4)
+              fovElement.value = fov.toFixed(4)
+              requestAnimationFrame(updateSphericalControls)
+          }
+
+          sphericalVideo = new YT.Player('spherical-video', {
+              height: '360',
+              width: '640',
+              videoId: 'TpjK07pUtkU',
+              events: {
+                  onReady(event) {
+                      updateSphericalControls()
+                  }
+              }
+          })
+
+          document.getElementById('spherical-video-flip').addEventListener('click', () => {
+              let { roll } = sphericalVideo.getSphericalProperties()
+              roll = (roll + 180) % 360
+              sphericalVideo.setSphericalProperties({ roll })
+          })
+      }
+    </script>
+  </main>
+</body>
+</html>

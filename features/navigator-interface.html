@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width">
-    <title>Navigator Namespace</title>
+    <title>Navigator Interface</title>
 </head>
 <body>
 <p><a href="../index.html">[Home]</a></p>
@@ -16,20 +16,20 @@
 
 <script>
     function test () {
-        const hasNamespace = 'ddg' in navigator;
+        const hasInterface = 'ddg' in navigator;
         let isExtension = false;
 
-        if (hasNamespace) {
+        if (hasInterface) {
             if (typeof navigator.ddg.isExtension === 'function') {
                 isExtension = navigator.ddg.isExtension();
             }
         }
 
         return {
-            page: 'navigator-namespace',
+            page: 'navigator-interface',
             date: (new Date()).toUTCString(),
             results: [
-                { id: 'namespace', value: hasNamespace },
+                { id: 'namespace', value: hasInterface },
                 { id: 'extension', value: isExtension }
             ]
         };

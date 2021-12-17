@@ -25,7 +25,7 @@
 
     window.results = {
         page: 'navigator-namespace',
-        date: null,
+        date: (new Date()).toUTCString(),
         results: [
             { id: 'namespace', value: hasNamespace },
             { id: 'extension', value: isExtension }

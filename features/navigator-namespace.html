@@ -8,32 +8,49 @@
 <body>
 <p><a href="../index.html">[Home]</a></p>
 
-<p>Using the new DOM API, <code>navigator.ddg</code>, to provide signals about the presence of DDG products</p>
+<p>The new DOM API <code>navigator.ddg</code> is used to provide signals about the presence of DDG products</p>
+<p>This test will try to detect <code>navigator.ddg</code> within a second of the page loading</p>
 
-<p id="ddg"></p>
-<p id="ddg-extension"></p>
+<p id="namespace"></p>
+<p id="extension"></p>
 
 <script>
-    const hasNamespace = 'ddg' in navigator;
-    let isExtension = false;
+    function test () {
+        const hasNamespace = 'ddg' in navigator;
+        let isExtension = false;
 
-    if (hasNamespace) {
-        if (typeof navigator.ddg.isExtension === 'function') {
-            isExtension = navigator.ddg.isExtension();
+        if (hasNamespace) {
+            if (typeof navigator.ddg.isExtension === 'function') {
+                isExtension = navigator.ddg.isExtension();
+            }
+        }
+
+        return {
+            page: 'navigator-namespace',
+            date: (new Date()).toUTCString(),
+            results: [
+                { id: 'namespace', value: hasNamespace },
+                { id: 'extension', value: isExtension }
+            ]
+        };
+    }
+
+    function display (results) {
+        for (const result of results) {
+            document.getElementById(result.id).textContent = `DDG ${result.id}: ${result.value}`;
         }
     }
 
-    window.results = {
-        page: 'navigator-namespace',
-        date: (new Date()).toUTCString(),
-        results: [
-            { id: 'namespace', value: hasNamespace },
-            { id: 'extension', value: isExtension }
-        ]
-    };
-
-    document.getElementById('ddg').textContent = `DDG: ${hasNamespace}`;
-    document.getElementById('ddg-extension').textContent = `DDG extension: ${Boolean(isExtension)}`;
+    let count = 0;
+    const int = setInterval(() => {
+        const results = test();
+        if (results.results[0].value === true || count >= 10) {
+            clearInterval(int);
+            display(results.results);
+            window.results = results;
+        }
+        count += 1;
+    }, 100);
 </script>
 
 </body>

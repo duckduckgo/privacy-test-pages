@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Navigator Interface</title>
+    <script src="../tracker-reporting/utils.js"></script>
+    <script>
+        // eslint-disable-next-line no-unused-vars
+        function init () {
+            // eslint-disable-next-line no-undef
+            callAfterDelay(detectInterface);
+        }
+
+        function detectInterface () {
+            const hasInterface = 'ddg' in navigator;
+            let isExtension = false;
+
+            if (hasInterface) {
+                if (typeof navigator.ddg.isExtension === 'function') {
+                    isExtension = navigator.ddg.isExtension();
+                }
+            }
+
+            const results = {
+                page: 'navigator-interface',
+                date: (new Date()).toUTCString(),
+                results: [
+                    { id: 'namespace', value: hasInterface },
+                    { id: 'extension', value: isExtension }
+                ]
+            };
+
+            for (const result of results.results) {
+                document.getElementById(result.id).textContent = `DDG ${result.id}: ${result.value}`;
+            }
+
+            window.results = results;
+        }
+    </script>
+</head>
+<body onload="init()">
+<p><a href="../index.html">[Home]</a></p>
+
+<p>The new DOM API <code>navigator.ddg</code> is used to provide signals about the presence of DDG products</p>
+<p>This test will try to detect <code>navigator.ddg</code> within a second of the page loading</p>
+
+<p id="namespace"></p>
+<p id="extension"></p>
+
+</body>
+</html>

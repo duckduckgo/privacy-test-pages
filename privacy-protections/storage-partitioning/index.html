@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Storage Partitioning Test Page</title>
+
+    <script src='./helpers/idb-wrapper.js' defer></script>
+    <script src='./helpers/commonTests.js'></script>
+    <script src='./main.js' defer></script>
+    <link href='./style.css' rel='stylesheet'></link>
+</head>
+<body>
+    <p><a href="../../">[Home]</a> ↣ <a href="../">[Privacy Protections Tests]</a> ↣ <strong>[Storage Partitioning Test Page]</strong></p>
+
+    <p>This page will determine whether various storage APIs are parititoned across origins.</p>
+
+    <p><button id='run'>Run Tests</button></p>
+
+    <details id='tests' hidden>
+        <summary id='tests-summary'></summary>
+        <ul id='tests-details'>
+        </ul>
+    </details>
+
+    <p><button id='download' disabled>Download the result</button></p>
+
+</body>
+</html>

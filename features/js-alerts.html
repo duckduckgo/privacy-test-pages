@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>JS Alerts</title>
+</head>
+
+<body>
+    <p><a href="../index.html">[Home]</a></p>
+   
+    <p>JS alerts</P>
+    <p id="alertText"></p>
+
+    <button onclick="showTextPrompt()">Prompt + Text</button>
+    <br>
+    <button onclick="showDefaultAlert()">Default Alert</button>
+    <br>
+    <button onclick="showConfirmDialog()">Confirm Dialog</button>
+    <br>
+    <button onclick="showAlertWithDelay()">Alert With 4s Delay</button>
+    <br>
+
+    <p>Recursive JS alerts</P>
+    <button onclick="showRecursiveTextPrompt()">Recursive Prompt + Text</button>
+    <br>
+    <button onclick="showRecursiveDefaultAlert()">Recursive Default Alert</button>
+    <br>
+    <button onclick="showRecursiveConfirmDialog()">Recursive Confirm Dialog</button>
+    <br>
+
+    <script>
+        /* eslint-disable no-unused-vars */
+
+        function showTextPrompt () {
+            const defaultText = prompt('Type something', 'Default Text');
+            if (defaultText != null) {
+                replaceText('Text Entered: ' + defaultText);
+            }
+        }
+
+        function showDefaultAlert () {
+            alert('Default Alert');
+        }
+
+        function showConfirmDialog () {
+            if (confirm('Select OK or Cancel')) {
+                replaceText('OK Selected');
+            } else {
+                replaceText('Cancel Selected');
+            }
+        }
+
+        function showAlertWithDelay () {
+            setTimeout(function () {
+                showDefaultAlert();
+            }, 4000);
+        }
+
+        function replaceText (text) {
+            document.getElementById('alertText').innerHTML = text;
+        }
+
+        function showRecursiveTextPrompt () {
+            showTextPrompt();
+            showRecursiveTextPrompt();
+        }
+
+        function showRecursiveConfirmDialog () {
+            showConfirmDialog();
+            showRecursiveConfirmDialog();
+        }
+
+        function showRecursiveDefaultAlert () {
+            showDefaultAlert();
+            showRecursiveDefaultAlert();
+        }
+    </script>
+</body>
+</html>

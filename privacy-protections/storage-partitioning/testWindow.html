@@ -3,41 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Storage Partitioning Test Window</title>
+    <title>Storage Partitioning - Test Tab</title>
+    <script src='./testPage.js' defer></script>
     <link href='./style.css' rel='stylesheet'></link>
 </head>
 <body>
     <p>Testing...</p>
-    <script>
-        const ALLOWED_HOSTNAMES = [
-            'localhost',
-            'privacy-test-pages.glitch.me'
-        ];
-
-        // Build embedded frame URL from query string
-        const topURL = new URL(window.location.href);
-        const embeddedOrigin = topURL.searchParams.get('embeddedOrigin');
-        const referringOrigin = topURL.searchParams.get('referringOrigin');
-        if (!ALLOWED_HOSTNAMES.includes(new URL(referringOrigin).hostname)) {
-            console.error(`Invalid referringOrigin ${referringOrigin}`);
-        }
-        const iframeURL = new URL('/privacy-protections/storage-partitioning/iframe.html?read', embeddedOrigin);
-        if (!ALLOWED_HOSTNAMES.includes(iframeURL.hostname)) {
-            console.error(`Invalid embeddedOrigin ${iframeURL.hostname}`);
-        }
-        const iframe = document.createElement('iframe');
-        iframe.src = iframeURL.href;
-        document.body.appendChild(iframe);
-
-        // Listen for results, and post to opener when we receive them
-        window.addEventListener('message', event => {
-            if (event.origin !== iframeURL.origin) {
-                console.error(`Message from unexpected origin ${event.origin}`);
-            }
-            console.log(event.data);
-            window.opener.postMessage(event.data, referringOrigin);
-            window.close()
-        }, false)
-    </script>
 </body>
 </html>

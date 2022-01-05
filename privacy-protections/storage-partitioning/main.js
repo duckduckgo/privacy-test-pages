@@ -1,4 +1,4 @@
-/* globals commonTests */
+/* globals uuidv4 */
 const runButton = document.querySelector('#run');
 const downloadButton = document.querySelector('#download');
 
@@ -7,7 +7,6 @@ const testsSummaryDiv = document.querySelector('#tests-summary');
 const testsDetailsElement = document.querySelector('#tests-details');
 
 const isLocalTest = window.location.hostname === 'localhost';
-const THIRD_PARTY_ORIGIN = isLocalTest ? `http://127.0.0.1:${window.location.port}` : 'https://good.third-party.site';
 
 // object that contains results of all tests
 const results = {
@@ -29,38 +28,6 @@ function downloadTheResults () {
     window.URL.revokeObjectURL(url);
     a.remove();
 }
-
-function constructTestPage (topOrigin, embeddedOrigin, name) {
-    return () => new Promise((resolve, reject) => {
-        const testURL = new URL('/privacy-protections/storage-partitioning/testWindow.html', topOrigin);
-        testURL.searchParams.set('embeddedOrigin', embeddedOrigin);
-        testURL.searchParams.set('referringOrigin', window.location.origin);
-        const testWindow = window.open(testURL.href, name);
-
-        // TODO: do some checking to make sure the window opened
-        // throw errors otherwise.
-
-        window.addEventListener('message', (event) => {
-            //if (event.origin !== window.location.origin)
-            //    reject(`Message from unexpected origin ${event.origin}`)
-            console.log('-----' + event.data);
-            resolve(event.data);
-        }, { capture: false, once: true });
-    });
-}
-
-const configurations = {
-    'same-site': {
-        desc: 'read values in same-site iframe',
-        iterations: 2,
-        run: constructTestPage(window.location.origin, window.location.origin, 'same-site')
-    },
-    'cross-site': {
-        desc: 'read values in cross-site iframe',
-        iterations: 2,
-        run: constructTestPage(THIRD_PARTY_ORIGIN, window.location.origin, 'cross-site')
-    }
-};
 
 function setStorage (frameOrigin, data) {
     return new Promise((resolve, reject) => {
@@ -111,8 +78,8 @@ function validateValues (sameSites, crossSites, reference, random) {
     }
 
     if (
-        (!sameSites.length === configurations['same-site'].iterations) ||
-        (!crossSites.length === configurations['cross-site'].iterations) ||
+        // (!sameSites.length === configurations['same-site'].iterations) ||
+        // (!crossSites.length === configurations['cross-site'].iterations) ||
         (!sameSites.every(v => v.value === reference.value)) ||
         (!crossSites.every(v => v.value === crossSites[0].value)) ||
         (!crossSites.every(v => v.value !== reference.value))) {
@@ -224,25 +191,31 @@ async function runTests () {
         };
     });
 
-    for (const type in configurations) {
-        const test = configurations[type];
-        for (let i = 0; i < test.iterations; i++) {
-            console.log(`Running test ${test.desc} iteration ${i}`);
-            const retrieval = await test.run();
-            console.log(retrieval);
+    const sessionId = uuidv4();
 
+    // Open test tab where all tests will be run
+    const testURL = new URL('/privacy-protections/storage-partitioning/testWindow.html', window.location.origin);
+    testURL.searchParams.set('sessionId', sessionId);
+    testURL.searchParams.set('isLocalTest', isLocalTest);
+    window.open(testURL, '_blank', 'noopener');
+
+    window.addEventListener('storage', () => {
+        console.log('RESULTS ARE READY');
+        const results = JSON.parse(window.localStorage.getItem(sessionId));
+
+        for (const [id, retrieval] of Object.entries(results)) {
+            const testType = id.split(',', 1); // same-site or cross-site
             retrieval.forEach(retrieval => {
-                allRetrievals.get(retrieval.api)[type].push({
+                allRetrievals.get(retrieval.api)[testType].push({
                     value: retrieval.value,
                     error: retrieval.error
                 });
             });
         }
-    }
-    console.log(allRetrievals);
-    const testResults = validateResults(allRetrievals, random);
-    console.log();
-    displayResults(allRetrievals, testResults);
+        console.log(allRetrievals);
+        const testResults = validateResults(allRetrievals, random);
+        displayResults(allRetrievals, testResults);
+    });
 }
 
 downloadButton.addEventListener('click', () => downloadTheResults());

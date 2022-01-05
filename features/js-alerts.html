@@ -31,46 +31,46 @@
     <br>
 
     <script>
-        function showTextPrompt() {
-            var defaultText = prompt("Type something", "Default Text");
+        function showTextPrompt () {
+            let defaultText = prompt('Type something', 'Default Text');
             if (defaultText != null) {
-                replaceText("Text Entered: " + defaultText);
+                replaceText('Text Entered: ' + defaultText);
             }
         }
 
-        function showDefaultAlert() {
-            alert("Default Alert")
+        function showDefaultAlert () {
+            alert('Default Alert');
         }
 
-        function showConfirmDialog() {
+        function showConfirmDialog () {
             if (confirm('Select OK or Cancel')) {
-                replaceText("OK Selected");
+                replaceText('OK Selected');
             } else {
-                replaceText("Cancel Selected");
+                replaceText('Cancel Selected');
             }
         }
 
-        function showAlertWithDelay() {
+        function showAlertWithDelay () {
             setTimeout(function () {
                 showDefaultAlert();
             }, 4000);
         }
 
-        function replaceText(text) {
-            document.getElementById("alertText").innerHTML = text;
+        function replaceText (text) {
+            document.getElementById('alertText').innerHTML = text;
         }
 
-        function showRecursiveTextPrompt() {
+        function showRecursiveTextPrompt () {
             showTextPrompt();
             showRecursiveTextPrompt();
         }
 
-        function showRecursiveConfirmDialog() {
+        function showRecursiveConfirmDialog () {
             showConfirmDialog();
             showRecursiveConfirmDialog();
         }
 
-        function showRecursiveDefaultAlert() {
+        function showRecursiveDefaultAlert () {
             showDefaultAlert();
             showRecursiveDefaultAlert();
         }

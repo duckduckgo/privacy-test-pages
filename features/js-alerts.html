@@ -31,8 +31,10 @@
     <br>
 
     <script>
+        /* eslint-disable no-unused-vars */
+
         function showTextPrompt () {
-            let defaultText = prompt('Type something', 'Default Text');
+            const defaultText = prompt('Type something', 'Default Text');
             if (defaultText != null) {
                 replaceText('Text Entered: ' + defaultText);
             }
@@ -74,11 +76,6 @@
             showDefaultAlert();
             showRecursiveDefaultAlert();
         }
-
     </script>
-
 </body>
-
 </html>
-
-

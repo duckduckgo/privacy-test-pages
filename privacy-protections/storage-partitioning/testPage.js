@@ -1,6 +1,8 @@
+const statusElement = document.querySelector('#status');
+
 const topURL = new URL(window.location.href);
 
-const isLocalTest = topURL.searchParams.get('isLocalTest');
+const isLocalTest = topURL.searchParams.get('isLocalTest') === 'true';
 const THIRD_PARTY_ORIGIN = isLocalTest ? `http://127.0.0.1:${window.location.port}` : 'https://good.third-party.site';
 const FIRST_PARTY_ORIGIN = isLocalTest ? `http://localhost:${window.location.port}` : 'https://privacy-test-pages.glitch.me';
 const configurations = [
@@ -44,9 +46,32 @@ function readStorageInIframe () {
 }
 
 function endTests (sessionId, results) {
-    console.log('END TEST CALLED');
     window.localStorage.setItem(sessionId, JSON.stringify(results));
-    // window.close();
+    statusElement.innerText = "Tests complete. If this window doesn't close itself, close it to return to the results.";
+    window.close();
+}
+
+function waitForInitialization (sessionId) {
+    return new Promise(resolve => {
+        window.addEventListener('storage', () => {
+            const signal = window.localStorage.getItem(sessionId);
+            if (signal !== null) {
+                window.localStorage.removeItem(sessionId);
+                resolve();
+            }
+        });
+    });
+}
+
+function openNextTestPage (testIndex, testIteration, sessionId, results) {
+    // Move to the next test configuration
+    const nextURL = new URL(window.location.pathname, configurations[testIndex].topOrigin);
+    nextURL.searchParams.set('sessionId', sessionId);
+    nextURL.searchParams.set('isLocalTest', isLocalTest);
+    nextURL.searchParams.set('results', JSON.stringify(results));
+    nextURL.searchParams.set('testIndex', testIndex);
+    nextURL.searchParams.set('testIteration', testIteration);
+    window.location.href = nextURL.href;
 }
 
 function saveTestResults (testId, testIteration, sessionId, retrieval) {
@@ -68,10 +93,21 @@ async function runTest () {
         return;
     }
 
-    let testIndex = topURL.searchParams.get('testIndex') === null ? 0 : parseInt(topURL.searchParams.get('testIndex'));
-    let testIteration = topURL.searchParams.get('testIteration') === null ? 0 : parseInt(topURL.searchParams.get('testIteration'));
+    let testIndex = topURL.searchParams.get('testIndex');
+    let testIteration = topURL.searchParams.get('testIteration');
 
-    console.log(`Running test ${configurations[testIndex].id}, iteration ${testIteration}`);
+    if (testIndex === null) {
+        console.log('testIndex query parameter is null. Waiting for main page to finish initialization.');
+        statusElement.innerText = 'waiting for main page to finish initialization.';
+        await waitForInitialization(sessionId);
+        openNextTestPage(0, 0, sessionId, results);
+        return;
+    }
+
+    testIndex = parseInt(testIndex);
+    testIteration = parseInt(testIteration);
+
+    statusElement.innerText = `Running test ${configurations[testIndex].id}, iteration ${testIteration}`;
     const retrieval = await readStorageInIframe();
 
     saveTestResults(configurations[testIndex].id, testIteration, sessionId, retrieval);
@@ -93,18 +129,9 @@ async function runTest () {
         nextURL.searchParams.set('results', JSON.stringify(results));
         setTimeout(() => {
             window.location.href = nextURL.href;
-        }, 1000);
+        }, 2000);
         return;
     }
 
-    // Move to the next test configuration
-    const nextURL = new URL(window.location.pathname, configurations[testIndex].topOrigin);
-    nextURL.searchParams.set('sessionId', sessionId);
-    nextURL.searchParams.set('isLocalTest', isLocalTest);
-    nextURL.searchParams.set('results', JSON.stringify(results));
-    nextURL.searchParams.set('testIndex', testIndex);
-    nextURL.searchParams.set('testIteration', testIteration);
-    setTimeout(() => {
-        window.location.href = nextURL.href;
-    }, 1000);
+    openNextTestPage(testIndex, testIteration, sessionId, results);
 }

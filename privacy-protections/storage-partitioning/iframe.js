@@ -33,7 +33,7 @@ function storeData (randomNumber) {
 function retrieveData () {
     return Promise.all(storgeAPIs.map(api => {
         try {
-            const result = api.retrive();
+            const result = api.retrieve();
 
             if (result instanceof Promise) {
                 return result

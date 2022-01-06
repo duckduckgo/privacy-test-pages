@@ -1,6 +1,7 @@
 /* globals uuidv4 */
 const runButton = document.querySelector('#run');
 const downloadButton = document.querySelector('#download');
+const toggleDetailsButton = document.querySelector('#toggle-details');
 
 const testsDiv = document.querySelector('#tests');
 const testsSummaryDiv = document.querySelector('#tests-summary');
@@ -40,7 +41,6 @@ function setStorage (frameOrigin, data) {
             document.body.appendChild(iframe);
 
             window.addEventListener('message', (event) => {
-                iframe.remove();
                 resolve(event.data);
             }, { capture: false, once: true });
         } catch (err) {
@@ -112,13 +112,15 @@ function displayResults (allRetrievals, testResults) {
     testsDetailsElement.innerHTML = '';
 
     function updateSummary () {
-        testsSummaryDiv.innerText = `Retrieved data from ${all} storage mechanisms${failed > 0 ? ` (${failed} failed)` : ''}. Click for details.`;
+        testsSummaryDiv.innerText = `Retrieved data from ${all} storage mechanisms${failed > 0 ? ` (${failed} failed)` : ''}.`;
     }
 
     function getLiFromResults (api, type) {
         const li = document.createElement('li');
+        li.setAttribute('hidden', '');
+        li.className = 'detailed-result';
         const span = document.createElement('span');
-        span.class = 'value';
+
         span.innerHTML = `${type}: ${JSON.stringify(allRetrievals.get(api)[type], null, 2)}`;
         li.appendChild(span);
         return li;
@@ -169,6 +171,26 @@ class DefaultMap extends Map {
 
 async function runTests () {
     const random = (Math.round(Math.random() * 1000)).toString();
+    const sessionId = uuidv4();
+
+    // Open the test tab where all tests will be run
+    const testURL = new URL('/privacy-protections/storage-partitioning/testWindow.html', window.location.origin);
+    testURL.searchParams.set('sessionId', sessionId);
+    testURL.searchParams.set('isLocalTest', isLocalTest);
+
+    // Ideally we'd use noopener here as some browsers (e.g., Firefox) keep tabs that
+    // have references to each other in the same "agent cluster", which impacts the
+    // scope of storage. This is why you'll see consistent sessionStorage across tabs
+    // that have references to each other in Firefox. Unfortuantely the test tab can't
+    // be closed programatically unless it has an opener reference.
+    // See: https://textslashplain.com/2021/02/04/window-close-restrictions/
+    window.open(testURL, '_blank');
+
+    // The test tab must be opened before we do any other initialization.
+    // Webkit doesn't propagate user gestures through these async calls.
+    console.log(`Setting ${random} in a same-origin iframe...`);
+    const status = await setStorage(window.location.origin, random);
+    console.log(status);
 
     const allRetrievals = new DefaultMap(() => {
         return {
@@ -176,10 +198,6 @@ async function runTests () {
             'cross-site': []
         };
     });
-
-    console.log(`Setting ${random} in a same-origin iframe...`);
-    const status = await setStorage(window.location.origin, random);
-    console.log(status);
 
     console.log('Retrieving reference values from a same-origin iframe...');
     const reference = await getStorage(window.location.origin);
@@ -191,17 +209,13 @@ async function runTests () {
         };
     });
 
-    const sessionId = uuidv4();
-
-    // Open test tab where all tests will be run
-    const testURL = new URL('/privacy-protections/storage-partitioning/testWindow.html', window.location.origin);
-    testURL.searchParams.set('sessionId', sessionId);
-    testURL.searchParams.set('isLocalTest', isLocalTest);
-    window.open(testURL, '_blank', 'noopener');
-
-    window.addEventListener('storage', () => {
-        console.log('RESULTS ARE READY');
+    function storageHandler () {
         const results = JSON.parse(window.localStorage.getItem(sessionId));
+        if (results === null) {
+            // Could be a delete event or an event from an unrelated test tab.
+            return;
+        }
+        window.localStorage.removeItem(sessionId);
 
         for (const [id, retrieval] of Object.entries(results)) {
             const testType = id.split(',', 1); // same-site or cross-site
@@ -215,10 +229,44 @@ async function runTests () {
         console.log(allRetrievals);
         const testResults = validateResults(allRetrievals, random);
         displayResults(allRetrievals, testResults);
-    });
+        window.removeEventListener('storage', storageHandler);
+    }
+    window.addEventListener('storage', storageHandler, false);
+
+    // Setup complete. Notify the test tab to continue with tests.
+    window.localStorage.setItem(sessionId, 'ready');
+    function resendIndicatorIfNotRead () {
+        setTimeout(() => {
+            if (window.localStorage.getItem(sessionId) !== null) {
+                window.localStorage.setItem(sessionId, 'ready');
+                resendIndicatorIfNotRead();
+            }
+        }, 500);
+    }
+    resendIndicatorIfNotRead();
 }
 
 downloadButton.addEventListener('click', () => downloadTheResults());
+
+function addUnhideHandler () {
+    toggleDetailsButton.addEventListener('click', () => {
+        testsDiv.querySelectorAll('li.detailed-result').forEach(li => {
+            li.removeAttribute('hidden');
+        });
+        toggleDetailsButton.innerText = 'Hide Detailed Results';
+        addHideHandler();
+    }, { once: true });
+}
+function addHideHandler () {
+    toggleDetailsButton.addEventListener('click', () => {
+        testsDiv.querySelectorAll('li.detailed-result').forEach(li => {
+            li.setAttribute('hidden', '');
+        });
+        toggleDetailsButton.innerText = 'Show Detailed Results';
+        addUnhideHandler();
+    }, { once: true });
+}
+addUnhideHandler();
 
 // run tests if button was clicked or…
 runButton.addEventListener('click', () => runTests());

@@ -168,6 +168,12 @@ const storgeAPIs = [
             await fetch(`serviceworker-write?data=${data}`);
         },
         retrieve: async () => {
+            if (!navigator.serviceWorker) {
+                throw new Error('Unsupported');
+            }
+            if (!navigator.serviceWorker.controller) {
+                throw new Error('No service worker controller for this context.');
+            }
             const response = await fetch('serviceworker-read');
             return await response.text();
         }

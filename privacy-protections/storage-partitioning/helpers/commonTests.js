@@ -2,11 +2,6 @@
 
 const timeout = 1000; // ms; used for cross-tab communication APIs
 
-// From: https://github.com/arthuredelstein/privacytests.org/blob/master/testing/out/tests/test_utils.js
-const sleepMs = (timeMs) => new Promise(
-    resolve => setTimeout(resolve, timeMs)
-);
-
 const storgeAPIs = [
     {
         name: 'document.cookie',
@@ -162,21 +157,17 @@ const storgeAPIs = [
             if (!navigator.serviceWorker) {
                 throw new Error('Unsupported');
             }
-            const registration = await navigator.serviceWorker.register(
-                'serviceworker.js');
-            console.log(registration);
-            await navigator.serviceWorker.ready;
-            console.log('service worker ready');
-            await sleepMs(500);
+            await navigator.serviceWorker.register('serviceworker.js');
+
+            // Wait until the new service worker is controlling the current context
+            await new Promise(resolve => {
+                if (navigator.serviceWorker.controller) return resolve();
+                navigator.serviceWorker.addEventListener('controllerchange', () => resolve());
+            });
+
             await fetch(`serviceworker-write?data=${data}`);
         },
         retrieve: async () => {
-            const registration = await navigator.serviceWorker.register(
-                'serviceworker.js');
-            console.log(registration);
-            await navigator.serviceWorker.ready;
-            console.log('service worker ready');
-            await sleepMs(500);
             const response = await fetch('serviceworker-read');
             return await response.text();
         }
@@ -184,21 +175,19 @@ const storgeAPIs = [
     {
         name: 'Web Locks API',
         store: async (key) => {
-            if (navigator.locks) {
-                navigator.locks.request(key, lock => new Promise((resolve, reject) => {}));
-                const queryResult = await navigator.locks.query();
-                return queryResult.held[0].clientId;
-            } else {
+            if (!navigator.locks) {
                 throw new Error('Unsupported');
             }
+            navigator.locks.request(key, () => new Promise(() => {}));
+            const queryResult = await navigator.locks.query();
+            return queryResult.held[0].clientId;
         },
         retrieve: async () => {
-            if (navigator.locks) {
-                const queryResult = await navigator.locks.query();
-                return queryResult.held[0].name;
-            } else {
+            if (!navigator.locks) {
                 throw new Error('Unsupported');
             }
+            const queryResult = await navigator.locks.query();
+            return queryResult.held[0].name;
         }
     }
 ];

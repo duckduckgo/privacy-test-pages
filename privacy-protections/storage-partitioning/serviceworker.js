@@ -2,7 +2,7 @@
 
 let data; // undefined
 
-self.addEventListener('install', (evt) => {
+self.addEventListener('install', () => {
     self.skipWaiting();
 });
 

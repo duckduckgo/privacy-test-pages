@@ -28,6 +28,10 @@ app.use(json({
     type: 'application/csp-report'
 }));
 
+// Import storage partitioning routes
+const partitioningRoutes = require('./privacy-protections/storage-partitioning/server/routes');
+app.use('/partitioning', partitioningRoutes);
+
 // serve all static files
 app.use(express.static('.', {
     setHeaders: (res, path) => {

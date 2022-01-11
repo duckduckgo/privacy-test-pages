@@ -2,9 +2,21 @@
 
 const timeout = 1000; // ms; used for cross-tab communication APIs
 
+function getURL (path, fileType, key) {
+    const url = new URL(`/partitioning/${path}`, window.location.origin);
+    url.searchParams.set('fileType', fileType);
+    url.searchParams.set('key', key);
+    return url;
+}
+
+const sleepMs = (timeMs) => new Promise(
+    (resolve, reject) => setTimeout(resolve, timeMs)
+);
+
 const storgeAPIs = [
     {
         name: 'document.cookie',
+        type: 'storage',
         store: (data) => {
             // we are using same set of tests for main frame and an iframe
             // we want to set 'Lax' in the main frame for the cookie not to be suspicious
@@ -14,11 +26,12 @@ const storgeAPIs = [
             document.cookie = `jsdata=${data}; expires= Wed, 21 Aug 2030 20:00:00 UTC; Secure; SameSite=${sameSite}`;
         },
         retrieve: () => {
-            return document.cookie.match(/jsdata=([0-9]+)/)[1];
+            return document.cookie.match(/jsdata=([0-9a-z-]+)/)[1];
         }
     },
     {
         name: 'localStorage',
+        type: 'storage',
         store: (data) => {
             localStorage.setItem('data', data);
         },
@@ -28,6 +41,7 @@ const storgeAPIs = [
     },
     {
         name: 'sessionStorage',
+        type: 'storage',
         store: (data) => {
             sessionStorage.setItem('data', data);
         },
@@ -37,6 +51,7 @@ const storgeAPIs = [
     },
     {
         name: 'IndexedDB',
+        type: 'storage',
         store: (data) => {
             return DB('data').then(db => Promise.all([db.deleteAll(), db.put({ id: data })])).then(() => 'OK');
         },
@@ -46,6 +61,7 @@ const storgeAPIs = [
     },
     {
         name: 'WebSQL',
+        type: 'storage',
         store: (data) => {
             let res, rej;
             const promise = new Promise((resolve, reject) => { res = resolve; rej = reject; });
@@ -79,6 +95,7 @@ const storgeAPIs = [
     },
     {
         name: 'Cache API',
+        type: 'storage',
         store: (data) => {
             return caches.open('data').then((cache) => {
                 const res = new Response(data, {
@@ -97,7 +114,36 @@ const storgeAPIs = [
     },
     // Tests below here are inspired by: https://github.com/arthuredelstein/privacytests.org/
     {
+        name: 'ServiceWorker',
+        type: 'storage',
+        store: async (data) => {
+            if (!navigator.serviceWorker) {
+                throw new Error('Unsupported');
+            }
+            await navigator.serviceWorker.register('serviceworker.js');
+
+            // Wait until the new service worker is controlling the current context
+            await new Promise(resolve => {
+                if (navigator.serviceWorker.controller) return resolve();
+                navigator.serviceWorker.addEventListener('controllerchange', () => resolve());
+            });
+
+            await fetch(`serviceworker-write?data=${data}`);
+        },
+        retrieve: async () => {
+            if (!navigator.serviceWorker) {
+                throw new Error('Unsupported');
+            }
+            if (!navigator.serviceWorker.controller) {
+                throw new Error('No service worker controller for this context.');
+            }
+            const response = await fetch('serviceworker-read');
+            return await response.text();
+        }
+    },
+    {
         name: 'BroadcastChannel',
+        type: 'communication',
         store: (data) => {
             const bc = new BroadcastChannel('secret');
             bc.onmessage = (event) => {
@@ -124,6 +170,7 @@ const storgeAPIs = [
     },
     {
         name: 'SharedWorker',
+        type: 'communication',
         store: (data) => {
             try {
                 const worker = new SharedWorker('helpers/sharedworker.js');
@@ -152,34 +199,8 @@ const storgeAPIs = [
         }
     },
     {
-        name: 'ServiceWorker',
-        store: async (data) => {
-            if (!navigator.serviceWorker) {
-                throw new Error('Unsupported');
-            }
-            await navigator.serviceWorker.register('serviceworker.js');
-
-            // Wait until the new service worker is controlling the current context
-            await new Promise(resolve => {
-                if (navigator.serviceWorker.controller) return resolve();
-                navigator.serviceWorker.addEventListener('controllerchange', () => resolve());
-            });
-
-            await fetch(`serviceworker-write?data=${data}`);
-        },
-        retrieve: async () => {
-            if (!navigator.serviceWorker) {
-                throw new Error('Unsupported');
-            }
-            if (!navigator.serviceWorker.controller) {
-                throw new Error('No service worker controller for this context.');
-            }
-            const response = await fetch('serviceworker-read');
-            return await response.text();
-        }
-    },
-    {
         name: 'Web Locks API',
+        type: 'communication',
         store: async (key) => {
             if (!navigator.locks) {
                 throw new Error('Unsupported');
@@ -194,6 +215,193 @@ const storgeAPIs = [
             }
             const queryResult = await navigator.locks.query();
             return queryResult.held[0].name;
+        }
+    },
+    {
+        name: 'Fetch Cache',
+        type: 'cache',
+        store: async (data) => {
+            await fetch(getURL('resource', 'fetch', data),
+                { cache: 'force-cache' }
+            );
+        },
+        retrieve: async (data) => {
+            await fetch(getURL('resource', 'fetch', data),
+                { cache: 'force-cache' }
+            );
+            const countResponse = await fetch(getURL('ctr', 'fetch', data),
+                { cache: 'reload' }
+            );
+            return (await countResponse.text()).trim();
+        }
+    },
+    {
+        name: 'XMLHttpRequest cache',
+        type: 'cache',
+        store: (key) => new Promise((resolve, reject) => {
+            const req = new XMLHttpRequest();
+            req.addEventListener('load', resolve, { once: true });
+            req.open('GET', getURL('resource', 'xhr', key));
+            req.setRequestHeader('Cache-Control', 'max-age=604800');
+            req.send();
+        }),
+        retrieve: async (key) => {
+            const req = new XMLHttpRequest();
+            const xhrLoadPromise = new Promise((resolve, reject) => {
+                req.addEventListener('load', resolve, { once: true });
+            });
+            req.open('GET', getURL('resource', 'xhr', key));
+            req.setRequestHeader('Cache-Control', 'max-age=604800');
+            req.send();
+            await xhrLoadPromise;
+            const countResponse = await fetch(
+                getURL('ctr', 'xhr', key), { cache: 'reload' });
+            return (await countResponse.text()).trim();
+        }
+    },
+    {
+        name: 'Iframe Cache',
+        type: 'cache',
+        store: (key) => new Promise((resolve, reject) => {
+            const iframe = document.createElement('iframe');
+            document.body.appendChild(iframe);
+            iframe.addEventListener('load', () => resolve(key), { once: true });
+            iframe.src = getURL('resource', 'page', key);
+        }),
+        retrieve: async (key) => {
+            const iframe = document.createElement('iframe');
+            document.body.appendChild(iframe);
+            const iframeLoadPromise = new Promise((resolve, reject) => {
+                iframe.addEventListener('load', resolve, { once: true });
+            });
+            const address = getURL('resource', 'page', key);
+            iframe.src = address;
+            await iframeLoadPromise;
+            const response = await fetch(
+                getURL('ctr', 'page', key), { cache: 'reload' });
+            return (await response.text()).trim();
+        }
+    },
+    {
+        name: 'Image Cache',
+        type: 'cache',
+        store: (key) => new Promise((resolve, reject) => {
+            const img = document.createElement('img');
+            document.body.appendChild(img);
+            img.addEventListener('load', () => resolve(key), { once: true });
+            img.src = getURL('resource', 'image', key);
+        }),
+        retrieve: async (key) => {
+            const img = document.createElement('img');
+            document.body.appendChild(img);
+            const imgLoadPromise = new Promise((resolve, reject) => {
+                img.addEventListener('load', resolve, { once: true });
+            });
+            img.src = getURL('resource', 'image', key);
+            await imgLoadPromise;
+            const response = await fetch(
+                getURL('ctr', 'image', key), { cache: 'reload' });
+            return (await response.text()).trim();
+        }
+    },
+    {
+        name: 'Favicon Cache',
+        type: 'cache',
+        store: (key) => key,
+        retrieve: async (key) => {
+            // Wait for the favicon to load (defined in supercookies.html)
+            await sleepMs(500);
+            const response = await fetch(
+                getURL('ctr', 'favicon', key), { cache: 'reload' });
+            const count = (await response.text()).trim();
+            if (count === '0') {
+                throw new Error('No requests received');
+            }
+            return count;
+        }
+    },
+    {
+        name: 'Font Cache',
+        type: 'cache',
+        store: async (key) => {
+            const style = document.createElement('style');
+            style.type = 'text/css';
+            const fontURI = getURL('resource', 'font', key);
+            style.innerHTML = `@font-face {font-family: "myFont"; src: url("${fontURI}"); } body { font-family: "myFont" }`;
+            document.getElementsByTagName('head')[0].appendChild(style);
+            return key;
+        },
+        retrieve: async (key) => {
+            const style = document.createElement('style');
+            style.type = 'text/css';
+            const fontURI = getURL('resource', 'font', key);
+            style.innerHTML = `@font-face {font-family: "myFont"; src: url("${fontURI}"); } body { font-family: "myFont" }`;
+            document.getElementsByTagName('head')[0].appendChild(style);
+            await sleepMs(500);
+            const response = await fetch(
+                getURL('ctr', 'font', key), { cache: 'reload' });
+            return (await response.text()).trim();
+        }
+    },
+    {
+        name: 'CSS cache',
+        type: 'cache',
+        store: async (key) => {
+            const href = getURL('resource', 'css', key);
+            const head = document.getElementsByTagName('head')[0];
+            head.innerHTML += `<link type="text/css" rel="stylesheet" href="${href}">`;
+            const testElement = document.querySelector('#css');
+            let fontFamily;
+            while (true) {
+                await sleepMs(100);
+                fontFamily = getComputedStyle(testElement).fontFamily;
+                if (fontFamily.startsWith('fake')) {
+                    break;
+                }
+            }
+            console.log(fontFamily);
+            return key;
+        },
+        retrieve: async (key) => {
+            const href = getURL('resource', 'css', key);
+            const head = document.getElementsByTagName('head')[0];
+            head.innerHTML += `<link type="text/css" rel="stylesheet" href="${href}">`;
+            const testElement = document.querySelector('#css');
+            let fontFamily;
+            while (true) {
+                await sleepMs(100);
+                fontFamily = getComputedStyle(testElement).fontFamily;
+                if (fontFamily.startsWith('fake')) {
+                    break;
+                }
+            }
+            console.log(fontFamily);
+            return fontFamily;
+        }
+    },
+    {
+        name: 'Prefetch Cache',
+        type: 'cache',
+        store: async (key) => {
+            const link = document.createElement('link');
+            link.rel = 'prefetch';
+            link.href = getURL('resource', 'prefetch', key);
+            document.getElementsByTagName('head')[0].appendChild(link);
+            return key;
+        },
+        retrieve: async (key) => {
+            const link = document.createElement('link');
+            link.rel = 'prefetch';
+            link.href = getURL('resource', 'prefetch', key).href;
+            document.getElementsByTagName('head')[0].appendChild(link);
+            await sleepMs(500);
+            const response = await fetch(
+                getURL('ctr', 'prefetch', key), { cache: 'reload' });
+            const countString = (await response.text()).trim();
+            if (parseInt(countString) === 0) {
+                throw new Error('No requests received');
+            }
+            return countString;
         }
     }
 ];

@@ -30,10 +30,13 @@ function downloadTheResults () {
     a.remove();
 }
 
-function setStorage (frameOrigin, data) {
+function setStorage (frameOrigin, sessionId) {
     return new Promise((resolve, reject) => {
         try {
-            const iframeURL = new URL(`/privacy-protections/storage-partitioning/iframe.html?data=${data}`, frameOrigin);
+            const iframeURL = new URL('/privacy-protections/storage-partitioning/iframe.html', frameOrigin);
+            iframeURL.searchParams.set('mode', 'store');
+            iframeURL.searchParams.set('sessionId', sessionId);
+
             const iframe = document.createElement('iframe');
             iframe.height = 1;
             iframe.width = 1;
@@ -49,10 +52,13 @@ function setStorage (frameOrigin, data) {
     });
 }
 
-function getStorage (frameOrigin) {
+function getStorage (frameOrigin, sessionId) {
     return new Promise((resolve, reject) => {
         try {
             const iframeURL = new URL('/privacy-protections/storage-partitioning/iframe.html', frameOrigin);
+            iframeURL.searchParams.set('mode', 'retrieve');
+            iframeURL.searchParams.set('sessionId', sessionId);
+
             const iframe = document.createElement('iframe');
             iframe.height = 1;
             iframe.width = 1;
@@ -170,7 +176,6 @@ class DefaultMap extends Map {
 }
 
 async function runTests () {
-    const random = (Math.round(Math.random() * 1000)).toString();
     const sessionId = uuidv4();
 
     // Open the test tab where all tests will be run
@@ -188,8 +193,8 @@ async function runTests () {
 
     // The test tab must be opened before we do any other initialization.
     // Webkit doesn't propagate user gestures through these async calls.
-    console.log(`Setting ${random} in a same-origin iframe...`);
-    const status = await setStorage(window.location.origin, random);
+    console.log(`Setting ${sessionId} in a same-origin iframe...`);
+    const status = await setStorage(window.location.origin, sessionId);
     console.log(status);
 
     const allRetrievals = new DefaultMap(() => {
@@ -200,7 +205,7 @@ async function runTests () {
     });
 
     console.log('Retrieving reference values from a same-origin iframe...');
-    const reference = await getStorage(window.location.origin);
+    const reference = await getStorage(window.location.origin, sessionId);
     console.log(reference);
     reference.forEach(retrieval => {
         allRetrievals.get(retrieval.api).reference = {
@@ -227,7 +232,7 @@ async function runTests () {
             });
         }
         console.log(allRetrievals);
-        const testResults = validateResults(allRetrievals, random);
+        const testResults = validateResults(allRetrievals, sessionId);
         displayResults(allRetrievals, testResults);
         window.removeEventListener('storage', storageHandler);
     }

@@ -26,9 +26,11 @@ if (isLocalTest === null) {
     runTest();
 }
 
-function readStorageInIframe () {
+function readStorageInIframe (sessionId) {
     return new Promise((resolve, reject) => {
-        const iframeURL = new URL('/privacy-protections/storage-partitioning/iframe.html?read', FIRST_PARTY_ORIGIN);
+        const iframeURL = new URL('/privacy-protections/storage-partitioning/iframe.html', FIRST_PARTY_ORIGIN);
+        iframeURL.searchParams.set('mode', 'retrieve');
+        iframeURL.searchParams.set('sessionId', sessionId);
 
         const iframe = document.createElement('iframe');
         iframe.src = iframeURL.href;
@@ -108,7 +110,7 @@ async function runTest () {
     testIteration = parseInt(testIteration);
 
     statusElement.innerText = `Running test ${configurations[testIndex].id}, iteration ${testIteration}`;
-    const retrieval = await readStorageInIframe();
+    const retrieval = await readStorageInIframe(sessionId);
 
     saveTestResults(configurations[testIndex].id, testIteration, sessionId, retrieval);
     results[[configurations[testIndex].id, testIteration]] = retrieval;

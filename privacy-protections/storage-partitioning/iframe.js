@@ -1,9 +1,9 @@
 /* globals storgeAPIs */
 
-function storeData (randomNumber) {
+function storeData (key) {
     return Promise.all(storgeAPIs.map(api => {
         try {
-            const result = api.store(randomNumber);
+            const result = api.store(key);
 
             if (result instanceof Promise) {
                 return result
@@ -30,10 +30,10 @@ function storeData (randomNumber) {
     }));
 }
 
-function retrieveData () {
+function retrieveData (key) {
     return Promise.all(storgeAPIs.map(api => {
         try {
-            const result = api.retrieve();
+            const result = api.retrieve(key);
 
             if (result instanceof Promise) {
                 return result
@@ -62,20 +62,22 @@ function retrieveData () {
     }));
 }
 
-const match = location.search.match(/data=([0-9]+)/);
+document.addEventListener('DOMContentLoaded', () => {
+    const url = new URL(window.location.href);
+    const mode = url.searchParams.get('mode');
+    const sessionId = url.searchParams.get('sessionId');
 
-// if number passed in the url - store it
-if (match) {
-    const number = match[1];
-
-    storeData(number)
-        .then(result => {
-            window.parent.postMessage(result, '*');
-        });
-} else {
-// otherwise retrive the number
-    retrieveData()
-        .then(result => {
-            window.parent.postMessage(result, '*');
-        });
-}
+    if (mode === 'store') {
+        storeData(sessionId)
+            .then(result => {
+                window.parent.postMessage(result, '*');
+            });
+    } else if (mode === 'retrieve') {
+        retrieveData(sessionId)
+            .then(result => {
+                window.parent.postMessage(result, '*');
+            });
+    } else {
+        console.error(`Unknown mode ${mode}`);
+    }
+});

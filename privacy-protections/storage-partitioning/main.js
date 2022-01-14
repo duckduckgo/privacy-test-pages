@@ -113,7 +113,7 @@ function displayResults (allRetrievals, testResults) {
     results.date = (new Date()).toUTCString();
 
     let all = 0;
-    let failed = 0;
+    const failed = 0;
 
     testsDetailsElement.innerHTML = '';
 
@@ -177,6 +177,13 @@ class DefaultMap extends Map {
 
 async function runTests () {
     const sessionId = uuidv4();
+
+    // Update favicon (must happen in top-level frame)
+    const faviconElement = document.getElementById('favicon');
+    const faviconURL = new URL('/partitioning/resource', window.location.origin);
+    faviconURL.searchParams.set('fileType', 'favicon');
+    faviconURL.searchParams.set('key', sessionId);
+    faviconElement.setAttribute('href', faviconURL.href);
 
     // Open the test tab where all tests will be run
     const testURL = new URL('/privacy-protections/storage-partitioning/testWindow.html', window.location.origin);

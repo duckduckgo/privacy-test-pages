@@ -1,5 +1,4 @@
 // Inspired by: https://github.com/arthuredelstein/privacytests.org/blob/master/live/caching.js
-
 const express = require('express');
 const router = express.Router();
 
@@ -41,7 +40,12 @@ const mimeTypes = {
 
 router.get('/', (req, res) => res.send('It works 👍'));
 
+/*
+ * Cached resource endpoints
+ */
+
 router.get('/resource', (req, res) => {
+    console.log(req.hostname);
     const { key, fileType } = req.query;
     let count = countCache.get(cacheKey(key, fileType));
     if (typeof count === 'undefined') {
@@ -75,13 +79,44 @@ router.get('/ctr', (req, res) => {
 });
 
 /*
-router.get('/altsvc', (req, res) => {
-    res.set({
-        'Alt-Svc': 'h2="torpat.ch:443"; ma=2592000;'
-    });
-    res.send('Alt-Svc');
+ * HSTS endpoints
+ */
+
+router.get('/set_hsts.png', (req, res) => {
+    const headers = {
+        'Strict-Transport-Security': 'max-age=30',
+        'Cache-Control': 'max-age=0'
+    };
+    res.sendFile('image.png', { root: __dirname, headers });
 });
 
+router.get('/get_hsts.png', (req, res) => {
+    console.log(req.protocol);
+    let isHTTPS = req.protocol === 'https';
+    // The X-Forwarded-Proto header is added by Glitch's proxy
+    // and reveals the original protocol used during the connection
+    if (req.headers['x-forwarded-proto']) {
+        isHTTPS = req.headers['x-forwarded-proto'].split(',', 1)[0] === 'https';
+    }
+    if (isHTTPS) {
+        const headers = { 'Cache-Control': 'max-age=0' };
+        res.sendFile('image.png', { root: __dirname, headers });
+    } else {
+        res.status(400).send({
+            message: 'Image accessed over HTTP'
+        });
+    }
+});
+
+router.get('/clear_hsts.png', (req, res) => {
+    const headers = {
+        'Strict-Transport-Security': 'max-age=0',
+        'Cache-Control': 'max-age=0'
+    };
+    res.sendFile('image.png', { root: __dirname, headers });
+});
+
+/*
 const ifNoneMatchValues = {};
 
 router.get('/etag', (req, res) => {
@@ -94,50 +129,6 @@ router.get('/etag', (req, res) => {
     }
     res.set({ 'Cache-Control': 'max-age=0' });
     res.send(key);
-});
-
-// ## HSTS cache tests
-
-router.get('/set_hsts.js', (req, res) => {
-    const headers = {
-        'Strict-Transport-Security': 'max-age=30',
-        'Cache-Control': 'no-store'
-    };
-    res.sendFile('test.js', { root: __dirname, headers });
-});
-
-router.get('/test_hsts.js', (req, res) => {
-    const headers = { 'Cache-Control': 'no-store' };
-    res.sendFile('test.js', { root: __dirname, headers });
-});
-
-router.get('/clear_hsts.js', (req, res) => {
-    const headers = {
-        'Strict-Transport-Security': 'max-age=0',
-        'Cache-Control': 'no-store'
-    };
-    res.sendFile('test.js', { root: __dirname, headers });
-});
-
-router.get('/set_hsts.png', (req, res) => {
-    const headers = {
-        'Strict-Transport-Security': 'max-age=30',
-        'Cache-Control': 'max-age=0'
-    };
-    res.sendFile('image.png', { root: __dirname, headers });
-});
-
-router.get('/test_hsts.png', (req, res) => {
-    const headers = { 'Cache-Control': 'max-age=0' };
-    res.sendFile('image.png', { root: __dirname, headers });
-});
-
-router.get('/clear_hsts.png', (req, res) => {
-    const headers = {
-        'Strict-Transport-Security': 'max-age=0',
-        'Cache-Control': 'max-age=0'
-    };
-    res.sendFile('image.png', { root: __dirname, headers });
 });
 
 const passwordCounts = {};

@@ -7,6 +7,7 @@ const cmd = require('node-cmd');
 const crypto = require('crypto');
 const fs = require('fs');
 const { json } = require('body-parser');
+const https = require('https');
 
 function fullUrl (req) {
     return url.format({
@@ -17,10 +18,25 @@ function fullUrl (req) {
     });
 }
 
-// start server
+// Start the HTTP server. On Glitch the proxy will forward both HTTP and HTTPS
+// traffic to this server.
 const listener = app.listen(port, () => {
-    console.log(`Server listening at port ${listener.address().port}`);
+    console.log(`HTTP Server listening at port ${listener.address().port}`);
 });
+
+// Start HTTPS server for https://localhost and https://127.0.0.1
+if (fs.existsSync('localhost+1.pem') && fs.existsSync('localhost+1-key.pem')) {
+    console.log('Running local HTTPS server.');
+    const httpsOptions = {
+        key: fs.readFileSync('localhost+1-key.pem'),
+        cert: fs.readFileSync('localhost+1.pem')
+    };
+    const httpsListener = https.createServer(httpsOptions, app).listen(443, () => {
+        console.log(`HTTPS server listening on port ${httpsListener.address().port}`);
+    });
+} else {
+    console.log('HTTPS key and certificate not found. Skipping HTTPS server.');
+}
 
 app.use(express.json());
 // Parse post request data as JSON for requests with content-type 'application/csp-report'

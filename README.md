@@ -30,7 +30,30 @@ We have couple of test domains, that all resolve to `privacy-test-pages.glitch.m
 
 If you are working on a simple page you can start any local server (e.g. `python -m SimpleHTTPServer 8000`) in the main folder of the project.
 
-If you are working on a complex page you may need to run our custom server (`node server.js`) which will require you to install all dependencies first (`npm i`).
+#### Test pages with a server-side component
+Some test pages have a server-side component that must run using our custom server. First, install the dependencies (`npm -i`) and then start the server via `node server.js`.
+
+#### Test pages that require HTTPS
+Some test pages (i.e., `privacy-protections/storage-partitioning/`) require HTTPS support to run. This requires additional dependencies. 
+
+On MacOS:
+```
+brew install mkcert
+brew install nss # if you use Firefox
+```
+
+Next, run the following command to make your OS cert store and Firefox's cert store trust your cert:
+```
+mkcert -install
+```
+
+Then, in the root directory of `privacy-test-pages`, run:
+
+```
+mkcert localhost 127.0.0.1
+```
+
+This will generate two files (`localhost+1-key.pem` and `localhost+1.pem`) in the root directory. Express will automatically pick these up when you start the server (`node server.js`).
 
 ## How to deploy it?
 

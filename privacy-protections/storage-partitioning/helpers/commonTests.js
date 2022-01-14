@@ -1,4 +1,4 @@
-/* exported storgeAPIs */
+/* exported storageAPIs HSTS */
 
 const timeout = 1000; // ms; used for cross-tab communication APIs
 
@@ -13,7 +13,23 @@ const sleepMs = (timeMs) => new Promise(
     (resolve, reject) => setTimeout(resolve, timeMs)
 );
 
-const storgeAPIs = [
+const loadSubresource = async (tagName, url) => {
+    const element = document.createElement(tagName);
+    document.body.appendChild(element);
+    const resultPromise = new Promise((resolve, reject) => {
+        element.addEventListener('load', resolve, { once: true });
+        element.addEventListener('error', reject, { once: true });
+    });
+    element.src = url;
+    try {
+        return await resultPromise;
+    } catch (e) {
+        // some sort of loading error happened
+        return e;
+    }
+};
+
+const storageAPIs = [
     {
         name: 'document.cookie',
         type: 'storage',
@@ -288,7 +304,7 @@ const storgeAPIs = [
         store: (key) => new Promise((resolve, reject) => {
             const img = document.createElement('img');
             document.body.appendChild(img);
-            img.addEventListener('load', () => resolve(key), { once: true });
+            img.addEventListener('load', resolve, { once: true });
             img.src = getURL('resource', 'image', key);
         }),
         retrieve: async (key) => {
@@ -307,9 +323,11 @@ const storgeAPIs = [
     {
         name: 'Favicon Cache',
         type: 'cache',
-        store: (key) => key,
+        store: () => {}, // noop since the favicon is set in the top-level frame
         retrieve: async (key) => {
-            // Wait for the favicon to load (defined in supercookies.html)
+            // Wait for the favicon to load.
+            // Unfortunately onload doesn't seem to fire for <link> elements, so
+            // there isn't a way to do this synchronously.
             await sleepMs(500);
             const response = await fetch(
                 getURL('ctr', 'favicon', key), { cache: 'reload' });
@@ -329,7 +347,6 @@ const storgeAPIs = [
             const fontURI = getURL('resource', 'font', key);
             style.innerHTML = `@font-face {font-family: "myFont"; src: url("${fontURI}"); } body { font-family: "myFont" }`;
             document.getElementsByTagName('head')[0].appendChild(style);
-            return key;
         },
         retrieve: async (key) => {
             const style = document.createElement('style');
@@ -350,17 +367,6 @@ const storgeAPIs = [
             const href = getURL('resource', 'css', key);
             const head = document.getElementsByTagName('head')[0];
             head.innerHTML += `<link type="text/css" rel="stylesheet" href="${href}">`;
-            const testElement = document.querySelector('#css');
-            let fontFamily;
-            while (true) {
-                await sleepMs(100);
-                fontFamily = getComputedStyle(testElement).fontFamily;
-                if (fontFamily.startsWith('fake')) {
-                    break;
-                }
-            }
-            console.log(fontFamily);
-            return key;
         },
         retrieve: async (key) => {
             const href = getURL('resource', 'css', key);
@@ -375,7 +381,6 @@ const storgeAPIs = [
                     break;
                 }
             }
-            console.log(fontFamily);
             return fontFamily;
         }
     },
@@ -387,7 +392,6 @@ const storgeAPIs = [
             link.rel = 'prefetch';
             link.href = getURL('resource', 'prefetch', key);
             document.getElementsByTagName('head')[0].appendChild(link);
-            return key;
         },
         retrieve: async (key) => {
             const link = document.createElement('link');
@@ -402,6 +406,38 @@ const storgeAPIs = [
                 throw new Error('No requests received');
             }
             return countString;
+        }
+    },
+    {
+        name: 'HSTS',
+        type: 'hsts',
+        store: async () => {
+            // TODO: need to move this somewhere global
+            const clearURL = new URL('/partitioning/clear_hsts.png', 'https://localhost:443/');
+            const setURL = new URL('/partitioning/set_hsts.png', 'https://localhost:443/');
+            const getURL = new URL('/partitioning/get_hsts.png', 'http://localhost:3000/');
+
+            // Clear any current HSTS
+            await loadSubresource('img', clearURL.href);
+
+            const result1 = await loadSubresource('img', getURL.href);
+            console.log('HSTS - pre set', result1.type);
+
+            await loadSubresource('img', setURL.href);
+
+            getURL.searchParams.set('foo', 'bust');
+            const result2 = await loadSubresource('img', getURL.href);
+            console.log('HSTS - post set', result2.type);
+        },
+        retrieve: async () => {
+            // TODO: need to move this somewhere global
+            const getURL = new URL('/partitioning/get_hsts.png', 'http://localhost:3000/');
+            const event = await loadSubresource('img', getURL.href);
+            if (event.type === 'load') {
+                return 'https';
+            } else if (event.type === 'error') {
+                return 'http';
+            }
         }
     }
 ];

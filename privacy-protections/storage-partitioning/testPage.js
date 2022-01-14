@@ -3,20 +3,43 @@ const statusElement = document.querySelector('#status');
 const topURL = new URL(window.location.href);
 
 const isLocalTest = topURL.searchParams.get('isLocalTest') === 'true';
-const THIRD_PARTY_ORIGIN = isLocalTest ? `http://127.0.0.1:${window.location.port}` : 'https://good.third-party.site';
-const FIRST_PARTY_ORIGIN = isLocalTest ? `http://localhost:${window.location.port}` : 'https://privacy-test-pages.glitch.me';
+
+const THIRD_PARTY_HOSTNAME = isLocalTest ? '127.0.0.1' : 'good.third-party.site';
+const THIRD_PARTY_HTTP = isLocalTest ? `http://${THIRD_PARTY_HOSTNAME}:3000` : `http://${THIRD_PARTY_HOSTNAME}`;
+const THIRD_PARTY_HTTPS = `https://${THIRD_PARTY_HOSTNAME}:443`;
+
+const FIRST_PARTY_HOSTNAME = isLocalTest ? 'localhost' : 'privacy-test-pages.glitch.me';
+const FIRST_PARTY_HTTP = isLocalTest ? `http://${FIRST_PARTY_HOSTNAME}:3000` : `http://${THIRD_PARTY_HOSTNAME}`;
+const FIRST_PARTY_HTTPS = `https://${FIRST_PARTY_HOSTNAME}`;
+
 const configurations = [
     {
-        id: 'same-site',
+        apiTypes: ['storage', 'cache', 'communication'],
+        siteType: 'same-site',
         desc: 'read values in same-site iframe',
         iterations: 2,
-        topOrigin: FIRST_PARTY_ORIGIN
+        topOrigin: FIRST_PARTY_HTTPS
     },
     {
-        id: 'cross-site',
+        apiTypes: ['storage', 'cache', 'communication'],
+        siteType: 'cross-site',
         desc: 'read values in cross-site iframe',
         iterations: 2,
-        topOrigin: THIRD_PARTY_ORIGIN
+        topOrigin: THIRD_PARTY_HTTPS
+    },
+    {
+        apiTypes: ['hsts'],
+        siteType: 'same-site',
+        desc: 'Read HSTS on a same-site HTTP test page',
+        iterations: 2,
+        topOrigin: FIRST_PARTY_HTTP
+    },
+    {
+        apiTypes: ['hsts'],
+        siteType: 'cross-site',
+        desc: 'Read HSTS on a cross-site HTTP test page',
+        iterations: 2,
+        topOrigin: THIRD_PARTY_HTTP
     }
 ];
 
@@ -26,11 +49,14 @@ if (isLocalTest === null) {
     runTest();
 }
 
-function readStorageInIframe (sessionId) {
+function readStorageInIframe (sessionId, apiTypes) {
     return new Promise((resolve, reject) => {
-        const iframeURL = new URL('/privacy-protections/storage-partitioning/iframe.html', FIRST_PARTY_ORIGIN);
+        const iframeURL = new URL('/privacy-protections/storage-partitioning/iframe.html', FIRST_PARTY_HTTPS);
         iframeURL.searchParams.set('mode', 'retrieve');
         iframeURL.searchParams.set('sessionId', sessionId);
+        if (typeof apiTypes !== 'undefined') {
+            iframeURL.searchParams.set('apiTypes', JSON.stringify(apiTypes));
+        }
 
         const iframe = document.createElement('iframe');
         iframe.src = iframeURL.href;
@@ -39,7 +65,7 @@ function readStorageInIframe (sessionId) {
         document.body.appendChild(iframe);
 
         window.addEventListener('message', event => {
-            if (event.origin !== FIRST_PARTY_ORIGIN) {
+            if (event.origin !== FIRST_PARTY_HTTPS) {
                 console.error(`Message from unexpected origin ${event.origin}`);
             }
             resolve(event.data);
@@ -50,7 +76,7 @@ function readStorageInIframe (sessionId) {
 function endTests (sessionId, results) {
     window.localStorage.setItem(sessionId, JSON.stringify(results));
     statusElement.innerText = "Tests complete. If this window doesn't close itself, close it to return to the results.";
-    window.close();
+    // window.close();
 }
 
 function waitForInitialization (sessionId) {
@@ -65,7 +91,7 @@ function waitForInitialization (sessionId) {
     });
 }
 
-function openNextTestPage (testIndex, testIteration, sessionId, results) {
+function openNextTestPage (testIndex, testIteration, testId, sessionId, results) {
     // Move to the next test configuration
     const nextURL = new URL(window.location.pathname, configurations[testIndex].topOrigin);
     nextURL.searchParams.set('sessionId', sessionId);
@@ -73,11 +99,12 @@ function openNextTestPage (testIndex, testIteration, sessionId, results) {
     nextURL.searchParams.set('results', JSON.stringify(results));
     nextURL.searchParams.set('testIndex', testIndex);
     nextURL.searchParams.set('testIteration', testIteration);
+    nextURL.searchParams.set('testId', testId);
     window.location.href = nextURL.href;
 }
 
-function saveTestResults (testId, testIteration, sessionId, retrieval) {
-    console.log(`SAVING TEST RESULTS ${testId}-${testIteration} with session id ${sessionId}`);
+function saveTestResults (siteType, testId, sessionId, retrieval) {
+    console.log(`SAVING TEST RESULTS ${siteType}-${testId} with session id ${sessionId}`);
     console.log(retrieval);
 }
 
@@ -97,43 +124,52 @@ async function runTest () {
 
     let testIndex = topURL.searchParams.get('testIndex');
     let testIteration = topURL.searchParams.get('testIteration');
+    let testId = topURL.searchParams.get('testId');
 
     if (testIndex === null) {
         console.log('testIndex query parameter is null. Waiting for main page to finish initialization.');
         statusElement.innerText = 'waiting for main page to finish initialization.';
         await waitForInitialization(sessionId);
-        openNextTestPage(0, 0, sessionId, results);
+        openNextTestPage(0, 0, 0, sessionId, results);
         return;
     }
 
     testIndex = parseInt(testIndex);
     testIteration = parseInt(testIteration);
+    testId = parseInt(testId);
 
-    statusElement.innerText = `Running test ${configurations[testIndex].id}, iteration ${testIteration}`;
-    const retrieval = await readStorageInIframe(sessionId);
+    statusElement.innerText = `Running iteration ${testIteration} of test: ${JSON.stringify(configurations[testIndex])}`;
 
-    saveTestResults(configurations[testIndex].id, testIteration, sessionId, retrieval);
-    results[[configurations[testIndex].id, testIteration]] = retrieval;
+    // Update favicon (must be set on top-level frame)
+    const faviconElement = document.getElementById('favicon');
+    const faviconURL = new URL('/partitioning/resource', FIRST_PARTY_HTTPS);
+    faviconURL.searchParams.set('fileType', 'favicon');
+    faviconURL.searchParams.set('key', sessionId);
+    faviconElement.setAttribute('href', faviconURL.href);
+
+    const retrieval = await readStorageInIframe(sessionId, configurations[testIndex].apiTypes);
+
+    saveTestResults(configurations[testIndex].siteType, testId, sessionId, retrieval);
+    results[[configurations[testIndex].siteType, testId]] = retrieval;
 
     testIteration += 1;
     if (testIteration >= configurations[testIndex].iterations) {
         testIndex += 1;
         testIteration = 0;
     }
+    testId += 1;
 
     // If we've completed all tests we need to return to a test page
     // that is same-origin with the main tab so we can send it a notification
     if (testIndex >= configurations.length) {
-        const nextURL = new URL(window.location.pathname, FIRST_PARTY_ORIGIN);
+        const nextURL = new URL(window.location.pathname, FIRST_PARTY_HTTPS);
         nextURL.searchParams.set('endTests', true);
         nextURL.searchParams.set('sessionId', sessionId);
         nextURL.searchParams.set('isLocalTest', isLocalTest);
         nextURL.searchParams.set('results', JSON.stringify(results));
-        setTimeout(() => {
-            window.location.href = nextURL.href;
-        }, 2000);
+        window.location.href = nextURL.href;
         return;
     }
 
-    openNextTestPage(testIndex, testIteration, sessionId, results);
+    openNextTestPage(testIndex, testIteration, testId, sessionId, results);
 }

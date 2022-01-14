@@ -1,7 +1,9 @@
-/* globals storgeAPIs */
+/* globals storageAPIs */
 
-function storeData (key) {
-    return Promise.all(storgeAPIs.map(api => {
+function storeData (key, filterFunc) {
+    const apis = storageAPIs.filter(filterFunc);
+    console.log('store', apis);
+    return Promise.all(apis.map(api => {
         try {
             const result = api.store(key);
 
@@ -30,8 +32,10 @@ function storeData (key) {
     }));
 }
 
-function retrieveData (key) {
-    return Promise.all(storgeAPIs.map(api => {
+function retrieveData (key, filterFunc) {
+    const apis = storageAPIs.filter(filterFunc);
+    console.log('retrieve', apis);
+    return Promise.all(apis.map(api => {
         try {
             const result = api.retrieve(key);
 
@@ -67,13 +71,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const mode = url.searchParams.get('mode');
     const sessionId = url.searchParams.get('sessionId');
 
+    // Filter tests by API types
+    let apiTypes = url.searchParams.get('apiTypes');
+    let filterFunc = () => true;
+    if (apiTypes !== null) {
+        apiTypes = JSON.parse(apiTypes);
+        filterFunc = api => apiTypes.includes(api.type);
+    }
+
     if (mode === 'store') {
-        storeData(sessionId)
+        storeData(sessionId, filterFunc)
             .then(result => {
                 window.parent.postMessage(result, '*');
             });
     } else if (mode === 'retrieve') {
-        retrieveData(sessionId)
+        retrieveData(sessionId, filterFunc)
             .then(result => {
                 window.parent.postMessage(result, '*');
             });

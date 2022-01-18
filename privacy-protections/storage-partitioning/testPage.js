@@ -1,16 +1,6 @@
+/* globals FIRST_PARTY_HTTP FIRST_PARTY_HTTPS THIRD_PARTY_HTTP THIRD_PARTY_HTTPS */
+
 const statusElement = document.querySelector('#status');
-
-const topURL = new URL(window.location.href);
-
-const isLocalTest = topURL.searchParams.get('isLocalTest') === 'true';
-
-const THIRD_PARTY_HOSTNAME = isLocalTest ? '127.0.0.1' : 'good.third-party.site';
-const THIRD_PARTY_HTTP = isLocalTest ? `http://${THIRD_PARTY_HOSTNAME}:3000` : `http://${THIRD_PARTY_HOSTNAME}`;
-const THIRD_PARTY_HTTPS = `https://${THIRD_PARTY_HOSTNAME}:443`;
-
-const FIRST_PARTY_HOSTNAME = isLocalTest ? 'localhost' : 'privacy-test-pages.glitch.me';
-const FIRST_PARTY_HTTP = isLocalTest ? `http://${FIRST_PARTY_HOSTNAME}:3000` : `http://${THIRD_PARTY_HOSTNAME}`;
-const FIRST_PARTY_HTTPS = `https://${FIRST_PARTY_HOSTNAME}`;
 
 const configurations = [
     {
@@ -42,12 +32,6 @@ const configurations = [
         topOrigin: THIRD_PARTY_HTTP
     }
 ];
-
-if (isLocalTest === null) {
-    console.error('Must indicate whether this is a local test via isLocalTest');
-} else {
-    runTest();
-}
 
 function readStorageInIframe (sessionId, apiTypes) {
     return new Promise((resolve, reject) => {
@@ -95,7 +79,6 @@ function openNextTestPage (testIndex, testIteration, testId, sessionId, results)
     // Move to the next test configuration
     const nextURL = new URL(window.location.pathname, configurations[testIndex].topOrigin);
     nextURL.searchParams.set('sessionId', sessionId);
-    nextURL.searchParams.set('isLocalTest', isLocalTest);
     nextURL.searchParams.set('results', JSON.stringify(results));
     nextURL.searchParams.set('testIndex', testIndex);
     nextURL.searchParams.set('testIteration', testIteration);
@@ -109,6 +92,7 @@ function saveTestResults (siteType, testId, sessionId, retrieval) {
 }
 
 async function runTest () {
+    const topURL = new URL(window.location.href);
     const results = topURL.searchParams.get('results') === null ? {} : JSON.parse(topURL.searchParams.get('results'));
 
     const sessionId = topURL.searchParams.get('sessionId');
@@ -165,7 +149,6 @@ async function runTest () {
         const nextURL = new URL(window.location.pathname, FIRST_PARTY_HTTPS);
         nextURL.searchParams.set('endTests', true);
         nextURL.searchParams.set('sessionId', sessionId);
-        nextURL.searchParams.set('isLocalTest', isLocalTest);
         nextURL.searchParams.set('results', JSON.stringify(results));
         window.location.href = nextURL.href;
         return;
@@ -173,3 +156,5 @@ async function runTest () {
 
     openNextTestPage(testIndex, testIteration, testId, sessionId, results);
 }
+
+runTest();

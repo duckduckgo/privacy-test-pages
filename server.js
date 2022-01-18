@@ -24,12 +24,13 @@ const listener = app.listen(port, () => {
     console.log(`HTTP Server listening at port ${listener.address().port}`);
 });
 
-// Start HTTPS server for https://localhost and https://127.0.0.1
-if (fs.existsSync('localhost+1.pem') && fs.existsSync('localhost+1-key.pem')) {
+// Start HTTPS server for https://first-party.example and https://third-party.example
+// See README.md for setup instructions
+if (fs.existsSync('first-party.example+3.pem') && fs.existsSync('first-party.example+3-key.pem')) {
     console.log('Running local HTTPS server.');
     const httpsOptions = {
-        key: fs.readFileSync('localhost+1-key.pem'),
-        cert: fs.readFileSync('localhost+1.pem')
+        key: fs.readFileSync('first-party.example+3-key.pem'),
+        cert: fs.readFileSync('first-party.example+3.pem')
     };
     const httpsListener = https.createServer(httpsOptions, app).listen(443, () => {
         console.log(`HTTPS server listening on port ${httpsListener.address().port}`);

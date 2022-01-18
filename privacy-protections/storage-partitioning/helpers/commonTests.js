@@ -1,4 +1,5 @@
 /* exported storageAPIs HSTS */
+/* globals FIRST_PARTY_HOSTNAME */
 
 const timeout = 1000; // ms; used for cross-tab communication APIs
 
@@ -412,26 +413,18 @@ const storageAPIs = [
         name: 'HSTS',
         type: 'hsts',
         store: async () => {
-            // TODO: need to move this somewhere global
-            const clearURL = new URL('/partitioning/clear_hsts.png', 'https://localhost:443/');
-            const setURL = new URL('/partitioning/set_hsts.png', 'https://localhost:443/');
-            const getURL = new URL('/partitioning/get_hsts.png', 'http://localhost:3000/');
-
             // Clear any current HSTS
+            const clearURL = new URL('/partitioning/clear_hsts.png', `https://hsts.${FIRST_PARTY_HOSTNAME}/`);
             await loadSubresource('img', clearURL.href);
 
-            const result1 = await loadSubresource('img', getURL.href);
-            console.log('HSTS - pre set', result1.type);
-
+            // Set HSTS
+            const setURL = new URL('/partitioning/set_hsts.png', `https://hsts.${FIRST_PARTY_HOSTNAME}/`);
             await loadSubresource('img', setURL.href);
-
-            getURL.searchParams.set('foo', 'bust');
-            const result2 = await loadSubresource('img', getURL.href);
-            console.log('HSTS - post set', result2.type);
         },
         retrieve: async () => {
-            // TODO: need to move this somewhere global
-            const getURL = new URL('/partitioning/get_hsts.png', 'http://localhost:3000/');
+            // Attempt to retrieve an image over HTTP
+            // The retrieval will fail if not upgraded to HTTPS by the browser.
+            const getURL = new URL('/partitioning/get_hsts.png', `http://hsts.${FIRST_PARTY_HOSTNAME}/`);
             const event = await loadSubresource('img', getURL.href);
             if (event.type === 'load') {
                 return 'https';

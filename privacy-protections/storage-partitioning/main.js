@@ -7,7 +7,7 @@ const testsDiv = document.querySelector('#tests');
 const testsSummaryDiv = document.querySelector('#tests-summary');
 const testsDetailsElement = document.querySelector('#tests-details');
 
-const isLocalTest = window.location.hostname === 'localhost';
+const isLocalTest = window.location.hostname.endsWith('.example');
 
 // object that contains results of all tests
 const results = {
@@ -286,4 +286,11 @@ runButton.addEventListener('click', () => runTests());
 // if url query is '?store' store the data immadiatelly
 if (document.location.search === '?run') {
     runTests();
+}
+
+// warn the user if loaded over localhost
+if (window.location.hostname === 'localhost') {
+    const warning = document.getElementById('warning');
+    warning.innerHTML = '⚠ Test must be accessed via https://first-party.example. See <a href="https://github.com/duckduckgo/privacy-test-pages#how-to-test-it-locally">README.md</a> for setup instructions. ⚠';
+    runButton.setAttribute('disabled', '');
 }

@@ -34,8 +34,26 @@ If you are working on a simple page you can start any local server (e.g. `python
 Some test pages have a server-side component that must run using our custom server. First, install the dependencies (`npm -i`) and then start the server via `node server.js`.
 
 #### Test pages that require HTTPS
-Some test pages (i.e., `privacy-protections/storage-partitioning/`) require HTTPS support to run. This requires additional dependencies. 
+Some test pages (i.e., `privacy-protections/storage-partitioning/`) require HTTPS and must load over real hostnames. This requires additional dependencies and machine/browser configuration.
 
+##### Setting up local test domains
+Many of the test pages can be visited via `http://localhost`, but browsers sometimes treat localhost differently than they would a real hostname (e.g., `example.com`). For example, it's not possible to register HSTS on `localhost`, even when loading over HTTPS.
+
+If you're using Firefox, you can use a pref to force hostnames to resolve to `127.0.0.1`:
+1. Go to `about:config`
+2. Set `network.dns.localDomains` to `first-party.example,hsts.first-party.example,third-party.example`.
+
+If you're testing in a browser other than Firefox, you'll have to edit your OS's hosts file to add the following lines:
+```
+# Privacy Test Pages (https://github.com/duckduckgo/privacy-test-pages)
+127.0.0.1 first-party.example
+127.0.0.1 hsts.first-party.example
+127.0.0.1 third-party.example
+```
+
+Unfortunately neither of these approaches support wildcard subdomains, so you will need to add new subdomains as required by your tests.
+
+##### Adding HTTPS support for test domains
 On MacOS:
 ```
 brew install mkcert
@@ -48,12 +66,11 @@ mkcert -install
 ```
 
 Then, in the root directory of `privacy-test-pages`, run:
-
 ```
-mkcert localhost 127.0.0.1
+mkcert first-party.example "*.first-party.example" third-party.example "*.third-party.example"
 ```
 
-This will generate two files (`localhost+1-key.pem` and `localhost+1.pem`) in the root directory. Express will automatically pick these up when you start the server (`node server.js`).
+This will generate two files (`first-party.example+3-key.pem` and `first-party.example+3.pem`) in the root directory. Express will automatically pick these up when you start the server (`node server.js`).
 
 ## How to deploy it?
 

@@ -1,4 +1,4 @@
-/* exported storageAPIs HSTS */
+/* exported testAPIs */
 /* globals FIRST_PARTY_HOSTNAME */
 
 const timeout = 1000; // ms; used for cross-tab communication APIs
@@ -30,9 +30,74 @@ const loadSubresource = async (tagName, url) => {
     }
 };
 
-const storageAPIs = [
-    {
-        name: 'document.cookie',
+// Validates storage APIs which return the value of the token stored in
+// the storage container within each test context. E.g.,
+//
+// document.cookie
+//     same-site: [ { "value": "51c69e1b" }, { "value": "51c69e1b" } ]
+//    cross-site: [ { "value": "fd10f7f5d2cf" }, { "value": "fd10f7f5d2cf" } ]
+function validateStorageAPI (sameSites, crossSites, reference, random) {
+    if (
+        (sameSites.every(v => v.error === 'Unsupported')) &&
+        (crossSites.every(v => v.error === 'Unsupported'))
+    ) {
+        return 'unsupported';
+    } else if (
+        (sameSites.every(v => v.error && v.error.endsWith('is deprecated'))) &&
+        (crossSites.every(v => v.error && v.error.endsWith('is deprecated')))
+    ) {
+        return 'unsupported';
+    }
+
+    if (reference.value !== random) {
+        if (reference.value === null && typeof reference.error !== 'undefined') {
+            return 'error';
+        }
+        return 'fail';
+    }
+
+    if (
+        // (!sameSites.length === configurations['same-site'].iterations) ||
+        // (!crossSites.length === configurations['cross-site'].iterations) ||
+        (!sameSites.every(v => v.value === reference.value)) ||
+        (!crossSites.every(v => v.value === crossSites[0].value)) ||
+        (!crossSites.every(v => v.value !== reference.value))
+    ) {
+        return 'fail';
+    }
+    return 'pass';
+}
+
+// Validates the results returned by Cache APIs. These return a count of the
+// number of requests the server has received upon each pageload. E.g.,
+//
+// Iframe Cache
+//     same-site: [ { "value": "1" }, { "value": "1" } ]
+//    cross-site: [ { "value": "2" }, { "value": "2" } ]
+function validateCacheAPI (sameSites, crossSites) {
+    if (
+        (sameSites.every(v => v.value === sameSites[0].value)) &&
+        (crossSites.every(v => v.value === crossSites[0].value)) &&
+        (crossSites.every(v => v.value === sameSites[0].value + 1))
+    ) {
+        return 'pass';
+    } else if (
+        (sameSites.every(v => v.value === sameSites[0].value)) &&
+        (crossSites.every(v => v.value === crossSites[0].value)) &&
+        (crossSites.every(v => v.value === sameSites[0].value))
+    ) {
+        return 'fail';
+    } else if (
+        (sameSites.every(v => v.error === 'No requests received')) &&
+        (crossSites.every(v => v.error === 'No requests received'))
+    ) {
+        return 'unsupported';
+    }
+    return 'error';
+}
+
+const testAPIs = {
+    'document.cookie': {
         type: 'storage',
         store: (data) => {
             // we are using same set of tests for main frame and an iframe
@@ -44,46 +109,46 @@ const storageAPIs = [
         },
         retrieve: () => {
             return document.cookie.match(/jsdata=([0-9a-z-]+)/)[1];
-        }
+        },
+        validate: validateStorageAPI
     },
-    {
-        name: 'localStorage',
+    localStorage: {
         type: 'storage',
         store: (data) => {
             localStorage.setItem('data', data);
         },
         retrieve: () => {
             return localStorage.getItem('data');
-        }
+        },
+        validate: validateStorageAPI
     },
-    {
-        name: 'sessionStorage',
+    sessionStorage: {
         type: 'storage',
         store: (data) => {
             sessionStorage.setItem('data', data);
         },
         retrieve: () => {
             return sessionStorage.getItem('data');
-        }
+        },
+        validate: validateStorageAPI
     },
-    {
-        name: 'IndexedDB',
+    IndexedDB: {
         type: 'storage',
         store: (data) => {
             return DB('data').then(db => Promise.all([db.deleteAll(), db.put({ id: data })])).then(() => 'OK');
         },
         retrieve: () => {
             return DB('data').then(db => db.getAll()).then(data => data[0].id);
-        }
+        },
+        validate: validateStorageAPI
     },
-    {
-        name: 'WebSQL',
+    WebSQL: {
         type: 'storage',
         store: (data) => {
             let res, rej;
             const promise = new Promise((resolve, reject) => { res = resolve; rej = reject; });
 
-            const db = openDatabase('data', '1.0', 'data', 2 * 1024 * 1024);
+            const db = window.openDatabase('data', '1.0', 'data', 2 * 1024 * 1024);
 
             db.transaction(tx => {
                 tx.executeSql('CREATE TABLE IF NOT EXISTS data (value)', [], () => {
@@ -96,10 +161,13 @@ const storageAPIs = [
             return promise;
         },
         retrieve: () => {
+            if (!window.openDatabase) {
+                throw new Error('Unsupported');
+            }
             let res, rej;
             const promise = new Promise((resolve, reject) => { res = resolve; rej = reject; });
 
-            const db = openDatabase('data', '1.0', 'data', 2 * 1024 * 1024);
+            const db = window.openDatabase('data', '1.0', 'data', 2 * 1024 * 1024);
 
             db.transaction(tx => {
                 tx.executeSql('SELECT * FROM data', [], (tx, d) => {
@@ -108,10 +176,10 @@ const storageAPIs = [
             });
 
             return promise;
-        }
+        },
+        validate: validateStorageAPI
     },
-    {
-        name: 'Cache API',
+    'Cache API': {
         type: 'storage',
         store: (data) => {
             return caches.open('data').then((cache) => {
@@ -127,11 +195,11 @@ const storageAPIs = [
                 return cache.match('/cache-api-response')
                     .then(r => r.text());
             });
-        }
+        },
+        validate: validateStorageAPI
     },
     // Tests below here are inspired by: https://github.com/arthuredelstein/privacytests.org/
-    {
-        name: 'ServiceWorker',
+    ServiceWorker: {
         type: 'storage',
         store: async (data) => {
             if (!navigator.serviceWorker) {
@@ -156,10 +224,10 @@ const storageAPIs = [
             }
             const response = await fetch('serviceworker-read');
             return await response.text();
-        }
+        },
+        validate: validateStorageAPI
     },
-    {
-        name: 'BroadcastChannel',
+    BroadcastChannel: {
         type: 'communication',
         store: (data) => {
             const bc = new BroadcastChannel('secret');
@@ -171,6 +239,9 @@ const storageAPIs = [
         },
         retrieve: () => {
             return new Promise((resolve, reject) => {
+                if (!window.BroadcastChannel) {
+                    reject(new Error('Unsupported'));
+                }
                 const bc = new BroadcastChannel('secret');
                 bc.onmessage = (event) => {
                     if (event.data !== 'request') {
@@ -183,10 +254,10 @@ const storageAPIs = [
                     reject(new Error(`No BroadcastChannel message received within timeout ${timeout}`));
                 }, timeout);
             });
-        }
+        },
+        validate: validateStorageAPI
     },
-    {
-        name: 'SharedWorker',
+    SharedWorker: {
         type: 'communication',
         store: (data) => {
             try {
@@ -199,6 +270,9 @@ const storageAPIs = [
         },
         retrieve: () => {
             return new Promise((resolve, reject) => {
+                if (!window.SharedWorker) {
+                    reject(new Error('Unsupported'));
+                }
                 const worker = new SharedWorker('helpers/sharedworker.js');
                 worker.port.start();
                 worker.port.onmessage = (e) => {
@@ -213,10 +287,10 @@ const storageAPIs = [
                     reject(new Error(`No Shared Worker message received within timeout ${timeout}`));
                 }, timeout);
             });
-        }
+        },
+        validate: validateStorageAPI
     },
-    {
-        name: 'Web Locks API',
+    'Web Locks API': {
         type: 'communication',
         store: async (key) => {
             if (!navigator.locks) {
@@ -232,10 +306,10 @@ const storageAPIs = [
             }
             const queryResult = await navigator.locks.query();
             return queryResult.held[0].name;
-        }
+        },
+        validate: validateStorageAPI
     },
-    {
-        name: 'Fetch Cache',
+    'Fetch Cache': {
         type: 'cache',
         store: async (data) => {
             await fetch(getURL('resource', 'fetch', data),
@@ -249,11 +323,11 @@ const storageAPIs = [
             const countResponse = await fetch(getURL('ctr', 'fetch', data),
                 { cache: 'reload' }
             );
-            return (await countResponse.text()).trim();
-        }
+            return parseInt((await countResponse.text()).trim());
+        },
+        validate: validateCacheAPI
     },
-    {
-        name: 'XMLHttpRequest cache',
+    'XMLHttpRequest Cache': {
         type: 'cache',
         store: (key) => new Promise((resolve, reject) => {
             const req = new XMLHttpRequest();
@@ -273,11 +347,11 @@ const storageAPIs = [
             await xhrLoadPromise;
             const countResponse = await fetch(
                 getURL('ctr', 'xhr', key), { cache: 'reload' });
-            return (await countResponse.text()).trim();
-        }
+            return parseInt((await countResponse.text()).trim());
+        },
+        validate: validateCacheAPI
     },
-    {
-        name: 'Iframe Cache',
+    'Iframe Cache': {
         type: 'cache',
         store: (key) => new Promise((resolve, reject) => {
             const iframe = document.createElement('iframe');
@@ -294,13 +368,13 @@ const storageAPIs = [
             const address = getURL('resource', 'page', key);
             iframe.src = address;
             await iframeLoadPromise;
-            const response = await fetch(
+            const countResponse = await fetch(
                 getURL('ctr', 'page', key), { cache: 'reload' });
-            return (await response.text()).trim();
-        }
+            return parseInt((await countResponse.text()).trim());
+        },
+        validate: validateCacheAPI
     },
-    {
-        name: 'Image Cache',
+    'Image Cache': {
         type: 'cache',
         store: (key) => new Promise((resolve, reject) => {
             const img = document.createElement('img');
@@ -316,13 +390,13 @@ const storageAPIs = [
             });
             img.src = getURL('resource', 'image', key);
             await imgLoadPromise;
-            const response = await fetch(
+            const countResponse = await fetch(
                 getURL('ctr', 'image', key), { cache: 'reload' });
-            return (await response.text()).trim();
-        }
+            return parseInt((await countResponse.text()).trim());
+        },
+        validate: validateCacheAPI
     },
-    {
-        name: 'Favicon Cache',
+    'Favicon Cache': {
         type: 'cache',
         store: () => {}, // noop since the favicon is set in the top-level frame
         retrieve: async (key) => {
@@ -332,15 +406,15 @@ const storageAPIs = [
             await sleepMs(500);
             const response = await fetch(
                 getURL('ctr', 'favicon', key), { cache: 'reload' });
-            const count = (await response.text()).trim();
-            if (count === '0') {
+            const count = parseInt((await response.text()).trim());
+            if (count === 0) {
                 throw new Error('No requests received');
             }
             return count;
-        }
+        },
+        validate: validateCacheAPI
     },
-    {
-        name: 'Font Cache',
+    'Font Cache': {
         type: 'cache',
         store: async (key) => {
             const style = document.createElement('style');
@@ -358,11 +432,11 @@ const storageAPIs = [
             await sleepMs(500);
             const response = await fetch(
                 getURL('ctr', 'font', key), { cache: 'reload' });
-            return (await response.text()).trim();
-        }
+            return parseInt((await response.text()).trim());
+        },
+        validate: validateCacheAPI
     },
-    {
-        name: 'CSS cache',
+    'CSS cache': {
         type: 'cache',
         store: async (key) => {
             const href = getURL('resource', 'css', key);
@@ -383,10 +457,31 @@ const storageAPIs = [
                 }
             }
             return fontFamily;
+        },
+        validate: (sameSites, crossSites) => {
+            //  same-site: [ { "value": "fake_652798686603804" }, { "value": "fake_652798686603804" } ]
+            // cross-site: [ { "value": "fake_35491713503664246" }, { "value": "fake_35491713503664246" } ]
+            if (
+                (sameSites.every(v => v.value.startsWith('fake_'))) &&
+                (crossSites.every(v => v.value.startsWith('fake_'))) &&
+                (sameSites.every(v => v.value === sameSites[0].value)) &&
+                (crossSites.every(v => v.value === crossSites[0].value)) &&
+                (crossSites.every(v => v.value !== sameSites[0].value))
+            ) {
+                return 'pass';
+            } else if (
+                (sameSites.every(v => v.value.startsWith('fake_'))) &&
+                (crossSites.every(v => v.value.startsWith('fake_'))) &&
+                (sameSites.every(v => v.value === sameSites[0].value)) &&
+                (crossSites.every(v => v.value === crossSites[0].value)) &&
+                (crossSites.every(v => v.value === sameSites[0].value))
+            ) {
+                return 'fail';
+            }
+            return 'error';
         }
     },
-    {
-        name: 'Prefetch Cache',
+    'Prefetch Cache': {
         type: 'cache',
         store: async (key) => {
             const link = document.createElement('link');
@@ -402,15 +497,15 @@ const storageAPIs = [
             await sleepMs(500);
             const response = await fetch(
                 getURL('ctr', 'prefetch', key), { cache: 'reload' });
-            const countString = (await response.text()).trim();
-            if (parseInt(countString) === 0) {
+            const count = parseInt((await response.text()).trim());
+            if (count === 0) {
                 throw new Error('No requests received');
             }
-            return countString;
-        }
+            return count;
+        },
+        validate: validateCacheAPI
     },
-    {
-        name: 'HSTS',
+    HSTS: {
         type: 'hsts',
         store: async () => {
             // Clear any current HSTS
@@ -431,6 +526,27 @@ const storageAPIs = [
             } else if (event.type === 'error') {
                 return 'http';
             }
+        },
+        validate: (sameSites, crossSites) => {
+            //  same-site: [ { "value": "https" }, { "value": "https" } ]
+            // cross-site: [ { "value": "http" }, { "value": "http" } ]
+            if ( // browser allows subresources to set HSTS, but partitions cross-site
+                (sameSites.every(v => v.value === 'https')) &&
+                (crossSites.every(v => v.value === 'http'))
+            ) {
+                return 'pass';
+            } else if ( // browser doesn't allow subresources to set HSTS (be careful with false positives)
+                (sameSites.every(v => v.value === 'http')) &&
+                (crossSites.every(v => v.value === 'http'))
+            ) {
+                return 'pass';
+            } else if (
+                (sameSites.every(v => v.value === 'https')) &&
+                (crossSites.every(v => v.value === 'https'))
+            ) {
+                return 'fail';
+            }
+            return 'error';
         }
     }
-];
+};

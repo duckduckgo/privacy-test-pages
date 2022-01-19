@@ -40,22 +40,26 @@ function retrieveData (key, apis) {
                 return result
                     .then(value => ({
                         api: api.name,
+                        type: api.type,
                         value: value
                     }))
                     .catch(e => ({
                         api: api.name,
+                        type: api.type,
                         value: null,
                         error: e.message
                     }));
             } else {
                 return Promise.resolve({
                     api: api.name,
+                    type: api.type,
                     value: result
                 });
             }
         } catch (e) {
             return Promise.resolve({
                 api: api.name,
+                type: api.type,
                 value: null,
                 error: e.message ? e.message : e
             });

@@ -1,6 +1,7 @@
 /* globals FIRST_PARTY_HTTP FIRST_PARTY_HTTPS THIRD_PARTY_HTTP THIRD_PARTY_HTTPS */
 
 const statusElement = document.querySelector('#status');
+const preElement = document.querySelector('#pre-status');
 
 const configurations = [
     {
@@ -122,7 +123,8 @@ async function runTest () {
     testIteration = parseInt(testIteration);
     testId = parseInt(testId);
 
-    statusElement.innerText = `Running iteration ${testIteration} of test: ${JSON.stringify(configurations[testIndex])}`;
+    statusElement.innerText = `Running iteration ${testIteration} of test:`;
+    preElement.innerText = JSON.stringify(configurations[testIndex], undefined, 4);
 
     // Update favicon (must be set on top-level frame)
     const faviconElement = document.getElementById('favicon');

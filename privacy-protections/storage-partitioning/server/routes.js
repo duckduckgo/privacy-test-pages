@@ -91,7 +91,6 @@ router.get('/set_hsts.png', (req, res) => {
 });
 
 router.get('/get_hsts.png', (req, res) => {
-    console.log(req.protocol);
     let isHTTPS = req.protocol === 'https';
     // The X-Forwarded-Proto header is added by Glitch's proxy
     // and reveals the original protocol used during the connection

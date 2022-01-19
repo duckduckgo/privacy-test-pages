@@ -1,4 +1,4 @@
-/* globals uuidv4 */
+/* globals uuidv4 testAPIs */
 const runButton = document.querySelector('#run');
 const downloadButton = document.querySelector('#download');
 const toggleDetailsButton = document.querySelector('#toggle-details');
@@ -75,33 +75,14 @@ function getStorage (frameOrigin, sessionId) {
     });
 }
 
-function validateValues (sameSites, crossSites, reference, random) {
-    if (reference.value !== random) {
-        if (reference.value === null && typeof reference.error !== 'undefined') {
-            return 'error';
-        }
-        return 'fail';
-    }
-
-    if (
-        // (!sameSites.length === configurations['same-site'].iterations) ||
-        // (!crossSites.length === configurations['cross-site'].iterations) ||
-        (!sameSites.every(v => v.value === reference.value)) ||
-        (!crossSites.every(v => v.value === crossSites[0].value)) ||
-        (!crossSites.every(v => v.value !== reference.value))) {
-        return 'fail';
-    }
-    return 'pass';
-}
-
 function validateResults (allRetrievals, random) {
     const out = new Map();
-    for (const api of allRetrievals.keys()) {
-        const sameSiteValues = allRetrievals.get(api)['same-site'];
-        const crossSiteValues = allRetrievals.get(api)['cross-site'];
-        const reference = allRetrievals.get(api).reference;
-        const result = validateValues(sameSiteValues, crossSiteValues, reference, random);
-        out.set(api, result);
+    for (const apiName of allRetrievals.keys()) {
+        const sameSiteValues = allRetrievals.get(apiName)['same-site'];
+        const crossSiteValues = allRetrievals.get(apiName)['cross-site'];
+        const reference = allRetrievals.get(apiName).reference;
+        const result = testAPIs[apiName].validate(sameSiteValues, crossSiteValues, reference, random);
+        out.set(apiName, result);
     };
     return out;
 }
@@ -132,12 +113,26 @@ function displayResults (allRetrievals, testResults) {
         return li;
     }
 
+    function getIcon (result) {
+        if (result === 'pass' || result === 'unsupported') {
+            return '✅';
+        } else if (result === 'fail') {
+            return '❌';
+        } else if (result === 'error') {
+            return '⚠️';
+        } else {
+            return '';
+        }
+    }
+
     for (const api of allRetrievals.keys()) {
         all++;
+        const result = testResults.get(api);
+
 
         const li = document.createElement('li');
         li.id = `test-${api.replace(' ', '-')}`;
-        li.innerHTML = `${api} - ${testResults.get(api)}<ul></ul>`;
+        li.innerHTML = `${getIcon(result)} ${api} - ${testResults.get(api)}<ul></ul>`;
 
         const ul = li.getElementsByTagName('ul')[0];
         ul.appendChild(getLiFromResults(api, 'same-site'));

@@ -76,6 +76,11 @@ function validateStorageAPI (sameSites, crossSites, reference, random) {
 //    cross-site: [ { "value": "2" }, { "value": "2" } ]
 function validateCacheAPI (sameSites, crossSites) {
     if (
+        (sameSites.every(v => v.error === 'No requests received')) &&
+        (crossSites.every(v => v.error === 'No requests received'))
+    ) {
+        return 'unsupported';
+    } else if (
         (sameSites.every(v => v.value === sameSites[0].value)) &&
         (crossSites.every(v => v.value === crossSites[0].value)) &&
         (crossSites.every(v => v.value === sameSites[0].value + 1))
@@ -87,11 +92,6 @@ function validateCacheAPI (sameSites, crossSites) {
         (crossSites.every(v => v.value === sameSites[0].value))
     ) {
         return 'fail';
-    } else if (
-        (sameSites.every(v => v.error === 'No requests received')) &&
-        (crossSites.every(v => v.error === 'No requests received'))
-    ) {
-        return 'unsupported';
     }
     return 'error';
 }

@@ -129,7 +129,6 @@ function displayResults (allRetrievals, testResults) {
         all++;
         const result = testResults.get(api);
 
-
         const li = document.createElement('li');
         li.id = `test-${api.replace(' ', '-')}`;
         li.innerHTML = `${getIcon(result)} ${api} - ${testResults.get(api)}<ul></ul>`;

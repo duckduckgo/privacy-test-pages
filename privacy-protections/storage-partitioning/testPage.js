@@ -61,7 +61,7 @@ function readStorageInIframe (sessionId, apiTypes) {
 function endTests (sessionId, results) {
     window.localStorage.setItem(sessionId, JSON.stringify(results));
     statusElement.innerText = "Tests complete. If this window doesn't close itself, close it to return to the results.";
-    // window.close();
+    window.close();
 }
 
 function waitForInitialization (sessionId) {

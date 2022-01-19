@@ -1,4 +1,4 @@
-/* globals uuidv4 testAPIs */
+/* globals uuidv4 testAPIs isLocalTest accessStorageInIframe */
 const runButton = document.querySelector('#run');
 const downloadButton = document.querySelector('#download');
 const toggleDetailsButton = document.querySelector('#toggle-details');
@@ -6,8 +6,6 @@ const toggleDetailsButton = document.querySelector('#toggle-details');
 const testsDiv = document.querySelector('#tests');
 const testsSummaryDiv = document.querySelector('#tests-summary');
 const testsDetailsElement = document.querySelector('#tests-details');
-
-const isLocalTest = window.location.hostname.endsWith('.example');
 
 // object that contains results of all tests
 const results = {
@@ -30,51 +28,6 @@ function downloadTheResults () {
     a.remove();
 }
 
-function setStorage (frameOrigin, sessionId) {
-    return new Promise((resolve, reject) => {
-        try {
-            const iframeURL = new URL('/privacy-protections/storage-partitioning/iframe.html', frameOrigin);
-            iframeURL.searchParams.set('mode', 'store');
-            iframeURL.searchParams.set('sessionId', sessionId);
-
-            const iframe = document.createElement('iframe');
-            iframe.height = 1;
-            iframe.width = 1;
-            iframe.src = iframeURL.href;
-            document.body.appendChild(iframe);
-
-            window.addEventListener('message', (event) => {
-                resolve(event.data);
-            }, { capture: false, once: true });
-        } catch (err) {
-            console.error(`Error while trying to set storage: ${err}`);
-        }
-    });
-}
-
-function getStorage (frameOrigin, sessionId) {
-    return new Promise((resolve, reject) => {
-        try {
-            const iframeURL = new URL('/privacy-protections/storage-partitioning/iframe.html', frameOrigin);
-            iframeURL.searchParams.set('mode', 'retrieve');
-            iframeURL.searchParams.set('sessionId', sessionId);
-
-            const iframe = document.createElement('iframe');
-            iframe.height = 1;
-            iframe.width = 1;
-            iframe.src = iframeURL.href;
-            document.body.appendChild(iframe);
-
-            window.addEventListener('message', (event) => {
-                iframe.remove();
-                resolve(event.data);
-            }, { capture: false, once: true });
-        } catch (err) {
-            console.error(`Error while trying to set storage: ${err}`);
-        }
-    });
-}
-
 function validateResults (allRetrievals, random) {
     const out = new Map();
     for (const apiName of allRetrievals.keys()) {
@@ -93,14 +46,7 @@ function displayResults (allRetrievals, testResults) {
     results.results.length = 0;
     results.date = (new Date()).toUTCString();
 
-    let all = 0;
-    const failed = 0;
-
     testsDetailsElement.innerHTML = '';
-
-    function updateSummary () {
-        testsSummaryDiv.innerText = `Retrieved data from ${all} storage mechanisms${failed > 0 ? ` (${failed} failed)` : ''}.`;
-    }
 
     function getLiFromResults (api, type) {
         const li = document.createElement('li');
@@ -121,17 +67,16 @@ function displayResults (allRetrievals, testResults) {
         } else if (result === 'error') {
             return '⚠️';
         } else {
-            return '';
+            return '?';
         }
     }
 
     for (const api of allRetrievals.keys()) {
-        all++;
         const result = testResults.get(api);
 
         const li = document.createElement('li');
         li.id = `test-${api.replace(' ', '-')}`;
-        li.innerHTML = `${getIcon(result)} ${api} - ${testResults.get(api)}<ul></ul>`;
+        li.innerHTML = `${getIcon(result)} ${api} - ${result}<ul></ul>`;
 
         const ul = li.getElementsByTagName('ul')[0];
         ul.appendChild(getLiFromResults(api, 'same-site'));
@@ -140,7 +85,7 @@ function displayResults (allRetrievals, testResults) {
         testsDetailsElement.appendChild(li);
     };
 
-    updateSummary();
+    testsSummaryDiv.innerText = `Retrieved data from ${allRetrievals.size} storage mechanisms.`;
 
     function addTestResult (testId, value) {
         results.results.push({
@@ -195,7 +140,7 @@ async function runTests () {
     // The test tab must be opened before we do any other initialization.
     // Webkit doesn't propagate user gestures through these async calls.
     console.log(`Setting ${sessionId} in a same-origin iframe...`);
-    const status = await setStorage(window.location.origin, sessionId);
+    const status = await accessStorageInIframe(window.location.origin, sessionId, 'store');
     console.log(status);
 
     const allRetrievals = new DefaultMap(() => {
@@ -206,7 +151,7 @@ async function runTests () {
     });
 
     console.log('Retrieving reference values from a same-origin iframe...');
-    const reference = await getStorage(window.location.origin, sessionId);
+    const reference = await accessStorageInIframe(window.location.origin, sessionId, 'retrieve');
     console.log(reference);
     reference.forEach(retrieval => {
         allRetrievals.get(retrieval.api).reference = {
@@ -228,7 +173,6 @@ async function runTests () {
         const getURL = new URL('/partitioning/get-results', window.location.origin);
         getURL.searchParams.set('key', sessionId);
 
-        // Send data to server
         const resp = await fetch(getURL.href, {
             method: 'GET',
             headers: {

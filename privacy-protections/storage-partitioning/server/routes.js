@@ -3,13 +3,13 @@ const express = require('express');
 const router = express.Router();
 
 const NodeCache = require('node-cache');
-const countCache = new NodeCache();
-const cacheKey = (key, fileType) => `${key}_${fileType}`;
-const cacheTTL = 600; // seconds
+const cacheTTL = 300; // seconds
 
-const blobs = {
+router.get('/', (req, res) => res.send('It works 👍'));
 
-};
+/*
+ * Cached resource endpoints
+ */
 
 const resourceFiles = {
     favicon: 'favicon.png',
@@ -38,11 +38,8 @@ const mimeTypes = {
     xhr: 'text/html'
 };
 
-router.get('/', (req, res) => res.send('It works 👍'));
-
-/*
- * Cached resource endpoints
- */
+const countCache = new NodeCache({ stdTTL: cacheTTL });
+const cacheKey = (key, fileType) => `${key}_${fileType}`;
 
 router.get('/resource', (req, res) => {
     console.log(req.hostname);
@@ -52,7 +49,7 @@ router.get('/resource', (req, res) => {
         count = 0;
     }
     count += 1;
-    countCache.set(cacheKey(key, fileType), count, cacheTTL);
+    countCache.set(cacheKey(key, fileType), count);
     console.log(`Requested: ${req.url} ; Count: ${count}`);
     res.set({
         'Access-Control-Allow-Origin': '*',
@@ -113,6 +110,64 @@ router.get('/clear_hsts.png', (req, res) => {
         'Cache-Control': 'max-age=0'
     };
     res.sendFile('image.png', { root: __dirname, headers });
+});
+
+/*
+ * Result caching
+ */
+
+const dataCache = new NodeCache({ stdTTL: cacheTTL, useClones: false });
+
+// Required for CORS preflight request browsers make before POSTing data.
+router.options('/save-results', (req, res) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', '*');
+    res.sendStatus(200);
+});
+
+router.post('/save-results', (req, res) => {
+    console.log('POST request');
+
+    // Add CORS headers
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', '*');
+
+    if (!req.body || typeof req.body !== 'object') {
+        res.sendStatus(400);
+        return;
+    }
+
+    const { key, siteType, testId } = req.query;
+
+    let cachedResults = dataCache.get(key);
+    if (typeof cachedResults === 'undefined') {
+        // The cache doesn't clone objects, it just stores and returns
+        // references. This means we just need to push an initial reference.
+        // On future calls, simply getting the reference and updating it
+        // is sufficient--no need to re-push the updated object.
+        cachedResults = {};
+        dataCache.set(key, cachedResults);
+    }
+
+    // Add new results to stored object
+    cachedResults[[siteType, testId]] = req.body;
+
+    res.sendStatus(200);
+});
+
+router.get('/get-results', (req, res) => {
+    const { key } = req.query;
+    if (!key) {
+        res.sendStatus(400);
+    }
+    const results = dataCache.get(key);
+    if (typeof results === 'undefined') {
+        res.sendStatus(400);
+    }
+    dataCache.del(key);
+    res.json(results);
 });
 
 /*

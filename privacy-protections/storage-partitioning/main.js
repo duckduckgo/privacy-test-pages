@@ -215,13 +215,32 @@ async function runTests () {
         };
     });
 
-    function storageHandler () {
-        const results = JSON.parse(window.localStorage.getItem(sessionId));
-        if (results === null) {
+    async function storageHandler () {
+        const flag = window.localStorage.getItem(sessionId);
+        if (flag !== 'test-complete') {
             // Could be a delete event or an event from an unrelated test tab.
             return;
         }
         window.localStorage.removeItem(sessionId);
+
+        // Fetch final results from server
+        console.log(`Fetching final results from server with session id ${sessionId}`);
+        const getURL = new URL('/partitioning/get-results', window.location.origin);
+        getURL.searchParams.set('key', sessionId);
+
+        // Send data to server
+        const resp = await fetch(getURL.href, {
+            method: 'GET',
+            headers: {
+                Accept: 'application/json, text/plain, */*',
+                'Content-Type': 'application/json'
+            }
+        });
+        if (resp.status !== 200) {
+            console.error(`Error fetching final results ${resp.status}.`);
+            return;
+        }
+        const results = JSON.parse(await resp.text());
 
         for (const [id, retrieval] of Object.entries(results)) {
             const testType = id.split(',', 1); // same-site or cross-site

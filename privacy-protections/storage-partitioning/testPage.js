@@ -58,8 +58,8 @@ function readStorageInIframe (sessionId, apiTypes) {
     });
 }
 
-function endTests (sessionId, results) {
-    window.localStorage.setItem(sessionId, JSON.stringify(results));
+function endTests (sessionId) {
+    window.localStorage.setItem(sessionId, 'test-complete');
     statusElement.innerText = "Tests complete. If this window doesn't close itself, close it to return to the results.";
     window.close();
 }
@@ -76,11 +76,10 @@ function waitForInitialization (sessionId) {
     });
 }
 
-function openNextTestPage (testIndex, testIteration, testId, sessionId, results) {
+function openNextTestPage (testIndex, testIteration, testId, sessionId) {
     // Move to the next test configuration
     const nextURL = new URL(window.location.pathname, configurations[testIndex].topOrigin);
     nextURL.searchParams.set('sessionId', sessionId);
-    nextURL.searchParams.set('results', JSON.stringify(results));
     nextURL.searchParams.set('testIndex', testIndex);
     nextURL.searchParams.set('testIteration', testIteration);
     nextURL.searchParams.set('testId', testId);
@@ -88,13 +87,25 @@ function openNextTestPage (testIndex, testIteration, testId, sessionId, results)
 }
 
 function saveTestResults (siteType, testId, sessionId, retrieval) {
-    console.log(`SAVING TEST RESULTS ${siteType}-${testId} with session id ${sessionId}`);
-    console.log(retrieval);
+    console.log(`Posting test results for ${siteType}-${testId} with session id ${sessionId}`);
+    const postURL = new URL('/partitioning/save-results', FIRST_PARTY_HTTPS);
+    postURL.searchParams.set('siteType', siteType);
+    postURL.searchParams.set('testId', testId);
+    postURL.searchParams.set('key', sessionId);
+
+    // Send data to server
+    return fetch(postURL.href, {
+        method: 'POST',
+        headers: {
+            Accept: 'application/json, text/plain, */*',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(retrieval)
+    });
 }
 
 async function runTest () {
     const topURL = new URL(window.location.href);
-    const results = topURL.searchParams.get('results') === null ? {} : JSON.parse(topURL.searchParams.get('results'));
 
     const sessionId = topURL.searchParams.get('sessionId');
     if (sessionId === null) {
@@ -103,7 +114,7 @@ async function runTest () {
     }
 
     if (topURL.searchParams.get('endTests')) {
-        endTests(sessionId, results);
+        endTests(sessionId);
         return;
     }
 
@@ -115,7 +126,7 @@ async function runTest () {
         console.log('testIndex query parameter is null. Waiting for main page to finish initialization.');
         statusElement.innerText = 'waiting for main page to finish initialization.';
         await waitForInitialization(sessionId);
-        openNextTestPage(0, 0, 0, sessionId, results);
+        openNextTestPage(0, 0, 0, sessionId);
         return;
     }
 
@@ -135,8 +146,11 @@ async function runTest () {
 
     const retrieval = await readStorageInIframe(sessionId, configurations[testIndex].apiTypes);
 
-    saveTestResults(configurations[testIndex].siteType, testId, sessionId, retrieval);
-    results[[configurations[testIndex].siteType, testId]] = retrieval;
+    const resp = await saveTestResults(configurations[testIndex].siteType, testId, sessionId, retrieval);
+    if (resp.status !== 200) {
+        console.error('POST request to save data failed', resp);
+        return;
+    }
 
     testIteration += 1;
     if (testIteration >= configurations[testIndex].iterations) {
@@ -151,12 +165,11 @@ async function runTest () {
         const nextURL = new URL(window.location.pathname, FIRST_PARTY_HTTPS);
         nextURL.searchParams.set('endTests', true);
         nextURL.searchParams.set('sessionId', sessionId);
-        nextURL.searchParams.set('results', JSON.stringify(results));
         window.location.href = nextURL.href;
         return;
     }
 
-    openNextTestPage(testIndex, testIteration, testId, sessionId, results);
+    openNextTestPage(testIndex, testIteration, testId, sessionId);
 }
 
 runTest();

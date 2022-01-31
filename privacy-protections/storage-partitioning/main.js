@@ -240,7 +240,7 @@ addUnhideHandler();
 // run tests if button was clicked or…
 runButton.addEventListener('click', () => runTests());
 
-// if url query is '?store' store the data immadiatelly
+// if url query is '?run' run the tests immediately
 if (document.location.search === '?run') {
     runTests();
 }

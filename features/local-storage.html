@@ -1,0 +1,74 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Local Storage & Cookies storing</title>
+</head>
+<body>
+    <h1>Local Storage & Cookies storing</h1>
+    <p></p>
+    <h3>Initial values</h3>
+    <div id='initial'></div>
+    <p>
+      <button id='start'>Start test</button>
+      <button id='cleanup'>Cleanup data</button>
+    </p>
+
+    <h3>Current values</h3>
+    <div id='tests'>
+    </div>
+
+    <script>
+      const startButton = document.querySelector('#start');
+      const cleanupButton = document.querySelector('#cleanup');
+      const initialDiv = document.querySelector('#initial');
+      const testsDiv = document.querySelector('#tests');
+
+      startButton.addEventListener('click', () => startIncrementing());
+      cleanupButton.addEventListener('click', () => cleanup());
+
+      initialDiv.innerHTML = countInfoAsHtml();
+
+      function startIncrementing () {
+          setInterval(() => {
+              tick();
+          }, 500);
+      }
+
+      function getCookie (cookieName) {
+          const name = cookieName + '=';
+          const splitCookies = decodeURIComponent(document.cookie).split(';');
+          for (let i = 0; i < splitCookies.length; i++) {
+              let cookie = splitCookies[i];
+              while (cookie.charAt(0) === ' ') {
+                  cookie = cookie.substring(1);
+              }
+              if (cookie.indexOf(name) === 0) {
+                  return cookie.substring(name.length, cookie.length);
+              }
+          }
+          return '';
+      }
+
+      function tick () {
+          const counter = (parseInt(localStorage.counter) || 0) + 1;
+          localStorage.counter = counter;
+          document.cookie = `counter=${localStorage.counter}`;
+          testsDiv.innerHTML = countInfoAsHtml();
+      }
+
+      function cleanup () {
+          localStorage.removeItem('counter');
+          document.cookie = 'counter=';
+          initialDiv.innerHTML = countInfoAsHtml();
+      }
+
+      function countInfoAsHtml () {
+          return `<p>Storage Counter: ${localStorage.counter}</p><p>Cookie Counter: ${getCookie('counter')}</p>`;
+      }
+    </script>
+  </body>
+</html>

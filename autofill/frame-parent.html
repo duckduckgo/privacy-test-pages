@@ -11,12 +11,15 @@
 <body>
   <p><a href="../index.html">[Home]</a></p>
 
-  <p>We should show the autofill prompts for this iframed form</p>
+  <p>We should show the autofill prompts for these iframed forms (note: it does <em>not</em> work on Android)</p>
 
+  <h2>Same origin iframe</h2>
   <iframe src="./frame-child.html" id="frame-form"></iframe>
+  <h2>Cross origin iframe</h2>
+  <iframe src="https://good.third-party.site/autofill/frame-child.html" id="frame-form-cross-origin"></iframe>
 
   <style>
-    #frame-form {
+    iframe {
       height: 2em;
     }
   </style>

@@ -7,10 +7,8 @@ onconnect = function (e) {
 
     port.onmessage = function (e) {
         if (e.data === 'request') {
-            console.log('request shared worker');
             port.postMessage(data);
         } else {
-            console.log('setting shared worker');
             data = e.data;
         }
     };

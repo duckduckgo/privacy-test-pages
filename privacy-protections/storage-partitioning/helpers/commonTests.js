@@ -207,12 +207,12 @@ const testAPIs = {
                     status: 200
                 });
 
-                return cache.put('/cache-api-response', res);
+                return cache.put('/partition_test/cache-api-response', res);
             });
         },
         retrieve: () => {
             return caches.open('partition_test').then((cache) => {
-                return cache.match('/cache-api-response')
+                return cache.match('/partition_test/cache-api-response')
                     .then(r => r.text());
             });
         },
@@ -270,7 +270,6 @@ const testAPIs = {
                 };
                 bc.postMessage('request');
                 setTimeout(() => {
-                    console.log('reject - bc');
                     reject(new Error(`No BroadcastChannel message received within timeout ${timeout}`));
                 }, timeout);
             });
@@ -303,7 +302,6 @@ const testAPIs = {
                 };
                 worker.port.postMessage('request');
                 setTimeout(() => {
-                    console.log('reject - shared worker');
                     reject(new Error(`No Shared Worker message received within timeout ${timeout}`));
                 }, timeout);
             });

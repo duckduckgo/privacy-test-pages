@@ -42,7 +42,6 @@ const countCache = new NodeCache({ stdTTL: cacheTTL });
 const cacheKey = (key, fileType) => `${key}_${fileType}`;
 
 router.get('/resource', (req, res) => {
-    console.log(req.hostname);
     const { key, fileType } = req.query;
     let count = countCache.get(cacheKey(key, fileType));
     if (typeof count === 'undefined') {
@@ -50,7 +49,6 @@ router.get('/resource', (req, res) => {
     }
     count += 1;
     countCache.set(cacheKey(key, fileType), count);
-    console.log(`Requested: ${req.url} ; Count: ${count}`);
     res.set({
         'Access-Control-Allow-Origin': '*',
         'Cache-Control': 'public, max-age=604800, immutable'
@@ -70,7 +68,6 @@ router.get('/ctr', (req, res) => {
     if (typeof count === 'undefined') {
         count = 0;
     }
-    console.log(`Count checked for ${fileType}, ${key}: ${count}`);
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.send(`${count}`);
 });
@@ -127,8 +124,6 @@ router.options('/save-results', (req, res) => {
 });
 
 router.post('/save-results', (req, res) => {
-    console.log('POST request');
-
     // Add CORS headers
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');

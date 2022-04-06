@@ -144,8 +144,8 @@ async function runTests () {
     // The test tab must be opened before we do any other initialization
     // so the user gesture is preserved, which avoids the pop-up blocker.
     console.log(`Setting ${sessionId} in a same-origin iframe...`);
-    const status = await accessStorageInIframe(window.location.origin, sessionId, 'store');
-    console.log(status);
+    await accessStorageInIframe(window.location.origin, sessionId, 'store');
+    console.log('...storage set.');
 
     const allRetrievals = new DefaultMap(() => {
         return {
@@ -189,7 +189,6 @@ async function runTests () {
                 });
             });
         }
-        console.log(allRetrievals);
         const testResults = validateResults(allRetrievals, sessionId);
         displayResults(allRetrievals, testResults);
         window.removeEventListener('storage', storageHandler);

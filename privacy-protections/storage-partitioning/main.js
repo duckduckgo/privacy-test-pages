@@ -132,8 +132,7 @@ async function runTests () {
     // tab's sessionStorage values, but they are not updated after forking.
     // Thus, if we set sessionStorage after window.open, the value set will not
     // propagate into the new tab's sessionStorage.
-    // The key name must match the name used in commonTests.js.
-    window.sessionStorage.setItem('partition_test', sessionId);
+    testAPIs.sessionStorage.store(sessionId);
 
     // Ideally we'd use noopener here as some browsers (e.g., Firefox) keep tabs that
     // have references to each other in the same "agent cluster", which impacts the

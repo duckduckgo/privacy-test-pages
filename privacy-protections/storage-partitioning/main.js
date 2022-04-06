@@ -33,8 +33,7 @@ function validateResults (allRetrievals, random) {
     for (const apiName of allRetrievals.keys()) {
         const sameSiteValues = allRetrievals.get(apiName)['same-site'];
         const crossSiteValues = allRetrievals.get(apiName)['cross-site'];
-        const reference = allRetrievals.get(apiName).reference;
-        const result = testAPIs[apiName].validate(sameSiteValues, crossSiteValues, reference, random);
+        const result = testAPIs[apiName].validate(sameSiteValues, crossSiteValues, random);
         out.set(apiName, result);
     };
     return out;
@@ -129,16 +128,22 @@ async function runTests () {
     testURL.searchParams.set('sessionId', sessionId);
     testURL.searchParams.set('isLocalTest', isLocalTest);
 
+    // sessionStorage is tab-scoped. window.open seems to fork the current
+    // tab's sessionStorage values, but they are not updated after forking.
+    // Thus, if we set sessionStorage after window.open, the value set will not
+    // propagate into the new tab's sessionStorage.
+    // The key name must match the name used in commonTests.js.
+    window.sessionStorage.setItem('partition_test', sessionId);
+
     // Ideally we'd use noopener here as some browsers (e.g., Firefox) keep tabs that
     // have references to each other in the same "agent cluster", which impacts the
-    // scope of storage. This is why you'll see consistent sessionStorage across tabs
-    // that have references to each other in Firefox. Unfortuantely the test tab can't
+    // scope of storage (in particular sessionStorage). Unfortuantely the test tab can't
     // be closed programatically unless it has an opener reference.
     // See: https://textslashplain.com/2021/02/04/window-close-restrictions/
     window.open(testURL, '_blank');
 
-    // The test tab must be opened before we do any other initialization.
-    // Webkit doesn't propagate user gestures through these async calls.
+    // The test tab must be opened before we do any other initialization
+    // so the user gesture is preserved, which avoids the pop-up blocker.
     console.log(`Setting ${sessionId} in a same-origin iframe...`);
     const status = await accessStorageInIframe(window.location.origin, sessionId, 'store');
     console.log(status);
@@ -147,16 +152,6 @@ async function runTests () {
         return {
             'same-site': [],
             'cross-site': []
-        };
-    });
-
-    console.log('Retrieving reference values from a same-origin iframe...');
-    const reference = await accessStorageInIframe(window.location.origin, sessionId, 'retrieve');
-    console.log(reference);
-    reference.forEach(retrieval => {
-        allRetrievals.get(retrieval.api).reference = {
-            value: retrieval.value,
-            error: retrieval.error
         };
     });
 
@@ -207,6 +202,7 @@ async function runTests () {
     function resendIndicatorIfNotRead () {
         setTimeout(() => {
             if (window.localStorage.getItem(sessionId) !== null) {
+                window.localStorage.removeItem(sessionId);
                 window.localStorage.setItem(sessionId, 'ready');
                 resendIndicatorIfNotRead();
             }

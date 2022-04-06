@@ -36,32 +36,27 @@ const loadSubresource = async (tagName, url) => {
 // document.cookie
 //     same-site: [ { "value": "51c69e1b" }, { "value": "51c69e1b" } ]
 //    cross-site: [ { "value": "fd10f7f5d2cf" }, { "value": "fd10f7f5d2cf" } ]
-function validateStorageAPI (sameSites, crossSites, reference, random) {
+function validateStorageAPI (sameSites, crossSites, random) {
     if (
         (sameSites.every(v => v.error === 'Unsupported')) &&
         (crossSites.every(v => v.error === 'Unsupported'))
     ) {
         return 'unsupported';
-    } else if (
-        (sameSites.every(v => v.error && v.error.endsWith('is deprecated'))) &&
-        (crossSites.every(v => v.error && v.error.endsWith('is deprecated')))
-    ) {
-        return 'unsupported';
     }
 
-    if (reference.value !== random) {
-        if (reference.value === null && typeof reference.error !== 'undefined') {
+    if (sameSites[0].value !== random) {
+        if (sameSites[0].value === null && typeof sameSites[0].error !== 'undefined') {
             return 'error';
         }
         return 'fail';
     }
 
     if (
-        // (!sameSites.length === configurations['same-site'].iterations) ||
-        // (!crossSites.length === configurations['cross-site'].iterations) ||
-        (!sameSites.every(v => v.value === reference.value)) ||
+        (sameSites.length === 0) ||
+        (crossSites.length !== sameSites.length) ||
+        (!sameSites.every(v => v.value === sameSites[0].value)) ||
         (!crossSites.every(v => v.value === crossSites[0].value)) ||
-        (!crossSites.every(v => v.value !== reference.value))
+        (!crossSites.every(v => v.value !== sameSites[0].value))
     ) {
         return 'fail';
     }
@@ -81,6 +76,8 @@ function validateCacheAPI (sameSites, crossSites) {
     ) {
         return 'unsupported';
     } else if (
+        (sameSites.length > 0) &&
+        (crossSites.length === sameSites.length) &&
         (sameSites.every(v => v.value === sameSites[0].value)) &&
         (crossSites.every(v => v.value === crossSites[0].value)) &&
         (crossSites.every(v => v.value === sameSites[0].value + 1))
@@ -105,40 +102,40 @@ const testAPIs = {
             // we want to set 'None' in an iframe for cookie to be accessible to us
             const sameSite = (window !== window.top) ? 'None' : 'Lax';
 
-            document.cookie = `jsdata=${data}; expires= Wed, 21 Aug 2030 20:00:00 UTC; Secure; SameSite=${sameSite}`;
+            document.cookie = `partition_test=${data}; expires= Wed, 21 Aug 2030 20:00:00 UTC; Secure; SameSite=${sameSite}`;
         },
         retrieve: () => {
-            return document.cookie.match(/jsdata=([0-9a-z-]+)/)[1];
+            return document.cookie.match(/partition_test=([0-9a-z-]+)/)[1];
         },
         validate: validateStorageAPI
     },
     localStorage: {
         type: 'storage',
         store: (data) => {
-            localStorage.setItem('data', data);
+            localStorage.setItem('partition_test', data);
         },
         retrieve: () => {
-            return localStorage.getItem('data');
+            return localStorage.getItem('partition_test');
         },
         validate: validateStorageAPI
     },
     sessionStorage: {
         type: 'storage',
         store: (data) => {
-            sessionStorage.setItem('data', data);
+            sessionStorage.setItem('partition_test', data);
         },
         retrieve: () => {
-            return sessionStorage.getItem('data');
+            return sessionStorage.getItem('partition_test');
         },
         validate: validateStorageAPI
     },
     IndexedDB: {
         type: 'storage',
         store: (data) => {
-            return DB('data').then(db => Promise.all([db.deleteAll(), db.put({ id: data })])).then(() => 'OK');
+            return DB('partition_test').then(db => Promise.all([db.deleteAll(), db.put({ id: data })])).then(() => 'OK');
         },
         retrieve: () => {
-            return DB('data').then(db => db.getAll()).then(data => data[0].id);
+            return DB('partition_test').then(db => db.getAll()).then(data => data[0].id);
         },
         validate: validateStorageAPI
     },
@@ -148,12 +145,12 @@ const testAPIs = {
             let res, rej;
             const promise = new Promise((resolve, reject) => { res = resolve; rej = reject; });
 
-            const db = window.openDatabase('data', '1.0', 'data', 2 * 1024 * 1024);
+            const db = window.openDatabase('partition_test', '1.0', 'partition_test', 2 * 1024 * 1024);
 
             db.transaction(tx => {
-                tx.executeSql('CREATE TABLE IF NOT EXISTS data (value)', [], () => {
-                    tx.executeSql('DELETE FROM data;', [], () => {
-                        tx.executeSql('INSERT INTO data (value) VALUES (?)', [data], () => res(), (sql, e) => rej('err - insert ' + e.message));
+                tx.executeSql('CREATE TABLE IF NOT EXISTS partition_test (value)', [], () => {
+                    tx.executeSql('DELETE FROM partition_test;', [], () => {
+                        tx.executeSql('INSERT INTO partition_test (value) VALUES (?)', [data], () => res(), (sql, e) => rej('err - insert ' + e.message));
                     }, (sql, e) => rej('err - delete ' + e.message));
                 }, (sql, e) => rej('err - create ' + e.message));
             });
@@ -167,22 +164,45 @@ const testAPIs = {
             let res, rej;
             const promise = new Promise((resolve, reject) => { res = resolve; rej = reject; });
 
-            const db = window.openDatabase('data', '1.0', 'data', 2 * 1024 * 1024);
+            const db = window.openDatabase('partition_test', '1.0', 'data', 2 * 1024 * 1024);
 
             db.transaction(tx => {
-                tx.executeSql('SELECT * FROM data', [], (tx, d) => {
+                tx.executeSql('SELECT * FROM partition_test', [], (tx, d) => {
                     res(d.rows[0].value);
                 }, (sql, e) => rej('err - select ' + e.message));
             });
 
             return promise;
         },
-        validate: validateStorageAPI
+        validate: (sameSites, crossSites) => {
+            if (
+                (sameSites.every(v => v.error === 'Unsupported')) &&
+                (crossSites.every(v => v.error === 'Unsupported'))
+            ) {
+                return 'unsupported';
+            } else if (
+                (sameSites.every(v => v.error && v.error.endsWith('is deprecated'))) &&
+                (crossSites.every(v => v.error && v.error.endsWith('is deprecated')))
+            ) {
+                return 'unsupported';
+            }
+
+            if (
+                // (!sameSites.length === configurations['same-site'].iterations) ||
+                // (!crossSites.length === configurations['cross-site'].iterations) ||
+                (!sameSites.every(v => v.value === sameSites[0].value)) ||
+                (!crossSites.every(v => v.value === crossSites[0].value)) ||
+                (!crossSites.every(v => v.value !== sameSites[0].value))
+            ) {
+                return 'fail';
+            }
+            return 'pass';
+        }
     },
     'Cache API': {
         type: 'storage',
         store: (data) => {
-            return caches.open('data').then((cache) => {
+            return caches.open('partition_test').then((cache) => {
                 const res = new Response(data, {
                     status: 200
                 });
@@ -191,7 +211,7 @@ const testAPIs = {
             });
         },
         retrieve: () => {
-            return caches.open('data').then((cache) => {
+            return caches.open('partition_test').then((cache) => {
                 return cache.match('/cache-api-response')
                     .then(r => r.text());
             });
@@ -230,7 +250,7 @@ const testAPIs = {
     BroadcastChannel: {
         type: 'communication',
         store: (data) => {
-            const bc = new BroadcastChannel('secret');
+            const bc = new BroadcastChannel('partition_test');
             bc.onmessage = (event) => {
                 if (event.data === 'request') {
                     bc.postMessage(data);
@@ -242,7 +262,7 @@ const testAPIs = {
                 if (!window.BroadcastChannel) {
                     reject(new Error('Unsupported'));
                 }
-                const bc = new BroadcastChannel('secret');
+                const bc = new BroadcastChannel('partition_test');
                 bc.onmessage = (event) => {
                     if (event.data !== 'request') {
                         resolve(event.data);

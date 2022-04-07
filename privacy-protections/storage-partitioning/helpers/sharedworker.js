@@ -1,4 +1,8 @@
-// From: https://github.com/arthuredelstein/privacytests.org/blob/master/testing/out/tests/supercookies_sharedworker.js
+/*
+ * Portions of the code derived from privacytests.org source code (https://github.com/arthuredelstein/privacytests.org)
+ * Copyright 2018 Arthur Edelstein
+ * MIT License (https://mit-license.org/)
+ */
 let data;
 
 // eslint-disable-next-line no-undef

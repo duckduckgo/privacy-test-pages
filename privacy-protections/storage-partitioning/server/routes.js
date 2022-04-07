@@ -1,4 +1,8 @@
-// Inspired by: https://github.com/arthuredelstein/privacytests.org/blob/master/live/caching.js
+/*
+ * Portions of the code derived from privacytests.org source code (https://github.com/arthuredelstein/privacytests.org)
+ * Copyright 2018 Arthur Edelstein
+ * MIT License (https://mit-license.org/)
+ */
 const express = require('express');
 const router = express.Router();
 

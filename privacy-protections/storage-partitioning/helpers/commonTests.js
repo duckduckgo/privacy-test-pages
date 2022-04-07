@@ -1,3 +1,9 @@
+/*
+ * Portions of the code derived from privacytests.org source code (https://github.com/arthuredelstein/privacytests.org)
+ * Copyright 2018 Arthur Edelstein
+ * MIT License (https://mit-license.org/)
+ */
+
 /* exported testAPIs */
 /* globals FIRST_PARTY_HOSTNAME */
 
@@ -259,7 +265,6 @@ const testAPIs = {
         },
         validate: validateStorageAPI
     },
-    // Tests below here are inspired by: https://github.com/arthuredelstein/privacytests.org/
     ServiceWorker: {
         type: 'storage',
         store: async (data) => {

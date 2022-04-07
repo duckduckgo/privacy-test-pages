@@ -110,6 +110,24 @@ router.get('/clear_hsts.png', (req, res) => {
 });
 
 /*
+ * HTTP Cookie Endpoints
+ */
+
+router.get('/reflect-headers', (req, res) => {
+    res.json(req.headers);
+});
+
+router.get('/set-cookie', (req, res) => {
+    const cookieName = req.query.cookieName;
+    const cookieValue = req.query.cookieValue;
+    const cookieHeader = `${cookieName}=${cookieValue}; HTTPOnly; SameSite=None; Secure; Expires= Wed, 21 Aug 2030 20:00:00 UTC`;
+    res.set({
+        'Set-Cookie': cookieHeader
+    });
+    res.send(`<!DOCTYPE html><html><body><pre>set-cookie: ${cookieHeader}</pre></body></html>`);
+});
+
+/*
  * Result caching
  */
 

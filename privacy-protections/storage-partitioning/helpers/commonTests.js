@@ -3,10 +3,11 @@
 
 const timeout = 1000; // ms; used for cross-tab communication APIs
 
-function getURL (path, fileType, key) {
+function getURL (path, params = {}) {
     const url = new URL(`/partitioning/${path}`, window.location.origin);
-    url.searchParams.set('fileType', fileType);
-    url.searchParams.set('key', key);
+    for (const [name, value] of Object.entries(params)) {
+        url.searchParams.set(name, value);
+    };
     return url;
 }
 
@@ -106,6 +107,25 @@ const testAPIs = {
         },
         retrieve: () => {
             return document.cookie.match(/partition_test=([0-9a-z-]+)/)[1];
+        },
+        validate: validateStorageAPI
+    },
+    'HTTP Cookies': {
+        type: 'storage',
+        store: async (data) => {
+            // Request a page that will send an HTTPOnly 'set-cookie' response header storing the provided data.
+            await fetch(getURL('set-cookie', {
+                cookieName: 'partition_test_http',
+                cookieValue: data
+            }));
+        },
+        retrieve: async () => {
+            // Test if we now send a requests with a 'cookie' header containing the secret.
+            const response = await fetch(getURL('reflect-headers'));
+            console.log(response);
+            const cookie = (await response.json()).cookie;
+            console.log(cookie);
+            return cookie ? cookie.match(/partition_test_http=([\w-]+)/)[1] : null;
         },
         validate: validateStorageAPI
     },
@@ -352,15 +372,15 @@ const testAPIs = {
     'Fetch Cache': {
         type: 'cache',
         store: async (data) => {
-            await fetch(getURL('resource', 'fetch', data),
+            await fetch(getURL('resource', { fileType: 'fetch', key: data }),
                 { cache: 'force-cache' }
             );
         },
         retrieve: async (data) => {
-            await fetch(getURL('resource', 'fetch', data),
+            await fetch(getURL('resource', { fileType: 'fetch', key: data }),
                 { cache: 'force-cache' }
             );
-            const countResponse = await fetch(getURL('ctr', 'fetch', data),
+            const countResponse = await fetch(getURL('ctr', { fileType: 'fetch', key: data }),
                 { cache: 'reload' }
             );
             return parseInt((await countResponse.text()).trim());
@@ -372,7 +392,7 @@ const testAPIs = {
         store: (key) => new Promise((resolve, reject) => {
             const req = new XMLHttpRequest();
             req.addEventListener('load', resolve, { once: true });
-            req.open('GET', getURL('resource', 'xhr', key));
+            req.open('GET', getURL('resource', { fileType: 'xhr', key: key }));
             req.setRequestHeader('Cache-Control', 'max-age=604800');
             req.send();
         }),
@@ -381,12 +401,12 @@ const testAPIs = {
             const xhrLoadPromise = new Promise((resolve, reject) => {
                 req.addEventListener('load', resolve, { once: true });
             });
-            req.open('GET', getURL('resource', 'xhr', key));
+            req.open('GET', getURL('resource', { fileType: 'xhr', key: key }));
             req.setRequestHeader('Cache-Control', 'max-age=604800');
             req.send();
             await xhrLoadPromise;
             const countResponse = await fetch(
-                getURL('ctr', 'xhr', key), { cache: 'reload' });
+                getURL('ctr', { fileType: 'xhr', key: key }), { cache: 'reload' });
             return parseInt((await countResponse.text()).trim());
         },
         validate: validateCacheAPI
@@ -397,7 +417,7 @@ const testAPIs = {
             const iframe = document.createElement('iframe');
             document.body.appendChild(iframe);
             iframe.addEventListener('load', () => resolve(key), { once: true });
-            iframe.src = getURL('resource', 'page', key);
+            iframe.src = getURL('resource', { fileType: 'page', key: key });
         }),
         retrieve: async (key) => {
             const iframe = document.createElement('iframe');
@@ -405,11 +425,11 @@ const testAPIs = {
             const iframeLoadPromise = new Promise((resolve, reject) => {
                 iframe.addEventListener('load', resolve, { once: true });
             });
-            const address = getURL('resource', 'page', key);
+            const address = getURL('resource', { fileType: 'page', key: key });
             iframe.src = address;
             await iframeLoadPromise;
             const countResponse = await fetch(
-                getURL('ctr', 'page', key), { cache: 'reload' });
+                getURL('ctr', { fileType: 'page', key: key }), { cache: 'reload' });
             return parseInt((await countResponse.text()).trim());
         },
         validate: validateCacheAPI
@@ -420,7 +440,7 @@ const testAPIs = {
             const img = document.createElement('img');
             document.body.appendChild(img);
             img.addEventListener('load', resolve, { once: true });
-            img.src = getURL('resource', 'image', key);
+            img.src = getURL('resource', { fileType: 'image', key: key });
         }),
         retrieve: async (key) => {
             const img = document.createElement('img');
@@ -428,10 +448,10 @@ const testAPIs = {
             const imgLoadPromise = new Promise((resolve, reject) => {
                 img.addEventListener('load', resolve, { once: true });
             });
-            img.src = getURL('resource', 'image', key);
+            img.src = getURL('resource', { fileType: 'image', key: key });
             await imgLoadPromise;
             const countResponse = await fetch(
-                getURL('ctr', 'image', key), { cache: 'reload' });
+                getURL('ctr', { fileType: 'image', key: key }), { cache: 'reload' });
             return parseInt((await countResponse.text()).trim());
         },
         validate: validateCacheAPI
@@ -445,7 +465,7 @@ const testAPIs = {
             // there isn't a way to do this synchronously.
             await sleepMs(500);
             const response = await fetch(
-                getURL('ctr', 'favicon', key), { cache: 'reload' });
+                getURL('ctr', { filetype: 'favicon', key: key }), { cache: 'reload' });
             const count = parseInt((await response.text()).trim());
             if (count === 0) {
                 throw new Error('No requests received');
@@ -459,19 +479,19 @@ const testAPIs = {
         store: async (key) => {
             const style = document.createElement('style');
             style.type = 'text/css';
-            const fontURI = getURL('resource', 'font', key);
+            const fontURI = getURL('resource', { fileType: 'font', key: key });
             style.innerHTML = `@font-face {font-family: "myFont"; src: url("${fontURI}"); } body { font-family: "myFont" }`;
             document.getElementsByTagName('head')[0].appendChild(style);
         },
         retrieve: async (key) => {
             const style = document.createElement('style');
             style.type = 'text/css';
-            const fontURI = getURL('resource', 'font', key);
+            const fontURI = getURL('resource', { fileType: 'font', key: key });
             style.innerHTML = `@font-face {font-family: "myFont"; src: url("${fontURI}"); } body { font-family: "myFont" }`;
             document.getElementsByTagName('head')[0].appendChild(style);
             await sleepMs(500);
             const response = await fetch(
-                getURL('ctr', 'font', key), { cache: 'reload' });
+                getURL('ctr', { fileType: 'font', key: key }), { cache: 'reload' });
             return parseInt((await response.text()).trim());
         },
         validate: validateCacheAPI
@@ -479,12 +499,12 @@ const testAPIs = {
     'CSS cache': {
         type: 'cache',
         store: async (key) => {
-            const href = getURL('resource', 'css', key);
+            const href = getURL('resource', { fileType: 'css', key: key });
             const head = document.getElementsByTagName('head')[0];
             head.innerHTML += `<link type="text/css" rel="stylesheet" href="${href}">`;
         },
         retrieve: async (key) => {
-            const href = getURL('resource', 'css', key);
+            const href = getURL('resource', { fileType: 'css', key: key });
             const head = document.getElementsByTagName('head')[0];
             head.innerHTML += `<link type="text/css" rel="stylesheet" href="${href}">`;
             const testElement = document.querySelector('#css');
@@ -502,16 +522,16 @@ const testAPIs = {
             //  same-site: [ { "value": "fake_652798686603804" }, { "value": "fake_652798686603804" } ]
             // cross-site: [ { "value": "fake_35491713503664246" }, { "value": "fake_35491713503664246" } ]
             if (
-                (sameSites.every(v => v.value.startsWith('fake_'))) &&
-                (crossSites.every(v => v.value.startsWith('fake_'))) &&
+                (sameSites.every(v => (v.value !== null) && (v.value.startsWith('fake_')))) &&
+                (crossSites.every(v => (v.value !== null) && (v.value.startsWith('fake_')))) &&
                 (sameSites.every(v => v.value === sameSites[0].value)) &&
                 (crossSites.every(v => v.value === crossSites[0].value)) &&
                 (crossSites.every(v => v.value !== sameSites[0].value))
             ) {
                 return 'pass';
             } else if (
-                (sameSites.every(v => v.value.startsWith('fake_'))) &&
-                (crossSites.every(v => v.value.startsWith('fake_'))) &&
+                (sameSites.every(v => (v.value !== null) && (v.value.startsWith('fake_')))) &&
+                (crossSites.every(v => (v.value !== null) && (v.value.startsWith('fake_')))) &&
                 (sameSites.every(v => v.value === sameSites[0].value)) &&
                 (crossSites.every(v => v.value === crossSites[0].value)) &&
                 (crossSites.every(v => v.value === sameSites[0].value))
@@ -526,17 +546,17 @@ const testAPIs = {
         store: async (key) => {
             const link = document.createElement('link');
             link.rel = 'prefetch';
-            link.href = getURL('resource', 'prefetch', key);
+            link.href = getURL('resource', { fileType: 'prefetch', key: key });
             document.getElementsByTagName('head')[0].appendChild(link);
         },
         retrieve: async (key) => {
             const link = document.createElement('link');
             link.rel = 'prefetch';
-            link.href = getURL('resource', 'prefetch', key).href;
+            link.href = getURL('resource', { fileType: 'prefetch', key: key }).href;
             document.getElementsByTagName('head')[0].appendChild(link);
             await sleepMs(500);
             const response = await fetch(
-                getURL('ctr', 'prefetch', key), { cache: 'reload' });
+                getURL('ctr', { fileType: 'prefetch', key: key }), { cache: 'reload' });
             const count = parseInt((await response.text()).trim());
             if (count === 0) {
                 throw new Error('No requests received');

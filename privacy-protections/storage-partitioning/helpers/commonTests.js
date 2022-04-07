@@ -93,19 +93,41 @@ function validateCacheAPI (sameSites, crossSites) {
     return 'error';
 }
 
+// we are using same set of tests for main frame and an iframe
+// we want to set 'Lax' in the main frame for the cookie not to be suspicious
+// we want to set 'None' in an iframe for cookie to be accessible to us
+const sameSite = (window !== window.top) ? 'none' : 'lax';
+
 const testAPIs = {
     'document.cookie': {
         type: 'storage',
         store: (data) => {
-            // we are using same set of tests for main frame and an iframe
-            // we want to set 'Lax' in the main frame for the cookie not to be suspicious
-            // we want to set 'None' in an iframe for cookie to be accessible to us
-            const sameSite = (window !== window.top) ? 'None' : 'Lax';
-
             document.cookie = `partition_test=${data}; expires= Wed, 21 Aug 2030 20:00:00 UTC; Secure; SameSite=${sameSite}`;
         },
         retrieve: () => {
             return document.cookie.match(/partition_test=([0-9a-z-]+)/)[1];
+        },
+        validate: validateStorageAPI
+    },
+    'Cookie Store API': {
+        type: 'storage',
+        store: (data) => {
+            if (!window.cookieStore) {
+                throw new Error('Unsupported');
+            }
+            window.cookieStore.set({
+                name: 'partition_test',
+                value: data,
+                expires: 'Wed, 21 Aug 2030 20:00:00 UTC',
+                sameSite: sameSite
+            });
+        },
+        retrieve: async () => {
+            if (!window.cookieStore) {
+                throw new Error('Unsupported');
+            }
+            const cookie = await window.cookieStore.get('partition_test');
+            return cookie.value;
         },
         validate: validateStorageAPI
     },

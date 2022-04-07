@@ -5,7 +5,7 @@
  */
 
 /* exported testAPIs */
-/* globals FIRST_PARTY_HOSTNAME */
+/* globals FIRST_PARTY_HOSTNAME DB */
 
 const timeout = 1000; // ms; used for cross-tab communication APIs
 

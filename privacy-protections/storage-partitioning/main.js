@@ -1,4 +1,3 @@
-/* globals uuidv4 testAPIs isLocalTest accessStorageInIframe */
 const runButton = document.querySelector('#run');
 const downloadButton = document.querySelector('#download');
 const toggleDetailsButton = document.querySelector('#toggle-details');

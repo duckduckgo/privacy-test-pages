@@ -1,5 +1,3 @@
-/* globals FIRST_PARTY_HTTP FIRST_PARTY_HTTPS THIRD_PARTY_HTTP THIRD_PARTY_HTTPS accessStorageInIframe */
-
 const statusElement = document.querySelector('#status');
 const preElement = document.querySelector('#pre-status');
 

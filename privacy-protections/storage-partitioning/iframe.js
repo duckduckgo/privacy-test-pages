@@ -1,5 +1,3 @@
-/* globals testAPIs */
-
 function storeData (key, apis) {
     return Promise.all(Object.entries(apis).map(([apiName, api]) => {
         try {

@@ -20,7 +20,7 @@ function downloadTheResults () {
     const a = document.createElement('a');
     const url = window.URL.createObjectURL(new Blob([data], { type: 'application/json' }));
     a.href = url;
-    a.download = 'storage-blocking-results.json';
+    a.download = 'storage-partitioning-results.json';
 
     document.body.appendChild(a);
     a.click();

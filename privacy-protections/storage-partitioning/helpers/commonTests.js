@@ -34,6 +34,13 @@ const loadSubresource = async (tagName, url) => {
 // Validates storage APIs which return the value of the token stored in
 // the storage container within each test context. E.g.,
 //
+// When validating results, we want to be as specific as possible.
+// Unexpected combinations of outputs may point to a test issue.
+// * API unsupported --> "unsupported"
+// * An exact set of conditions we expect when partitioned/blocked --> "pass"
+// * An exact set of conditions we expect when unpartitioned/unblocked --> "fail"
+// * Some unknown / unexpected combination of conditions --> "error"
+//
 // document.cookie
 //     same-site: [ { "value": "51c69e1b" }, { "value": "51c69e1b" } ]
 //    cross-site: [ { "value": "fd10f7f5d2cf" }, { "value": "fd10f7f5d2cf" } ]
@@ -43,25 +50,23 @@ function validateStorageAPI (sameSites, crossSites, sessionId) {
         (crossSites.every(v => v.error === 'Unsupported'))
     ) {
         return 'unsupported';
-    }
-
-    if (sameSites[0].value !== sessionId) {
-        if (sameSites[0].value === null && typeof sameSites[0].error !== 'undefined') {
-            return 'error';
-        }
-        return 'fail';
-    }
-
-    if (
-        (sameSites.length === 0) ||
-        (crossSites.length !== sameSites.length) ||
-        (!sameSites.every(v => v.value === sameSites[0].value)) ||
-        (!crossSites.every(v => v.value === crossSites[0].value)) ||
-        (!crossSites.every(v => v.value !== sameSites[0].value))
+    } else if (
+        (sameSites.length > 0) &&
+        (crossSites.length === sameSites.length) &&
+        (sameSites.every(v => v.value === sessionId)) &&
+        (crossSites.every(v => v.value === crossSites[0].value)) &&
+        (crossSites.every(v => v.value !== sessionId))
+    ) {
+        return 'pass';
+    } else if (
+        (sameSites.length > 0) &&
+        (crossSites.length === sameSites.length) &&
+        (sameSites.every(v => v.value === sessionId)) &&
+        (crossSites.every(v => v.value === sessionId))
     ) {
         return 'fail';
     }
-    return 'pass';
+    return 'error';
 }
 
 // Validates the results returned by Cache APIs. These return a count of the
@@ -85,6 +90,8 @@ function validateCacheAPI (sameSites, crossSites) {
     ) {
         return 'pass';
     } else if (
+        (sameSites.length > 0) &&
+        (crossSites.length === sameSites.length) &&
         (sameSites.every(v => v.value === sameSites[0].value)) &&
         (crossSites.every(v => v.value === crossSites[0].value)) &&
         (crossSites.every(v => v.value === sameSites[0].value))

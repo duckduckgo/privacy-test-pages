@@ -7,6 +7,8 @@ const testsDiv = document.querySelector('#tests');
 const testsSummaryDiv = document.querySelector('#tests-summary');
 const testsDetailsElement = document.querySelector('#tests-details');
 
+const storageFrameId = 'storage-frame';
+
 // object that contains results of all tests
 const results = {
     page: 'storage-partitioning',
@@ -28,12 +30,12 @@ function downloadTheResults () {
     a.remove();
 }
 
-function validateResults (allRetrievals, random) {
+function validateResults (allRetrievals, sessionId) {
     const out = new Map();
     for (const apiName of allRetrievals.keys()) {
         const sameSiteValues = allRetrievals.get(apiName)['same-site'];
         const crossSiteValues = allRetrievals.get(apiName)['cross-site'];
-        const result = testAPIs[apiName].validate(sameSiteValues, crossSiteValues, random);
+        const result = testAPIs[apiName].validate(sameSiteValues, crossSiteValues, sessionId);
         out.set(apiName, result);
     };
     return out;
@@ -144,7 +146,7 @@ async function runTests () {
     // The test tab must be opened before we do any other initialization
     // so the user gesture is preserved, which avoids the pop-up blocker.
     console.log(`Setting ${sessionId} in a same-origin iframe...`);
-    await accessStorageInIframe(window.location.origin, sessionId, 'store');
+    await accessStorageInIframe(window.location.origin, sessionId, 'store', [], storageFrameId);
     console.log('...storage set.');
 
     const allRetrievals = new DefaultMap(() => {
@@ -190,8 +192,13 @@ async function runTests () {
             });
         }
         const testResults = validateResults(allRetrievals, sessionId);
-        displayResults(allRetrievals, testResults);
+
+        // Cleanup
+        const iframe = document.getElementById(storageFrameId);
+        iframe.parentNode.removeChild(iframe);
         window.removeEventListener('storage', storageHandler);
+
+        displayResults(allRetrievals, testResults);
     }
     window.addEventListener('storage', storageHandler, false);
 

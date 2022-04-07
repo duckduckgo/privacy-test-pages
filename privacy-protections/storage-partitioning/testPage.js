@@ -59,9 +59,7 @@ function openNextTestPage (testIndex, testIteration, testId, sessionId) {
     nextURL.searchParams.set('testIndex', testIndex);
     nextURL.searchParams.set('testIteration', testIteration);
     nextURL.searchParams.set('testId', testId);
-    setTimeout(() => {
-        window.location.href = nextURL.href;
-    }, 5);
+    window.location.href = nextURL.href;
 }
 
 function saveTestResults (siteType, testId, sessionId, retrieval) {

@@ -10,7 +10,7 @@ const FIRST_PARTY_HTTP = isLocalTest ? `http://${FIRST_PARTY_HOSTNAME}:3000` : `
 const FIRST_PARTY_HTTPS = `https://${FIRST_PARTY_HOSTNAME}`;
 
 // Inject an iframe to retrieve values from test APIs
-function accessStorageInIframe (frameOrigin, sessionId, mode, apiTypes) {
+function accessStorageInIframe (frameOrigin, sessionId, mode, apiTypes = [], frameId) {
     return new Promise((resolve, reject) => {
         // Prepare arguments to pass to iframe
         const iframeURL = new URL('/privacy-protections/storage-partitioning/iframe.html', frameOrigin);
@@ -19,7 +19,7 @@ function accessStorageInIframe (frameOrigin, sessionId, mode, apiTypes) {
         }
         iframeURL.searchParams.set('mode', mode);
         iframeURL.searchParams.set('sessionId', sessionId);
-        if (typeof apiTypes !== 'undefined') {
+        if (apiTypes.length !== 0) {
             iframeURL.searchParams.set('apiTypes', JSON.stringify(apiTypes));
         }
 
@@ -27,6 +27,9 @@ function accessStorageInIframe (frameOrigin, sessionId, mode, apiTypes) {
         iframe.src = iframeURL.href;
         iframe.height = 1;
         iframe.width = 1;
+        if (frameId) {
+            iframe.id = frameId;
+        }
         document.body.appendChild(iframe);
 
         window.addEventListener('message', event => {

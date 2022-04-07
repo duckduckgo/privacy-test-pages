@@ -251,3 +251,13 @@ if (window.location.hostname === 'localhost') {
     warning.innerHTML = '⚠ Test must be accessed via https://first-party.example. See <a href="https://github.com/duckduckgo/privacy-test-pages#how-to-test-it-locally">README.md</a> for setup instructions. ⚠';
     runButton.setAttribute('disabled', '');
 }
+
+// warn the user if loaded over privacy-test-pages.glitch.me
+if (window.location.hostname === 'privacy-test-pages.glitch.me') {
+    const warning = document.getElementById('warning');
+    warning.innerHTML = `⚠ Test must be accessed via ${FIRST_PARTY_HTTPS}. Redirecting you... ⚠`;
+    runButton.setAttribute('disabled', '');
+    setTimeout(() => {
+        window.location.href = new URL(window.location.pathname, FIRST_PARTY_HTTPS).href;
+    }, 2000);
+}

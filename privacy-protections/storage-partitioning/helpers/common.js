@@ -5,7 +5,7 @@ const THIRD_PARTY_HOSTNAME = isLocalTest ? 'third-party.example' : 'good.third-p
 const THIRD_PARTY_HTTP = isLocalTest ? `http://${THIRD_PARTY_HOSTNAME}:3000` : `http://${THIRD_PARTY_HOSTNAME}`;
 const THIRD_PARTY_HTTPS = `https://${THIRD_PARTY_HOSTNAME}:443`;
 
-const FIRST_PARTY_HOSTNAME = isLocalTest ? 'first-party.example' : 'privacy-test-pages.glitch.me';
+const FIRST_PARTY_HOSTNAME = isLocalTest ? 'first-party.example' : 'www.first-party.site';
 const FIRST_PARTY_HTTP = isLocalTest ? `http://${FIRST_PARTY_HOSTNAME}:3000` : `http://${THIRD_PARTY_HOSTNAME}`;
 const FIRST_PARTY_HTTPS = `https://${FIRST_PARTY_HOSTNAME}`;
 

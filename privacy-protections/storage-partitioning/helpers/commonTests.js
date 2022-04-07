@@ -37,7 +37,7 @@ const loadSubresource = async (tagName, url) => {
 // document.cookie
 //     same-site: [ { "value": "51c69e1b" }, { "value": "51c69e1b" } ]
 //    cross-site: [ { "value": "fd10f7f5d2cf" }, { "value": "fd10f7f5d2cf" } ]
-function validateStorageAPI (sameSites, crossSites, random) {
+function validateStorageAPI (sameSites, crossSites, sessionId) {
     if (
         (sameSites.every(v => v.error === 'Unsupported')) &&
         (crossSites.every(v => v.error === 'Unsupported'))
@@ -45,7 +45,7 @@ function validateStorageAPI (sameSites, crossSites, random) {
         return 'unsupported';
     }
 
-    if (sameSites[0].value !== random) {
+    if (sameSites[0].value !== sessionId) {
         if (sameSites[0].value === null && typeof sameSites[0].error !== 'undefined') {
             return 'error';
         }
@@ -106,11 +106,15 @@ const testAPIs = {
             document.cookie = `partition_test=${data}; expires= Wed, 21 Aug 2030 20:00:00 UTC; Secure; SameSite=${sameSite}`;
         },
         retrieve: () => {
-            return document.cookie.match(/partition_test=([0-9a-z-]+)/)[1];
+            const match = document.cookie.match(/partition_test=([0-9a-z-]+)/);
+            if (!match) {
+                return null;
+            }
+            return match[1];
         },
         validate: validateStorageAPI
     },
-    'HTTP Cookies': {
+    'HTTP Cookie': {
         type: 'storage',
         store: async (data) => {
             // Request a page that will send an HTTPOnly 'set-cookie' response header storing the provided data.
@@ -122,9 +126,7 @@ const testAPIs = {
         retrieve: async () => {
             // Test if we now send a requests with a 'cookie' header containing the secret.
             const response = await fetch(getURL('reflect-headers'));
-            console.log(response);
             const cookie = (await response.json()).cookie;
-            console.log(cookie);
             return cookie ? cookie.match(/partition_test_http=([\w-]+)/)[1] : null;
         },
         validate: validateStorageAPI
@@ -147,6 +149,9 @@ const testAPIs = {
                 throw new Error('Unsupported');
             }
             const cookie = await window.cookieStore.get('partition_test');
+            if (!cookie) {
+                return null;
+            }
             return cookie.value;
         },
         validate: validateStorageAPI
@@ -177,7 +182,12 @@ const testAPIs = {
             return DB('partition_test').then(db => Promise.all([db.deleteAll(), db.put({ id: data })])).then(() => 'OK');
         },
         retrieve: () => {
-            return DB('partition_test').then(db => db.getAll()).then(data => data[0].id);
+            return DB('partition_test').then(db => db.getAll()).then(data => {
+                if (!data[0]) {
+                    return null;
+                }
+                return data[0].id;
+            });
         },
         validate: validateStorageAPI
     },
@@ -216,30 +226,7 @@ const testAPIs = {
 
             return promise;
         },
-        validate: (sameSites, crossSites) => {
-            if (
-                (sameSites.every(v => v.error === 'Unsupported')) &&
-                (crossSites.every(v => v.error === 'Unsupported'))
-            ) {
-                return 'unsupported';
-            } else if (
-                (sameSites.every(v => v.error && v.error.endsWith('is deprecated'))) &&
-                (crossSites.every(v => v.error && v.error.endsWith('is deprecated')))
-            ) {
-                return 'unsupported';
-            }
-
-            if (
-                // (!sameSites.length === configurations['same-site'].iterations) ||
-                // (!crossSites.length === configurations['cross-site'].iterations) ||
-                (!sameSites.every(v => v.value === sameSites[0].value)) ||
-                (!crossSites.every(v => v.value === crossSites[0].value)) ||
-                (!crossSites.every(v => v.value !== sameSites[0].value))
-            ) {
-                return 'fail';
-            }
-            return 'pass';
-        }
+        validate: validateStorageAPI
     },
     'Cache API': {
         type: 'storage',
@@ -255,7 +242,12 @@ const testAPIs = {
         retrieve: () => {
             return caches.open('partition_test').then((cache) => {
                 return cache.match('/partition_test/cache-api-response')
-                    .then(r => r.text());
+                    .then(r => {
+                        if (!r) {
+                            return null;
+                        }
+                        return r.text();
+                    });
             });
         },
         validate: validateStorageAPI

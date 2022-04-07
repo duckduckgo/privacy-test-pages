@@ -153,7 +153,7 @@ const testAPIs = {
             window.cookieStore.set({
                 name: 'partition_test',
                 value: data,
-                expires: 'Wed, 21 Aug 2030 20:00:00 UTC',
+                expires: new Date('Wed, 21 Aug 2030 20:00:00 UTC').getTime(),
                 sameSite: sameSite
             });
         },

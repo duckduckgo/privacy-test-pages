@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Query Parameters</title>
+
+  <style>
+    .expected {
+      color: grey;
+      font-size: 14px;
+      margin-top: -10px;
+      margin-bottom: -4px;
+    }
+  </style>
+</head>
+<body>
+  <p><a href="../../">[Home]</a> ↣ <a href="../">[Privacy Protections Tests]</a> ↣ <strong>[Query Parameters]</strong></p>
+  
+  <p>This test page has sample links that use tracking query parameters. When clicking on the sample links the displayed results should be equal to the listed "Expected" value.</P>
+
+  <div id="demo">
+    <p>URLs with Tracking Parameters</p>
+    <ul>
+      <li>
+        <p><a href="/privacy-protections/query-parameters/query.html?utm_source=something&q=other">Link with utm_source and 1 standard parameter</a></p>
+        <p class="expected">Expected: &quot;q=other&quot;</p>
+      </li>
+      <li>
+        <p><a href="/privacy-protections/query-parameters/query.html?utm_source=something&utm_medium=somethingelse">Link with utm_source and utm_medium</a></p>
+        <p class="expected">Expected: &quot;&quot;</p>
+      </li>
+      <li>
+        <p><a href="/privacy-protections/query-parameters/query.html?fbclid=12345&fb_source=someting&u=14">Link with fbclid, fb_source and 1 standard parameter</a></p>
+        <p class="expected">Expected: &quot;u=14&quot;</p>
+      </li>
+      <li>
+        <p><a href="/privacy-protections/query-parameters/query.html?q=something&id=1234">Link which should not be rewritten</a></p>
+        <p class="expected">Expected: &quot;q=something&id=1234&quot;</p>
+      </li>
+    </ul>
+  </div>  
+</body>
+</html>

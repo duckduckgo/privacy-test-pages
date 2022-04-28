@@ -31,7 +31,7 @@
         <p class="expected">Expected: https://www.nytimes.com/2021/09/20/business/jeff-bezos-earth-fund.html</p>
       </li>
       <li>
-        <p><a href="https://www.google.fr/amp/s/www.brookings.edu/research/reforming-global-fossil-fuel-subsidies-how-the-united-states-can-restart-international-cooperation/%3famp">Non Standard TLD (Google Domain)</a></p>
+        <p><a href="https://www.google.fr/amp/s/www.brookings.edu/research/reforming-global-fossil-fuel-subsidies-how-the-united-states-can-restart-international-cooperation/?amp">Non Standard TLD (Google Domain)</a></p>
         <p class="expected">Expected: https://www.brookings.edu/research/reforming-global-fossil-fuel-subsidies-how-the-united-states-can-restart-international-cooperation</p>
       </li>
       <li>
@@ -57,6 +57,22 @@
       <li>
         <p><a href="https://www.independent.co.uk/news/world/americas/us-politics/fauci-dog-tests-congress-letter-b1944407.html?amp">?amp link</a></p>
         <p class="expected">Expected: https://www.independent.co.uk/news/world/americas/us-politics/fauci-dog-tests-congress-letter-b1944407.html</p>
+      </li>
+    </ul>
+
+    <p>False Positive AMP Urls</p>
+    <ul>
+      <li>
+        <p><a href="https://basecamp.com/pricing">basecamp.com</a></p>
+        <p class="expected">Expected: https://basecamp.com/pricing</p>
+      </li>
+      <li>
+        <p><a href="https://daily.bandcamp.com/album-of-the-day/pan-daijing-tissues-review">bandcamp.com</a></p>
+        <p class="expected">Expected: https://daily.bandcamp.com/album-of-the-day/pan-daijing-tissues-review</p>
+      </li>
+      <li>
+        <p><a href="https://amp.dev/about/websites/">amp.dev</a></p>
+        <p class="expected">Expected: https://amp.dev/about/websites/</p>
       </li>
     </ul>
   </div>  

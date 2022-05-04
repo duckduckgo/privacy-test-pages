@@ -16,10 +16,11 @@ self.addEventListener('activate', function (event) {
 
 self.addEventListener('fetch', async (event) => {
     const scope = self.registration.scope;
-    const shortPath = event.request.url.split(scope)[1];
+    const url = new URL(event.request.url);
+    const shortPath = url.href.split(scope)[1];
     if (shortPath) {
         if (shortPath.startsWith('serviceworker-write?')) {
-            data = (new URL(event.request.url)).searchParams.get('data');
+            data = url.searchParams.get('data');
             event.respondWith(new Response(''));
         } else if (shortPath === 'serviceworker-read') {
             event.respondWith(new Response(data));

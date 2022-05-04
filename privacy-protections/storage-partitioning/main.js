@@ -179,7 +179,7 @@ async function runTests () {
             console.error(`Error fetching final results ${resp.status}.`);
             return;
         }
-        const results = JSON.parse(await resp.text());
+        const results = await resp.json();
 
         for (const [id, retrieval] of Object.entries(results)) {
             const testType = id.split(',', 1); // same-site or cross-site

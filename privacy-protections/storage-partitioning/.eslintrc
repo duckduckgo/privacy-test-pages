@@ -1,0 +1,13 @@
+{
+    "globals": {
+        "FIRST_PARTY_HTTP": "readonly",
+        "FIRST_PARTY_HTTPS": "readonly",
+        "THIRD_PARTY_HTTP": "readonly",
+        "THIRD_PARTY_HTTPS": "readonly",
+        "accessStorageInIframe": "readonly",
+        "DB": "readonly",
+        "uuidv4": "readonly",
+        "testAPIs": "readonly",
+        "isLocalTest": "readonly"
+    }
+}

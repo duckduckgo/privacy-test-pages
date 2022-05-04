@@ -7,6 +7,7 @@ const cmd = require('node-cmd');
 const crypto = require('crypto');
 const fs = require('fs');
 const { json } = require('body-parser');
+const https = require('https');
 
 function fullUrl (req) {
     return url.format({
@@ -17,16 +18,36 @@ function fullUrl (req) {
     });
 }
 
-// start server
+// Start the HTTP server. On Glitch the proxy will forward both HTTP and HTTPS
+// traffic to this server.
 const listener = app.listen(port, () => {
-    console.log(`Server listening at port ${listener.address().port}`);
+    console.log(`HTTP Server listening at port ${listener.address().port}`);
 });
+
+// Start HTTPS server for https://first-party.example and https://third-party.example
+// See README.md for setup instructions
+if (fs.existsSync('first-party.example+3.pem') && fs.existsSync('first-party.example+3-key.pem')) {
+    console.log('Running local HTTPS server.');
+    const httpsOptions = {
+        key: fs.readFileSync('first-party.example+3-key.pem'),
+        cert: fs.readFileSync('first-party.example+3.pem')
+    };
+    const httpsListener = https.createServer(httpsOptions, app).listen(443, () => {
+        console.log(`HTTPS server listening on port ${httpsListener.address().port}`);
+    });
+} else {
+    console.log('HTTPS key and certificate not found. Skipping HTTPS server.');
+}
 
 app.use(express.json());
 // Parse post request data as JSON for requests with content-type 'application/csp-report'
 app.use(json({
     type: 'application/csp-report'
 }));
+
+// Import storage partitioning routes
+const partitioningRoutes = require('./privacy-protections/storage-partitioning/server/routes');
+app.use('/partitioning', partitioningRoutes);
 
 // serve all static files
 app.use(express.static('.', {

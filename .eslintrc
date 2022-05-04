@@ -9,5 +9,11 @@
     },
     "env": {
         "browser": true
+    },
+    "parserOptions": {
+        "sourceType": "script",
+        "ecmaFeatures": {
+            "globalReturn": false
+        }
     }
 }

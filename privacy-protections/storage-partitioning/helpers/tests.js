@@ -469,7 +469,7 @@ const testAPIs = {
             // there isn't a way to do this synchronously.
             await sleepMs(500);
             const response = await fetch(
-                getURL('ctr', { filetype: 'favicon', key: key }), { cache: 'reload' });
+                getURL('ctr', { fileType: 'favicon', key: key }), { cache: 'reload' });
             const count = parseInt((await response.text()).trim());
             if (count === 0) {
                 throw new Error('No requests received');

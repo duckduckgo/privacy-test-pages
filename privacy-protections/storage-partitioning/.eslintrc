@@ -1,5 +1,6 @@
 {
     "globals": {
+        "FIRST_PARTY_SITE": "readonly",
         "FIRST_PARTY_HTTP": "readonly",
         "FIRST_PARTY_HTTPS": "readonly",
         "THIRD_PARTY_HTTP": "readonly",

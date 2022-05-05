@@ -1,4 +1,4 @@
-/* exported THIRD_PARTY_HTTP THIRD_PARTY_HTTPS HSTS_FIRST_PARTY FIRST_PARTY_HTTP FIRST_PARTY_HTTPS accessStorageInIframe */
+/* exported THIRD_PARTY_HTTP THIRD_PARTY_HTTPS HSTS_HOSTNAME FIRST_PARTY_HTTP FIRST_PARTY_HTTPS accessStorageInIframe */
 const isLocalTest = window.location.hostname.endsWith('.example');
 
 const THIRD_PARTY_HOSTNAME = isLocalTest ? 'third-party.example' : 'good.third-party.site';
@@ -6,9 +6,10 @@ const THIRD_PARTY_HTTP = isLocalTest ? `http://${THIRD_PARTY_HOSTNAME}:3000` : `
 const THIRD_PARTY_HTTPS = `https://${THIRD_PARTY_HOSTNAME}`;
 
 const FIRST_PARTY_HOSTNAME = isLocalTest ? 'first-party.example' : 'www.first-party.site';
-const HSTS_FIRST_PARTY = isLocalTest ? 'hsts.first-party.example' : 'privacy-test-pages.glitch.me';
 const FIRST_PARTY_HTTP = isLocalTest ? `http://${FIRST_PARTY_HOSTNAME}:3000` : `http://${THIRD_PARTY_HOSTNAME}`;
 const FIRST_PARTY_HTTPS = `https://${FIRST_PARTY_HOSTNAME}`;
+
+const HSTS_HOSTNAME = isLocalTest ? 'hsts.first-party.example' : 'privacy-test-pages.glitch.me';
 
 // Inject an iframe to retrieve values from test APIs
 function accessStorageInIframe (frameOrigin, sessionId, mode, apiTypes = [], frameId) {

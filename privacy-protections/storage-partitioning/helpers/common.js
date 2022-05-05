@@ -1,4 +1,4 @@
-/* exported THIRD_PARTY_HOSTNAME THIRD_PARTY_HTTP THIRD_PARTY_HTTPS FIRST_PARTY_HOSTNAME FIRST_PARTY_HTTP FIRST_PARTY_HTTPS accessStorageInIframe */
+/* exported THIRD_PARTY_HOSTNAME THIRD_PARTY_HTTP THIRD_PARTY_HTTPS FIRST_PARTY_HOSTNAME FIRST_PARTY_SITE FIRST_PARTY_HTTP FIRST_PARTY_HTTPS accessStorageInIframe */
 const isLocalTest = window.location.hostname.endsWith('.example');
 
 const THIRD_PARTY_HOSTNAME = isLocalTest ? 'third-party.example' : 'good.third-party.site';
@@ -6,6 +6,7 @@ const THIRD_PARTY_HTTP = isLocalTest ? `http://${THIRD_PARTY_HOSTNAME}:3000` : `
 const THIRD_PARTY_HTTPS = `https://${THIRD_PARTY_HOSTNAME}`;
 
 const FIRST_PARTY_HOSTNAME = isLocalTest ? 'first-party.example' : 'www.first-party.site';
+const FIRST_PARTY_SITE = isLocalTest ? 'first-party.example' : 'first-party.site'; // eTLD+1
 const FIRST_PARTY_HTTP = isLocalTest ? `http://${FIRST_PARTY_HOSTNAME}:3000` : `http://${THIRD_PARTY_HOSTNAME}`;
 const FIRST_PARTY_HTTPS = `https://${FIRST_PARTY_HOSTNAME}`;
 

@@ -5,7 +5,7 @@
  */
 
 /* exported testAPIs */
-/* globals FIRST_PARTY_SITE DB */
+/* globals HSTS_HOSTNAME DB */
 
 const timeout = 1000; // ms; used for cross-tab communication APIs
 
@@ -573,17 +573,17 @@ const testAPIs = {
         type: 'hsts',
         store: async () => {
             // Clear any current HSTS
-            const clearURL = new URL('/partitioning/clear_hsts.png', `https://hsts.${FIRST_PARTY_SITE}/`);
+            const clearURL = new URL('/partitioning/clear_hsts.png', `https://${HSTS_HOSTNAME}/`);
             await loadSubresource('img', clearURL.href);
 
             // Set HSTS
-            const setURL = new URL('/partitioning/set_hsts.png', `https://hsts.${FIRST_PARTY_SITE}/`);
+            const setURL = new URL('/partitioning/set_hsts.png', `https://${HSTS_HOSTNAME}/`);
             await loadSubresource('img', setURL.href);
         },
         retrieve: async () => {
             // Attempt to retrieve an image over HTTP
             // The retrieval will fail if not upgraded to HTTPS by the browser.
-            const getURL = new URL('/partitioning/get_hsts.png', `http://hsts.${FIRST_PARTY_SITE}/`);
+            const getURL = new URL('/partitioning/get_hsts.png', `http://${HSTS_HOSTNAME}/`);
             const event = await loadSubresource('img', getURL.href);
             if (event.type === 'load') {
                 return 'https';

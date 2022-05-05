@@ -1,4 +1,4 @@
-/* exported THIRD_PARTY_HOSTNAME THIRD_PARTY_HTTP THIRD_PARTY_HTTPS FIRST_PARTY_HOSTNAME FIRST_PARTY_SITE FIRST_PARTY_HTTP FIRST_PARTY_HTTPS accessStorageInIframe */
+/* exported THIRD_PARTY_HTTP THIRD_PARTY_HTTPS FIRST_PARTY_SITE FIRST_PARTY_HTTP FIRST_PARTY_HTTPS accessStorageInIframe */
 const isLocalTest = window.location.hostname.endsWith('.example');
 
 const THIRD_PARTY_HOSTNAME = isLocalTest ? 'third-party.example' : 'good.third-party.site';

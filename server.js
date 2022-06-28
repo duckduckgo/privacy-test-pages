@@ -160,7 +160,7 @@ app.get('/set-cookie', (req, res) => {
     res.set('Access-Control-Allow-Credentials', 'true');
     res.set('Timing-Allow-Origin', '*');
 
-    const expires = new Date((Date.now() + (7 * 24 * 60 * 60 * 1000)));
+    const expires = new Date((Date.now() + (10 * 24 * 60 * 60 * 1000)));
 
     if (!req.query.value) {
         return res.sendStatus(401);

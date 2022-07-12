@@ -6,33 +6,35 @@
   <title>Facebook click to load</title>
 </head>
 <body>
-  <!-- Load the facebook SDK in the recommended way -->
-  <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js?XFBML=false"></script>
+<!-- Load the facebook SDK in the recommended way -->
+<div id="fb-root"></div>
+<script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v14.0" nonce="1SgoaWbh"></script>
 <p><a href="../../">[Home]</a> ↣ <a href="../">[Privacy Protections Tests]</a> ↣ <strong>[Facebook click to load]</strong></p>
 
-<h2> About ClickToLoad Tests</h2>  
-<p>This page embeds the facebook SDK, and several facebook iFrames. It also attempts to create 
-a variety of social elements using the SDK.</P>
+<h2> About ClickToLoad Tests</h2>
+<p>This page embeds the facebook SDK, and several facebook iFrames. It also attempts to create
+a variety of social elements using the SDK.</p>
 
 <p>The page will count how many facebook requests have been sent. In some cases, the browser may start requesting iFrame links, which should be blocked by the extension (but will be counted in the Facebook calls). Calls should not exceed iFrames (and manual verification that those network calls were blocked is a good practice). Once elements are clicked, the count should increase and elements should display (in most cases - this page does not use a valid SDK APP ID, so not all functions work correctly, login in particular.).</p>
 
 <h2> Metrics </h2>
 <div id="facebook_calls"> Facebook Calls: <span id="facebook_call_count">0</span></div>
-<div id="facebook_calls"> Facebook iFrames: <span id="facebook_iFrames">0</span></div>
-<p><button id='download'>Download the result</button></p>
+<div id="facebook_iframes"> Facebook iFrames: <span id="facebook_iFrames">0</span></div>
+<p><button id="download">Download the result</button></p>
 
 <h2> All the social buttons from the SDK </h2>
-<div class="fb-like" data-href="https://developers.facebook.com/docs/plugins/1" data-width="" data-layout="standard" data-action="like" data-size="small" data-share="true"></div>
-<br /><div class="fb-like" data-href="https://developers.facebook.com/docs/plugins/2" data-width="" data-layout="standard" data-action="recommend" data-size="small" data-share="true"></div>
-<br /><div class="fb-save" data-uri="https://developers.facebook.com/docs/plugins/1" data-size="large"></div>
-<br /><div class="fb-share-button" data-href="https://developers.facebook.com/docs/plugins/" data-layout="button_count" data-size="small"><a target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fdevelopers.facebook.com%2Fdocs%2Fplugins%2F&amp;src=sdkpreparse" class="fb-xfbml-parse-ignore">Share</a></div>
+<div class="fb-like" data-href="https://privacy-test-pages.glitch.me/" data-width="" data-layout="standard" data-action="like" data-size="small" data-share="true"></div>
+<br><div class="fb-like" data-href="https://privacy-test-pages.glitch.me/" data-width="" data-layout="standard" data-action="recommend" data-size="small" data-share="true"></div>
+<br><div class="fb-save" data-uri="https://privacy-test-pages.glitch.me/" data-size="small"><p>Save button (appears to be broken in FB docs)</p></div>
+<br><div class="fb-share-button" data-href="https://privacy-test-pages.glitch.me/" data-layout="button_count" data-size="small"><a target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fdevelopers.facebook.com%2Fdocs%2Fplugins%2F&amp;src=sdkpreparse" class="fb-xfbml-parse-ignore">Share</a></div>
 
 <h2> All the social buttons in iFrames </h2>
-<iframe src="https://www.facebook.com/plugins/like.php?href=https%3A%2F%2Fdevelopers.facebook.com%2Fdocs%2Fplugins2%2F&width=450&layout=standard&action=like&size=small&share=true&height=35&appId" width="450" height="35" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>
-<br /><iframe src="https://www.facebook.com/v2.0/plugins/like.php?href=https%3A%2F%2Fdevelopers.facebook.com%2Fdocs%2Fplugins1%2F&width=450&layout=standard&action=like&size=small&share=true&height=35&appId" width="450" height="35" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>
-<br /><iframe src="https://www.facebook.com/plugins/share_button.php?href=https%3A%2F%2Fdevelopers.facebook.com%2Fdocs%2Fplugins%2F&layout=button_count&size=small&width=121&height=20&appId" width="121" height="20" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>
+<iframe src="https://www.facebook.com/plugins/like.php?href=https%3A%2F%2Fprivacy-test-pages.glitch.me%2F&width=450&layout=standard&action=like&size=small&share=true&height=35&appId" width="450" height="35" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>
+<br><iframe src="https://www.facebook.com/plugins/like.php?href=https%3A%2F%2Fprivacy-test-pages.glitch.me%2F&width=450&layout=standard&action=recommend&size=small&share=true&height=35&appId" width="450" height="35" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>
+<p> SAVE button N/A in iframes per FB docs </p>
+<br><div class="fb-group" data-href="https://www.facebook.com/groups/ayearofrunning/" data-width="280" data-show-metadata="true"><blockquote cite="https://www.facebook.com/groups/ayearofrunning/" class="fb-xfbml-parse-ignore">A Year of Running</blockquote></div>
 
-<h2> Login buttons (SDK & custom) </h2>
+<h2> Login buttons (SDK &amp; custom) </h2>
 <p style="color: #9F6000;background-color: #FEEFB3; margin: 10px 22px; padding: 10px; font-size:1.2em;vertical-align:middle;">&#x26A0; Login buttons only work with a valid Facebook developer account. This page is not configured with a real account, so is unlikely to show a proper login button, and the login flow may create errors. For true login testing, use a real FB account and actual pages with login.</p>
 <br /><div class="fb-login-button" data-width="" data-size="large" data-button-type="continue_with" data-layout="default" data-auto-logout-link="false" data-use-continue-as="false"></div>
 <br /><button id="custom-fb-login-button" style="padding:10px; background-color: #00ccff" type="button">Custom Facebook Login</button>
@@ -53,10 +55,10 @@ a variety of social elements using the SDK.</P>
 <br /><iframe src="https://www.facebook.com/plugins/comment_embed.php?href=https%3A%2F%2Fwww.facebook.com%2Fzuck%2Fposts%2F10102577175875681%3Fcomment_id%3D1193531464007751%26reply_comment_id%3D654912701278942&width=560&include_parent=false&height=152&appId" width="560" height="152" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>
 <br /><iframe src="https://www.facebook.com/plugins/post.php?href=https%3A%2F%2Fwww.facebook.com%2F20531316728%2Fposts%2F10154009990506729%2F&width=500&show_text=true&height=292&appId" width="500" height="292" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>
 <br /><iframe src="https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2Ffacebook%2Fvideos%2F10153231379946729%2F&width=500&show_text=false&height=280&appId" width="500" height="280" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" allowFullScreen="true"></iframe>
-<p> Groups don't currently allow iFrame displays, but the documentation still shows this as a valid method of showing groups, so it's included here in case it changes again in the future </p> 
+<p> Groups don't currently allow iFrame displays, but the documentation still shows this as a valid method of showing groups, so it's included here in case it changes again in the future </p>
 <br /><iframe src="https://www.facebook.com/plugins/group.php?href=https%3A%2F%2Fwww.facebook.com%2Fgroups%2Fayearofrunning%2F&width=280&show_social_context=true&show_metadata=false&height=267&appId" width="280" height="267" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"></iframe>
 
-<script src='./main.js'></script>
-  
+<script src="./main.js"></script>
+
 </body>
 </html>

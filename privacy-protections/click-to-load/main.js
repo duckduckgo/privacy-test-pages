@@ -20,7 +20,7 @@ function updateResults () {
         }
     ];
 
-    document.getElementById('facebook_iFrames').innerHTML = fbIFrames;
+    document.getElementById('facebook_iframe_count').innerHTML = fbIFrames;
     document.getElementById('facebook_call_count').innerHTML = facebookCalls;
 }
 

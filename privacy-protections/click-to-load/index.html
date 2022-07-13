@@ -12,14 +12,20 @@
 <p><a href="../../">[Home]</a>↣<a href="../">[Privacy Protections Tests]</a>↣<strong>[Facebook click to load]</strong></p>
 
 <h2>About ClickToLoad Tests</h2>
-<p>This page embeds the Facebook SDK, and several Facebook iFrames. It also attempts to create
-a variety of social elements using the SDK.</p>
+<p>This page embeds the Facebook SDK, embeds several FB buttons (Like, Recommend, Share) directly and in iframes.  It also attempts to create
+a variety of social elements using the SDK directly, and in iFrames.</p>
 
-<p>The page will count how many Facebook requests have been sent. In some cases, the browser may start requesting iFrame links, which should be blocked by the extension (but will be counted in the Facebook calls). Calls should not exceed iFrames (and manual verification that those network calls were blocked is a good practice). Once elements are clicked, the count should increase and elements should display (in most cases - this page does not use a valid SDK APP ID, so not all functions work correctly, login in particular.).</p>
+<p>When protections are enabled, the following should be true:
+    <ul>
+        <li><b>Facebook Resources Loads</b> should show <b>NONE</b></li>
+        <li>Social buttons for SDK and iFrames should be blocked</li>
+        <li>Login buttons should still show (with a placeholder for the first), but will reload the real FB SDK if you click on them, and be replaced with the real FB element</li>
+        <li>All remaining objects &amp; iFrames should be overlaid with a DDG CTL element, explaining that those elements were blocked.  Those elements should be loaded if user clicks on the corresponding button</li>
+    </ul>
+</p>
 
 <h2>Metrics</h2>
-<div>Facebook Calls:<span id="facebook_call_count">-</span></div>
-<div>Facebook iFrames:<span id="facebook_iframe_count">-</span></div>
+<div>Facebook Resources Loads: <span id="facebook_call_count">...</span></div>
 <p><button id="download">Download the result</button></p>
 
 <h2>All the social buttons from the SDK</h2>

@@ -1,5 +1,4 @@
 let facebookCalls = 0;
-let fbIFrames = 0;
 
 // object that contains results of all tests
 const results = {
@@ -13,21 +12,9 @@ function updateResults () {
         {
             id: 'facebookCalls',
             value: facebookCalls
-        },
-        {
-            id: 'fbIFrames',
-            value: fbIFrames
         }
     ];
-
-    document.getElementById('facebook_iFrames').innerHTML = fbIFrames;
-    document.getElementById('facebook_call_count').innerHTML = facebookCalls;
 }
-
-// Find all the iFrames currently on page.
-const frameNodes = document.querySelectorAll('iFrame');
-fbIFrames = frameNodes.length;
-updateResults();
 
 // This initializes the facebook SDK.
 window.fbAsyncInit = function () {
@@ -98,3 +85,7 @@ function downloadTheResults () {
 
 const downloadButton = document.querySelector('#download');
 downloadButton.addEventListener('click', () => downloadTheResults());
+
+window.onload = function () {
+    document.getElementById('facebook_call_count').innerHTML = facebookCalls ? '<span style="color:RED;">DETECTED</span>' : '<span style="color:GREEN;">NONE</span>';
+};

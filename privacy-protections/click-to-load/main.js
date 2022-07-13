@@ -1,4 +1,5 @@
 let facebookCalls = 0;
+let loadsUpdated = false;
 
 // object that contains results of all tests
 const results = {
@@ -64,6 +65,9 @@ function facebookObserver (list, observer) {
     }
 
     updateResults();
+    if (loadsUpdated) {
+        updateLoads();
+    }
 }
 
 const observer = new PerformanceObserver(facebookObserver);
@@ -86,6 +90,11 @@ function downloadTheResults () {
 const downloadButton = document.querySelector('#download');
 downloadButton.addEventListener('click', () => downloadTheResults());
 
-window.onload = function () {
+const updateLoads = function () {
     document.getElementById('facebook_call_count').innerHTML = facebookCalls ? '<span style="color:RED;">DETECTED</span>' : '<span style="color:GREEN;">NONE</span>';
+};
+
+window.onload = function () {
+    updateLoads();
+    loadsUpdated = true;
 };

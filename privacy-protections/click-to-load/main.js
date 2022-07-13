@@ -86,6 +86,6 @@ function downloadTheResults () {
 const downloadButton = document.querySelector('#download');
 downloadButton.addEventListener('click', () => downloadTheResults());
 
-window.onload = function() {
-  document.getElementById('facebook_call_count').innerHTML = facebookCalls ? '<span style="color:RED;">DETECTED</span>' : '<span style="color:GREEN;">NONE</span>';
-}
+window.onload = function () {
+    document.getElementById('facebook_call_count').innerHTML = facebookCalls ? '<span style="color:RED;">DETECTED</span>' : '<span style="color:GREEN;">NONE</span>';
+};

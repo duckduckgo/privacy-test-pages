@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Autofill autoprompt for signin forms</title>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+
+<body>
+<p><a href="../index.html">[Home]</a></p>
+<nav>
+  <ul class="nav">
+    <li><a href="./case-1.html">Case 1</a></li>
+    <li><a href="./case-2.html">Case 2</a></li>
+    <li><a href="./case-3.html">Case 3</a></li>
+    <li><a href="./case-4.html">Case 4</a></li>
+    <li><a href="./case-5.html">Case 5</a></li>
+  </ul>
+</nav>
+
+<p id="demo"></p>
+
+<div class="">
+  <p>Sign in form present on pageload (<b>should prompt automatically</b>).</p>
+
+  <div class="dialog">
+    <form id="click-form" novalidate>
+      <h3>Sign in form</h3>
+      <fieldset>
+        <label for="email">Email</label>
+        <input id="email" type="email">
+        <label for="password">Password</label>
+        <input id="password" type="password">
+        <button type="submit">Sign in</button>
+      </fieldset>
+    </form>
+  </div>
+  <script>
+    const clickForm = document.getElementById('click-form');
+    const button = clickForm?.querySelector('button');
+    const handler = (e) => {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      clickForm.outerHTML = '<h1>Submitted!</h1>';
+    }
+    button?.addEventListener('click', handler, true);
+  </script>
+</div>
+
+</body>
+
+</html>

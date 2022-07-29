@@ -30,8 +30,7 @@
       clickFormButton?.addEventListener('click', (e) => {
           e.preventDefault();
           e.stopImmediatePropagation();
-          // Note that form.submit() does not fire a submit event
-          clickForm.submit();
+          clickForm.innerHTML = '<h1>Done!</h1>';
       }, true);
     </script>
   </div>

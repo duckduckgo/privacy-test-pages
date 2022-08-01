@@ -47,10 +47,11 @@
       const handler = (e) => {
         e.preventDefault();
         e.stopImmediatePropagation();
-        window.location.href = '3-multistep-form.html'
-      }
+        window.location.href = '3-multistep-form.html';
+      };
       button?.addEventListener('click', handler, true);
-    })
+      clickForm?.addEventListener('submit', handler, true);
+    });
   </script>
 </div>
 

@@ -44,8 +44,9 @@
       e.preventDefault();
       e.stopImmediatePropagation();
       clickForm.outerHTML = '<h1>Submitted!</h1>';
-    }
+    };
     button?.addEventListener('click', handler, true);
+    clickForm?.addEventListener('submit', handler, true);
   </script>
 </div>
 

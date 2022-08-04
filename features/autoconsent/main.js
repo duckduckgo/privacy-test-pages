@@ -83,7 +83,7 @@ button.addEventListener('click', (ev) => {
 const acceptButton = document.createElement('button');
 acceptButton.innerText = 'Accept all';
 acceptButton.id = 'accept-all';
-document.getElementById('privacy-test-page-cmp-test').appendChild(button);
+document.getElementById('privacy-test-page-cmp-test').appendChild(acceptButton);
 acceptButton.addEventListener('click', (ev) => {
     ev.target.innerText = 'Accept was clicked!';
     window.results.results.push('accept_button_clicked');

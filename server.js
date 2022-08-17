@@ -109,7 +109,6 @@ app.all('*', (req, res, next) => {
     if (isPayHostname(req)) {
         req.url = joinPath(AD_FLOW, '/pay/', req.path);
         app.handle(req, res);
-        return;
     }
 });
 

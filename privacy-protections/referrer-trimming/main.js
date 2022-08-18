@@ -155,7 +155,11 @@ function runTests () {
         });
     }
 
-    for (const test of tests) {
+    const params = new URL(location.href).searchParams;
+    const paramTestId = params.get('testid');
+    const filteredTests = paramTestId ? tests.filter(test => test.id === paramTestId) : tests;
+
+    for (const test of filteredTests) {
         const li = document.createElement('li');
         li.id = `test-${test.id.replace(' ', '-')}`;
         li.innerHTML = `${test.id} - <span class='value'>…</span>`;
@@ -241,5 +245,5 @@ startButton.addEventListener('click', () => runTests());
 
 // if url query is '?run' start tests imadiatelly
 if (document.location.search.indexOf('?run') === 0) {
-    runTests();
+    setTimeout(() => runTests(), 1000);
 }

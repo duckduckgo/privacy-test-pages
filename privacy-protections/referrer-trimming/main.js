@@ -245,5 +245,5 @@ startButton.addEventListener('click', () => runTests());
 
 // if url query is '?run' start tests imadiatelly
 if (document.location.search.indexOf('?run') === 0) {
-    setTimeout(() => runTests(), 1000);
+    callAfterDelay(runTests);
 }

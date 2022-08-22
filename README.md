@@ -26,10 +26,11 @@ We have couple of test domains, that all resolve to `privacy-test-pages.glitch.m
 - `good.third-party.site` - non-tracking third party, it's not on our blocklist and will not be blocked by our clients
 - `broken.third-party.site` - tracking third party that we can't block (e.g. due to brekage), it's on our blocklist, but it will not be blocked by our clients
 - `bad.third-party.site` - tracking third party that's on our blocklist and our clients will block
-- `search-company.example` - Simulated search provider
-- `ad-company.example` - Simulated ad provider
-- `payment-company.example` - Simulated payment provider
-- `publisher-company.example`- Simulated publisher website
+- `www.search-company.example` - Simulated search provider
+- `convert.ad-company.example` - Simulated ad provider conversion ping
+- `www.ad-company.example` - Simulated ad provider non-conversion ping
+- `www.payment-company.example` - Simulated payment provider
+- `www.publisher-company.example`- Simulated publisher website
 
 ### How to test it locally
 
@@ -46,7 +47,7 @@ Many of the test pages can be visited via `http://localhost`, but browsers somet
 
 If you're using Firefox, you can use a pref to force hostnames to resolve to `127.0.0.1`:
 1. Go to `about:config`
-2. Set `network.dns.localDomains` to `first-party.example,hsts.first-party.example,third-party.example,search-company.example,www.ad-company.example,convert.ad-company.example,publiher-company.example,payment-company.example`.
+2. Set `network.dns.localDomains` to `first-party.example,hsts.first-party.example,third-party.example,www.search-company.example,www.ad-company.example,convert.ad-company.example,www.publisher-company.example,www.payment-company.example`.
 
 If you're testing in a browser other than Firefox, you'll have to edit your OS's hosts file to add the following lines:
 ```

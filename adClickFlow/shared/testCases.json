@@ -1,0 +1,494 @@
+[
+  {
+    "name": "y.js heuristic; no ad_domain param; u3 param included",
+    "steps": [
+      {
+        "name": "Navigate to search page",
+        "action": {
+          "type": "navigate",
+          "url": "https://www.search-company.site/"
+        },
+        "expected": {
+          "url": "https://www.search-company.site/"
+        }
+      },
+      {
+        "name": "Click on [Ad 1]",
+        "action": {
+          "type": "click",
+          "id": "ad-id-1"
+        },
+        "expected": {
+          "url": "https://www.publisher-company.site/product.html?p=12",
+          "requests": [
+            {
+              "url": "https://convert.ad-company.site/convert.js?ad=1",
+              "status": "loaded"
+            },
+            {
+              "url": "https://convert.ad-company.site/ping.gif",
+              "status": "loaded"
+            },
+            {
+              "url": "https://www.ad-company.site/track.js?ad=1",
+              "status": "blocked"
+            },
+            {
+              "url": "https://www.ad-company.site/ping.gif",
+              "status": "parent blocked"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "m.js heuristic; no ad_domain param; dsl param included",
+    "steps": [
+      {
+        "name": "Navigate to search page",
+        "action": {
+          "type": "navigate",
+          "url": "https://www.search-company.site/"
+        },
+        "expected": {
+          "url": "https://www.search-company.site/"
+        }
+      },
+      {
+        "name": "Click on [Ad 2]",
+        "action": {
+          "type": "click",
+          "id": "ad-id-2"
+        },
+        "expected": {
+          "newTab": true,
+          "url": "https://www.publisher-company.site/product.html?p=200",
+          "requests": [
+            {
+              "url": "https://convert.ad-company.site/convert.js?ad=1",
+              "status": "loaded"
+            },
+            {
+              "url": "https://convert.ad-company.site/ping.gif",
+              "status": "loaded"
+            },
+            {
+              "url": "https://www.ad-company.site/track.js?ad=1",
+              "status": "blocked"
+            },
+            {
+              "url": "https://www.ad-company.site/ping.gif",
+              "status": "parent blocked"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "y.js heuristic; no ad_domain param, but missing u3 param",
+    "steps": [
+      {
+        "name": "Navigate to search page",
+        "action": {
+          "type": "navigate",
+          "url": "https://www.search-company.site/"
+        },
+        "expected": {
+          "url": "https://www.search-company.site/"
+        }
+      },
+      {
+        "name": "Click on [Ad 3]",
+        "action": {
+          "type": "click",
+          "id": "ad-id-3"
+        },
+        "expected": {
+          "url": "https://www.publisher-company.site/product.html?p=12",
+          "requests": [
+            {
+              "url": "https://convert.ad-company.site/convert.js?ad=1",
+              "status": "blocked"
+            },
+            {
+              "url": "https://convert.ad-company.site/ping.gif",
+              "status": "parent blocked"
+            },
+            {
+              "url": "https://www.ad-company.site/track.js?ad=1",
+              "status": "blocked"
+            },
+            {
+              "url": "https://www.ad-company.site/ping.gif",
+              "status": "parent blocked"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "m.js heuristic; no ad_domain param, but missing dsl param",
+    "steps": [
+      {
+        "name": "Navigate to search page",
+        "action": {
+          "type": "navigate",
+          "url": "https://www.search-company.site/"
+        },
+        "expected": {
+          "url": "https://www.search-company.site/"
+        }
+      },
+      {
+        "name": "Click on [Ad 4]",
+        "action": {
+          "type": "click",
+          "id": "ad-id-4"
+        },
+        "expected": {
+          "newTab": true,
+          "url": "https://www.publisher-company.site/product.html?p=200",
+          "requests": [
+            {
+              "url": "https://convert.ad-company.site/convert.js?ad=1",
+              "status": "blocked"
+            },
+            {
+              "url": "https://convert.ad-company.site/ping.gif",
+              "status": "parent blocked"
+            },
+            {
+              "url": "https://www.ad-company.site/track.js?ad=1",
+              "status": "blocked"
+            },
+            {
+              "url": "https://www.ad-company.site/ping.gif",
+              "status": "parent blocked"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "y.js heuristic; ad_domain provided, but empty (u3 not needed)",
+    "steps": [
+      {
+        "name": "Navigate to search page",
+        "action": {
+          "type": "navigate",
+          "url": "https://www.search-company.site/"
+        },
+        "expected": {
+          "url": "https://www.search-company.site/"
+        }
+      },
+      {
+        "name": "Click on [Ad 5]",
+        "action": {
+          "type": "click",
+          "id": "ad-id-5"
+        },
+        "expected": {
+          "url": "https://www.publisher-company.site/product.html?p=12",
+          "requests": [
+            {
+              "url": "https://convert.ad-company.site/convert.js?ad=1",
+              "status": "loaded"
+            },
+            {
+              "url": "https://convert.ad-company.site/ping.gif",
+              "status": "loaded"
+            },
+            {
+              "url": "https://www.ad-company.site/track.js?ad=1",
+              "status": "blocked"
+            },
+            {
+              "url": "https://www.ad-company.site/ping.gif",
+              "status": "parent blocked"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "m.js heuristic; ad_domain provided, but empty (dsl not needed)",
+    "steps": [
+      {
+        "name": "Navigate to search page",
+        "action": {
+          "type": "navigate",
+          "url": "https://www.search-company.site/"
+        },
+        "expected": {
+          "url": "https://www.search-company.site/"
+        }
+      },
+      {
+        "name": "Click on [Ad 6]",
+        "action": {
+          "type": "click",
+          "id": "ad-id-6"
+        },
+        "expected": {
+          "newTab": true,
+          "url": "https://www.publisher-company.site/product.html?p=200",
+          "requests": [
+            {
+              "url": "https://convert.ad-company.site/convert.js?ad=1",
+              "status": "loaded"
+            },
+            {
+              "url": "https://convert.ad-company.site/ping.gif",
+              "status": "loaded"
+            },
+            {
+              "url": "https://www.ad-company.site/track.js?ad=1",
+              "status": "blocked"
+            },
+            {
+              "url": "https://www.ad-company.site/ping.gif",
+              "status": "parent blocked"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "y.js ad-company-provided; ad_domain provided (u3 not needed)",
+    "steps": [
+      {
+        "name": "Navigate to search page",
+        "action": {
+          "type": "navigate",
+          "url": "https://www.search-company.site/"
+        },
+        "expected": {
+          "url": "https://www.search-company.site/"
+        }
+      },
+      {
+        "name": "Click on [Ad 7]",
+        "action": {
+          "type": "click",
+          "id": "ad-id-7"
+        },
+        "expected": {
+          "url": "https://www.publisher-company.site/product.html?p=12",
+          "requests": [
+            {
+              "url": "https://convert.ad-company.site/convert.js?ad=1",
+              "status": "loaded"
+            },
+            {
+              "url": "https://convert.ad-company.site/ping.gif",
+              "status": "loaded"
+            },
+            {
+              "url": "https://www.ad-company.site/track.js?ad=1",
+              "status": "blocked"
+            },
+            {
+              "url": "https://www.ad-company.site/ping.gif",
+              "status": "parent blocked"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "m.js ad-company-provided; ad_domain provided (dsl not needed)",
+    "steps": [
+      {
+        "name": "Navigate to search page",
+        "action": {
+          "type": "navigate",
+          "url": "https://www.search-company.site/"
+        },
+        "expected": {
+          "url": "https://www.search-company.site/"
+        }
+      },
+      {
+        "name": "Click on [Ad 8]",
+        "action": {
+          "type": "click",
+          "id": "ad-id-8"
+        },
+        "expected": {
+          "newTab": true,
+          "url": "https://www.publisher-company.site/product.html?p=200",
+          "requests": [
+            {
+              "url": "https://convert.ad-company.site/convert.js?ad=1",
+              "status": "loaded"
+            },
+            {
+              "url": "https://convert.ad-company.site/ping.gif",
+              "status": "loaded"
+            },
+            {
+              "url": "https://www.ad-company.site/track.js?ad=1",
+              "status": "blocked"
+            },
+            {
+              "url": "https://www.ad-company.site/ping.gif",
+              "status": "parent blocked"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Single-site, new-tab, session",
+    "steps": [
+      {
+        "name": "Navigate to search page",
+        "action": {
+          "type": "navigate",
+          "url": "https://www.search-company.site/"
+        },
+        "expected": {
+          "url": "https://www.search-company.site/"
+        }
+      },
+      {
+        "name": "Click on [Ad 1]",
+        "action": {
+          "type": "click-new-tab",
+          "id": "ad-id-1"
+        },
+        "expected": {
+          "newTab": true,
+          "url": "https://www.publisher-company.site/product.html?p=12",
+          "requests": [
+            {
+              "url": "https://convert.ad-company.site/convert.js?ad=1",
+              "status": "loaded"
+            },
+            {
+              "url": "https://convert.ad-company.site/ping.gif",
+              "status": "loaded"
+            },
+            {
+              "url": "https://www.ad-company.site/track.js?ad=1",
+              "status": "blocked"
+            },
+            {
+              "url": "https://www.ad-company.site/ping.gif",
+              "status": "parent blocked"
+            }
+          ]
+        }
+      },
+      {
+        "name": "Buy now",
+        "action": {
+          "type": "click",
+          "id": "buy-now"
+        },
+        "expected": {
+          "url": "https://www.publisher-company.site/checkout.html",
+          "requests": [
+            {
+              "url": "https://convert.ad-company.site/convert.js?ad=1",
+              "status": "loaded"
+            },
+            {
+              "url": "https://convert.ad-company.site/ping.gif",
+              "status": "loaded"
+            },
+            {
+              "url": "https://www.ad-company.site/track.js?ad=1",
+              "status": "blocked"
+            },
+            {
+              "url": "https://www.ad-company.site/ping.gif",
+              "status": "parent blocked"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "name": "Single-site, new-tab, session, variant two",
+    "steps": [
+      {
+        "name": "Navigate to search page",
+        "action": {
+          "type": "navigate",
+          "url": "https://www.search-company.site/"
+        },
+        "expected": {
+          "url": "https://www.search-company.site/"
+        }
+      },
+      {
+        "name": "Click on [Ad 1]",
+        "action": {
+          "type": "click",
+          "id": "ad-id-1"
+        },
+        "expected": {
+          "url": "https://www.publisher-company.site/product.html?p=12",
+          "requests": [
+            {
+              "url": "https://convert.ad-company.site/convert.js?ad=1",
+              "status": "loaded"
+            },
+            {
+              "url": "https://convert.ad-company.site/ping.gif",
+              "status": "loaded"
+            },
+            {
+              "url": "https://www.ad-company.site/track.js?ad=1",
+              "status": "blocked"
+            },
+            {
+              "url": "https://www.ad-company.site/ping.gif",
+              "status": "parent blocked"
+            }
+          ]
+        }
+      },
+      {
+        "name": "Buy now",
+        "action": {
+          "type": "click-new-tab",
+          "id": "buy-now"
+        },
+        "expected": {
+          "newTab": true,
+          "url": "https://www.publisher-company.site/checkout.html",
+          "requests": [
+            {
+              "url": "https://convert.ad-company.site/convert.js?ad=1",
+              "status": "loaded"
+            },
+            {
+              "url": "https://convert.ad-company.site/ping.gif",
+              "status": "loaded"
+            },
+            {
+              "url": "https://www.ad-company.site/track.js?ad=1",
+              "status": "blocked"
+            },
+            {
+              "url": "https://www.ad-company.site/ping.gif",
+              "status": "parent blocked"
+            }
+          ]
+        }
+      }
+    ]
+  }
+]

@@ -26,6 +26,11 @@ We have couple of test domains, that all resolve to `privacy-test-pages.glitch.m
 - `good.third-party.site` - non-tracking third party, it's not on our blocklist and will not be blocked by our clients
 - `broken.third-party.site` - tracking third party that we can't block (e.g. due to brekage), it's on our blocklist, but it will not be blocked by our clients
 - `bad.third-party.site` - tracking third party that's on our blocklist and our clients will block
+- `www.search-company.example` - Simulated search provider
+- `convert.ad-company.example` - Simulated ad provider conversion ping
+- `www.ad-company.example` - Simulated ad provider non-conversion ping
+- `www.payment-company.example` - Simulated payment provider
+- `www.publisher-company.example`- Simulated publisher website
 
 ### How to test it locally
 
@@ -42,11 +47,16 @@ Many of the test pages can be visited via `http://localhost`, but browsers somet
 
 If you're using Firefox, you can use a pref to force hostnames to resolve to `127.0.0.1`:
 1. Go to `about:config`
-2. Set `network.dns.localDomains` to `first-party.example,hsts.first-party.example,third-party.example`.
+2. Set `network.dns.localDomains` to `first-party.example,hsts.first-party.example,third-party.example,www.search-company.example,www.ad-company.example,convert.ad-company.example,www.publisher-company.example,www.payment-company.example`.
 
 If you're testing in a browser other than Firefox, you'll have to edit your OS's hosts file to add the following lines:
 ```
 # Privacy Test Pages (https://github.com/duckduckgo/privacy-test-pages)
+127.0.0.1 www.search-company.example
+127.0.0.1 www.ad-company.example
+127.0.0.1 convert.ad-company.example
+127.0.0.1 www.publisher-company.example
+127.0.0.1 www.payment-company.example
 127.0.0.1 first-party.example
 127.0.0.1 hsts.first-party.example
 127.0.0.1 third-party.example
@@ -68,10 +78,10 @@ mkcert -install
 
 Then, in the root directory of `privacy-test-pages`, run:
 ```
-mkcert first-party.example "*.first-party.example" third-party.example "*.third-party.example"
+mkcert first-party.example "*.first-party.example" third-party.example "*.third-party.example" search-company.example "*.search-company.example" ad-company.example "*.ad-company.example" publisher-company.example "*.publisher-company.example" payment-company.example "*.payment-company.example"
 ```
 
-This will generate two files (`first-party.example+3-key.pem` and `first-party.example+3.pem`) in the root directory. Express will automatically pick these up when you start the server (`node server.js`).
+This will generate two files (`first-party.example+11-key.pem` and `first-party.example+11.pem`) in the root directory. Express will automatically pick these up when you start the server (`node server.js`).
 
 ## How to deploy it?
 

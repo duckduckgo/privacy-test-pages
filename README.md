@@ -26,11 +26,11 @@ We have couple of test domains, that all resolve to `privacy-test-pages.glitch.m
 - `good.third-party.site` - non-tracking third party, it's not on our blocklist and will not be blocked by our clients
 - `broken.third-party.site` - tracking third party that we can't block (e.g. due to brekage), it's on our blocklist, but it will not be blocked by our clients
 - `bad.third-party.site` - tracking third party that's on our blocklist and our clients will block
-- `www.search-company.example` - Simulated search provider
-- `convert.ad-company.example` - Simulated ad provider conversion ping
-- `www.ad-company.example` - Simulated ad provider non-conversion ping
-- `www.payment-company.example` - Simulated payment provider
-- `www.publisher-company.example`- Simulated publisher website
+- `www.search-company.site` - Simulated search provider
+- `convert.ad-company.site` - Simulated ad provider conversion ping
+- `www.ad-company.site` - Simulated ad provider non-conversion ping
+- `www.payment-company.site` - Simulated payment provider
+- `www.publisher-company.site`- Simulated publisher website
 
 ### How to test it locally
 

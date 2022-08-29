@@ -15,7 +15,7 @@ const results = {
 // list of localStorage entries with partial test results that we need to clear at the end of all testing
 const lsEntriesToClear = [];
 
-function generateNavigationTest (url) {
+function generateNavigationTest (url, testid) {
     const key = `referrer-trimming-${url}`;
     lsEntriesToClear.push(key);
     const currentURL = new URL(location.href);
@@ -40,6 +40,10 @@ function generateNavigationTest (url) {
 
         return result;
     } else { // test haven't run yet
+        if (testid) {
+            url += `?testid=${testid}`;
+        }
+
         window.location.href = url;
 
         // let test runner know that it should not run other tests
@@ -81,15 +85,15 @@ function generateFrameTest (url) {
 const tests = [
     {
         id: '1p navigation',
-        run: () => generateNavigationTest('/come-back')
+        run: (testid) => generateNavigationTest('/come-back', testid)
     },
     {
         id: '3p navigation',
-        run: () => generateNavigationTest('https://good.third-party.site/come-back')
+        run: (testid) => generateNavigationTest('https://good.third-party.site/come-back', testid)
     },
     {
         id: '3p tracker navigation',
-        run: () => generateNavigationTest('https://bad.third-party.site/come-back')
+        run: (testid) => generateNavigationTest('https://bad.third-party.site/come-back', testid)
     },
     {
         id: '1p request',
@@ -168,7 +172,7 @@ function runTests () {
         testsDetailsDiv.appendChild(li);
 
         try {
-            const result = test.run();
+            const result = test.run(paramTestId);
 
             if (result === 'stop') {
                 updateSummary();

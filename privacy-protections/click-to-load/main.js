@@ -1,5 +1,5 @@
 let facebookCalls = 0;
-let fbIFrames = 0;
+let pageLoaded = false;
 
 // object that contains results of all tests
 const results = {
@@ -13,21 +13,9 @@ function updateResults () {
         {
             id: 'facebookCalls',
             value: facebookCalls
-        },
-        {
-            id: 'fbIFrames',
-            value: fbIFrames
         }
     ];
-
-    document.getElementById('facebook_iFrames').innerHTML = fbIFrames;
-    document.getElementById('facebook_call_count').innerHTML = facebookCalls;
 }
-
-// Find all the iFrames currently on page.
-const frameNodes = document.querySelectorAll('iFrame');
-fbIFrames = frameNodes.length;
-updateResults();
 
 // This initializes the facebook SDK.
 window.fbAsyncInit = function () {
@@ -77,6 +65,9 @@ function facebookObserver (list, observer) {
     }
 
     updateResults();
+    if (pageLoaded || facebookCalls) {
+        displayLoads();
+    }
 }
 
 const observer = new PerformanceObserver(facebookObserver);
@@ -98,3 +89,12 @@ function downloadTheResults () {
 
 const downloadButton = document.querySelector('#download');
 downloadButton.addEventListener('click', () => downloadTheResults());
+
+function displayLoads () {
+    document.getElementById('facebook_call_count').innerHTML = facebookCalls ? '<span style="color:RED;">DETECTED</span>' : '<span style="color:GREEN;">NONE</span>';
+}
+
+window.addEventListener('load', () => {
+    displayLoads();
+    pageLoaded = true;
+});

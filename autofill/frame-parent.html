@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Email autofill when form is within an iframe</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+
+<body>
+  <p><a href="../index.html">[Home]</a></p>
+
+  <p>We should show the autofill prompts for these iframed forms (note: it does <em>not</em> work on Android)</p>
+
+  <h2>Same origin iframe</h2>
+  <iframe src="./frame-child.html" id="frame-form"></iframe>
+  <h2>Cross origin iframe</h2>
+  <iframe src="https://good.third-party.site/autofill/frame-child.html" id="frame-form-cross-origin"></iframe>
+
+  <style>
+    iframe {
+      height: 2em;
+    }
+  </style>
+
+
+</body>
+
+</html>

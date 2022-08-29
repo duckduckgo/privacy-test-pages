@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Checkout page</title>
+</head>
+<body>
+
+<h1><a href="./" id="home-page">Publisher site</a></h1>
+<h2>Checkout</h2>
+
+<p>Click the link to complete the purchase</p>
+
+<form action="process.html" method="post">
+  <label for="cc-name">Cardholder full Name</label><input name="cc-name" autocomplete="cc-name" id="cc-name" /><br />
+  <label for="cc-exp-month">Card number</label><input name="cc-number" autocomplete="cc-number" id="cc-number" /><br />
+  <label for="cc-exp-month">Month</label><input name="cc-exp-month" autocomplete="cc-exp-month" id="cc-exp-month" /><br />
+  <label for="cc-exp-year">Year</label><input name="cc-exp-year" autocomplete="cc-exp-year" id="cc-exp-year" /><br />
+  <label for="cc-csc">CSC</label><input name="cc-csc" autocomplete="cc-csc" id="cc-csc" /><br />
+  <button id="pay-button">Pay</button>
+</form>
+
+<button id="payment-company">Pay with payment-company!</button>
+
+<script type="module">
+    import { initializeBoilerplate, getPaymentGatewayUrl } from './shared/utils.mjs'
+    initializeBoilerplate();
+
+    const button = document.getElementById('payment-company');
+    button.addEventListener('click', () => {
+      window.location = getPaymentGatewayUrl(globalThis.location.hostname);
+    });
+</script>
+
+</body>
+</html>

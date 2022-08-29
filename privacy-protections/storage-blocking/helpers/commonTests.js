@@ -1,4 +1,5 @@
 /* exported commonTests */
+/* global cookieStore */
 // tests that are common for both main frame and an iframe
 const commonTests = [
     {
@@ -91,6 +92,19 @@ const commonTests = [
                 return cache.match('/cache-api-response')
                     .then(r => r.text());
             });
+        }
+    },
+    {
+        id: 'CookieStore',
+        store: (data) => {
+            return cookieStore.set({
+                name: 'cookiestoredata',
+                value: data,
+                expires: new Date('Wed, 21 Aug 2030 20:00:00 UTC').getTime()
+            });
+        },
+        retrive: async () => {
+            return (await cookieStore.get('cookiestoredata')).value;
         }
     }
 ];

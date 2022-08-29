@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Autofill autoprompt for signin forms</title>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+
+<body>
+<p><a href="../../index.html">[Home]</a></p>
+<nav>
+  <ul class="nav">
+    <li><a href="./1-standard-login-form.html">Form present on pageload</a></li>
+    <li><a href="./2-form-in-modal.html">Form in modal</a></li>
+    <li><a href="./3-multistep-form.html">Multistep login form</a></li>
+    <li><a href="./4-covered-form.html">With dialog covering the form</a></li>
+    <li><a href="./5-form-with-text.html">Form below the fold on mobile but in sidebar on larger screens</a></li>
+  </ul>
+</nav>
+
+<p id="demo"></p>
+<p>Sign in form present below the fold on mobile, but in a sidebar on larger screens (<strong>should prompt automatically only when visible, i.e. on desktop</strong>).</p>
+
+<div class="container">
+  <div class="main">
+    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.  Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. </p>
+    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.  Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. </p>
+
+    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.  Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. </p>
+    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.  Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. </p>
+  </div>
+
+  <div class="sidebar">
+    <form id="click-form" novalidate>
+      <h3>Sign in form</h3>
+      <fieldset>
+        <label for="email">Email</label>
+        <input id="email" type="email">
+        <label for="password">Password</label>
+        <input id="password" type="password">
+        <button type="submit">Sign in</button>
+      </fieldset>
+    </form>
+  </div>
+
+  <script>
+    const clickForm = document.getElementById('click-form');
+    const button = clickForm?.querySelector('button');
+    const handler = (e) => {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      clickForm.outerHTML = '<h1>Submitted!</h1>';
+    };
+    button?.addEventListener('click', handler, true);
+    clickForm?.addEventListener('submit', handler, true);
+  </script>
+</div>
+
+</body>
+
+</html>

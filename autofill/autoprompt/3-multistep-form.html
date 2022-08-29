@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Autofill autoprompt for signin forms</title>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+
+<body>
+<p><a href="../../index.html">[Home]</a></p>
+<nav>
+  <ul class="nav">
+    <li><a href="./1-standard-login-form.html">Form present on pageload</a></li>
+    <li><a href="./2-form-in-modal.html">Form in modal</a></li>
+    <li><a href="./3-multistep-form.html">Multistep login form</a></li>
+    <li><a href="./4-covered-form.html">With dialog covering the form</a></li>
+    <li><a href="./5-form-with-text.html">Form below the fold on mobile but in sidebar on larger screens</a></li>
+  </ul>
+</nav>
+
+<p id="demo"></p>
+
+<div class="dialog">
+  <p>Login form with a multistep flow. It should prompt automatically on first load, then the second field triggers the prompt on tap/click.</p>
+  <form action="/login" id="login">
+    <h2>Log in</h2>
+    <fieldset>
+      <label for="email">Email</label>
+      <input id="email" type="email" required>
+      <button type="button">Continue</button>
+    </fieldset>
+    <fieldset class="password-container" hidden>
+      <label for="password">Password</label>
+      <input id="password" type="password" required>
+      <button type="submit">Log in</button>
+    </fieldset>
+  </form>
+</div>
+
+<script type="module">
+  const continueButton = document.querySelector('button[type=button]');
+  const submitButton = document.querySelector('button[type=submit]');
+  const passwordContainer = document.querySelector('.password-container');
+
+  continueButton.addEventListener('click', () => {
+      if (form.email.validity.valid) {
+          passwordContainer.removeAttribute('hidden');
+          continueButton.setAttribute('hidden', '');
+      }
+  });
+
+  const form = document.forms.login;
+  form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (form.checkValidity()) {
+          setTimeout(() => {
+              form.outerHTML = '<h1>Submitted!</h1>';
+          }, 100);
+      }
+  });
+</script>
+
+</body>
+
+</html>

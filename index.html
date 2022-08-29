@@ -22,6 +22,12 @@
 	<li><a href="./tracker-reporting/1major-via-fetch.html">1 major tracker loaded via fetch</a> <a href="./tracker-reporting/1major-via-fetch.html?delay=5000">[Delay 5s]</a></li>
 </ul>
 
+<h2>Ad attribution flow</h2>
+
+<ul>
+	<li><a href="https://www.search-company.site">Example search ad attribution flow</a></li>
+</ul>
+
 <h2>Browser Features</h2>
 
 <ul>
@@ -37,6 +43,7 @@
 	<li><a href="./features/autoconsent/">Cookie consent</a></li>
 	<li><a href="./features/navigator-interface.html">Navigator Interface</a></li>
 	<li><a href="./features/js-alerts.html">JS alerts</a></li>
+	<li><a href="./features/local-storage.html">Local storage</a></li>
 </ul>
 
 <h2>Security</h2>
@@ -46,6 +53,7 @@
 	<li><a href="./security/spoof-js-page-rewrite.html">URL Spoofing - JS page rewrite</a></li>
 	<li><a href="./security/csp-report/index.html">Leak of extension IDs via CSP</a></li>
 	<li><a href="./security/js-leaks.html">Detect changes to JS objects in global scope</a></li>
+	<li><a href="./security/badware/phishing.html">An example phishing page</a></li>
 </ul>
 
 <h2>Privacy Protections Tests</h2>
@@ -55,6 +63,7 @@
 	<li><a href='./privacy-protections/fingerprinting/'>Fingerprinting</a></li>
 	<li><a href='./privacy-protections/fingerprinting/canvas.html'>Fingerprinting canvas verification</a></li>
 	<li><a href='./privacy-protections/storage-blocking/'>Storage blocking</a></li>
+	<li><a href='./privacy-protections/storage-partitioning/'>Storage partitioning</a></li>
 	<li><a href='./privacy-protections/referrer-trimming/'>Referrer trimming</a></li>
 	<li><a href='./privacy-protections/https-upgrades/'>HTTPS upgrades</a></li>
 	<li><a href='./privacy-protections/https-loop-protection/'>HTTPS upgrade loop protection</a></li>
@@ -68,8 +77,20 @@
 
 <h2>Autofill</h2>
 <ul>
+	<li><a href="./autofill/frame-parent.html">Email autofill when form is within an iframe</a></li>
 	<li><a href="./autofill/modal.html">Email autofill form within self-closing modal</a></li>
 	<li><a href="./autofill/form-submission.html">Form submission detection and autofill</a></li>
+	<li><a href="./autofill/frame-form-submission-parent.html">Form submission detection and autofill within an iframe</a></li>
+  <li>
+		Autoprompt credentials autofill when a login form is front and center
+		<ul>
+			<li><a href="./autofill/autoprompt/1-standard-login-form.html">Form present on pageload</a></li>
+			<li><a href="./autofill/autoprompt/2-form-in-modal.html">Form in modal</a></li>
+			<li><a href="./autofill/autoprompt/3-multistep-form.html">Multistep login form</a></li>
+			<li><a href="./autofill/autoprompt/4-covered-form.html">With dialog covering the form</a></li>
+			<li><a href="./autofill/autoprompt/5-form-with-text.html">Form below the fold on mobile but in sidebar on larger screens</a></li>
+		</ul>
+	</li>
 </ul>
 
 <h2>Other</h2>

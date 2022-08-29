@@ -6,11 +6,5 @@
         "fontList": "writable",
         "codecsList": "writable",
         "webglConstantsList": "writable"
-    },
-    "parserOptions": {
-        "sourceType": "script",
-        "ecmaFeatures": {
-            "globalReturn": false
-        }
-    },
+    }
 }

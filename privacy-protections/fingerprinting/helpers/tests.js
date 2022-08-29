@@ -279,6 +279,29 @@ const tests = [
             return promise;
         }
     },
+    {
+        id: 'navigator.userAgentData',
+        category: 'navigator',
+        getValue: () => ({
+            brands: navigator.userAgentData.brands,
+            mobile: navigator.userAgentData.mobile,
+            platform: navigator.userAgentData.platform
+        })
+    },
+    {
+        id: 'navigator.userAgentData.getHighEntropyValues',
+        category: 'navigator',
+        getValue: () => {
+            return navigator.userAgentData.getHighEntropyValues(['architecture', 'bitness', 'model', 'platformVersion', 'fullVersionList'])
+                .then(obj => ({
+                    architecture: obj.architecture,
+                    bitness: obj.bitness,
+                    model: obj.model,
+                    platformVersion: obj.platformVersion,
+                    fullVersionList: obj.fullVersionList
+                }));
+        }
+    },
 
     // window
     {
@@ -300,6 +323,26 @@ const tests = [
         id: 'window.indexedDB',
         category: 'window',
         getValue: () => Boolean(window.indexedDB)
+    },
+    {
+        id: 'window.screenX',
+        category: 'window',
+        getValue: () => window.screenX
+    },
+    {
+        id: 'window.screenLeft',
+        category: 'window',
+        getValue: () => window.screenLeft
+    },
+    {
+        id: 'window.screenY',
+        category: 'window',
+        getValue: () => window.screenY
+    },
+    {
+        id: 'window.screenTop',
+        category: 'window',
+        getValue: () => window.screenTop
     },
     {
         id: 'window.innerHeight',
@@ -692,6 +735,29 @@ const tests = [
             });
 
             return Promise.all(promises).then(() => result);
+        }
+    },
+    {
+        id: 'navigator.requestMediaKeySystemAccess',
+        category: 'codecs',
+        getValue: () => {
+            const config = {
+                initDataTypes: ['cenc'],
+                videoCapabilities: [{
+                    contentType: 'video/mp4;codecs="avc1.4D401E"'
+                }]
+            };
+            const keys = [
+                'com.widevine.alpha',
+                'com.microsoft.playready', 'com.youtube.playready',
+                'webkit-org.w3.clearkey', 'org.w3.clearkey',
+                'com.adobe.primetime', 'com.adobe.access',
+                'com.apple.fairplay'
+            ];
+
+            return Promise.all(
+                keys.map(key => navigator.requestMediaKeySystemAccess(key, [config]).catch(e => null))
+            ).then(list => list.filter(i => i !== null).map(i => i.keySystem));
         }
     },
 

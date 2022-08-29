@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Publisher site - Home</title>
+</head>
+<body>
+
+<h1><a href="./" id="home-page">Publisher site</a></h1>
+
+<template id="mylisting">
+    <section class="prod">
+        <h3><a href="#" target="_blank"></a></h3>
+        <div class="price"></div>
+    </section>
+</template>
+
+<main></main>
+
+<script type="module">
+    import { products, initializeBoilerplate } from './shared/utils.mjs'
+    initializeBoilerplate();
+
+    const mainElement = document.querySelector('main');
+    const listingTemplate = document.getElementById('mylisting');
+    let productListingId = 1;
+    for (const productId in products) {
+        const product = products[productId];
+        renderListing(productId, product, productListingId);
+        productListingId++
+    }
+
+    function renderListing(productId, product, id) {
+        const listingElement = listingTemplate.content.cloneNode(true);
+        const link = listingElement.querySelector('h3 a');
+        link.href = `./product.html?p=${productId}`;
+        link.textContent = product.name;
+        link.id = `product-link-${id}`;
+        const price = listingElement.querySelector('.price');
+        price.textContent = '$' + product.price.join('.');
+        mainElement.appendChild(listingElement);
+    }
+</script>
+
+</body>
+</html>

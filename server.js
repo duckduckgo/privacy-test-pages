@@ -7,6 +7,7 @@ const cmd = require('node-cmd');
 const crypto = require('crypto');
 const fs = require('fs');
 const { json } = require('body-parser');
+const https = require('https');
 
 function fullUrl (req) {
     return url.format({
@@ -17,16 +18,106 @@ function fullUrl (req) {
     });
 }
 
-// start server
+// Start the HTTP server. On Glitch the proxy will forward both HTTP and HTTPS
+// traffic to this server.
 const listener = app.listen(port, () => {
-    console.log(`Server listening at port ${listener.address().port}`);
+    console.log(`HTTP Server listening at port ${listener.address().port}`);
 });
+
+// Start HTTPS server for https://first-party.example and https://third-party.example
+// See README.md for setup instructions
+if (fs.existsSync('first-party.example+11.pem') && fs.existsSync('first-party.example+11-key.pem')) {
+    console.log('Running local HTTPS server.');
+    const httpsOptions = {
+        key: fs.readFileSync('first-party.example+11-key.pem'),
+        cert: fs.readFileSync('first-party.example+11.pem')
+    };
+    const httpsListener = https.createServer(httpsOptions, app).listen(443, () => {
+        console.log(`HTTPS server listening on port ${httpsListener.address().port}`);
+    });
+} else {
+    console.log('HTTPS key and certificate not found. Skipping HTTPS server.');
+}
 
 app.use(express.json());
 // Parse post request data as JSON for requests with content-type 'application/csp-report'
 app.use(json({
     type: 'application/csp-report'
 }));
+
+// Import storage partitioning routes
+const partitioningRoutes = require('./privacy-protections/storage-partitioning/server/routes');
+app.use('/partitioning', partitioningRoutes);
+
+function joinPath () {
+    return '/' + [...arguments].map(s => s.replace(/^[/]/, '').replace(/[/]$/, '')).join('/');
+}
+
+function isSearchHostname (req) {
+    return req.hostname === 'www.search-company.example' || req.hostname === 'www.search-company.site';
+}
+
+function isAdHostname (req) {
+    return (
+        req.hostname === 'www.ad-company.example' ||
+        req.hostname === 'www.ad-company.site' ||
+        req.hostname === 'convert.ad-company.example' ||
+        req.hostname === 'convert.ad-company.site'
+    );
+}
+
+function isPubHostname (req) {
+    return req.hostname === 'www.publisher-company.example' || req.hostname === 'www.publisher-company.site';
+}
+
+function isPayHostname (req) {
+    return req.hostname === 'www.payment-company.example' || req.hostname === 'www.payment-company.site';
+}
+
+// Handle internal redirects to adClickFlow directories
+app.all('*', (req, res, next) => {
+    const AD_FLOW = '/adClickFlow';
+    if (
+        // If we're not a ad click flow domain ignore.
+        !(isSearchHostname(req) || isAdHostname(req) || isPubHostname(req) || isPayHostname(req)) ||
+        // If we've already passed to the ad dir then ignore.
+        req.path.startsWith(AD_FLOW)
+    ) {
+        next();
+        return;
+    }
+    if (req.path.includes('/shared/')) {
+        req.url = joinPath(AD_FLOW, '/', req.path);
+        app.handle(req, res);
+        return;
+    }
+    if (isSearchHostname(req)) {
+        req.url = joinPath(AD_FLOW, '/serp/', req.path);
+        app.handle(req, res);
+        return;
+    }
+    if (isAdHostname(req)) {
+        req.url = joinPath(AD_FLOW, '/ad/', req.path);
+        app.handle(req, res);
+        return;
+    }
+    if (isPubHostname(req)) {
+        req.url = joinPath(AD_FLOW, '/pub/', req.path);
+        app.handle(req, res);
+        return;
+    }
+    if (isPayHostname(req)) {
+        req.url = joinPath(AD_FLOW, '/pay/', req.path);
+        app.handle(req, res);
+    }
+});
+
+async function adClickFlow () {
+    const adClickFlow = require('./adClickFlow/server/routes');
+    const adClickFlowRoutes = await adClickFlow.init();
+    app.use('/adClickFlow', adClickFlowRoutes);
+}
+adClickFlow();
 
 // serve all static files
 app.use(express.static('.', {
@@ -139,7 +230,7 @@ app.get('/set-cookie', (req, res) => {
     res.set('Access-Control-Allow-Credentials', 'true');
     res.set('Timing-Allow-Origin', '*');
 
-    const expires = new Date((Date.now() + (7 * 24 * 60 * 60 * 1000)));
+    const expires = new Date((Date.now() + (10 * 24 * 60 * 60 * 1000)));
 
     if (!req.query.value) {
         return res.sendStatus(401);

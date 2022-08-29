@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>product page</title>
+</head>
+<body>
+
+<h1><a href="./" id="home-page">Publisher site</a></h1>
+
+<template id="myproduct">
+    <section class="prod">
+        <h2><a href="/checkout.html" id="buy-now-heading"></a></h2>
+        <summary>
+        </summary>
+        <div class="price"></div>
+        <a href="/checkout.html" id="buy-now">Buy now</a>
+    </section>
+</template>
+
+<main></main>
+
+<script type="module" src="index.mjs"></script>
+<script type="module">
+  import { initializeBoilerplate } from './shared/utils.mjs'
+  initializeBoilerplate()
+</script>
+
+</body>
+</html>

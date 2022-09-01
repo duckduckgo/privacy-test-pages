@@ -23,11 +23,11 @@
           "requests": [
             {
               "url": "https://convert.ad-company.site/convert.js?ad=1",
-              "status": "loaded"
+              "status": "blocked"
             },
             {
               "url": "https://convert.ad-company.site/ping.gif",
-              "status": "loaded"
+              "status": "parent blocked"
             },
             {
               "url": "https://www.ad-company.site/track.js?ad=1",
@@ -67,11 +67,11 @@
           "requests": [
             {
               "url": "https://convert.ad-company.site/convert.js?ad=1",
-              "status": "loaded"
+              "status": "blocked"
             },
             {
               "url": "https://convert.ad-company.site/ping.gif",
-              "status": "loaded"
+              "status": "parent blocked"
             },
             {
               "url": "https://www.ad-company.site/track.js?ad=1",
@@ -361,10 +361,10 @@
         }
       },
       {
-        "name": "Click on [Ad 1]",
+        "name": "Click on [Ad 5]",
         "action": {
           "type": "click-new-tab",
-          "id": "ad-id-1"
+          "id": "ad-id-5"
         },
         "expected": {
           "newTab": true,
@@ -433,10 +433,10 @@
         }
       },
       {
-        "name": "Click on [Ad 1]",
+        "name": "Click on [Ad 5]",
         "action": {
           "type": "click",
-          "id": "ad-id-1"
+          "id": "ad-id-5"
         },
         "expected": {
           "url": "https://www.publisher-company.site/product.html?p=12",

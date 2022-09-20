@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width">
-    <title>JS Alerts</title>
+    <title>JS Alerts and Hanging</title>
 </head>
 
 <body>
@@ -22,12 +22,18 @@
     <button onclick="showAlertWithDelay()">Alert With 4s Delay</button>
     <br>
 
-    <p>Recursive JS alerts</P>
+    <p>Recursive JS alerts</p>
     <button onclick="showRecursiveTextPrompt()">Recursive Prompt + Text</button>
     <br>
     <button onclick="showRecursiveDefaultAlert()">Recursive Default Alert</button>
     <br>
     <button onclick="showRecursiveConfirmDialog()">Recursive Confirm Dialog</button>
+    <br>
+
+    <p>JS Hanging</p>
+    <button onclick="endlessLoop()">Start an endless loop</button>
+    <br>
+    <button id="delayedLoopButton" onclick="delayedEndlessLoop()">Start delayed endless loop</button>
     <br>
 
     <script>
@@ -75,6 +81,19 @@
         function showRecursiveDefaultAlert () {
             showDefaultAlert();
             showRecursiveDefaultAlert();
+        }
+
+        function endlessLoop() {
+            while (1);
+        }
+
+        function delayedEndlessLoop() {
+            setTimeout(function () { 
+                document.getElementById("delayedLoopButton").textContent = "Bang!"
+                setTimeout(function () { 
+                    endlessLoop();
+                }, 50);
+            }, 3000);
         }
     </script>
 </body>

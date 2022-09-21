@@ -26,11 +26,16 @@ We have couple of test domains, that all resolve to `privacy-test-pages.glitch.m
 - `good.third-party.site` - non-tracking third party, it's not on our blocklist and will not be blocked by our clients
 - `broken.third-party.site` - tracking third party that we can't block (e.g. due to brekage), it's on our blocklist, but it will not be blocked by our clients
 - `bad.third-party.site` - tracking third party that's on our blocklist and our clients will block
+
+We also have additional test domains that resolve to `ad-attribution-test-pages.glitch.me`, specifically for the Ad Attribution tests hosted [here](https://www.search-company.site):
+
 - `www.search-company.site` - Simulated search provider
 - `convert.ad-company.site` - Simulated ad provider conversion ping
 - `www.ad-company.site` - Simulated ad provider non-conversion ping
 - `www.payment-company.site` - Simulated payment provider
 - `www.publisher-company.site`- Simulated publisher website
+
+The ad attribution test domains resolve to a separate glitch project due to glitch domain limits (i.e., 5 domains per project). Otherwise the projects are identical.
 
 ### How to test it locally
 
@@ -85,4 +90,4 @@ This will generate two files (`first-party.example+11-key.pem` and `first-party.
 
 ## How to deploy it?
 
-After PR is merged test pages are automatically deployed to glitch ([code](https://glitch.com/edit/#!/privacy-test-pages)) and github pages (legacy).
+After PR is merged test pages are automatically deployed to glitch ([privacy-test-pages](https://glitch.com/edit/#!/privacy-test-pages) and [ad-attribution-test-pages](https://glitch.com/edit/#!/ad-attribution-test-pages)) and github pages (legacy).

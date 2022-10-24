@@ -83,14 +83,14 @@
             showRecursiveDefaultAlert();
         }
 
-        function endlessLoop() {
+        function endlessLoop () {
             while (1);
         }
 
-        function delayedEndlessLoop() {
-            setTimeout(function () { 
-                document.getElementById("delayedLoopButton").textContent = "Bang!"
-                setTimeout(function () { 
+        function delayedEndlessLoop () {
+            setTimeout(function () {
+                document.getElementById('delayedLoopButton').textContent = 'Bang!';
+                setTimeout(function () {
                     endlessLoop();
                 }, 50);
             }, 3000);

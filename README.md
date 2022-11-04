@@ -15,6 +15,7 @@ Please note that we are not taking external contributions for new test pages, bu
 ### How to create a new test?
 
 - Templates for both simple and complex tests (Privacy Protections Tests) can be found in the [TEMPLATES](./TEMPLATES) directory.
+- If you are adding new routes to `server.js` consider extracting them to a separate file (see the template [routes.js](./TEMPLATES/complex/server/routes.js) file).
 - Please remember to link new test page from [index.html](./index.html).
 - Once you have a PR with a new page please assign it to one of the AoR DRIs (@kdzwinel, @jonathanKingston).
 

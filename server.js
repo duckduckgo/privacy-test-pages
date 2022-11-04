@@ -170,37 +170,6 @@ wss.on('connection', (ws) => {
     ws.close();
 });
 
-// dummy server sent events
-app.get('/block-me/server-sent-events', (req, res) => {
-    res.set({
-        'Cache-Control': 'no-cache',
-        'Content-Type': 'text/event-stream',
-        'Access-Control-Allow-Origin': '*',
-        'Timing-Allow-Origin': '*'
-    });
-    res.flushHeaders();
-
-    res.write('data: It works 👍\n\n');
-
-    setTimeout(() => {
-        res.end();
-    }, 1000);
-});
-
-// dummy CSP report endopoint
-app.post('/block-me/csp', (req, res) => {
-    res.set('Timing-Allow-Origin', '*');
-    res.set('Server-Timing', 'loaded');
-    return res.sendStatus(200);
-});
-
-// dummy sednBeacon endopoint
-app.post('/block-me/beacon', (req, res) => {
-    res.set('Timing-Allow-Origin', '*');
-    res.set('Server-Timing', 'loaded');
-    return res.sendStatus(204);
-});
-
 // reflects request headers and request url back
 app.get('/reflect-headers', (req, res) => {
     res.set('Access-Control-Allow-Origin', req.headers.origin || '*');
@@ -261,6 +230,9 @@ app.get('/come-back', (req, res) => {
 </body>
 </html>`);
 });
+
+const blockingRoutes = require('./privacy-protections/request-blocking/server/routes');
+app.use('/block-me', blockingRoutes);
 
 const partitioningRoutes = require('./privacy-protections/storage-partitioning/server/routes');
 app.use('/partitioning', partitioningRoutes);

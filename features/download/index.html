@@ -6,7 +6,7 @@
   <title>Download</title>
 </head>
 <body>
-<p><a href="../index.html">[Home]</a></p>
+<p><a href="../../index.html">[Home]</a></p>
 
 <p>Download PDF</p>  
 <ul>
@@ -30,7 +30,7 @@
        link.addEventListener('click', () => {
            const iframe = document.createElement('iframe');
            iframe.style.display = 'none';
-           iframe.src = `./download/${link.dataset.type}`;
+           iframe.src = `./file/${link.dataset.type}`;
            iframeContainer.appendChild(iframe);
        });
    });

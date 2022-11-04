@@ -283,8 +283,9 @@ function retrieveData () {
 
         const li = document.createElement('li');
         li.id = `test-${test.id.replace(' ', '-')}`;
-        li.innerHTML = `${test.id} - <span class='value'>…</span>`;
+        li.innerHTML = `${test.id} - <span class='value'>…</span> <span class='extra'></span>`;
         const valueSpan = li.querySelector('.value');
+        const extraSpan = li.querySelector('.extra');
 
         testsDetailsElement.appendChild(li);
 
@@ -295,7 +296,7 @@ function retrieveData () {
                 result
                     .then(data => {
                         if (Array.isArray(data)) {
-                            valueSpan.innerHTML = `<ul>${data.map(r => `<li>${r.test} - ${r.value} ${r.error ? '(❌ ' + r.error + ')' : ''}</li>`).join('')}</ul>`;
+                            valueSpan.innerHTML = `<ul>${data.map(r => `<li>${r.test} - ${r.value} ${r.error ? '(❌ ' + r.error + ')' : ''} <span class='extra'>${r.extra ? '(' + r.extra + ')' : ''}</span></li>`).join('')}</ul>`;
 
                             data.forEach(item => addTestResult(`${test.id} - ${item.test}`, item.value));
                         } else {
@@ -320,6 +321,18 @@ function retrieveData () {
             failed++;
             valueSpan.innerHTML = `❌ error thrown ("${e.message ? e.message : e}")`;
             addTestResult(test.id, null);
+        }
+
+        if (test.extra) {
+            const result = test.extra();
+
+            if (result instanceof Promise) {
+                result.then(actualResult => {
+                    extraSpan.innerText = actualResult ? `(${actualResult})` : '';
+                });
+            } else if (result) {
+                extraSpan.innerText = `(${result})`;
+            }
         }
     });
 

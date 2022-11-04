@@ -8,7 +8,6 @@ const crypto = require('crypto');
 const fs = require('fs');
 const { json } = require('body-parser');
 const https = require('https');
-const { ALL_CH } = require('./features/client-hints/all-ch');
 
 function fullUrl (req) {
     return url.format({
@@ -335,14 +334,5 @@ app.get('/features/download/:type', (req, res) => {
     }
 });
 
-const ALL_CH_STR = ALL_CH.join(',');
-app.get('/features/client-hints/', (req, res) => {
-    res.set('accept-ch', ALL_CH_STR);
-    fs.readFile('./features/client-hints/main.html', { encoding: 'utf-8' }, (err, contents) => {
-        if (err) {
-            res.statusCode = 500;
-            return res.end('error');
-        }
-        res.end(contents);
-    });
-});
+const chRoutes = require('./features/client-hints/server/routes.js');
+app.use('/features/client-hints', chRoutes);

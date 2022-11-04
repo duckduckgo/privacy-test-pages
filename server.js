@@ -333,3 +333,6 @@ app.get('/features/download/:type', (req, res) => {
         break;
     }
 });
+
+const chRoutes = require('./features/client-hints/server/routes.js');
+app.use('/features/client-hints', chRoutes);

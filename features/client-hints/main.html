@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Client Hints</title>
+</head>
+
+<body>
+  <p><a href="../index.html">[Home]</a></p>
+
+  <p>This site asks browser for all client hints possible via headers and via JS.</p>
+  <p>To test a default set of client hints sent go <a href='https://good.third-party.site/features/client-hints/'>here</a> - this loads the same test, but doesn't send the <code>accept-ch</code> header.</P>
+
+  <h3>Hints received via request headers:</h3>
+  <table id="headers"></table>
+
+  <h3>Hints requested via <code>navigator.userAgentData</code>:</h3>
+  <table id="js"></table>
+
+  <script src="./all-ch.js"></script>
+  <script>
+    /* global ALL_CH, ALL_CH_JS */
+
+    const headerTable = document.getElementById('headers');
+
+    function createRow (name, value, extraHTML) {
+        const tr = document.createElement('tr');
+        const tdName = document.createElement('td');
+        const tdValue = document.createElement('td');
+
+        let valueHTML = null;
+
+        if (typeof value === 'undefined') {
+            valueHTML = '❌ (<i>missing</i>)';
+        } else if (value.length === 0) {
+            valueHTML = '❌ (<i>empty</i>)';
+        }
+
+        tdName.innerText = name;
+        tdValue.innerText = value;
+        if (valueHTML) {
+            tdValue.innerHTML = valueHTML;
+        }
+        if (extraHTML) {
+            const span = document.createElement('span');
+            span.innerHTML = extraHTML;
+            tdValue.appendChild(span);
+        }
+
+        tr.appendChild(tdName);
+        tr.appendChild(tdValue);
+
+        return tr;
+    }
+
+    fetch('/reflect-headers')
+        .then(r => r.json()).then(data => {
+            ALL_CH.forEach(hint => {
+                const value = data.headers && data.headers[hint];
+
+                headerTable.appendChild(createRow(hint, value));
+            });
+
+            Object.keys(data.headers).forEach(header => {
+                if (header.startsWith('sec-ch-') && !ALL_CH.includes(header.toLowerCase())) {
+                    headerTable.appendChild(createRow(header, data.headers[header], '⚠️ <i>(unrequested sec-ch header)'));
+                }
+            });
+        });
+    
+    const jsTable = document.getElementById('js');
+
+    if (navigator.userAgentData) {
+        navigator.userAgentData.getHighEntropyValues(ALL_CH_JS).then(hints => {
+            ALL_CH_JS.forEach(hint => {
+                const value = Array.isArray(hints[hint]) ? JSON.stringify(hints[hint]) : hints[hint];
+
+                jsTable.appendChild(createRow(hint, value));
+            });
+
+            Object.keys(hints).forEach(hint => {
+                if (!ALL_CH_JS.includes(hint)) {
+                    const value = Array.isArray(hints[hint]) ? JSON.stringify(hints[hint]) : hints[hint];
+
+                    jsTable.appendChild(createRow(hint, value, '⚠️ <i>(unrequested hint)'));
+                }
+            });
+        });
+    } else {
+        jsTable.innerHTML = '<tr><td>❌ <i>(`navigator.userAgentData` API not available)</i></td></tr>';
+    }
+  </script>
+
+</body>
+
+</html>

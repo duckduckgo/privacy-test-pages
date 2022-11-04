@@ -10,12 +10,13 @@
 <body>
   <p><a href="../index.html">[Home]</a></p>
 
-  <p>This site asks browser for all client hints possible via headers and via JS.</P>
+  <p>This site asks browser for all client hints possible via headers and via JS.</p>
+  <p>To test a default set of client hints sent go <a href='https://good.third-party.site/features/client-hints/'>here</a> - this loads the same test, but doesn't send the <code>accept-ch</code> header.</P>
 
-  <h3>Hints requested via `accept-ch`:</h3>
+  <h3>Hints received via request headers:</h3>
   <table id="headers"></table>
 
-  <h3>Hints requested via `navigator.userAgentData`:</h3>
+  <h3>Hints requested via <code>navigator.userAgentData</code>:</h3>
   <table id="js"></table>
 
   <script src="./all-ch.js"></script>

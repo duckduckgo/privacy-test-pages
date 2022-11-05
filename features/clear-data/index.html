@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Clear domain data</title>
+</head>
+<body>
+<p><a href="../../index.html">[Home]</a></p>
+  
+<p>This page attempts to clear all storage for this domain.</p>
+<p>Depending on <a href='https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Clear-Site-Data'>Clear-Site-Data</a> header support by your browser this will clear all caches, HttpOnly cookies, client hint preferences etc.</p>
+
+<button id="clear">Clear</button>
+
+<ul id="data"></ul>
+
+<script>
+const storage = [
+    {
+        name: 'localStorage',
+        unit: 'item(s)',
+        check: () => localStorage.length,
+        clear: () => localStorage.clear()
+    },
+    {
+        name: 'sessionStorage',
+        unit: 'item(s)',
+        check: () => sessionStorage.length,
+        clear: () => sessionStorage.clear()
+    },
+    {
+        name: 'indexedDB',
+        unit: 'db(s)',
+        check: () => indexedDB.databases().then(d => d.length),
+        clear: () => indexedDB.databases().then(dbs => dbs.forEach(db => indexedDB.deleteDatabase(db.name)))
+    },
+    {
+        name: 'cookies',
+        unit: 'cookie(s)',
+        check: () => document.cookie.length ? document.cookie.split(';').length : 0,
+        clear: () => {
+            // https://stackoverflow.com/a/27374365
+            document.cookie.split(';').forEach(c => {
+                document.cookie = c.replace(/^ +/, '').replace(/=.*/, '=;expires=' + new Date().toUTCString() + ';path=/');
+            });
+        }
+    },
+    {
+        name: 'CacheStorage',
+        unit: 'item(s)',
+        check: () => caches.keys().then(k => k.length),
+        clear: () => caches.keys().then(keys => Promise.all(keys.map(key => caches.delete(key))))
+    },
+    {
+        name: 'StorageManager',
+        unit: 'byte(s)',
+        check: () => navigator.storage.estimate().then(x => x.usage),
+        clear: () => {}
+    },
+    {
+        name: 'ServiceWorker',
+        unit: 'worker(s)',
+        check: () => navigator.serviceWorker.getRegistrations().then(regs => regs.length),
+        clear: () => navigator.serviceWorker.getRegistrations().then(regs => Promise.all(regs.forEach(r => r.unregister())))
+    }
+];
+
+const ul = document.getElementById('data');
+
+storage.forEach(async test => {
+    const li = document.createElement('li');
+    let result;
+    let icon;
+    let unit = ' ' + test.unit;
+
+    try {
+        result = await test.check();
+        icon = result > 0 ? '📬' : '📭';
+    } catch (e) {
+        result = `${e.message}`;
+        icon = '⚠️';
+        unit = '';
+    }
+
+    li.innerText = `${icon} - ${test.name} - ${result}${unit}`;
+
+    ul.appendChild(li);
+});
+
+const clearButton = document.getElementById('clear');
+
+clearButton.addEventListener('click', async () => {
+    await Promise.all(storage.map(async test => {
+        try {
+            test.clear();
+        } catch (e) {
+            console.log(`Clearing ${test.name} failed - ${e.message}`);
+        }
+    }));
+
+    // load page with Clear-Site-Data header
+    location.href = './clear';
+});
+</script>
+  
+</body>
+</html>

@@ -245,3 +245,6 @@ app.use('/features/download', downloadRoutes);
 
 const chRoutes = require('./features/client-hints/server/routes.js');
 app.use('/features/client-hints', chRoutes);
+
+const clearDataRoutes = require('./features/clear-data/server/routes.js');
+app.use('/features/clear-data', clearDataRoutes);

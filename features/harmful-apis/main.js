@@ -149,11 +149,11 @@ const tests = [
                         'viewport-width': data.headers['viewport-width']
                     };
 
-                    if (Object.values(chData).every(i => i === undefined)) {
+                    if (Object.values(chData).every(i => i === undefined) && !('userAgentData' in navigator)) {
                         return false;
                     }
 
-                    return chData;
+                    return true;
                 });
         }
     },
@@ -203,7 +203,7 @@ const tests = [
         id: 'first-party-sets-api',
         run: () => {
             if (!window.cookieStore) {
-                return '❌ Can\'t be tested - CookieStore not available';
+                throw new Error('❌ Can\'t be tested - CookieStore not available');
             }
 
             return window.cookieStore.set({ name: 'first-party-sets-test', value: 'value' })
@@ -231,7 +231,7 @@ const results = {
 };
 
 function resultToHTML (data) {
-    return ((data === false) ? '❌ API not available' : '✅ API available') + ' (' + JSON.stringify(data, null, 2) + ')';
+    return ((data === false) ? 'API not available' : '🛑 API available');
 }
 
 /**
@@ -274,7 +274,7 @@ function runTests () {
                 result
                     .then(data => {
                         valueSpan.innerHTML = resultToHTML(data);
-                        resultObj.value = data || null;
+                        resultObj.value = Boolean(data);
                     })
                     .catch(e => {
                         failed++;
@@ -283,11 +283,11 @@ function runTests () {
                     });
             } else {
                 valueSpan.innerHTML = resultToHTML(result);
-                resultObj.value = result || null;
+                resultObj.value = Boolean(result);
             }
         } catch (e) {
             failed++;
-            valueSpan.innerHTML = `❌ error thrown ("${e.message ? e.message : e}")`;
+            valueSpan.innerHTML = `⚠️ error thrown ("${e.message ? e.message : e}")`;
         }
 
         all++;

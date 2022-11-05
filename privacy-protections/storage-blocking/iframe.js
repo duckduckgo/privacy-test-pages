@@ -34,7 +34,7 @@ function retrieveData () {
     return Promise.all(commonTests.map(async (test) => {
         try {
             const result = test.retrive();
-            const value = (result instanceof Promise) ? await result : result;
+            const value = await result;
             let extra;
 
             if (test.extra) {

@@ -83,7 +83,7 @@ const tests = [
     {
         id: 'ambientlightsensor-api',
         run: () => {
-            return ('AmbientLightSensorSensor' in window);
+            return ('AmbientLightSensor' in window);
         }
     },
     {
@@ -170,21 +170,9 @@ const tests = [
         }
     },
     {
-        id: 'raw-sockets-api',
-        run: () => {
-            return ('openUDPSocket' in navigator) || ('openTCPSocket' in navigator);
-        }
-    },
-    {
         id: 'idle-detection-api',
         run: () => {
             return ('IdleDetector' in window);
-        }
-    },
-    {
-        id: 'raw-clipboard-api',
-        run: () => {
-            return ('clipboard' in navigator) && ('platform' in navigator.clipboard);
         }
     },
     {

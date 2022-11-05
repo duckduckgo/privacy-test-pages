@@ -39,7 +39,7 @@ function retrieveData () {
 
             if (test.extra) {
                 const extraResult = test.extra();
-                extra = (extraResult instanceof Promise) ? await extraResult : extraResult;
+                extra = await extraResult;
             }
 
             return {

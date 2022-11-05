@@ -31,33 +31,28 @@ function storeData (randomNumber) {
 }
 
 function retrieveData () {
-    return Promise.all(commonTests.map(test => {
+    return Promise.all(commonTests.map(async (test) => {
         try {
             const result = test.retrive();
+            const value = await result;
+            let extra;
 
-            if (result instanceof Promise) {
-                return result
-                    .then(value => ({
-                        test: test.id,
-                        value: value
-                    }))
-                    .catch(e => ({
-                        test: test.id,
-                        value: null,
-                        error: e.message
-                    }));
-            } else {
-                return Promise.resolve({
-                    test: test.id,
-                    value: result
-                });
+            if (test.extra) {
+                const extraResult = test.extra();
+                extra = await extraResult;
             }
+
+            return {
+                test: test.id,
+                value,
+                extra
+            };
         } catch (e) {
-            return Promise.resolve({
+            return {
                 test: test.id,
                 value: null,
                 error: e.message ? e.message : e
-            });
+            };
         }
     }));
 }

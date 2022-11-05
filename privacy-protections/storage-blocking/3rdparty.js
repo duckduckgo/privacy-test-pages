@@ -7,14 +7,22 @@
 (function () {
     const src = document.currentScript.src;
     const trackingDomain = src.indexOf('https://broken.third-party.site/') === 0;
+    const cookieName = trackingDomain ? 'tptdata' : 'tpsdata';
 
     commonTests.push({
         id: `JS cookie (3rd party ${trackingDomain ? 'tracking' : 'safe'} script)`,
         store: (data) => {
-            document.cookie = `tp${trackingDomain ? 't' : 's'}data=${data}; expires= Wed, 21 Aug 2030 20:00:00 UTC;`;
+            document.cookie = `${cookieName}=${data}; expires= Wed, 21 Aug 2030 20:00:00 UTC;`;
         },
         retrive: () => {
             return trackingDomain ? document.cookie.match(/tptdata=([0-9]+)/)[1] : document.cookie.match(/tpsdata=([0-9]+)/)[1];
+        },
+        extra: () => {
+            if (window.cookieStore) {
+                return window.cookieStore.get(cookieName).then(cookie => {
+                    return 'expires in ' + ((cookie.expires - Date.now()) / (1000 * 60 * 60 * 24)).toFixed(2) + ' days';
+                });
+            }
         }
     });
 })();

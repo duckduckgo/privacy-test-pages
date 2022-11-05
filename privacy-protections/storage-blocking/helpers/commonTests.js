@@ -14,6 +14,13 @@ const commonTests = [
         },
         retrive: () => {
             return document.cookie.match(/jsdata=([0-9]+)/)[1];
+        },
+        extra: () => {
+            if (window.cookieStore) {
+                return cookieStore.get('jsdata').then(cookie => {
+                    return 'expires in ' + ((cookie.expires - Date.now()) / (1000 * 60 * 60 * 24)).toFixed(2) + ' days';
+                });
+            }
         }
     },
     {
@@ -105,6 +112,13 @@ const commonTests = [
         },
         retrive: async () => {
             return (await cookieStore.get('cookiestoredata')).value;
+        },
+        extra: () => {
+            if (window.cookieStore) {
+                return cookieStore.get('cookiestoredata').then(cookie => {
+                    return 'expires in ' + ((cookie.expires - Date.now()) / (1000 * 60 * 60 * 24)).toFixed(2) + ' days';
+                });
+            }
         }
     }
 ];

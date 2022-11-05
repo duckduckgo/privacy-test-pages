@@ -214,6 +214,12 @@ const tests = [
                     return ('sameParty' in cookie);
                 });
         }
+    },
+    {
+        id: 'fledge',
+        run: () => {
+            return ('joinAdInterestGroup' in navigator) || ('runAdAuction' in navigator);
+        }
     }
 ];
 

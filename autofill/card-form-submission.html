@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Card form submission detection and autofill</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+
+<body>
+  <p><a href="../index.html">[Home]</a></p>
+
+  <p id="demo"></p>
+
+  <div class="">
+    <p>Submitting this form should prompt to save a card</p>
+
+    <form id="click-form" novalidate action="/autofill/card-form-submission.html">
+      <h3>Card form with click handler</h3>
+      <fieldset>
+        <label for="card_number">Card Number</label>
+        <input id="card_number" type="text">
+
+        <label for="month">Month</label>
+        <input id="month" type="text">
+
+        <label for="year">Year</label>
+        <input id="year" type="text">
+
+        <label for="cvv">cvv</label>
+        <input id="cvv" type="text">
+        
+        <button type="submit">Save</button>
+      </fieldset>
+    </form>
+    <script>
+      const clickForm = document.getElementById('click-form');
+      const clickFormButton = clickForm.querySelector('button');
+      clickFormButton?.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          // Note that form.submit() does not fire a submit event
+          clickForm.submit();
+      }, true);
+    </script>
+</body>

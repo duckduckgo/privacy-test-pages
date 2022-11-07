@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Address form submission detection and autofill</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+
+<body>
+  <p><a href="../index.html">[Home]</a></p>
+
+  <p id="demo"></p>
+
+  <div class="">
+    <p>Submitting this form should prompt to save an address identification.</p>
+
+    <form id="click-form" novalidate action="/autofill/address-form-submission.html">
+      <h3>Address form with click handler</h3>
+      <fieldset>
+        <label for="given_name">Given Name</label>
+        <input id="given_name" type="text">
+
+        <label for="last_name">Last Name</label>
+        <input id="last_name" type="text">
+
+        <label for="address_1">Address</label>
+        <input id="address_1" type="text">
+
+        <label for="address_2">Apartment, suite, etc</label>
+        <input id="address_2" type="text">
+
+        <label for="city">City</label>
+        <input id="city" type="text">
+
+        <label for="postal">Postal/Zip Code</label>
+        <input id="postal" type="text">
+
+        <label for="phone">Phone</label>
+        <input id="phone" type="tel">
+
+        
+        <button type="submit">Save</button>
+      </fieldset>
+    </form>
+    <script>
+      const clickForm = document.getElementById('click-form');
+      const clickFormButton = clickForm.querySelector('button');
+      clickFormButton?.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          // Note that form.submit() does not fire a submit event
+          clickForm.submit();
+      }, true);
+    </script>
+</body>

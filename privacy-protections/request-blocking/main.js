@@ -383,6 +383,33 @@ const tests = [
     },
     {
         category: 'other',
+        id: 'iframe-fetch-depth-2',
+        description: 'Try requesting data from two frames deep (iframe within an iframe).',
+        html: `<iframe src='./middleframe.html?${random}' style='width:100px' id='html-iframe-depth-2-fetch-test'></iframe>`,
+        checkAsync: (callback) => {
+            const item = document.querySelector('#html-iframe-depth-2-fetch-test');
+
+            if (item) {
+                item.addEventListener('load', () => {
+                    item.contentWindow.postMessage({ action: 'fetch', url: `${TRACKER_RESOURCES_URL}/fetch.json?iframe-depth-2-${Math.random()}` });
+                });
+
+                const onMessage = msg => {
+                    if (msg.data.includes('frame fetch loaded')) {
+                        callback('loaded');
+                        window.removeEventListener('message', onMessage);
+                    } else if (msg.data.includes('frame fetch failed')) {
+                        callback('failed');
+                        window.removeEventListener('message', onMessage);
+                    }
+                };
+
+                window.addEventListener('message', onMessage);
+            }
+        }
+    },
+    {
+        category: 'other',
         id: 'webworker-fetch',
         description: 'Try fetching data from within a WebWorker.',
         checkAsync: (callback) => {
@@ -464,6 +491,26 @@ const tests = [
             }
 
             observer.observe({ entryTypes: ['resource', 'navigation'] });
+        }
+    },
+    {
+        category: 'other',
+        id: 'redirected-fetch',
+        description: 'Try requesting tracker via redirect through a safe domain.',
+        checkAsync: (callback) => {
+            const url = new URL('/redirect', location.href);
+            url.searchParams.append('destination', `${TRACKER_RESOURCES_URL}/fetch.json?redirected-${random}`);
+
+            fetch(url)
+                .then(r => r.json())
+                .then(data => {
+                    if (data.data.includes('fetch loaded')) {
+                        callback('loaded');
+                    }
+                })
+                .catch(e => {
+                    callback('failed');
+                });
         }
     }
 ];

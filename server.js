@@ -231,6 +231,22 @@ app.get('/come-back', (req, res) => {
 </html>`);
 });
 
+const REDIRECT_ALLOWLIST = ['bad.third-party.site'];
+
+app.get('/redirect', (req, res) => {
+    const destination = req.query.destination;
+
+    if (!REDIRECT_ALLOWLIST.find(allowHost => destination.startsWith('https://' + allowHost + '/'))) {
+        res.statusCode = 403;
+        res.end();
+        return;
+    }
+
+    res.set('Location', destination);
+    res.statusCode = 307;
+    res.end();
+});
+
 const blockingRoutes = require('./privacy-protections/request-blocking/server/routes');
 app.use('/block-me', blockingRoutes);
 

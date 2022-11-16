@@ -1,53 +1,35 @@
 /* exported commonTests */
 /* global cookieStore, THIRD_PARTY_TRACKER_ORIGIN, THIRD_PARTY_ORIGIN */
 
+function generateCookieHeaderTest (namePrefix, origin) {
+    return {
+        id: `${namePrefix} header cookie`,
+        store: (data) => {
+            return fetch(`${origin}/set-cookie?value=${data}`, { credentials: 'include' }).then(r => {
+                if (!r.ok) {
+                    throw new Error('Request failed.');
+                }
+            });
+        },
+        retrive: () => {
+            return fetch(`${origin}/reflect-headers`, { credentials: 'include' })
+                .then(r => r.json())
+                .then(data => data.headers.cookie.match(/headerdata=([0-9]+)/)[1]);
+        }
+    };
+}
+
+const cookieHeaderTests = [generateCookieHeaderTest('first party', '')];
+if (document.location.origin !== THIRD_PARTY_ORIGIN) {
+    cookieHeaderTests.push(generateCookieHeaderTest('safe third party', THIRD_PARTY_ORIGIN));
+}
+if (document.location.origin !== THIRD_PARTY_TRACKER_ORIGIN) {
+    cookieHeaderTests.push(generateCookieHeaderTest('tracking third party', THIRD_PARTY_TRACKER_ORIGIN));
+}
+
 // tests that are common for both main frame and an iframe
 const commonTests = [
-    {
-        id: 'first party header cookie',
-        store: (data) => {
-            return fetch(`/set-cookie?value=${data}`).then(r => {
-                if (!r.ok) {
-                    throw new Error('Request failed.');
-                }
-            });
-        },
-        retrive: () => {
-            return fetch('/reflect-headers')
-                .then(r => r.json())
-                .then(data => data.headers.cookie.match(/headerdata=([0-9]+)/)[1]);
-        }
-    },
-    {
-        id: 'safe third party header cookie',
-        store: (data) => {
-            return fetch(`${THIRD_PARTY_ORIGIN}/set-cookie?value=${data}`, { credentials: 'include' }).then(r => {
-                if (!r.ok) {
-                    throw new Error('Request failed.');
-                }
-            });
-        },
-        retrive: () => {
-            return fetch(`${THIRD_PARTY_ORIGIN}/reflect-headers`, { credentials: 'include' })
-                .then(r => r.json())
-                .then(data => data.headers.cookie.match(/headerdata=([0-9]+)/)[1]);
-        }
-    },
-    {
-        id: 'tracking third party header cookie',
-        store: (data) => {
-            return fetch(`${THIRD_PARTY_TRACKER_ORIGIN}/set-cookie?value=${data}`, { credentials: 'include' }).then(r => {
-                if (!r.ok) {
-                    throw new Error('Request failed.');
-                }
-            });
-        },
-        retrive: () => {
-            return fetch(`${THIRD_PARTY_TRACKER_ORIGIN}/reflect-headers`, { credentials: 'include' })
-                .then(r => r.json())
-                .then(data => data.headers.cookie.match(/headerdata=([0-9]+)/)[1]);
-        }
-    },
+    ...cookieHeaderTests,
     {
         id: 'JS cookie',
         store: (data) => {

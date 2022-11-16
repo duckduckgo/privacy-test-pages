@@ -200,7 +200,11 @@ app.get('/set-cookie', (req, res) => {
     if (!req.query.value) {
         return res.sendStatus(401);
     }
-    return res.cookie('headerdata', req.query.value, { expires, httpOnly: true, sameSite: 'none', secure: true }).sendStatus(200);
+    let cookieName = 'headerdata';
+    if (req.query.name) {
+        cookieName = req.query.name;
+    }
+    return res.cookie(cookieName, req.query.value, { expires, httpOnly: true, sameSite: 'none', secure: true }).sendStatus(200);
 });
 
 // returns a random number and sets caching for a year

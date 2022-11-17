@@ -1,7 +1,48 @@
 /* exported commonTests */
-/* global cookieStore */
+/* global cookieStore, THIRD_PARTY_TRACKER_ORIGIN, THIRD_PARTY_ORIGIN */
+
+function generateCookieHeaderTest (namePrefix, origin, cookiename) {
+    return {
+        id: `${namePrefix} header cookie`,
+        store: (data) => {
+            return fetch(`${origin}/set-cookie?value=${data}&name=${cookiename}`, { credentials: 'include' }).then(r => {
+                if (!r.ok) {
+                    throw new Error('Request failed.');
+                }
+            });
+        },
+        retrive: () => {
+            return fetch(`${origin}/reflect-headers`, { credentials: 'include' })
+                .then(r => r.json())
+                .then(data => {
+                    const cookie = data.headers.cookie.split(';')
+                        .map(s => s.trim())
+                        .find(s => s.startsWith(`${cookiename}=`));
+                    return cookie.split('=')[1];
+                });
+        }
+    };
+}
+
+let context = '';
+if (window.top === window.self) {
+    context = 'top';
+} else if (document.location.origin === THIRD_PARTY_ORIGIN) {
+    context = 'thirdparty';
+} else if (document.location.origin === THIRD_PARTY_TRACKER_ORIGIN) {
+    context = 'thirdpartytracker';
+}
+const cookieHeaderTests = [generateCookieHeaderTest('first party', '', `${context}_firstparty_headerdata`)];
+if (document.location.origin !== THIRD_PARTY_ORIGIN) {
+    cookieHeaderTests.push(generateCookieHeaderTest('safe third party', THIRD_PARTY_ORIGIN, `${context}_thirdparty_headerdata`));
+}
+if (document.location.origin !== THIRD_PARTY_TRACKER_ORIGIN) {
+    cookieHeaderTests.push(generateCookieHeaderTest('tracking third party', THIRD_PARTY_TRACKER_ORIGIN, `${context}_tracker_headerdata`));
+}
+
 // tests that are common for both main frame and an iframe
 const commonTests = [
+    ...cookieHeaderTests,
     {
         id: 'JS cookie',
         store: (data) => {

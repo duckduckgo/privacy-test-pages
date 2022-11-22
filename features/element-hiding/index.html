@@ -4,6 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width">
     <title>Element Hiding</title>
+    <script src='./main.js' defer></script>
+    <script src='https://bad.third-party.site/features/element-hiding/blocked.js' defer></script>
     <style type="text/css">
         .container {
             width: 400px;
@@ -17,48 +19,54 @@
         }
     </style>
 </head>
-<body onload="init()">
-<p><a href="../index.html">[Home]</a></p>
+<body>
+    <p><a href="../../">[Home]</a> ↣ [Features] ↣ <strong>[Element Hiding Test Page]</strong></p>
 
-<p>Test page for element hiding, a feature used to hide DOM elements.</p>
+    <p>Test page for element hiding, a feature used to hide DOM elements.</p>
 
-<div id="hide">
-    <div class="container" id="hide">
-        This element should be hidden.
+    <div id="hide">
+        <div class="container hide-test" id="hide-basic">
+            This element should be hidden.
+        </div>
+        <div class="container hide-test" id="hide-delayed">
+            This element should be hidden.
+        </div>
+        <div class="container hide-test" id="hide-wildcard-selector">
+            This element should be hidden.
+        </div>
+        <div class="container hide-test frame-container" id="hide-frame-contents">
+        </div>
     </div>
-    <div class="container" id="hide-delayed">
-        This element should be hidden.
-    </div>
-    <div class="container" id="hide-wildcard-selector">
-        This element should be hidden.
-    </div>
-    <iframe src="https://good.third-party.site/features/element-hiding/good-frame.html" width="440" height="240" style="border:none;overflow:hidden;margin:25px;display:block;" scrolling="no" frameborder="0"></iframe>
-</div>
 
-<div id="hide-empty">
-    <div class="container" id="hide-empty-no-content">
+    <div id="hide-empty">
+        <div class="container hide-empty-test" id="hide-empty-no-content">
+        </div>
+        <div class="container hide-empty-test" id="hide-empty-ad-label">
+            <span>Advertisement</span>
+        </div>
+        <div class="container hide-empty-test" id="hide-empty-text-content">
+            This element should not be hidden.
+        </div>
+        <div class="container hide-empty-test frame-container" id="hide-empty-frame-content">
+        </div>
+        <div class="container hide-empty-test frame-container-delayed" id="hide-empty-delayed-content">
+        </div>
+        <div class="container hide-empty-test" id="hide-empty-wildcard-selector">
+        </div>
     </div>
-    <div class="container" id="hide-empty-ad-label">
-        <span>Advertisement</span>
-    </div>
-    <div class="container" id="hide-empty-text-content">
-        This element should not be hidden.
-    </div>
-    <div class="container" id="hide-empty-frame-content">
-    </div>
-    <div class="container" id="hide-empty-delayed-content">
-    </div>
-    <div class="container" id="hide-empty-wildcard-selector">
-    </div>
-</div>
 
-<div id="closest-empty">
+    <div id="closest-empty">
+        <div class="container closest-empty-test frame-container" id="closest-empty-frame-content">
+        </div>
+        <div class="container closest-empty-test frame-container-delayed" id="closest-empty-delayed-content">
+        </div>
 
-</div>
+    </div>
 
-<div id="override">
-
-</div>
-
-</body>
+    <div id="override">
+        <div class="container ad-container" id="override-basic">
+            This element should not be hidden.
+        </div>
+    </div>
+    </body>
 </html>

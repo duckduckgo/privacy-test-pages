@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width">
     <title>Element Hiding</title>
     <script src='./main.js' defer></script>
-    <script src='https://bad.third-party.site/features/element-hiding/blocked.js' defer></script>
     <style type="text/css">
         .container {
             width: 400px;
@@ -17,24 +16,45 @@
             padding: 20px;
             margin: 25px;
         }
+        #results-table {
+            border-collapse: collapse;
+            width: 70%;
+        }
+        #results-table td, #results-table th {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        #results-table th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            text-align: left;
+            background-color: #f2f2f2;
+            color: black;
+        }
+        .spacer {
+            height: 1000px;
+        }
     </style>
 </head>
 <body>
     <p><a href="../../">[Home]</a> ↣ [Features] ↣ <strong>[Element Hiding Test Page]</strong></p>
 
-    <p>Test page for element hiding, a feature used to hide DOM elements.</p>
+    <p>Test page for element hiding, a feature used to hide DOM elements. Tests take a few seconds to run.</p>
+
+    <table id="results-table">
+        <tr><th>Description</th><th>Outcome</th></tr>
+    </table>
+
+    <div class="spacer">
+    </div>
 
     <div id="hide">
         <div class="container hide-test" id="hide-basic">
             This element should be hidden.
         </div>
-        <div class="container hide-test" id="hide-delayed">
-            This element should be hidden.
-        </div>
-        <div class="container hide-test" id="hide-wildcard-selector">
-            This element should be hidden.
-        </div>
         <div class="container hide-test frame-container" id="hide-frame-contents">
+        </div>
+        <div class="container hide-test frame-container-delayed" id="hide-delayed-frame">
         </div>
     </div>
 
@@ -49,18 +69,47 @@
         </div>
         <div class="container hide-empty-test frame-container" id="hide-empty-frame-content">
         </div>
-        <div class="container hide-empty-test frame-container-delayed" id="hide-empty-delayed-content">
-        </div>
-        <div class="container hide-empty-test" id="hide-empty-wildcard-selector">
+        <div class="container hide-empty-test frame-container-delayed" id="hide-empty-delayed-frame">
         </div>
     </div>
 
     <div id="closest-empty">
-        <div class="container closest-empty-test frame-container" id="closest-empty-frame-content">
+        <div class="container closest-empty-test" id="closest-empty-single-div">
         </div>
-        <div class="container closest-empty-test frame-container-delayed" id="closest-empty-delayed-content">
+        <div id="closest-empty-single-nested-div">
+            <div class="container closest-empty-test">
+            </div>
         </div>
-
+        <div id="closest-empty-siblings-nested-div">
+            <div class="container closest-empty-test">
+            </div>
+            <div>
+                <span>Advertisement</span>
+            </div>
+        </div>
+        <div id="closest-empty-siblings-content-nested-div">
+            <div class="container closest-empty-test">
+            </div>
+            <div class="container">
+                <span>Lorem Ipsum</span>
+            </div>
+        </div>
+        <div id="closest-empty-frame-content">
+            <div class="container closest-empty-test frame-container">
+            </div>
+        </div>
+        <div id="closest-empty-delayed-frame">
+            <div class="container closest-empty-test frame-container-delayed">
+            </div>
+        </div>
+        <div class="container">
+            <div id="closest-empty-intermediate-element">
+                <div class="closest-empty-test">
+                </div>
+            </div>
+        </div>
+        <div id="closest-empty-delayed-parent">
+        </div>
     </div>
 
     <div id="override">

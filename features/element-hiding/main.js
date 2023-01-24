@@ -6,18 +6,19 @@ const expectedResults = [
     { id: 'hide-delayed', description: 'hide rule: element added to page after delay is hidden', hidden: true },
     { id: 'hide-empty-no-content', description: 'hide-empty rule: element containing no content is hidden', hidden: true },
     { id: 'hide-empty-ad-label', description: 'hide-empty rule: element containing ad label content is hidden', hidden: true },
-    { id: 'hide-empty-text-content', description: 'hide-empty rule: element containing text content is not hidden', hidden: false },
-    { id: 'hide-empty-frame-content', description: 'hide-empty rule: element containing iframe is not hidden', hidden: false },
-    { id: 'hide-empty-delayed-frame', description: 'hide-empty rule: element that loads 3p frame after delay is not hidden', hidden: false },
     { id: 'hide-empty-delayed', description: 'hide-empty rule: empty element added to page after delay is hidden', hidden: true },
     { id: 'closest-empty-single-div', description: 'closest-empty rule: element containing no content is hidden', hidden: true },
     { id: 'closest-empty-single-nested-div', description: 'closest-empty rule: parent of target element is hidden', hidden: true },
     { id: 'closest-empty-siblings-nested-div', description: 'closest-empty rule: parent of target element with empty siblings is hidden', hidden: true },
+    { id: 'closest-empty-delayed-parent', description: 'closest-empty rule: parent of empty element added to page after delay is hidden', hidden: true },
+    { id: 'hide-empty-text-content', description: 'hide-empty rule: element containing text content is not hidden', hidden: false },
+    { id: 'hide-empty-frame-content', description: 'hide-empty rule: element containing iframe is not hidden', hidden: false },
+    { id: 'hide-empty-delayed-frame', description: 'hide-empty rule: element that loads 3p frame after delay is not hidden', hidden: false },
+    { id: 'hide-empty-frame-changed', description: 'hide-empty rule: about:blank iframe that changes src to load content after delay is not hidden', hidden: false },
     { id: 'closest-empty-siblings-content-nested-div', description: 'closest-empty rule: parent of target element with non-empty siblings is not hidden', hidden: false },
     { id: 'closest-empty-frame-content', description: 'closest-empty rule: parent of element containing iframe is not hidden', hidden: false },
     { id: 'closest-empty-delayed-frame', description: 'closest-empty rule: parent of element that loads 3p frame after delay is not hidden', hidden: false },
-    { id: 'closest-empty-intermediate-element', description: 'closest-empty rule: only outermost element should be hidden when target is nested', hidden: false },
-    { id: 'closest-empty-delayed-parent', description: 'closest-empty rule: parent of empty element added to page after delay is hidden', hidden: true },
+    { id: 'closest-empty-intermediate-element', description: 'closest-empty rule: intermediate elements should not be hidden when target is nested', hidden: false },
     { id: 'override-basic', description: 'override rule: element is not hidden when override rule present', hidden: false }
 ];
 
@@ -65,7 +66,7 @@ function updateTable (name, description, testPassed) {
 
     const result = {
         id: name,
-        hiddenProperly: testPassed
+        result: testPassed
     };
 
     if (testPassed) {
@@ -80,7 +81,7 @@ function updateTable (name, description, testPassed) {
 }
 
 function injectDelayedContent () {
-    setTimeout(function () {
+    setTimeout(() => {
         // inject iframes
         const delayedFrameContainers = [...document.querySelectorAll('.frame-container-delayed')];
         delayedFrameContainers.forEach((container) => {
@@ -95,6 +96,9 @@ function injectDelayedContent () {
             div.setAttribute('id', element.id);
             parentElement.appendChild(div);
         });
+        // change src of about:blank iframe
+        const frame = document.getElementById('hide-empty-about-blank-frame');
+        frame.src = `https://${TEST_DOMAIN}/features/element-hiding/frame.html`;
     }, 600);
 }
 

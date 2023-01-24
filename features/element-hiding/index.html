@@ -31,8 +31,8 @@
             background-color: #f2f2f2;
             color: black;
         }
-        .spacer {
-            height: 1000px;
+        .debug-disclaimer {
+            margin: 20px 0;
         }
     </style>
 </head>
@@ -45,7 +45,8 @@
         <tr><th>Description</th><th>Outcome</th></tr>
     </table>
 
-    <div class="spacer">
+    <div class="debug-disclaimer">
+        Debug data:
     </div>
 
     <div id="hide">
@@ -70,6 +71,10 @@
         <div class="container hide-empty-test frame-container" id="hide-empty-frame-content">
         </div>
         <div class="container hide-empty-test frame-container-delayed" id="hide-empty-delayed-frame">
+        </div>
+        <div class="container hide-empty-test" id="hide-empty-frame-changed">
+            <iframe scrolling="no" width="400" height="200" src="about:blank" id="hide-empty-about-blank-frame" style="border: none; overflow: hidden; display: block;">
+            </iframe>
         </div>
     </div>
 

@@ -15,6 +15,6 @@ setTimeout(() => {
 }, 500);
 
 window.results = {
-    page: 'autoconsent',
+    page: 'autoconsent-banner',
     results: []
 };

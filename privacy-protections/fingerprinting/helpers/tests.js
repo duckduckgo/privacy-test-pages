@@ -577,7 +577,7 @@ const tests = [
 
     // WebRTC
     {
-        id: 'RTCIceCandidate.candiate',
+        id: 'RTCIceCandidate.candidate',
         category: 'webrtc',
         getValue: () => {
             let resolve;

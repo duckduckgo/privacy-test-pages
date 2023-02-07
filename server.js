@@ -200,7 +200,11 @@ app.get('/set-cookie', (req, res) => {
     if (!req.query.value) {
         return res.sendStatus(401);
     }
-    return res.cookie('headerdata', req.query.value, { expires, httpOnly: true, sameSite: 'none', secure: true }).sendStatus(200);
+    let cookieName = 'headerdata';
+    if (req.query.name) {
+        cookieName = req.query.name;
+    }
+    return res.cookie(cookieName, req.query.value, { expires, httpOnly: true, sameSite: 'none', secure: true }).sendStatus(200);
 });
 
 // returns a random number and sets caching for a year
@@ -229,6 +233,22 @@ app.get('/come-back', (req, res) => {
 </script>
 </body>
 </html>`);
+});
+
+const REDIRECT_ALLOWLIST = ['bad.third-party.site'];
+
+app.get('/redirect', (req, res) => {
+    const destination = req.query.destination;
+
+    if (!REDIRECT_ALLOWLIST.find(allowHost => destination.startsWith('https://' + allowHost + '/'))) {
+        res.statusCode = 403;
+        res.end();
+        return;
+    }
+
+    res.set('Location', destination);
+    res.statusCode = 307;
+    res.end();
 });
 
 const blockingRoutes = require('./privacy-protections/request-blocking/server/routes');

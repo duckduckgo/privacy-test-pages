@@ -1,6 +1,4 @@
-/* globals commonTests */
-const THIRD_PARTY_ORIGIN = 'https://good.third-party.site';
-const THIRD_PARTY_TRACKER_ORIGIN = 'https://broken.third-party.site';
+/* globals commonTests,THIRD_PARTY_ORIGIN,THIRD_PARTY_TRACKER_ORIGIN */
 
 const storeButton = document.querySelector('#store');
 const retriveButton = document.querySelector('#retrive');
@@ -82,51 +80,6 @@ function create3pIframeTest (name, origin) {
 }
 
 const tests = [
-    {
-        id: 'first party header cookie',
-        store: (data) => {
-            return fetch(`/set-cookie?value=${data}`).then(r => {
-                if (!r.ok) {
-                    throw new Error('Request failed.');
-                }
-            });
-        },
-        retrive: () => {
-            return fetch('/reflect-headers')
-                .then(r => r.json())
-                .then(data => data.headers.cookie.match(/headerdata=([0-9]+)/)[1]);
-        }
-    },
-    {
-        id: 'safe third party header cookie',
-        store: (data) => {
-            return fetch(`${THIRD_PARTY_ORIGIN}/set-cookie?value=${data}`, { credentials: 'include' }).then(r => {
-                if (!r.ok) {
-                    throw new Error('Request failed.');
-                }
-            });
-        },
-        retrive: () => {
-            return fetch(`${THIRD_PARTY_ORIGIN}/reflect-headers`, { credentials: 'include' })
-                .then(r => r.json())
-                .then(data => data.headers.cookie.match(/headerdata=([0-9]+)/)[1]);
-        }
-    },
-    {
-        id: 'tracking third party header cookie',
-        store: (data) => {
-            return fetch(`${THIRD_PARTY_TRACKER_ORIGIN}/set-cookie?value=${data}`, { credentials: 'include' }).then(r => {
-                if (!r.ok) {
-                    throw new Error('Request failed.');
-                }
-            });
-        },
-        retrive: () => {
-            return fetch(`${THIRD_PARTY_TRACKER_ORIGIN}/reflect-headers`, { credentials: 'include' })
-                .then(r => r.json())
-                .then(data => data.headers.cookie.match(/headerdata=([0-9]+)/)[1]);
-        }
-    },
     create3pIframeTest('safe', THIRD_PARTY_ORIGIN),
     create3pIframeTest('tracking', THIRD_PARTY_TRACKER_ORIGIN),
     {
@@ -278,7 +231,7 @@ function retrieveData () {
         });
     }
 
-    tests.concat(commonTests).forEach(test => {
+    [...commonTests, ...tests].forEach(test => {
         all++;
 
         const li = document.createElement('li');

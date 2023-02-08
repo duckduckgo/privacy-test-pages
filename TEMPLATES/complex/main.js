@@ -1,3 +1,5 @@
+const PAGE_NAME = 'name-of-the-page'; // FILL ME OUT!
+
 const startButton = document.querySelector('#start');
 const downloadButton = document.querySelector('#download');
 
@@ -22,7 +24,7 @@ const tests = [
 
 // object that contains results of all tests
 const results = {
-    page: 'name-of-the-test', // FILL ME OUT!
+    page: `${PAGE_NAME}-test`,
     date: null,
     results: []
 };
@@ -85,7 +87,7 @@ function runTests () {
                         updateSummary();
                     });
             } else {
-                valueSpan.innerHTML = resultToHTML(data);
+                valueSpan.innerHTML = resultToHTML(result);
                 resultObj.value = result || null;
             }
         } catch (e) {
@@ -106,7 +108,7 @@ function downloadTheResults () {
     const a = document.createElement('a');
     const url = window.URL.createObjectURL(new Blob([data], { type: 'application/json' }));
     a.href = url;
-    a.download = 'fingerprinting-results.json';
+    a.download = `${PAGE_NAME}-results.json`;
 
     document.body.appendChild(a);
     a.click();

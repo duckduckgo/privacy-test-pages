@@ -584,7 +584,7 @@ const tests = [
             const promise = new Promise((res, rej) => { resolve = res; });
 
             const c = new RTCPeerConnection({
-                iceServers: [{ urls: 'stun:stun.l.google.com:19302?transport=udp' }]
+                iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
             });
 
             c.onicecandidate = result => {

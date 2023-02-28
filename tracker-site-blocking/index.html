@@ -31,11 +31,11 @@ function loadTracker () {
 
 <p>This will test conditional tracker blocking per site (option blocking)</p>
 <p>Clicking the button below will redirect you to good.third-party.site, or bad.third-party.site</p>
-<p>The test tracker should be blocked on bad.third-party.site, but not good.third-party.site</p>
+<p>The test tracker should be blocked on Site A, but not on Site B</p>
 
 <ul>
-    <li><button type="button" onclick="window.open('https://good.third-party.site/tracker-site-blocking/index.html', '_')">Open good.third-party.site</button></li>
-    <li><button type="button" onclick="window.open('https://bad.third-party.site/tracker-site-blocking/index.html', '_')">Open bad.third-party.site</button></li>
+    <li><button type="button" onclick="window.open('https://www.first-party.site/tracker-site-blocking/index.html', '_')">Open Site A</button></li>
+    <li><button type="button" onclick="window.open('https://bad.third-party.site/tracker-site-blocking/index.html', '_')">Open Site B</button></li>
 </ul>
 
 <div id="target-div">

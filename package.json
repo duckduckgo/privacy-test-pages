@@ -1,6 +1,5 @@
 {
   "name": "privacy-test-pages",
-  "version": "1.0.0",
   "description": "This project contains a collection of pages that are meant to be used for testing various privacy and security features of browsers and browser extensions.",
   "main": "server.js",
   "engines": {

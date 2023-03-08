@@ -11,15 +11,19 @@
 <p>This page tests various ways of script injection to verify that API calls are attributed to the correct script URL.</p>
 
 <table>
-    <tr>
-        <th>API call</th>
-        <th>Description</th>
-        <th>Expected script URL</th>
-    </tr>
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>API call</th>
+            <th>Description</th>
+            <th>Expected script URL</th>
+        </tr>
+    </thead>
     <tbody id="results"></tbody>
 </table>
 <template id="result-row">
     <tr>
+        <td class="idx"></td>
         <td class="api"></td>
         <td class="desc"></td>
         <td class="url"></td>
@@ -31,17 +35,23 @@
 <script>
     const ul = document.getElementById('results');
     const template = document.getElementById('result-row');
+    const results = [];
+    let idx = 1;
 
     window.addResult = function (api, desc, url) {
+        results.push({ api, desc, url });
         const listEntry = template.content.cloneNode(true);
+        listEntry.querySelector('.idx').textContent = idx++;
         listEntry.querySelector('.api').textContent = api;
         listEntry.querySelector('.desc').textContent = desc;
         listEntry.querySelector('.url').textContent = url;
         ul.appendChild(listEntry);
     };
+</script>
 
+<script>
     console.log(location.href, navigator.userAgent);
-    window.addResult('navigator.userAgent', 'normal inline script', window.location.href);
+    window.addResult('Navigator.prototype.userAgent', 'normal inline script', window.location.href);
 </script>
 <script src="entrypoints/createelement.js"></script>
 <script src="entrypoints/eval.js"></script>
@@ -58,22 +68,20 @@
 <script src="entrypoints/eventlistener.js"></script>
 <script src="entrypoints/settimeout.js"></script>
 <script src="entrypoints/promise.js"></script>
-<script src="entrypoints/module.js" type="module"></script>
+<script src="entrypoints/module.mjs" type="module"></script>
 <script src="entrypoints/deep-stack.js"></script>
 <script src="entrypoints/deep-async-stack.js"></script>
-<script>
-    const worker = new Worker('entrypoints/web-worker.js');
-    worker.addEventListener('message', function (event) {
-        window.addResult('Navigator.prototype.userAgent', 'web worker', event.data.dave);
-    });
-</script>
+<script src="entrypoints/web-worker.js"></script>
 <script src="entrypoints/service-worker.js"></script>
 <script src="entrypoints/prototype-overload.js"></script>
 
 <style>
-    table,th,td {
+    table {
+        border-radius: 3px;
         border: solid 1px;
-        border-collapse: collapse;
+    }
+    table th,table td {
+        border: solid 1px;
         padding: 10px;
     }
 </style>

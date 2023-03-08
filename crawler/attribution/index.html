@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>API call attribution test</title>
+</head>
+
+<body>
+<p><a href="../../index.html">[Home]</a> ↣ <strong>[API call attribution test]</strong></p>
+
+<p>This page tests various ways of script injection to verify that API calls are attributed to the correct script URL.</p>
+
+<table>
+    <tr>
+        <th>API call</th>
+        <th>Description</th>
+        <th>Expected script URL</th>
+    </tr>
+    <tbody id="results"></tbody>
+</table>
+<template id="result-row">
+    <tr>
+        <td class="api"></td>
+        <td class="desc"></td>
+        <td class="url"></td>
+    </tr>
+</template>
+
+<div id="container"></div>
+
+<script>
+    const ul = document.getElementById('results');
+    const template = document.getElementById('result-row');
+
+    window.addResult = function (api, desc, url) {
+        const listEntry = template.content.cloneNode(true);
+        listEntry.querySelector('.api').textContent = api;
+        listEntry.querySelector('.desc').textContent = desc;
+        listEntry.querySelector('.url').textContent = url;
+        ul.appendChild(listEntry);
+    };
+
+    console.log(location.href, navigator.userAgent);
+    window.addResult('navigator.userAgent', 'normal inline script', window.location.href);
+</script>
+<script src="entrypoints/createelement.js"></script>
+<script src="entrypoints/eval.js"></script>
+<script src="entrypoints/dom0.js"></script>
+<script src="entrypoints/blob-url.js"></script>
+<script src="entrypoints/data-url.js"></script>
+<script src="entrypoints/document-write.js"></script>
+<script src="entrypoints/iframe-blob-url.js"></script>
+<script src="entrypoints/iframe-data-url.js"></script>
+<script src="entrypoints/iframe-javascript-url.js"></script>
+<script src="entrypoints/iframe-document-write.js"></script>
+<script src="entrypoints/iframe-sandbox.js"></script>
+<script src="entrypoints/iframe-simple.js"></script>
+<script src="entrypoints/eventlistener.js"></script>
+<script src="entrypoints/settimeout.js"></script>
+<script src="entrypoints/promise.js"></script>
+<script src="entrypoints/module.js" type="module"></script>
+<script src="entrypoints/deep-stack.js"></script>
+<script src="entrypoints/deep-async-stack.js"></script>
+<script>
+    const worker = new Worker('entrypoints/web-worker.js');
+    worker.addEventListener('message', function (event) {
+        window.addResult('Navigator.prototype.userAgent', 'web worker', event.data.dave);
+    });
+</script>
+<script src="entrypoints/service-worker.js"></script>
+<script src="entrypoints/prototype-overload.js"></script>
+
+<style>
+    table,th,td {
+        border: solid 1px;
+        border-collapse: collapse;
+        padding: 10px;
+    }
+</style>
+</body>
+</html>

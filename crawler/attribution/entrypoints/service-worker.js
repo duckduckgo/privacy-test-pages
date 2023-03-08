@@ -1,0 +1,18 @@
+navigator.serviceWorker.addEventListener('message', (e) => {
+    window.addResult('Navigator.prototype.userAgent', 'service worker', e.data.dave);
+});
+navigator.serviceWorker.register('./sw-source.js', { scope: './' })
+    .then(registration => {
+        if (registration.active) {
+            registration.active.postMessage({ doit: true });
+        } else if (registration.installing) {
+            registration.installing.addEventListener('statechange', (event) => {
+                if (event.target.state === 'activated' && registration.active) {
+                    registration.active.postMessage({ doit: true });
+                }
+            });
+        }
+    })
+    .catch((error) => {
+        console.error('Registration failed with ' + error);
+    });

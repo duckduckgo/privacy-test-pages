@@ -1,5 +1,5 @@
 navigator.serviceWorker.addEventListener('message', (e) => {
-    window.addResult('Navigator.prototype.userAgent', 'service worker', e.data.dave);
+    window.addResult('Navigator.prototype.userAgent', 'service worker', e.data.serviceWorkerUrl);
 });
 navigator.serviceWorker.register('./sw-source.js', { scope: './' })
     .then(registration => {

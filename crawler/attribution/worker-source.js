@@ -1,2 +1,2 @@
 console.log(self.location.href, navigator.userAgent);
-self.postMessage({ dave: self.location.href });
+self.postMessage({ workerUrl: self.location.href });

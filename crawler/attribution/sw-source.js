@@ -10,6 +10,6 @@ self.addEventListener('activate', (evt) => {
 
 self.addEventListener('message', (event) => {
     console.log(self.location.href, navigator.userAgent);
-    event.source.postMessage({ dave: self.location.href });
+    event.source.postMessage({ serviceWorkerUrl: self.location.href });
     self.registration.unregister();
 });

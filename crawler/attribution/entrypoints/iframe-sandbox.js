@@ -3,5 +3,5 @@
     f.src = 'iframe-sandbox.html';
     f.sandbox = 'allow-scripts';
     document.body.appendChild(f);
-    window.addResult('Navigator.prototype.userAgent', 'inline script inside sandboxed iframe', document.currentScript.src);
+    window.addResult('Navigator.prototype.userAgent', 'inline script inside sandboxed iframe', f.src);
 }

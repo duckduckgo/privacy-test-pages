@@ -3,7 +3,7 @@ function deepCall () {
         deepCall();
     } else {
         console.log(deepCall.src, navigator.userAgent);
-        window.addResult('Navigator.prototype.userAgent', 'deep call stack', deepCall.src);
+        window.addResult('Navigator.prototype.userAgent', 'deep call stack', location.href, deepCall.src);
     }
 }
 // storing data on the function object to make it work in Webkit

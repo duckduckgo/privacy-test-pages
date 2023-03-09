@@ -6,6 +6,6 @@
         }, 500);
     }).then(() => {
         console.log(src, navigator.userAgent);
-        window.addResult('Navigator.prototype.userAgent', 'delayed script (Promise)', src);
+        window.addResult('Navigator.prototype.userAgent', 'delayed script (Promise)', location.href, src);
     });
 }

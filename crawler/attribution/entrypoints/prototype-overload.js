@@ -7,7 +7,7 @@
     const src = document.currentScript.src;
     descriptor.value = function () {
         console.log(src, navigator.userAgent);
-        window.addResult('Navigator.prototype.userAgent', 'createElement prototype overload', src);
+        window.addResult('Navigator.prototype.userAgent', 'createElement prototype overload', location.href, src);
         return origImpl.apply(this, arguments);
     };
 

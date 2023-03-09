@@ -16,7 +16,8 @@
             <th>#</th>
             <th>API call</th>
             <th>Description</th>
-            <th>Expected script URL</th>
+            <th>Context URL</th>
+            <th>Expected attribution URL</th>
         </tr>
     </thead>
     <tbody id="results"></tbody>
@@ -26,7 +27,8 @@
         <td class="idx"></td>
         <td class="api"></td>
         <td class="desc"></td>
-        <td class="url"></td>
+        <td class="context"></td>
+        <td class="expected"></td>
     </tr>
 </template>
 
@@ -38,20 +40,21 @@
     const results = [];
     let idx = 1;
 
-    window.addResult = function (api, desc, url) {
-        results.push({ api, desc, url });
+    window.addResult = function (api, desc, contextUrl, expectedAttributionUrl) {
+        results.push({ api, desc, contextUrl, expectedAttributionUrl });
         const listEntry = template.content.cloneNode(true);
         listEntry.querySelector('.idx').textContent = idx++;
         listEntry.querySelector('.api').textContent = api;
         listEntry.querySelector('.desc').textContent = desc;
-        listEntry.querySelector('.url').textContent = url;
+        listEntry.querySelector('.context').textContent = contextUrl;
+        listEntry.querySelector('.expected').textContent = expectedAttributionUrl;
         ul.appendChild(listEntry);
     };
 </script>
 
 <script>
     console.log(location.href, navigator.userAgent);
-    window.addResult('Navigator.prototype.userAgent', 'normal inline script', window.location.href);
+    window.addResult('Navigator.prototype.userAgent', 'normal inline script', window.location.href, window.location.href);
 </script>
 <script src="entrypoints/createelement.js"></script>
 <script src="entrypoints/eval.js"></script>
@@ -79,6 +82,7 @@
     table {
         border-radius: 3px;
         border: solid 1px;
+        max-width: 100%;
     }
     table th,table td {
         border: solid 1px;

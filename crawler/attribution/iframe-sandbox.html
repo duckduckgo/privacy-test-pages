@@ -1,3 +1,4 @@
 <script>
     console.log(location.href, navigator.userAgent);
+    parent.postMessage({ type: 'messageFromSandbox', url: location.href }, '*');
 </script>

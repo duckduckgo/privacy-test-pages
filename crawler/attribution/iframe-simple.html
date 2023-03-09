@@ -1,4 +1,4 @@
 <script>
     console.log(location.href, navigator.userAgent);
-    parent.addResult('Navigator.prototype.userAgent', 'inline script inside iframe', location.href, location.href);
+    parent.postMessage({ type: 'messageFromSimpleIframe', url: location.href }, '*');
 </script>

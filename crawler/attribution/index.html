@@ -50,33 +50,50 @@
         listEntry.querySelector('.expected').textContent = expectedAttributionUrl;
         ul.appendChild(listEntry);
     };
+    const isLocalTest = window.location.hostname.endsWith('.example');
+    window.THIRD_PARTY_ORIGIN = isLocalTest ? '//third-party.example' : '//bad.third-party.site';
+
+    const s = document.createElement('script');
+    s.src = `${window.THIRD_PARTY_ORIGIN}/crawler/attribution/entrypoints/module.mjs`;
+    s.type = 'module';
+    document.body.appendChild(s);
+
+    const links = [
+        `${window.THIRD_PARTY_ORIGIN}/crawler/attribution/entrypoints/simple-3p-script.js`,
+        `${window.THIRD_PARTY_ORIGIN}/crawler/attribution/entrypoints/createelement.js`,
+        `${window.THIRD_PARTY_ORIGIN}/crawler/attribution/entrypoints/eval.js`,
+        `${window.THIRD_PARTY_ORIGIN}/crawler/attribution/entrypoints/dom0.js`,
+        `${window.THIRD_PARTY_ORIGIN}/crawler/attribution/entrypoints/blob-url.js`,
+        `${window.THIRD_PARTY_ORIGIN}/crawler/attribution/entrypoints/data-url.js`,
+        `${window.THIRD_PARTY_ORIGIN}/crawler/attribution/entrypoints/iframe-blob-url.js`,
+        `${window.THIRD_PARTY_ORIGIN}/crawler/attribution/entrypoints/iframe-data-url.js`,
+        `${window.THIRD_PARTY_ORIGIN}/crawler/attribution/entrypoints/iframe-javascript-url.js`,
+        `${window.THIRD_PARTY_ORIGIN}/crawler/attribution/entrypoints/iframe-document-write.js`,
+        `${window.THIRD_PARTY_ORIGIN}/crawler/attribution/entrypoints/iframe-sandbox.js`,
+        `${window.THIRD_PARTY_ORIGIN}/crawler/attribution/entrypoints/iframe-simple.js`,
+        `${window.THIRD_PARTY_ORIGIN}/crawler/attribution/entrypoints/eventlistener.js`,
+        `${window.THIRD_PARTY_ORIGIN}/crawler/attribution/entrypoints/settimeout.js`,
+        `${window.THIRD_PARTY_ORIGIN}/crawler/attribution/entrypoints/promise.js`,
+        `${window.THIRD_PARTY_ORIGIN}/crawler/attribution/entrypoints/deep-stack.js`,
+        `${window.THIRD_PARTY_ORIGIN}/crawler/attribution/entrypoints/deep-async-stack.js`,
+        `${window.THIRD_PARTY_ORIGIN}/crawler/attribution/entrypoints/web-worker.js`,
+        `${window.THIRD_PARTY_ORIGIN}/crawler/attribution/entrypoints/service-worker.js`,
+        `${window.THIRD_PARTY_ORIGIN}/crawler/attribution/entrypoints/prototype-overload.js`,
+    ];
+    for (const l of links) {
+        const s = document.createElement('script');
+        s.src = l;
+        document.body.appendChild(s);
+    }
 </script>
 
 <script>
     console.log(location.href, navigator.userAgent);
     window.addResult('Navigator.prototype.userAgent', 'normal inline script', window.location.href, window.location.href);
 </script>
-<script src="entrypoints/createelement.js"></script>
-<script src="entrypoints/eval.js"></script>
-<script src="entrypoints/dom0.js"></script>
-<script src="entrypoints/blob-url.js"></script>
-<script src="entrypoints/data-url.js"></script>
-<script src="entrypoints/document-write.js"></script>
-<script src="entrypoints/iframe-blob-url.js"></script>
-<script src="entrypoints/iframe-data-url.js"></script>
-<script src="entrypoints/iframe-javascript-url.js"></script>
-<script src="entrypoints/iframe-document-write.js"></script>
-<script src="entrypoints/iframe-sandbox.js"></script>
-<script src="entrypoints/iframe-simple.js"></script>
-<script src="entrypoints/eventlistener.js"></script>
-<script src="entrypoints/settimeout.js"></script>
-<script src="entrypoints/promise.js"></script>
-<script src="entrypoints/module.mjs" type="module"></script>
-<script src="entrypoints/deep-stack.js"></script>
-<script src="entrypoints/deep-async-stack.js"></script>
-<script src="entrypoints/web-worker.js"></script>
-<script src="entrypoints/service-worker.js"></script>
-<script src="entrypoints/prototype-overload.js"></script>
+
+<!-- document.write doesn't work from async scripts -->
+<script src="/crawler/attribution/entrypoints/document-write.js"></script>
 
 <style>
     table {

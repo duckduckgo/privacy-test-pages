@@ -1,6 +1,6 @@
 {
     const f = document.createElement('iframe');
-    f.src = 'iframe-sandbox.html';
+    f.src = `${window.THIRD_PARTY_ORIGIN}/crawler/attribution/iframe-sandbox.html`;
     f.sandbox = 'allow-scripts';
     document.body.appendChild(f);
     function receiveMessage (event) {

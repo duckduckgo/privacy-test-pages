@@ -1,21 +1,21 @@
 {
     const descriptor = Object.getOwnPropertyDescriptor(
         Document.prototype,
-        'createElement'
+        'createComment'
     );
     const origImpl = descriptor.value;
     const src = document.currentScript.src;
     descriptor.value = function () {
         console.log(src, navigator.userAgent);
-        window.addResult('Navigator.prototype.userAgent', 'createElement prototype overload', location.href, src);
+        window.addResult('Navigator.prototype.userAgent', 'createComment prototype overload by 3rd-party', location.href, src);
         return origImpl.apply(this, arguments);
     };
 
     Object.defineProperty(
         Document.prototype,
-        'createElement',
+        'createComment',
         descriptor
     );
 
-    document.createElement('div');
+    document.createComment('foo');
 }

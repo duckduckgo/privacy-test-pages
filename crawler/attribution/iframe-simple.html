@@ -1,0 +1,4 @@
+<script>
+    console.log(location.href, navigator.userAgent);
+    parent.postMessage({ type: 'messageFromSimpleIframe', url: location.href }, '*');
+</script>

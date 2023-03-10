@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>API call attribution test</title>
+</head>
+
+<body>
+<p><a href="../../index.html">[Home]</a> ↣ <strong>[API call attribution test]</strong></p>
+
+<p>This page tests various ways of script injection to verify that API calls (navigator.userAgent in particular) are attributed to the correct script URL.</p>
+
+<table>
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>API call</th>
+            <th>Description</th>
+            <th>Context URL</th>
+            <th>Expected attribution URL</th>
+        </tr>
+    </thead>
+    <tbody id="results"></tbody>
+</table>
+<template id="result-row">
+    <tr>
+        <td class="idx"></td>
+        <td class="api"></td>
+        <td class="desc"></td>
+        <td class="context"></td>
+        <td class="expected"></td>
+    </tr>
+</template>
+
+<div id="container"></div>
+
+<script>
+    const ul = document.getElementById('results');
+    const template = document.getElementById('result-row');
+    const results = [];
+    let idx = 1;
+
+    window.addResult = function (api, desc, contextUrl, expectedAttributionUrl) {
+        results.push({ api, desc, contextUrl, expectedAttributionUrl });
+        const listEntry = template.content.cloneNode(true);
+        listEntry.querySelector('.idx').textContent = idx++;
+        listEntry.querySelector('.api').textContent = api;
+        listEntry.querySelector('.desc').textContent = desc;
+        listEntry.querySelector('.context').textContent = contextUrl;
+        listEntry.querySelector('.expected').textContent = expectedAttributionUrl;
+        ul.appendChild(listEntry);
+    };
+    const isLocalTest = window.location.hostname.endsWith('.example');
+    window.THIRD_PARTY_ORIGIN = isLocalTest ? '//third-party.example' : '//bad.third-party.site';
+
+    const s = document.createElement('script');
+    s.src = `${window.THIRD_PARTY_ORIGIN}/crawler/attribution/entrypoints/module.mjs`;
+    s.type = 'module';
+    document.body.appendChild(s);
+
+    const links = [
+        `${window.THIRD_PARTY_ORIGIN}/crawler/attribution/entrypoints/simple-3p-script.js`,
+        `${window.THIRD_PARTY_ORIGIN}/crawler/attribution/entrypoints/createelement.js`,
+        `${window.THIRD_PARTY_ORIGIN}/crawler/attribution/entrypoints/eval.js`,
+        `${window.THIRD_PARTY_ORIGIN}/crawler/attribution/entrypoints/new-function.js`,
+        `${window.THIRD_PARTY_ORIGIN}/crawler/attribution/entrypoints/dom0.js`,
+        `${window.THIRD_PARTY_ORIGIN}/crawler/attribution/entrypoints/blob-url.js`,
+        `${window.THIRD_PARTY_ORIGIN}/crawler/attribution/entrypoints/data-url.js`,
+        `${window.THIRD_PARTY_ORIGIN}/crawler/attribution/entrypoints/iframe-blob-url.js`,
+        `${window.THIRD_PARTY_ORIGIN}/crawler/attribution/entrypoints/iframe-data-url.js`,
+        `${window.THIRD_PARTY_ORIGIN}/crawler/attribution/entrypoints/iframe-javascript-url.js`,
+        `${window.THIRD_PARTY_ORIGIN}/crawler/attribution/entrypoints/iframe-document-write.js`,
+        `${window.THIRD_PARTY_ORIGIN}/crawler/attribution/entrypoints/iframe-sandbox.js`,
+        `${window.THIRD_PARTY_ORIGIN}/crawler/attribution/entrypoints/iframe-simple.js`,
+        `${window.THIRD_PARTY_ORIGIN}/crawler/attribution/entrypoints/eventlistener.js`,
+        `${window.THIRD_PARTY_ORIGIN}/crawler/attribution/entrypoints/settimeout.js`,
+        `${window.THIRD_PARTY_ORIGIN}/crawler/attribution/entrypoints/promise.js`,
+        `${window.THIRD_PARTY_ORIGIN}/crawler/attribution/entrypoints/deep-stack.js`,
+        `${window.THIRD_PARTY_ORIGIN}/crawler/attribution/entrypoints/deep-async-stack.js`,
+        `${window.THIRD_PARTY_ORIGIN}/crawler/attribution/entrypoints/web-worker.js`,
+        `${window.THIRD_PARTY_ORIGIN}/crawler/attribution/entrypoints/service-worker.js`,
+        '/crawler/attribution/entrypoints/1p-prototype-overload.js',
+        `${window.THIRD_PARTY_ORIGIN}/crawler/attribution/entrypoints/reusing-1p-prototype.js`,
+        `${window.THIRD_PARTY_ORIGIN}/crawler/attribution/entrypoints/3p-prototype-overload.js`,
+        '/crawler/attribution/entrypoints/reusing-3p-prototype.js'
+    ];
+    for (const l of links) {
+        const s = document.createElement('script');
+        s.src = l;
+        document.body.appendChild(s);
+    }
+</script>
+
+<script>
+    console.log(location.href, navigator.userAgent);
+    window.addResult('Navigator.prototype.userAgent', 'normal inline script', window.location.href, window.location.href);
+</script>
+
+<!-- document.write doesn't work from async scripts -->
+<script src="/crawler/attribution/entrypoints/document-write.js"></script>
+
+<style>
+    table {
+        border-radius: 3px;
+        border: solid 1px;
+        max-width: 100%;
+    }
+    table th,table td {
+        border: solid 1px;
+        padding: 10px;
+    }
+</style>
+</body>
+</html>

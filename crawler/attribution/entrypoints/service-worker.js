@@ -1,3 +1,4 @@
+// this is an entry point to set up a service worker. The actual API call is in sw-source.js
 navigator.serviceWorker.addEventListener('message', (e) => {
     window.addResult('Navigator.prototype.userAgent', 'service worker', e.data.serviceWorkerUrl, e.data.serviceWorkerUrl);
 });

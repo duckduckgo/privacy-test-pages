@@ -7,4 +7,5 @@
     parent.addResult('Navigator.prototype.userAgent', 'contentDocument.write() into iframe', location.href, '${document.currentScript.src}');
     </script>`
     );
+    s.contentDocument.close();
 }

@@ -165,14 +165,14 @@ const ads = {
         product: 200,
         useMPath: true,
         differentSubdomainAdDomain: true
-    },    
+    },
     15: {
         title: '[Ad 15] SERP Ad (heuristic) with 307 redirect',
         summary: '/y.js; 307 redirect status code, Empty ad_domain parameter; No u3 param',
         product: 12,
         emptyAdDomain: true,
         customRedirect: 307
-    },     
+    },
     16: {
         title: '[Ad 16] SERP Ad (heuristic) with 301 redirect',
         summary: '/y.js; 301 redirect status code, Empty ad_domain parameter; No u3 param',

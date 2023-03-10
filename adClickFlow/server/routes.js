@@ -3,8 +3,8 @@ async function routeInit () {
     const routes = express.Router();
 
     const { getPubUrl, getPubCompleteUrl } = await import('../shared/utils.mjs');
-    
-    function getRedirectStatusCode(req) {
+
+    function getRedirectStatusCode (req) {
         const codeFromUri = parseInt(req.query.customRedirect);
         return isNaN(codeFromUri) ? 302 : codeFromUri;
     }

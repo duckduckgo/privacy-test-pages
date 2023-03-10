@@ -5,10 +5,11 @@
     s.src = u;
     function receiveMessage (event) {
         if (event.data.type === 'messageFromDataIframe') {
-            window.addResult('Navigator.prototype.userAgent', 'iframe with a data: url', event.data.url, src);
+            window.addResult('Navigator.prototype.userAgent', 'iframe with a data: url', event.data.url, receiveMessage.currentSrc);
             window.removeEventListener('message', receiveMessage);
         }
     }
+    receiveMessage.currentSrc = src;
     window.addEventListener('message', receiveMessage);
     document.body.appendChild(s);
 }

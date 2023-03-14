@@ -18,7 +18,7 @@ const expectedResults = [
     { id: 'closest-empty-siblings-content-nested-div', description: 'closest-empty rule: parent of target element with non-empty siblings is not hidden', hidden: false },
     { id: 'closest-empty-frame-content', description: 'closest-empty rule: parent of element containing iframe is not hidden', hidden: false },
     { id: 'closest-empty-delayed-frame', description: 'closest-empty rule: parent of element that loads 3p frame after delay is not hidden', hidden: false },
-    { id: 'closest-empty-intermediate-element', description: 'closest-empty rule: intermediate elements should not be hidden when target is nested', hidden: false },
+    { id: 'closest-empty-image-element', description: 'closest-empty rule: element should not be hidden when it contains image content', hidden: false },
     { id: 'override-basic', description: 'override rule: element is not hidden when override rule present', hidden: false }
 ];
 
@@ -48,7 +48,8 @@ function init () {
 function checkResults () {
     for (const testCase of expectedResults) {
         const element = document.getElementById(testCase.id);
-        const isHidden = element.style.getPropertyValue('display') === 'none';
+        const boundingRect = element.getBoundingClientRect();
+        const isHidden = boundingRect.height === 0 && boundingRect.width === 0;
         const result = testCase.hidden === isHidden;
         updateTable(testCase.id, testCase.description, result);
     }

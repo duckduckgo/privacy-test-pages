@@ -2,6 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' https: http:; object-src 'none'; base-uri 'none'; style-src 'self'; font-src 'self';">
     <meta name="viewport" content="width=device-width">
     <title>Element Hiding</title>
     <script src='./main.js' defer></script>
@@ -108,8 +109,9 @@
             </div>
         </div>
         <div class="container">
-            <div id="closest-empty-intermediate-element">
+            <div id="closest-empty-image-element">
                 <div class="closest-empty-test">
+                    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==" width='25' height='25'/>
                 </div>
             </div>
         </div>

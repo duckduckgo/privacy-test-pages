@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Runtime checks</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <script src="../utils.js"></script>
+    <p><a href="../index.html">[Runtime checks]</a></p>
+
+    <p>This page verifies that runtime checking is enabled given the corresponding <a href="../config/basicRun.json">config</a></p>
+
+    <script>
+        // eslint-disable-next-line no-undef
+        it('Script that should not execute', async () => {
+            window.scripty1Ran = false;
+            const scriptElement = document.createElement('script');
+            scriptElement.innerText = 'window.scripty1Ran = true';
+            scriptElement.id = 'scripty';
+            scriptElement.setAttribute('type', 'application/evilscript');
+            document.body.appendChild(scriptElement);
+            const hadInspectorNode = scriptElement === document.querySelector('ddg-runtime-checks:last-of-type');
+            // Continue to modify the script element after it has been added to the DOM
+            scriptElement.integrity = 'sha256-123';
+            scriptElement.madeUpProp = 'val';
+            const instanceofResult = scriptElement instanceof HTMLScriptElement;
+            const scripty = document.querySelector('#scripty');
+
+            return [
+                { name: 'hadInspectorNode', result: hadInspectorNode, expected: true },
+                { name: 'expect script to match', result: scripty, expected: scriptElement },
+                { name: 'instanceof matches HTMLScriptElement', result: instanceofResult, expected: true },
+                { name: 'scripty.integrity', result: scripty.integrity, expected: 'sha256-123' },
+                { name: 'scripty.madeUpProp', result: scripty.madeUpProp, expected: 'val' },
+                { name: 'scripty.type', result: scripty.type, expected: 'application/evilscript' },
+                { name: 'scripty.id', result: scripty.id, expected: 'scripty' },
+                { name: 'script ran', result: window.scripty1Ran, expected: false }
+            ];
+        });
+
+        // eslint-disable-next-line no-undef
+        it('Script that should execute', async () => {
+            window.scripty2Ran = false;
+            const scriptElement = document.createElement('script');
+            scriptElement.innerText = 'window.scripty2Ran = true';
+            scriptElement.id = 'scripty2';
+            scriptElement.setAttribute('type', 'application/javascript');
+            document.body.appendChild(scriptElement);
+            const hadInspectorNode = scriptElement === document.querySelector('ddg-runtime-checks:last-of-type');
+            // Continue to modify the script element after it has been added to the DOM
+            scriptElement.madeUpProp = 'val';
+            const instanceofResult = scriptElement instanceof HTMLScriptElement;
+            const scripty = document.querySelector('#scripty2');
+
+            return [
+                { name: 'hadInspectorNode', result: hadInspectorNode, expected: true },
+                { name: 'expect script to match', result: scripty, expected: scriptElement },
+                { name: 'instanceof matches HTMLScriptElement', result: instanceofResult, expected: true },
+                { name: 'scripty.madeUpProp', result: scripty.madeUpProp, expected: 'val' },
+                { name: 'scripty.type', result: scripty.type, expected: 'application/javascript' },
+                { name: 'scripty.id', result: scripty.id, expected: 'scripty2' },
+                { name: 'script ran', result: window.scripty2Ran, expected: true }
+            ];
+        });
+
+        // eslint-disable-next-line no-undef
+        it('Invalid external script should trigger error listeners', async () => {
+            const scriptElement = document.createElement('script');
+            scriptElement.id = 'scripty3';
+            scriptElement.src = 'invalid://url';
+            scriptElement.setAttribute('type', 'application/javascript');
+
+            let listenerCount = 0;
+            let resolver = null;
+            const promise = new Promise(resolve => {
+                resolver = resolve;
+            });
+            scriptElement.onerror = () => {
+                listenerCount++;
+                resolver();
+            };
+
+            let resolver2 = null;
+            const promise2 = new Promise(resolve => {
+                resolver2 = resolve;
+            });
+            scriptElement.addEventListener('error', () => {
+                listenerCount++;
+                resolver2();
+            });
+
+            document.body.appendChild(scriptElement);
+            await Promise.all([promise, promise2]);
+
+            const hadInspectorNode = scriptElement === document.querySelector('ddg-runtime-checks:last-of-type');
+            // Continue to modify the script element after it has been added to the DOM
+            // @ts-expect-error https://app.asana.com/0/1201614831475344/1203979574128023/f
+            scriptElement.madeUpProp = 'val';
+            const instanceofResult = scriptElement instanceof HTMLScriptElement;
+            const scripty = document.querySelector('#scripty3');
+
+            return [
+                { name: 'listenerCount', result: listenerCount, expected: 2 },
+                { name: 'hadInspectorNode', result: hadInspectorNode, expected: true },
+                { name: 'instanceof matches HTMLScriptElement', result: instanceofResult, expected: true },
+                { name: 'scripty.madeUpProp', result: scripty.madeUpProp, expected: 'val' },
+                { name: 'scripty.type', result: scripty.type, expected: 'application/javascript' },
+                { name: 'scripty.id', result: scripty.id, expected: 'scripty3' },
+                { name: 'scripty.src', result: scripty.src, expected: 'invalid://url' }
+            ];
+        });
+
+        // eslint-disable-next-line no-undef
+        renderResults();
+    </script>
+</body>
+</html>

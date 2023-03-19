@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Runtime checks</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <script src="../utils.js"></script>
+    <p><a href="../index.html">[Runtime checks]</a></p>
+
+    <p>This page verifies that runtime checking filters HTML properties <a href="../config/filterProps.json">config</a></p>
+
+    <script>
+        function getAttributeValues (el) {
+            const attributes = {};
+            for (const attribute of el.getAttributeNames()) {
+                attributes[attribute] = el.getAttribute(attribute);
+            }
+            return attributes;
+        }
+        function getProps (el) {
+            const props = {};
+            for (const prop of Object.keys(el)) {
+                props[prop] = el[prop];
+            }
+            return props;
+        }
+
+        it('Script that should filter props', async () => {
+            // @ts-expect-error https://app.asana.com/0/1201614831475344/1203979574128023/f
+            window.scriptyRan = false;
+            const scriptElement = document.createElement('script');
+            scriptElement.innerText = 'window.scriptyRan = true';
+            scriptElement.id = 'scripty4';
+            scriptElement.setAttribute('type', 'application/javascript');
+            // @ts-expect-error made up prop is unknown to TS
+            scriptElement.madeUpProp1 = 'val';
+            // @ts-expect-error made up prop is unknown to TS
+            scriptElement.madeUpProp2 = 'val';
+            scriptElement.setAttribute('madeUpAttr1', '1');
+            scriptElement.setAttribute('madeUpAttr2', '2');
+            document.body.appendChild(scriptElement);
+            const hadInspectorNode = scriptElement === document.querySelector('ddg-runtime-checks');
+            // Continue to modify the script element after it has been added to the DOM
+            // @ts-expect-error made up prop is unknown to TS
+            scriptElement.madeUpProp1 = 'val';
+            // @ts-expect-error made up prop is unknown to TS
+            scriptElement.madeUpProp2 = 'val';
+            scriptElement.setAttribute('madeUpAttr3', '3');
+            scriptElement.setAttribute('madeUpAttr4', '4');
+            const instanceofResult = scriptElement instanceof HTMLScriptElement;
+            const scripty = document.querySelector('script#scripty4');
+            const nodeAndFakeNodeMatch = scripty === scriptElement;
+            return [
+                { name: 'hadInspectorNode', result: hadInspectorNode, expected: true },
+                { name: 'instanceof matches HTMLScriptElement', result: instanceofResult, expected: true },
+                { name: 'script ran', result: window.scriptyRan, expected: true },
+                { name: 'node and fake node match', result: nodeAndFakeNodeMatch, expected: false },
+                {
+                    name: 'attributes',
+                    result: getAttributeValues(scripty),
+                    expected: {
+                        id: 'scripty4',
+                        type: 'application/javascript',
+                        // madeupattr1: undefined,
+                        madeupattr2: '2',
+                        // madeupattr3: undefined,
+                        madeupattr4: '4'
+                    }
+                },
+                {
+                    name: 'props',
+                    result: getProps(scripty),
+                    expected: {
+                        madeUpProp2: 'val'
+                    }
+                }
+            ];
+        });
+
+        renderResults();
+    </script>
+</body>
+</html>

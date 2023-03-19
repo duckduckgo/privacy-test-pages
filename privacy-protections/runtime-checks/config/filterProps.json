@@ -1,0 +1,26 @@
+{
+    "features": {
+        "runtimeChecks": {
+            "state": "enabled",
+            "exceptions": [],
+            "settings": {
+                "taintCheck": "enabled",
+                "matchAllDomains": "enabled",
+                "matchAllStackDomains": "enabled",
+                "overloadInstanceOf": "enabled",
+                "domains": [
+                ],
+                "stackDomains": [
+                ],               
+                "tagModifiers": {
+                    "script": {
+                        "filters": {
+                            "property": ["madeUpProp1", "madeUpProp3"],
+                            "attribute": ["madeupattr1", "madeupattr3"]
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

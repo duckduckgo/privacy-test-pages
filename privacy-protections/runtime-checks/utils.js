@@ -13,7 +13,7 @@ function buildTableCell (value, tagName = 'td') {
 
 /**
  * Builds a result table for the given results.
- * @param {ResultRow} results The results to build the table for.
+ * @param {Record<string, ResultRow>} results The results to build the table for.
  * @return {Element} The table element.
  */
 // eslint-disable-next-line no-unused-vars
@@ -27,15 +27,41 @@ function buildResultTable (results) {
     tr.appendChild(buildTableCell('Expected', 'th'));
     thead.appendChild(tr);
     table.appendChild(thead);
-    const tbody = document.createElement('tbody');
-    results.forEach((result) => {
+    for (const name in results) {
+        const resultSection = results[name];
+        const tbody = document.createElement('tbody');
         tr = document.createElement('tr');
-        tr.appendChild(buildTableCell(result.name));
-        tr.appendChild(buildTableCell(result.result));
-        tr.appendChild(buildTableCell(result.expected));
-        tr.classList.add(result.result === result.expected ? 'pass' : 'fail');
+        const heading = buildTableCell(name, 'th');
+        heading.colSpan = 3;
+        tr.appendChild(heading);
         tbody.appendChild(tr);
-    });
-    table.appendChild(tbody);
+
+        resultSection.forEach((result) => {
+            const resultOut = JSON.stringify(result.result);
+            const expectedOut = JSON.stringify(result.expected);
+            tr = document.createElement('tr');
+            tr.appendChild(buildTableCell(result.name));
+            tr.appendChild(buildTableCell(resultOut));
+            tr.appendChild(buildTableCell(expectedOut));
+            tr.classList.add(resultOut === expectedOut ? 'pass' : 'fail');
+            tbody.appendChild(tr);
+        });
+        table.appendChild(tbody);
+    }
     return table;
+}
+
+window.ongoingTests = [];
+// eslint-disable-next-line no-unused-vars
+function it (name, test) {
+    window.ongoingTests.push({ name, test });
+}
+// eslint-disable-next-line no-unused-vars
+async function renderResults () {
+    const results = {};
+    for (const test of window.ongoingTests) {
+        const result = await test.test();
+        results[test.name] = result;
+    }
+    document.body.appendChild(buildResultTable(results));
 }

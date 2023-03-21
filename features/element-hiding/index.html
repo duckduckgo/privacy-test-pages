@@ -9,6 +9,7 @@
         .container {
             width: 400px;
             height: 200px;
+            display: block;
             background-color: rgb(249, 251, 251);
             color: rgb(88, 104, 113);
             font-size: 16px;
@@ -76,6 +77,27 @@
             <iframe scrolling="no" width="400" height="200" src="about:blank" id="hide-empty-about-blank-frame" style="border: none; overflow: hidden; display: block;">
             </iframe>
         </div>
+        <div class="container hide-empty-test" id="hide-empty-img-element">
+            <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==" width='25' height='25'/>
+        </div>
+        <div class="container hide-empty-test" id="hide-empty-svg-element">
+            <svg>
+                <circle cx="50" cy="50" r="40" stroke="orange" stroke-width="5" fill="blue"></circle>
+            </svg>
+        </div>
+        <div class="container hide-empty-test" id="hide-empty-pixel-element">
+            <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==" width='1' height='1'/>
+        </div>
+        <input class="hide-empty-test" id="hide-empty-input">
+        <div class="container hide-empty-test" id="hide-empty-form-element">
+            <form>
+                <input>
+            </form>
+        </div>
+        <div class="container hide-empty-test" id="hide-empty-media-element">
+            <canvas id="demo-canvas">
+            </canvas>
+        </div>
     </div>
 
     <div id="closest-empty">
@@ -107,10 +129,9 @@
             <div class="container closest-empty-test frame-container-delayed">
             </div>
         </div>
-        <div class="container">
-            <div id="closest-empty-intermediate-element">
-                <div class="closest-empty-test">
-                </div>
+        <div id="closest-empty-img-element">
+            <div class="container closest-empty-test">
+                <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==" width='25' height='25'/>
             </div>
         </div>
         <div id="closest-empty-delayed-parent">

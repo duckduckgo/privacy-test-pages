@@ -8,3 +8,6 @@ git reset --hard origin/main
 
 # Force pull
 git pull origin main --force
+
+# Install dependencies
+npm i

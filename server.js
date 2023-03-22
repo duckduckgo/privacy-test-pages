@@ -251,6 +251,8 @@ app.get('/redirect', (req, res) => {
     res.end();
 });
 
+app.use('/content-scope-scripts/', express.static('node_modules/@duckduckgo/content-scope-scripts/integration-test/test-pages/'));
+
 const blockingRoutes = require('./privacy-protections/request-blocking/server/routes');
 app.use('/block-me', blockingRoutes);
 

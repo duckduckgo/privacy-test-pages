@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Middleframe Test</title>
+</head>
+<body>
+    <script>
+        const iframe = document.createElement('iframe');
+        iframe.src = `./frame.html?${Math.random()}`;
+
+        const onMessage = msg => {
+            if (msg.data.action && msg.data.action === 'fetch') {
+                iframe.addEventListener('load', () => {
+                    // pass message from upper frame to lower frame
+                    iframe.contentWindow.postMessage({ action: 'fetch', url: msg.data.url });
+                });
+                document.body.appendChild(iframe);
+            } else if (msg.data && (msg.data.includes('frame fetch loaded') || msg.data.includes('frame fetch failed'))) {
+                // pass message from lower frame to upper frame
+                window.parent.postMessage(msg.data, '*');
+                window.removeEventListener('message', onMessage);
+            }
+        };
+
+        window.addEventListener('message', onMessage);
+    </script>
+</body>
+</html>

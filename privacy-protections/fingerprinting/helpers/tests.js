@@ -577,14 +577,14 @@ const tests = [
 
     // WebRTC
     {
-        id: 'RTCIceCandidate.candiate',
+        id: 'RTCIceCandidate.candidate',
         category: 'webrtc',
         getValue: () => {
             let resolve;
             const promise = new Promise((res, rej) => { resolve = res; });
 
             const c = new RTCPeerConnection({
-                iceServers: [{ urls: 'stun:stun.l.google.com:19302?transport=udp' }]
+                iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
             });
 
             c.onicecandidate = result => {

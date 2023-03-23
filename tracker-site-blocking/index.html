@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Option blocked request loaded via script</title>
+
+  <script src="//publisher-company.site/shared/utils.mjs"></script>
+
+</head>
+<body>
+<p><a href="../index.html">[Home]</a></p>
+
+<p>This will test conditional tracker blocking per site (option blocking). Clicking the buttons below will open bad.third-party.site (Site A) or first-party.site (Site B).</p>
+<p>The test tracker should be blocked on Site A, but not on Site B. Check dashboard and devtools network tab to see if the tracker was blocked</p>
+
+<ul>
+    <li><button type="button" onclick="window.location.href = 'https://bad.third-party.site/tracker-site-blocking/index.html'">Open Site A</button></li>
+    <li><button type="button" onclick="window.location.href = 'https://www.first-party.site/tracker-site-blocking/index.html'">Open Site B</button></li>
+</ul>
+
+</body>
+</html>

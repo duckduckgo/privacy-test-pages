@@ -20,11 +20,16 @@ function getAdUrl (id, hostname) {
     const adPath = `https://www.${adHostname}/aclick`;
     const adUrl = new URL(adPath);
     const params = ['ld', 'u', 'rlid', 'vqd', 'iurl', 'CID'];
+    const customRedirect = 'customRedirect' in ads[id];
     // add some fake values
     for (const param of params) {
         adUrl.searchParams.append(param, `${param}Value`);
     }
     adUrl.searchParams.append('ID', id)
+
+    if (customRedirect) {
+        adUrl.searchParams.append('customRedirect', ads[id]['customRedirect']);
+    }
 
     // Build Search Redirection URL
     const useMPath = 'useMPath' in ads[id];
@@ -61,6 +66,11 @@ function getAdUrl (id, hostname) {
     } else if (includeParam) {
         searchUrl.searchParams.append('u3', 'foo');
     }
+
+    if (customRedirect) {
+        searchUrl.searchParams.append('customRedirect', ads[id]['customRedirect']);
+    }
+
     // normal URLs use a different param, but we use 'u' here to avoid conflict with other params.
     searchUrl.searchParams.append('u', encodeURIComponent(adUrl));
     return searchUrl.href;
@@ -155,6 +165,20 @@ const ads = {
         product: 200,
         useMPath: true,
         differentSubdomainAdDomain: true
+    },
+    15: {
+        title: '[Ad 15] SERP Ad (heuristic) with 307 redirect',
+        summary: '/y.js; 307 redirect status code, Empty ad_domain parameter; No u3 param',
+        product: 12,
+        emptyAdDomain: true,
+        customRedirect: 307
+    },
+    16: {
+        title: '[Ad 16] SERP Ad (heuristic) with 301 redirect',
+        summary: '/y.js; 301 redirect status code, Empty ad_domain parameter; No u3 param',
+        product: 12,
+        emptyAdDomain: true,
+        customRedirect: 301
     }
 };
 

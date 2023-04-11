@@ -10,4 +10,4 @@ git reset --hard origin/main
 git pull origin main --force
 
 # Install dependencies
-npm ci
+npm ci --ignore-scripts

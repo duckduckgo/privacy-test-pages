@@ -6,10 +6,10 @@
         "name": "Navigate to search page",
         "action": {
           "type": "navigate",
-          "url": "https://www.search-company.site/"
+          "url": "https://www.search-company.site/#ad-id-1"
         },
         "expected": {
-          "url": "https://www.search-company.site/"
+          "url": "https://www.search-company.site/#ad-id-1"
         }
       },
       {
@@ -49,10 +49,10 @@
         "name": "Navigate to search page",
         "action": {
           "type": "navigate",
-          "url": "https://www.search-company.site/"
+          "url": "https://www.search-company.site/#ad-id-2"
         },
         "expected": {
-          "url": "https://www.search-company.site/"
+          "url": "https://www.search-company.site/#ad-id-2"
         }
       },
       {
@@ -93,10 +93,10 @@
         "name": "Navigate to search page",
         "action": {
           "type": "navigate",
-          "url": "https://www.search-company.site/"
+          "url": "https://www.search-company.site/#ad-id-3"
         },
         "expected": {
-          "url": "https://www.search-company.site/"
+          "url": "https://www.search-company.site/#ad-id-3"
         }
       },
       {
@@ -136,10 +136,10 @@
         "name": "Navigate to search page",
         "action": {
           "type": "navigate",
-          "url": "https://www.search-company.site/"
+          "url": "https://www.search-company.site/#ad-id-4"
         },
         "expected": {
-          "url": "https://www.search-company.site/"
+          "url": "https://www.search-company.site/#ad-id-4"
         }
       },
       {
@@ -180,10 +180,10 @@
         "name": "Navigate to search page",
         "action": {
           "type": "navigate",
-          "url": "https://www.search-company.site/"
+          "url": "https://www.search-company.site/#ad-id-5"
         },
         "expected": {
-          "url": "https://www.search-company.site/"
+          "url": "https://www.search-company.site/#ad-id-5"
         }
       },
       {
@@ -223,10 +223,10 @@
         "name": "Navigate to search page",
         "action": {
           "type": "navigate",
-          "url": "https://www.search-company.site/"
+          "url": "https://www.search-company.site/#ad-id-6"
         },
         "expected": {
-          "url": "https://www.search-company.site/"
+          "url": "https://www.search-company.site/#ad-id-6"
         }
       },
       {
@@ -267,10 +267,10 @@
         "name": "Navigate to search page",
         "action": {
           "type": "navigate",
-          "url": "https://www.search-company.site/"
+          "url": "https://www.search-company.site/#ad-id-7"
         },
         "expected": {
-          "url": "https://www.search-company.site/"
+          "url": "https://www.search-company.site/#ad-id-7"
         }
       },
       {
@@ -310,10 +310,10 @@
         "name": "Navigate to search page",
         "action": {
           "type": "navigate",
-          "url": "https://www.search-company.site/"
+          "url": "https://www.search-company.site/#ad-id-8"
         },
         "expected": {
-          "url": "https://www.search-company.site/"
+          "url": "https://www.search-company.site/#ad-id-8"
         }
       },
       {
@@ -354,10 +354,10 @@
         "name": "Navigate to search page",
         "action": {
           "type": "navigate",
-          "url": "https://www.search-company.site/"
+          "url": "https://www.search-company.site/#ad-id-5"
         },
         "expected": {
-          "url": "https://www.search-company.site/"
+          "url": "https://www.search-company.site/#ad-id-5"
         }
       },
       {
@@ -426,10 +426,10 @@
         "name": "Navigate to search page",
         "action": {
           "type": "navigate",
-          "url": "https://www.search-company.site/"
+          "url": "https://www.search-company.site/#ad-id-5"
         },
         "expected": {
-          "url": "https://www.search-company.site/"
+          "url": "https://www.search-company.site/#ad-id-5"
         }
       },
       {

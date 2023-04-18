@@ -22,5 +22,26 @@
         </fieldset>
     </form>
 </div>
+
+<form id="click-form" novalidate action="/autofill/signup.html">
+    <h3>Sign in form with click handler</h3>
+    <fieldset>
+      <label for="email">Email</label>
+      <input id="email" type="email">
+      <label for="password">Password</label>
+      <input id="password" type="password">
+      <button type="submit">Sign in</button>
+    </fieldset>
+  </form>
+  <script>
+    const clickForm = document.getElementById('click-form');
+    const clickFormButton = clickForm.querySelector('button');
+    clickFormButton?.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        // Note that form.submit() does not fire a submit event
+        clickForm.submit();
+    }, true);
+  </script>
 </body>
 </html>

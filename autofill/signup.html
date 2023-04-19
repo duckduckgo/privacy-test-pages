@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Password generation during signup</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <p><a href="../index.html">[Home]</a></p>
+  <div class="">
+    <form action="/autofill/signup.html" id="signup">
+        <h2>Password generation during signup</h2>
+        <fieldset>
+            <label for="email">Email</label>
+            <input id="email" type="email">
+            <label for="password">Password</label>
+            <input id="password" type="password" passwordrules="minlength: 5; maxlength: 10">
+            <label for="password-2">Password Confirmation</label>
+            <input id="password-2" type="password" passwordrules="minlength: 5; maxlength: 10">
+            <button id="submit-signup" type="submit">Sign up</button>
+        </fieldset>
+    </form>
+</div>
+
+<form id="click-form" novalidate action="/autofill/signup.html">
+    <h3>Sign in form with click handler</h3>
+    <fieldset>
+      <label for="email-signin">Email</label>
+      <input id="email-signin" type="email">
+      <label for="password-signin">Password</label>
+      <input id="password-signin" type="password">
+      <button id="submit-signin" type="submit">Sign in</button>
+    </fieldset>
+  </form>
+  <script>
+    const clickForm = document.getElementById('click-form');
+    const clickFormButton = clickForm.querySelector('button');
+    clickFormButton?.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        // Note that form.submit() does not fire a submit event
+        clickForm.submit();
+    }, true);
+  </script>
+</body>
+</html>

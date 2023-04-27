@@ -1,5 +1,5 @@
 /* exported commonTests */
-/* global cookieStore, THIRD_PARTY_TRACKER_ORIGIN, THIRD_PARTY_ORIGIN */
+/* global cookieStore, THIRD_PARTY_TRACKER_ORIGIN, THIRD_PARTY_ORIGIN, THIRD_PARTY_AD_ORIGIN */
 
 function generateCookieHeaderTest (namePrefix, origin, cookiename) {
     return {
@@ -29,6 +29,8 @@ if (window.top === window.self) {
     context = 'top';
 } else if (document.location.origin === THIRD_PARTY_ORIGIN) {
     context = 'thirdparty';
+} else if (document.location.origin === THIRD_PARTY_AD_ORIGIN) {
+    context = 'thirdpartyAd';
 } else if (document.location.origin === THIRD_PARTY_TRACKER_ORIGIN) {
     context = 'thirdpartytracker';
 }

@@ -1,4 +1,4 @@
-/* globals commonTests,THIRD_PARTY_ORIGIN,THIRD_PARTY_TRACKER_ORIGIN */
+/* globals commonTests,THIRD_PARTY_ORIGIN,THIRD_PARTY_TRACKER_ORIGIN,THIRD_PARTY_AD_ORIGIN */
 
 const storeButton = document.querySelector('#store');
 const retriveButton = document.querySelector('#retrive');
@@ -82,6 +82,7 @@ function create3pIframeTest (name, origin) {
 const tests = [
     create3pIframeTest('safe', THIRD_PARTY_ORIGIN),
     create3pIframeTest('tracking', THIRD_PARTY_TRACKER_ORIGIN),
+    create3pIframeTest('ad', THIRD_PARTY_AD_ORIGIN),
     {
         id: 'browser cache',
         store: (data) => {

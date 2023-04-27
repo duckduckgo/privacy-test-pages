@@ -73,11 +73,14 @@ function isPayHostname (req) {
 // Handle internal redirects to adClickFlow directories
 app.all('*', (req, res, next) => {
     const AD_FLOW = '/adClickFlow';
+    const PRIVACY_PROTECTIONS = '/privacy-protections';
     if (
         // If we're not a ad click flow domain ignore.
         !(isSearchHostname(req) || isAdHostname(req) || isPubHostname(req) || isPayHostname(req)) ||
         // If we've already passed to the ad dir then ignore.
-        req.path.startsWith(AD_FLOW)
+        req.path.startsWith(AD_FLOW) ||
+        // If we're a privacy protection dir then ignore.
+        req.path.startsWith(PRIVACY_PROTECTIONS)
     ) {
         next();
         return;

@@ -45,6 +45,12 @@ const tests = [
         }
     },
     {
+        id: 'web-midi-api',
+        run: () => {
+            return ('requestMIDIAccess' in navigator);
+        }
+    },
+    {
         id: 'accelerometer-api',
         run: () => {
             return ('Accelerometer' in window);
@@ -219,6 +225,12 @@ const tests = [
         id: 'fledge',
         run: () => {
             return ('joinAdInterestGroup' in navigator) || ('runAdAuction' in navigator);
+        }
+    },
+    {
+        id: 'window-placement-api',
+        run: () => {
+            return ('screen' in window && 'isExtended' in window.screen);
         }
     }
 ];

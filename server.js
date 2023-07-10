@@ -2,6 +2,7 @@ const express = require('express');
 const ws = require('ws');
 const app = express();
 const port = process.env.PORT || 3000;
+const host = process.env.HOST || '127.0.0.1';
 const url = require('url');
 const cmd = require('node-cmd');
 const crypto = require('crypto');
@@ -20,8 +21,8 @@ function fullUrl (req) {
 
 // Start the HTTP server. On Glitch the proxy will forward both HTTP and HTTPS
 // traffic to this server.
-const listener = app.listen(port, () => {
-    console.log(`HTTP Server listening at port ${listener.address().port}`);
+const listener = app.listen(port, host, () => {
+    console.log(`HTTP Server listening at ${listener.address().address}:${listener.address().port}`);
 });
 
 // Start HTTPS server for https://first-party.example and https://third-party.example

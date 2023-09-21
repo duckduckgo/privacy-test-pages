@@ -93,7 +93,7 @@ router.get('/get_hsts.png', (req, res) => {
     // The X-Forwarded-Proto header is added by Glitch's proxy
     // and reveals the original protocol used during the connection
     // This header will always show HTTPS for all custom domains,
-    // it's only correct for privacy-test-pages.glitch.me.
+    // it's only correct for privacy-test-pages.site.
     if (req.headers['x-forwarded-proto']) {
         isHTTPS = req.headers['x-forwarded-proto'].split(',', 1)[0] === 'https';
     }

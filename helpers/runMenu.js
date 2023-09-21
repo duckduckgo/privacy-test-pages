@@ -42,7 +42,7 @@ function initMenu () {
         'bad.third-party.site',
         'good.third-party.site',
         'broken.third-party.site',
-        'privacy-test-pages.glitch.me'
+        'privacy-test-pages.site'
     ].forEach((hostname) => {
         const li = document.createElement('li');
         const a = document.createElement('a');

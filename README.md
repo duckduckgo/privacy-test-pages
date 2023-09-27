@@ -28,7 +28,7 @@ We have couple of test domains, that all resolve to `privacy-test-pages.site`, w
 - `broken.third-party.site` - tracking third party that we can't block (e.g. due to brekage), it's on our blocklist, but it will not be blocked by our clients
 - `bad.third-party.site` - tracking third party that's on our blocklist and our clients will block
 
-We also have additional test domains that resolve to `ad-attribution-test-pages.site`, specifically for the Ad Attribution tests hosted [here](https://www.search-company.site):
+We also have additional test domains specifically for the Ad Attribution tests hosted [here](https://www.search-company.site):
 
 - `www.search-company.site` - Simulated search provider
 - `convert.ad-company.site` - Simulated ad provider conversion ping

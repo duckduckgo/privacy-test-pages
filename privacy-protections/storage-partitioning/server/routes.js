@@ -89,7 +89,7 @@ router.get('/set_hsts.png', (req, res) => {
 });
 
 router.get('/get_hsts.png', (req, res) => {
-    let isHTTPS = req.protocol === 'https';
+    const isHTTPS = req.protocol === 'https';
     if (isHTTPS) {
         const headers = { 'Cache-Control': 'max-age=0' };
         res.sendFile('image.png', { root: __dirname, headers });

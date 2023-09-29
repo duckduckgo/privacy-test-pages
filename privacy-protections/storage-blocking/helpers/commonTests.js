@@ -158,7 +158,7 @@ const commonTests = [
         },
         extra: () => {
             if (window.cookieStore) {
-                return cookieStore.get('cookiestoredata').then(cookie => {
+                return cookieStore.get('swcookiestoredata').then(cookie => {
                     return 'expires in ' + ((cookie.expires - Date.now()) / (1000 * 60 * 60 * 24)).toFixed(2) + ' days';
                 });
             }

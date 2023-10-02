@@ -2,7 +2,7 @@
 🛡 Collection of pages for testing various privacy and security features of browsers and browser extensions.
 
 ## How to use it?
-The site with all tests is live [here](https://privacy-test-pages.glitch.me/). All tests run either on page load or provide instructions on how to run them.
+The site with all tests is live [here](https://privacy-test-pages.site/). All tests run either on page load or provide instructions on how to run them.
 
 ### Privacy Protections Tests
 
@@ -21,14 +21,14 @@ Please note that we are not taking external contributions for new test pages, bu
 
 ### Test domains
 
-We have couple of test domains, that all resolve to `privacy-test-pages.glitch.me`, which help us simulate various scenarios:
+We have couple of test domains, that all resolve to `privacy-test-pages.site`, which help us simulate various scenarios:
 
 - `www.first-party.site` - an alternative first-party domain used for tests that require first-party resources on other subdomains (e.g., `hsts.first-party.site`)
 - `good.third-party.site` - non-tracking third party, it's not on our blocklist and will not be blocked by our clients
 - `broken.third-party.site` - tracking third party that we can't block (e.g. due to brekage), it's on our blocklist, but it will not be blocked by our clients
 - `bad.third-party.site` - tracking third party that's on our blocklist and our clients will block
 
-We also have additional test domains that resolve to `ad-attribution-test-pages.glitch.me`, specifically for the Ad Attribution tests hosted [here](https://www.search-company.site):
+We also have additional test domains specifically for the Ad Attribution tests hosted [here](https://www.search-company.site):
 
 - `www.search-company.site` - Simulated search provider
 - `convert.ad-company.site` - Simulated ad provider conversion ping

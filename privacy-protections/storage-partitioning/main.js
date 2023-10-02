@@ -252,8 +252,8 @@ if (window.location.hostname === 'localhost') {
     runButton.setAttribute('disabled', '');
 }
 
-// warn the user if loaded over privacy-test-pages.glitch.me
-if (window.location.hostname === 'privacy-test-pages.glitch.me') {
+// warn the user if loaded over privacy-test-pages.site
+if (window.location.hostname === 'privacy-test-pages.site') {
     const warning = document.getElementById('warning');
     warning.innerHTML = `⚠ Test must be accessed via ${FIRST_PARTY_HTTPS}. Redirecting you... ⚠`;
     runButton.setAttribute('disabled', '');

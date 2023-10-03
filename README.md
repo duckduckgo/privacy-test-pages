@@ -89,4 +89,4 @@ This will generate two files (`first-party.example+11-key.pem` and `first-party.
 
 ## How to deploy it?
 
-After PR is merged test pages are automatically deployed to our own infra ([privacy-test-pages.site](https://privacy-test-pages.site)) and two legacy locations: glitch ([privacy-test-pages](https://glitch.com/edit/#!/privacy-test-pages) and github pages.
+After PR is merged test pages are automatically deployed to our own infra ([privacy-test-pages.site](https://privacy-test-pages.site)) and two legacy locations: glitch ([privacy-test-pages](https://glitch.com/edit/#!/privacy-test-pages)) and github pages.

@@ -1,4 +1,4 @@
-/* globals commonTests,THIRD_PARTY_ORIGIN,THIRD_PARTY_TRACKER_ORIGIN,THIRD_PARTY_AD_ORIGIN */
+/* globals commonTests,THIRD_PARTY_ORIGIN,THIRD_PARTY_TRACKER_ORIGIN,THIRD_PARTY_AD_ORIGIN,cookieStore */
 
 const storeButton = document.querySelector('#store');
 const retriveButton = document.querySelector('#retrive');
@@ -145,6 +145,24 @@ const tests = [
 
                     throw new Error(`Invalid response (${r.status})`);
                 });
+        }
+    },
+    {
+        id: 'service worker cookieStore',
+        store: async (data) => {
+            await navigator.serviceWorker.register(`./service-worker.js?data=${data}`, { scope: './' });
+            const resp = await fetch(`./service-worker-set-cookie?name=swcookiestoredata&data=${data}`);
+            return await resp.text();
+        },
+        retrive: async () => {
+            return (await cookieStore.get('swcookiestoredata')).value;
+        },
+        extra: () => {
+            if (window.cookieStore) {
+                return cookieStore.get('swcookiestoredata').then(cookie => {
+                    return 'expires in ' + ((cookie.expires - Date.now()) / (1000 * 60 * 60 * 24)).toFixed(2) + ' days';
+                });
+            }
         }
     }
 ];

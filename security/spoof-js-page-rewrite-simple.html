@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+	<title>URL Spoofing - Simple JS page rewrite</title>
+	<script>
+		function run() {
+			document.write("Not DDG.<br>");
+			document.location = "https://duckduckgo.com:8443";
+		}
+	</script>
+</head>
+
+<body>
+	<p><a href="../index.html">[Home]</a></p>
+
+	This test will try to confuse the browser to show the wrong domain in the URL bar by rewriting the current page content and loading a URL that will timeout. 
+
+	<button onclick="run()">Start</button>
+</body>
+
+</html>

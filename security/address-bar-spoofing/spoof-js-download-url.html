@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>URL Spoofing - Download URL</title>
+  <script>
+    // eslint-disable-next-line no-unused-vars
+    function run() {
+      const w = open()
+      w.opener = null
+      w.document.write('<h1>Not Google.</h1>')
+      w.location = 'http://goo.gl/3Hywh'
+    }
+  </script>
+</head>
+
+<body>
+  <p><a href="../index.html">[Home]</a></p>
+  This test uses a Google hosted download URL for downloading a file to spoof the browser into displaying the download
+  URL as the current origin while rewriting the document content to spoof the address bar.
+  <button onclick="run()">Start</button>
+</body>
+
+</html>

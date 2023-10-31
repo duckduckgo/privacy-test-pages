@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <meta http-equiv="Content-Security-Policy" content="form-action https://duck.co" />
+    <title>URL Spoofing - Redirect Form Action</title>
+    <script>
+        // eslint-disable-next-line no-unused-vars
+        function run() {
+            document.forms[0].submit();
+        }
+    </script>
+</head>
+
+<body>
+    <p><a href="../index.html">[Home]</a></p>
+    This test uses a form action on a redirect URL to trick the browser into displaying the
+    redirect URL as the current address bar value, while trying to remain on the current page.
+    <form action="https://duck.co/">
+    </form>
+</body>
+
+</html>

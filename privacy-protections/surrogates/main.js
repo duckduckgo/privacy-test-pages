@@ -49,6 +49,14 @@ function checkSurrogate () {
 }
 
 const surrogates = {
+    'head': {
+        notes: 'Loading surrogate in <head>',
+        load: () => Promise.resolve(checkSurrogate()), // included in the html
+        cleanUp: () => {
+            document.getElementById('head-tag').remove();
+            delete window.ga;
+        }
+    },
     'main-frame': {
         url: 'https://google-analytics.com/analytics.js',
         notes: 'Loading surrogate in the main frame.',
@@ -111,33 +119,37 @@ const surrogates = {
     }
 };
 
+async function injectSurrogate(testData) {
+    return new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+
+        if (testData.crossOrigin) {
+            s.crossOrigin = testData.crossOrigin;
+        }
+        if (testData.integrity) {
+            s.integrity = testData.integrity;
+        }
+
+        s.onload = () => {
+            updateTable({ name, testData });
+            resolve();
+        };
+
+        s.onerror = (error) => {
+            updateTable({ name, testData, error });
+            resolve();
+        };
+
+        s.src = testData.url;
+
+        document.body.appendChild(s);
+    })
+}
+
 (async function loadSurrogates () {
     for (const [name, testData] of Object.entries(surrogates)) {
         if (testData.url) {
-            await new Promise((resolve, reject) => {
-                const s = document.createElement('script');
-
-                if (testData.crossOrigin) {
-                    s.crossOrigin = testData.crossOrigin;
-                }
-                if (testData.integrity) {
-                    s.integrity = testData.integrity;
-                }
-
-                s.onload = () => {
-                    updateTable({ name, testData });
-                    resolve();
-                };
-
-                s.onerror = (error) => {
-                    updateTable({ name, testData, error });
-                    resolve();
-                };
-
-                s.src = testData.url;
-
-                document.body.appendChild(s);
-            });
+            await injectSurrogate(testData)
         } else {
             testData.load().then(result => {
                 testData.test = () => result;

@@ -116,6 +116,13 @@ const surrogates = {
 
             return promise;
         }
+    },
+    'delayed-set': {
+        notes: 'Set script src after insert',
+        url: 'https://google-analytics.com/analytics.js',
+        delay: true,
+        test: checkSurrogate,
+        cleanUp: () => { delete window.ga; }
     }
 };
 
@@ -140,9 +147,17 @@ async function injectSurrogate (testData) {
             resolve();
         };
 
-        s.src = testData.url;
+        if (!testData.delay) {
+            s.src = testData.url;
+        }
 
         document.body.appendChild(s);
+
+        if (testData.delay) {
+            setTimeout(() => {
+                s.src = testData.url;
+            }, 500);
+        }
     });
 }
 

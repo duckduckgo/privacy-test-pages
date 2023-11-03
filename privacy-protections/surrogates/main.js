@@ -49,7 +49,7 @@ function checkSurrogate () {
 }
 
 const surrogates = {
-    'head': {
+    head: {
         notes: 'Loading surrogate in <head>',
         load: () => Promise.resolve(checkSurrogate()), // included in the html
         cleanUp: () => {
@@ -119,7 +119,7 @@ const surrogates = {
     }
 };
 
-async function injectSurrogate(testData) {
+async function injectSurrogate (testData) {
     return new Promise((resolve, reject) => {
         const s = document.createElement('script');
 
@@ -143,13 +143,13 @@ async function injectSurrogate(testData) {
         s.src = testData.url;
 
         document.body.appendChild(s);
-    })
+    });
 }
 
 (async function loadSurrogates () {
     for (const [name, testData] of Object.entries(surrogates)) {
         if (testData.url) {
-            await injectSurrogate(testData)
+            await injectSurrogate(testData);
         } else {
             testData.load().then(result => {
                 testData.test = () => result;

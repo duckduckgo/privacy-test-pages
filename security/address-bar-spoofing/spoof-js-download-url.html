@@ -10,15 +10,15 @@
     function run() {
       const w = open()
       w.opener = null
-      w.document.write('<h1>Not Google.</h1>')
-      w.location = 'http://goo.gl/3Hywh'
+      w.document.write('<h1>Not Third Party Site.</h1>')
+      w.location = 'https://bad.third-party.site/features/download/file/pdf'
     }
   </script>
 </head>
 
 <body>
   <p><a href="../index.html">[Home]</a></p>
-  This test uses a Google hosted download URL for downloading a file to spoof the browser into displaying the download
+  This test uses a download URL for downloading a file to spoof the browser into displaying the download
   URL as the current origin while rewriting the document content to spoof the address bar.
   <button onclick="run()">Start</button>
 </body>

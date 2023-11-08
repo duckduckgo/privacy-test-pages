@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>URL Spoofing - Basic Auth Whitespace Repeated</title>
+    <script>
+        // eslint-disable-next-line no-unused-vars
+        function run() {
+            var whitespaces = "\u3000".repeat(300);
+            location = `https://www.google.com${whitespaces}@example.com/`;
+        }
+    </script>
+</head>
+
+<body>
+    <p><a href="../index.html">[Home]</a></p>
+    This test uses 300 repeated unicode whitespace characters inside the username field of the basicauth portion
+    of the URL to perform an address bar spoofing attack.
+    <button id="run" onclick="run()">run</button>
+</body>
+
+</html>

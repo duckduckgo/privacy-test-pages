@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>URL Spoofing - Simple Location</title>
+    <script>
+        // eslint-disable-next-line no-unused-vars
+        function run() {
+            location = "httpx://www.duckduckgo.com";
+        }
+    </script>
+</head>
+
+<body>
+    <p><a href="../index.html">[Home]</a></p>
+
+    This is the most simple test for URL spoofing. Simply rewrite the current location using an unsupported scheme.
+
+    <button onclick="run()">Start</button>
+</body>
+
+</html>

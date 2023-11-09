@@ -13,14 +13,14 @@
                 w.location = 'tel://duckduckgo.com'
                 setTimeout(function () {
                     w.history.back()
-                }, 2100)
-            }, 2000)
+                }, 600)
+            }, 500)
         }
     </script>
 </head>
 
 <body>
-    <p><a href="../index.html">[Home]</a></p>
+    <p><a href="./index.html">[Back]</a></p>
 
     This test will try to confuse the browser to show the wrong domain in the URL bar by loading a static Base64
     encoded document, rewriting the current page, and then navigating to a tel: URL.

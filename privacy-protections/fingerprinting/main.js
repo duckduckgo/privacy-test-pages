@@ -55,7 +55,7 @@ function runTests () {
     tests.forEach(test => {
         if (disabledTests.includes(test.id)) {
             console.log(`Test "${test.id}" disabled via url param.`);
-            return false;
+            return;
         }
         if (test.category === 'all-props' && !includeAllPropsCheckbox.checked) {
             return;

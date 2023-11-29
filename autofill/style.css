@@ -56,8 +56,10 @@ hr {
 
 fieldset {
   display: grid;
-  grid-template-columns: max-content minmax(80px, 1fr);
+  grid-template-columns: 1fr 1fr;
   grid-gap: 1em;
+  width: 410px;
+  max-width: 100%;
   max-width: 100%;
   padding: 0;
   border: none;
@@ -116,4 +118,20 @@ button,
   justify-content: center;
   align-items: center;
   z-index: 1000;
+}
+
+dl {
+  text-align: left;
+  width: 80%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+dt {
+  font-weight: bold;
+  margin-top: 1em;
+}
+
+dt::after {
+  content: ':'
 }

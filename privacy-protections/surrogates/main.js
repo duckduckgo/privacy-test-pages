@@ -1,3 +1,6 @@
+const GREEN = '#71bf69';
+const RED = '#f97268';
+
 const results = {
     page: 'surrogates',
     date: (new Date()).toUTCString(),
@@ -11,10 +14,14 @@ function updateTable ({ name, testData, error }) {
     const descriptionCell = row.insertCell(0);
     const testCell = row.insertCell(1);
 
+    const requestFailExpected = testData.expectedResult === 'failed';
+    const requestLoadedColor = requestFailExpected ? RED : GREEN;
+    const requestFailedColor = requestFailExpected ? GREEN : RED;
+
     // set default values and colors
     descriptionCell.innerText = testData.notes;
     testCell.innerText = 'request failed';
-    testCell.style.backgroundColor = '#f97268';
+    testCell.style.backgroundColor = requestFailedColor;
 
     const result = {
         id: name,
@@ -27,7 +34,7 @@ function updateTable ({ name, testData, error }) {
         if (testResult) {
             result.loaded = true;
             testCell.innerText = 'surrogate loaded';
-            testCell.style.backgroundColor = '#71bf69';
+            testCell.style.backgroundColor = requestLoadedColor;
         } else {
             testCell.innerText = 'surrogate not loaded';
         }
@@ -61,6 +68,7 @@ const surrogates = {
         url: 'https://google-analytics.com/analytics.js',
         notes: 'Loading surrogate in the main frame.',
         test: checkSurrogate,
+        expectedResult: 'loaded',
         cleanUp: () => { delete window.ga; }
     },
     'cross-origin': {
@@ -68,6 +76,7 @@ const surrogates = {
         crossOrigin: 'anonymous',
         notes: 'Loading surrogate with crossOrigin=anonymous set.',
         test: checkSurrogate,
+        expectedResult: 'loaded',
         cleanUp: () => { delete window.ga; }
     },
     'integrity-check': {
@@ -76,12 +85,14 @@ const surrogates = {
         integrity: 'sha512-1xNTXD/ZeaKg/Xjb6De9la7CXo5gC1lMk+beyKo691KJrjlj0HbZG6frzK0Wo6bm96i9Cp6w/WB4vSN/8zDBLQ==',
         notes: 'Loading surrogate with integrity=sha512-… set.',
         test: checkSurrogate,
+        expectedResult: 'failed',
         cleanUp: () => { delete window.ga; }
     },
     'direct-access': {
         url: 'chrome-extension://bkdgflcldnnnapblkhphbgpggdiikppg/web_accessible_resources/analytics.js',
         notes: 'Chromium only - it should not be possible to access local surrogate file',
-        test: () => { return true; }
+        test: () => { return true; },
+        expectedResult: 'failed'
     },
     'sub-frame': {
         notes: 'Loading surrogate in an iframe.',
@@ -115,7 +126,8 @@ const surrogates = {
             });
 
             return promise;
-        }
+        },
+        expectedResult: 'loaded'
     },
     'delayed-set': {
         notes: 'Set script src after insert',

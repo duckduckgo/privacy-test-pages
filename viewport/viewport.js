@@ -11,7 +11,13 @@ function viewportHandler (event) {
         'visualViewport.height': visualViewport.height,
         'visualViewport.scale': visualViewport.scale
     };
-    document.querySelector('#result').textContent = JSON.stringify(r, null, 4);
+    const viewportContent = document.querySelector('meta[name="viewport"]')?.getAttribute('content');
+    document.querySelector('#result').textContent = `
+current viewport content:
+    ${viewportContent}
+
+current viewport state:
+    ${JSON.stringify(r, null, 4)}`;
 }
 
 window.addEventListener('load', () => {

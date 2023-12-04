@@ -274,3 +274,6 @@ app.use('/features/client-hints', chRoutes);
 
 const clearDataRoutes = require('./features/clear-data/server/routes.js');
 app.use('/features/clear-data', clearDataRoutes);
+
+const viewportRoutes = require('./viewport/server/routes.js');
+app.use('/viewport', viewportRoutes);

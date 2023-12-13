@@ -38,6 +38,10 @@
         <p><a href="/privacy-protections/query-parameters/query.html?q=something&id=1234">Link which should not be rewritten</a></p>
         <p class="expected">Expected: &quot;q=something&id=1234&quot;</p>
       </li>
+      <li>
+        <p><a href="https://reddit.com?fbclid=12345" target="_blank">Click Me!</a></p>
+        <p class="expected">Expected: &quot;q=something&id=1234&quot;</p>
+      </li>
     </ul>
   </div>  
 </body>

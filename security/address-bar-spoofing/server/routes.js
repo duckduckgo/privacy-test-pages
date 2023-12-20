@@ -3,7 +3,7 @@ const router = express.Router();
 
 // Returns a 301 redirect to a download link of our browser
 // for use in the download path test
-router.get('/download-redirect', (req, res) => {
+router.get('/', (req, res) => {
     res.redirect(301, 'https://staticcdn.duckduckgo.com/macos-desktop-browser/duckduckgo.dmg');
 });
 

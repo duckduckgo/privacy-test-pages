@@ -18,8 +18,12 @@
 
 <body>
   <p><a href="./index.html">[Back]</a></p>
-  This test uses a download URL for downloading a file to spoof the browser into displaying the download
-  URL as the current origin while rewriting the document content to spoof the address bar.
+  This test uses a download URL that performs a HTTP redirect for downloading a file to trick the
+  browser into displaying the download URL as the current origin while rewriting the document content
+  resulting in a spoofed address bar.
+  The expected result is that the redirect should be followed and the file should be downloaded 
+  in the about:blank context instead of in the context of the download URL where the document might
+  be spoofed by the previous page.
   <button onclick="run()">Start</button>
 </body>
 

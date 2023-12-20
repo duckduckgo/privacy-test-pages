@@ -285,4 +285,4 @@ const viewportRoutes = require('./viewport/server/routes.js');
 app.use('/viewport', viewportRoutes);
 
 const addressBarSpoofingRoutes = require('./security/address-bar-spoofing/server/routes.js');
-app.use('/security/address-bar-spoofing', addressBarSpoofingRoutes);
+app.use('/security/address-bar-spoofing-download-redirect', addressBarSpoofingRoutes);

@@ -255,12 +255,6 @@ app.get('/redirect', (req, res) => {
     res.end();
 });
 
-// Returns a 301 redirect to a download link of our browser
-// for use in the address bar spoofing test
-app.get('/security/address-bar-spoofing/download-redirect', (req, res) => {
-    res.redirect(301, 'https://staticcdn.duckduckgo.com/macos-desktop-browser/duckduckgo.dmg');
-});
-
 app.use('/content-scope-scripts/', express.static('node_modules/@duckduckgo/content-scope-scripts/integration-test/test-pages/'));
 
 const blockingRoutes = require('./privacy-protections/request-blocking/server/routes');
@@ -280,3 +274,6 @@ app.use('/features/client-hints', chRoutes);
 
 const clearDataRoutes = require('./features/clear-data/server/routes.js');
 app.use('/features/clear-data', clearDataRoutes);
+
+const addressBarSpoofingRoutes = require('./security/address-bar-spoofing/server/routes.js');
+app.use('/security/address-bar-spoofing', addressBarSpoofingRoutes);

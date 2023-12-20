@@ -280,3 +280,6 @@ app.use('/features/client-hints', chRoutes);
 
 const clearDataRoutes = require('./features/clear-data/server/routes.js');
 app.use('/features/clear-data', clearDataRoutes);
+
+const addressBarSpoofingRoutes = require('./security/address-bar-spoofing/server/routes.js');
+app.use('/security/address-bar-spoofing', addressBarSpoofingRoutes);

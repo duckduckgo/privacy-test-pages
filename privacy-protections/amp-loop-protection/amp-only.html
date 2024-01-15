@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AMP loop protection</title>
+</head>
+<body>
+    <h1 id="param-display"></h1>
+    <script>
+        const MAX = 15;
+        const LS_ITEM_KEY = 'amp-loop-protection-attempt';
+        const newUrl = new URL(location.href);
+        const isStart = newUrl.searchParams.has('start');
+
+        if (isStart) {
+            localStorage[LS_ITEM_KEY] = 0;
+        }
+        const attempt = Number.parseInt(localStorage[LS_ITEM_KEY], 10) || 0;
+        localStorage[LS_ITEM_KEY] = attempt + 1;
+
+        document.getElementById('param-display').innerText = `${newUrl.searchParams}`;
+        document.body.innerHTML += `<p>Attempt ${attempt + 1}/${MAX}</p>`;
+
+        // set amp attr, count attempts
+        const params = new URLSearchParams(location.search);
+        if (params.get('amp') === '1') {
+            document.documentElement.setAttribute('amp', '');
+            const link = document.createElement('link');
+            link.setAttribute('rel', 'canonical');
+            const ampUrl = new URL('http://good.third-party.site/privacy-protections/amp-loop-protection/amp-only.html');
+            if (isStart) {
+                ampUrl.searchParams.set('start', '1');
+            }
+            link.setAttribute('href', ampUrl.href);
+            document.head.appendChild(link);
+
+            localStorage.removeItem(LS_ITEM_KEY);
+            const onMessage = msg => {
+                if (msg.data.action && msg.data.action === 'url') {
+                    if (window.opener) {
+                        window.opener.postMessage({ url: document.location.href, type: msg.data.type }, '*');
+                    } else if (window.parent) {
+                        window.parent.postMessage({ url: document.location.href, type: msg.data.type }, '*');
+                    }
+                }
+            };
+
+            window.addEventListener('message', onMessage);
+        } else if (attempt < MAX) {
+            newUrl.searchParams.set('amp', 1);
+            newUrl.pathname = newUrl.pathname
+            location.href = newUrl.href;
+        }
+    </script>
+</body>
+</html>

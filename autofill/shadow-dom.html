@@ -14,7 +14,7 @@
 <p id="demo"></p>
 
 <div class="">
-  <p>Form in shadow DOM created after click.</p>
+  <p>Form in nested shadow DOM created after click.</p>
 
   <div class="dialog">
     <shadow-component></shadow-component>
@@ -41,7 +41,7 @@
             // Create a div element inside the shadow root
             const div = document.createElement('div');
             const initialButton = document.createElement('button');
-            initialButton.textContent = 'Click here to login';
+            initialButton.textContent = 'Click here to sign up';
             initialButton.type = 'button';
             div.appendChild(initialButton);
             shadowRoot.appendChild(div);

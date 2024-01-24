@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width">
-  <title>Autofill: forms in shadow DOM</title>
+  <title>Autofill: form in a nested shadow DOM</title>
   <link rel="stylesheet" href="../style.css" />
 </head>
 
@@ -47,7 +47,24 @@
             shadowRoot.appendChild(div);
 
             initialButton.addEventListener('click', () => {
-                const formEl = `<form id="click-form" novalidate action="./shadow-dom.html">
+                initialButton.outerHTML = '<custom-form></custom-form>';
+            });
+        }
+    }
+
+    // Define the custom element "shadow-component"
+    customElements.define('shadow-component', ShadowComponent);
+
+    class Form extends HTMLElement {
+        constructor () {
+            super();
+
+            // Create a shadow root
+            const shadowRoot = this.attachShadow({ mode: 'open' });
+
+            // Append the form to the shadow root
+            this.shadowRoot.innerHTML = `
+      <form id="click-form" novalidate action="./shadow-dom.html">
       <h3>Sign up form</h3>
       <fieldset>
         <label for="email">Email</label>
@@ -56,23 +73,22 @@
         <input id="password" type="password" autocomplete="new-password">
         <button type="submit">Sign up</button>
       </fieldset>
-    </form>`;
-                initialButton.outerHTML = formEl;
-                const clickForm = shadowRoot.getElementById('click-form');
-                const button = clickForm?.querySelector('button');
-                const handler = (e) => {
-                    e.preventDefault();
-                    e.stopImmediatePropagation();
-                    alert('Success');
-                };
-                button?.addEventListener('click', handler, true);
-                clickForm?.addEventListener('submit', handler, true);
-            });
+    </form>
+    `;
+            const clickForm = shadowRoot.getElementById('click-form');
+            const button = clickForm?.querySelector('button');
+            const handler = (e) => {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                alert('Success');
+            };
+            button?.addEventListener('click', handler, true);
+            clickForm?.addEventListener('submit', handler, true);
         }
     }
 
-    // Define the custom element "shadow-component"
-    customElements.define('shadow-component', ShadowComponent);
+    // Define the custom element
+    customElements.define('custom-form', Form);
   </script>
 </div>
 

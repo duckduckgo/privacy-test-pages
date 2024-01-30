@@ -20,41 +20,55 @@
   </ul>
 </nav>
 
-<p id="demo"></p>
+<p id="demo"><button type="button" id="open-modal">Click here to open dialog</button></p>
+
+<p id="random-text">Some random text to use as "something outside the dialog element". Clicking here should close the dialog (if open).</p>
 
 <div class="">
   <p>Form created in modal after click (<b>should not prompt automatically</b>).</p>
 
-  <div class="dialog">
-    <p><button type="button">Click here to login</button></p>
-  </div>
-  <script>
-    const initialButton = document.querySelector('button');
-    initialButton.addEventListener('click', () => {
-      const formEl = `<form id="click-form" novalidate action="3-multistep-form.html">
-      <h3>Sign in form dia</h3>
+  <div class="dialog" hidden></div>
+</div>
+
+<script type="module">
+  const initialButton = document.querySelector('button');
+  const dialogEl = document.querySelector('.dialog');
+  initialButton.addEventListener('click', () => {
+      const formEl = `<form id="login" novalidate action="3-multistep-form.html">
+      <h3>Sign in form</h3>
       <fieldset>
         <label for="email">Email</label>
         <input id="email" type="email">
         <label for="password">Password</label>
         <input id="password" type="password">
-        <button type="submit">Sign in</button>
+        <button type="submit">Log in</button>
       </fieldset>
-    </form>`
-      initialButton.outerHTML = formEl;
-      const clickForm = document.getElementById('click-form');
-      const button = clickForm?.querySelector('button');
+    </form>`;
+      dialogEl.innerHTML = formEl;
+      dialogEl.removeAttribute('hidden');
+      window.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') { dialogEl.setAttribute('hidden', ''); }
+      });
+      window.addEventListener('pointerdown', (e) => {
+          if (!dialogEl.contains(e.target)) { dialogEl.setAttribute('hidden', ''); }
+      });
+
+      const loginForm = document.getElementById('login');
+      const button = loginForm?.querySelector('button');
       const handler = (e) => {
-        e.preventDefault();
-        e.stopImmediatePropagation();
-        window.location.href = '3-multistep-form.html';
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          // window.location.href = '3-multistep-form.html';
+          if (loginForm.checkValidity()) {
+              setTimeout(() => {
+                  dialogEl.innerHTML = '<h1>Submitted!</h1>';
+              }, 100);
+          }
       };
       button?.addEventListener('click', handler, true);
-      clickForm?.addEventListener('submit', handler, true);
-    });
-  </script>
-</div>
-
+      loginForm?.addEventListener('submit', handler, true);
+  });
+</script>
 </body>
 
 </html>

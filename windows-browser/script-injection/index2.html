@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Secure World Content Scope script tests</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        table {
+            border-collapse: separate; 
+            border-spacing: 0; 
+            border-radius: 10px; 
+            overflow: hidden; 
+            width: 50%;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        tr:hover {
+            background-color: #ddd;
+        }
+    </style>
+</head>
+<body>
+    <h2>Secure World Content Scope script tests</h2>
+    <table>
+        <tr>
+            <td>Content scripts executed:</td>
+            <td id="secureWorld-testResult-1">False</td>
+        </tr>
+        <tr>
+            <td>Message to handlers:</td>
+            <td id="secureWorld-testResult-3">False</td>
+        </tr>
+        <tr>
+            <td>Round trip message from JS back to JS:</td>
+            <td id="secureWorld-testResult-4">False</td>
+        </tr>
+        <tr>
+            <td>ExecutableScript updated:</td>
+            <td id="secureWorld-testResult-5">False</td>
+        </tr>
+        <tr>
+            <td>Value set by script not visible to page:</td>
+            <td id="secureWorld-testResult-6">True</td>
+        </tr>
+    </table>
+    <h2>Iframe (same origin):</h2>
+    <iframe src="iframe2.html" height="400"></iframe>
+    
+    <h2>Iframe (different origin):</h2>
+    <iframe src="https://good.third-party.site/windows-browser/script-injection/iframe2.html" height="400"></iframe>
+    <script>
+        if (typeof window.helloFromSecureDDG !== 'undefined') {
+            document.getElementById("secureWorld-testResult-6").innerHTML = "False";
+        }
+    </script>
+        <a href="index.html">Main World Content Scope script tests</a>
+        <a href="index2.html">Secure World Content Scope script tests</a>
+        
+        <form action="index.html" method="POST" target="_blank">
+            <!-- Add any form elements here if needed -->
+            <button type="submit">Main World Content Scope script tests with POST to _blank</button>
+        </form>
+    
+        
+        <form action="index2.html" method="POST" target="_blank">
+            <!-- Add any form elements here if needed -->
+            <button type="submit">Secure World Content Scope script tests with POST to _blank</button>
+        </form>
+</body>
+</html>

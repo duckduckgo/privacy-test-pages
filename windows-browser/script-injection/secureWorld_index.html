@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width">
-  <title>Windows Browser: Main World Content Scope script tests</title>
+  <title>Windows Browser: Secure World Content Scope script tests</title>
 
   <style>
     body {
@@ -54,41 +54,39 @@
 </head>
 <body>
 <p><a href="../../index.html">[Home]</a></p>
-<h2>Windows Browser: Main World Content Scope script tests</h2>
+<h2>Windows Browser: Secure World Content Scope script tests</h2>
 
 <p>Validates the Windows Browser can successfully inject MainWorld scripts and provides message dispatching.</P>
-
-
     <table>
         <tr>
             <td>Content scripts executed:</td>
-            <td id="mainWorld-testResult-1">False</td>
-        </tr> 
+            <td id="secureWorld-testResult-1">False</td>
+        </tr>
         <tr>
             <td>Message to handlers:</td>
-            <td id="mainWorld-testResult-3">False</td>
+            <td id="secureWorld-testResult-3">False</td>
         </tr>
         <tr>
             <td>Round trip message from JS back to JS:</td>
-            <td id="mainWorld-testResult-4">False</td>
+            <td id="secureWorld-testResult-4">False</td>
         </tr>
         <tr>
             <td>ExecutableScript updated:</td>
-            <td id="mainWorld-testResult-5">False</td>
+            <td id="secureWorld-testResult-5">False</td>
         </tr>
         <tr>
             <td>Value set by script not visible to page:</td>
-            <td id="mainWorld-testResult-6">True</td>
+            <td id="secureWorld-testResult-6">True</td>
         </tr>
     </table>
     <h2>Iframe (same origin):</h2>
-    <iframe src="mainWorld_iframe.html" height="400"></iframe>
+    <iframe src="secureWorld_iframe.html" height="400"></iframe>
     
     <h2>Iframe (different origin):</h2>
-    <iframe src="https://good.third-party.site/windows-browser/script-injection/mainWorld_iframe.html" height="400"></iframe>
+    <iframe src="https://good.third-party.site/windows-browser/script-injection/secureWorld_iframe.html" height="400"></iframe>
     <script>
-        if (typeof window.helloFromDDG !== 'undefined') {
-            document.getElementById("mainWorld-testResult-6").innerHTML = "False";
+        if (typeof window.helloFromSecureDDG !== 'undefined') {
+            document.getElementById("secureWorld-testResult-6").innerHTML = "False";
         }
     </script>    
     <a href="./index.html">Main World Content Scope script tests</a>

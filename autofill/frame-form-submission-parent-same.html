@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Form submission detection and autofill within iframe</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+
+<body>
+  <p><a href="../index.html#autofill">[Home]</a></p>
+
+  <p>We should show the autofill prompts for this same frame iframed form</p>
+
+  <h2>Same origin iframe</h2>
+  <iframe src="./frame-form-submission-child.html" id="frame-form"></iframe>
+
+  <style>
+    iframe {
+      height: 20em;
+      display:inline-block;
+    }
+  </style>
+</body>

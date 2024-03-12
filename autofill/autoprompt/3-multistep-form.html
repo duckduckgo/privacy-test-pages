@@ -33,7 +33,7 @@
     </fieldset>
     <fieldset class="password-container" hidden>
       <label for="password">Password</label>
-      <input id="password" type="password" required>
+      <input id="password" type="password" required disabled>
       <button type="submit">Log in</button>
     </fieldset>
   </form>
@@ -41,13 +41,14 @@
 
 <script type="module">
   const continueButton = document.querySelector('button[type=button]');
-  const submitButton = document.querySelector('button[type=submit]');
   const passwordContainer = document.querySelector('.password-container');
+  const passwordField = document.querySelector('#password');
 
   continueButton.addEventListener('click', () => {
       if (form.email.validity.valid) {
           passwordContainer.removeAttribute('hidden');
           continueButton.setAttribute('hidden', '');
+          passwordField.removeAttribute('disabled');
       }
   });
 

@@ -108,18 +108,18 @@
 </div>
 
 <script>
-(function() { 
+(function () {
     'use strict';
-    
+
     // Multipliers for confidence that the breakage issue is more widespread.
     const confidenceLevels = {
-        'low': 1,
-        'medium': 10,
-        'high': 100
-    }
+        low: 1,
+        medium: 10,
+        high: 100
+    };
 
     // Format results for display so they're between 0 and 100.
-    function formatResult(num) {
+    function formatResult (num) {
         if (num === 0 || isNaN(num)) {
             return 0;
         } else if (num > 1) {
@@ -131,7 +131,7 @@
     }
 
     // Hide/display the domain rank and API usage fields.
-    function toggleTab(type) {
+    function toggleTab (type) {
         document.body.className = type;
         if (type === 'domain') {
             apiUsageInput.value = '';
@@ -140,38 +140,38 @@
         }
         doCalculation();
     }
-    
+
     // Calculate breakage reach as a percentage of page loads.
-    function doCalculation() {
+    function doCalculation () {
         const domainRank = domainRankInput.value;
         const apiUsage = apiUsageInput.value;
         const reductionFactor = reductionFactorInput.value;
         const confidence = document.querySelector('input[name="confidenceInput"]:checked').value;
-        let result = "";
+        let result = '';
 
         // Domain popularity is calculated using a trend line formula based on rank:pageload data from https://dl.acm.org/doi/10.1145/3517745.3561418
         // Domain rank 1 is an outlier and therefore an exception to the formula.
         let domainPopularity = 0;
-        if (!!domainRank) {
+        if (domainRank) {
             domainPopularity = (domainRank > 1) ? (0.0687189317758425 * Math.pow(domainRank, -1.03435633987409)) : 0.17;
         }
-        
+
         const domainPopularityOutput = document.getElementById('domainPopularityOutput');
-        domainPopularityOutput.innerHTML = "Domain pageloads: " + formatResult(domainPopularity) + "%";
-    
+        domainPopularityOutput.innerHTML = 'Domain pageloads: ' + formatResult(domainPopularity) + '%';
+
         if (domainRank && !reductionFactor) {
             result = domainPopularity;
-        } else if(apiUsage && !reductionFactor) {
+        } else if (apiUsage && !reductionFactor) {
             result = apiUsage / 100;
-        } else if(domainRank && reductionFactor) {
+        } else if (domainRank && reductionFactor) {
             result = domainPopularity * (reductionFactor / 100);
-        } else if(apiUsage && reductionFactor) {
+        } else if (apiUsage && reductionFactor) {
             result = (apiUsage / 100) * (reductionFactor / 100);
         }
-        
+
         result *= confidenceLevels[confidence];
-        document.getElementById("results").innerHTML = "Platform pageloads affected: " + formatResult(result) + "%";
-        
+        document.getElementById('results').innerHTML = 'Platform pageloads affected: ' + formatResult(result) + '%';
+
         // Update the URL parameters
         const url = new URL(window.location.href); // Use current URL
         const urlParams = url.searchParams; // get current params
@@ -190,7 +190,7 @@
     const domainRankInput = document.getElementById('domainRankInput');
     const apiUsageInput = document.getElementById('apiUsageInput');
     const reductionFactorInput = document.getElementById('reductionFactorInput');
-    
+
     // Get URL parameters.
     const urlSearchParams = new URLSearchParams(window.location.search.toLowerCase());
 
@@ -203,25 +203,25 @@
     }
     if (urlSearchParams.has('reductionfactor')) reductionFactorInput.value = urlSearchParams.get('reductionfactor');
     if (urlSearchParams.has('confidence')) {
-      const confidenceValue = urlSearchParams.get('confidence');
-      const confidenceInput = document.querySelector('input[name=confidenceInput][value=' + confidenceValue + ']');
-      if (confidenceInput) confidenceInput.checked = true;
+        const confidenceValue = urlSearchParams.get('confidence');
+        const confidenceInput = document.querySelector('input[name=confidenceInput][value=' + confidenceValue + ']');
+        if (confidenceInput) confidenceInput.checked = true;
     }
-    
+
     // Listen for user input.
 
     domainRankInput.addEventListener('input', doCalculation);
     apiUsageInput.addEventListener('input', doCalculation);
     reductionFactorInput.addEventListener('input', doCalculation);
-    
-    document.getElementById("low").addEventListener('change', doCalculation);
-    document.getElementById("medium").addEventListener('change', doCalculation);
-    document.getElementById("high").addEventListener('change', doCalculation);
-    
-    document.getElementById('domainButton').addEventListener('click', function() {
+
+    document.getElementById('low').addEventListener('change', doCalculation);
+    document.getElementById('medium').addEventListener('change', doCalculation);
+    document.getElementById('high').addEventListener('change', doCalculation);
+
+    document.getElementById('domainButton').addEventListener('click', function () {
         toggleTab('domain');
     });
-    document.getElementById('apiButton').addEventListener('click', function() {
+    document.getElementById('apiButton').addEventListener('click', function () {
         toggleTab('api');
     });
 

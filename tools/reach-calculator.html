@@ -9,10 +9,6 @@
     <link rel="icon" type="image/ico" href="https://duckduckgo.com/duckduckgo-help-pages/favicon.ico">
     <link rel="icon" type="image/svg+xml" sizes="any" href="https://duckduckgo.com/duckduckgo-help-pages/favicon.svg">
     <link rel="apple-touch-icon" href="https://duckduckgo.com/duckduckgo-help-pages/apple-touch-icon.png">
-    <!-- Enable support for HTML5 elements (e.g. <nav>, <footer>) -->
-    <!--[if lt IE 9]>
-        <script src="https://duckduckgo.com/duckduckgo-help-pages/scripts/html5shiv.js"></script>
-    <![endif]-->
         
     <style>
         body {
@@ -145,7 +141,7 @@
     function doCalculation () {
         const domainRank = domainRankInput.value;
         const apiUsage = apiUsageInput.value;
-        const reductionFactor = reductionFactorInput.value;
+        const reductionFactor = reductionFactorInput.value || 100;
         const confidence = document.querySelector('input[name="confidenceInput"]:checked').value;
         let result = '';
 
@@ -157,20 +153,16 @@
         }
 
         const domainPopularityOutput = document.getElementById('domainPopularityOutput');
-        domainPopularityOutput.innerHTML = 'Domain pageloads: ' + formatResult(domainPopularity) + '%';
+        domainPopularityOutput.textContent = 'Domain pageloads: ' + formatResult(domainPopularity) + '%';
 
-        if (domainRank && !reductionFactor) {
-            result = domainPopularity;
-        } else if (apiUsage && !reductionFactor) {
-            result = apiUsage / 100;
-        } else if (domainRank && reductionFactor) {
+        if (domainRank) {
             result = domainPopularity * (reductionFactor / 100);
-        } else if (apiUsage && reductionFactor) {
+        } else if (apiUsage) {
             result = (apiUsage / 100) * (reductionFactor / 100);
         }
 
         result *= confidenceLevels[confidence];
-        document.getElementById('results').innerHTML = 'Platform pageloads affected: ' + formatResult(result) + '%';
+        document.getElementById('results').textContent = 'Platform pageloads affected: ' + formatResult(result) + '%';
 
         // Update the URL parameters
         const url = new URL(window.location.href); // Use current URL

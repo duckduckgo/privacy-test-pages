@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Site Breakage Reach Calculator</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="https://duckduckgo.com/duckduckgo-help-pages/css/main.css">
+    <link rel="icon" type="image/ico" href="https://duckduckgo.com/duckduckgo-help-pages/favicon.ico">
+    <link rel="icon" type="image/svg+xml" sizes="any" href="https://duckduckgo.com/duckduckgo-help-pages/favicon.svg">
+    <link rel="apple-touch-icon" href="https://duckduckgo.com/duckduckgo-help-pages/apple-touch-icon.png">
+        
+    <style>
+        body {
+            padding: 0;
+        }
+        #container {
+            max-width: 600px; /* Set the maximum width of the element to 600px */
+            width: 100%; /* Allow the element to expand to the full width of its container */
+            margin: 0 auto; /* Auto margins on left and right will center the element */
+        }
+        button {
+            background: #fff;
+            border: solid 2px #4d4d4d;
+            border-bottom: 0;
+            border-radius: 8px 8px 0 0;
+            box-shadow: inset 0 -4px 4px -4px #4d4d4d;
+            color: #4d4d4d;
+            cursor: pointer;
+            height: 2em;
+            padding: 0 1em;
+        }
+        .domain #domainButton, .api #apiButton { /* When tab button is active */
+            background: #0000c0;
+            border-color: #0000c0;
+            box-shadow: none;
+            color: #fff;
+        }
+        .domain #apiButton, .api #domainButton {
+        }
+        .domain #apiTab, .api #domainTab {
+            display: none;
+        }
+        .domain #domainTab, .api #apiTab {
+            display: block;
+        }
+        #calculator {
+            border: solid 4px #0000c0;
+            border-radius: 0 8px 8px 8px;
+            padding: 1em;
+        }
+        #calculator div {
+            margin-bottom: 1em;
+        }
+        input[type="number"] {
+            width: 8em;
+        }
+        hr {
+            margin: 1em 0;
+        }
+        #results {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body class="domain">
+<div id="container">
+    <h2>Site Breakage Reach Calculator</h2>
+
+    <div id="options">
+        <button id="domainButton" class="tablink">Domains</button>
+        <button id="apiButton" class="tablink">APIs/Features</button>
+    </div>
+
+    <div id="calculator">
+        <div id="domainTab" class="optionTab">
+            <label>Domain rank from <a href="https://tranco-list.eu/query" target="_blank">Tranco</a>:<br>
+            <input type="number" id="domainRankInput" min="1" max="100000000"></label>
+            <div id="domainPopularityOutput"></div>
+        </div>
+
+        <div id="apiTab" class="optionTab">
+            <label>API/feature usage share (%):<br>
+            <input type="number" id="apiUsageInput" min="0" max="100"></label>
+            <div>Note: <a href="https://chromestatus.com/metrics/feature/popularity" target="_blank">Chrome Platform Status</a> is useful for JS APIs.</div>
+        </div>
+
+        <div>
+            <label><abbr title="Further reduction assumption, e.g. visiting 2+ pages, particular version, etc.">[Optional] Reduction assumption (%):<br>
+            <input type="number" id="reductionFactorInput" min="0" max="100"></abbr></label><br>
+        </div>
+
+        <div>
+            <label for="confidenceInput">Additional unaccounted-for breakage?</label><br>
+            <label><input type="radio" id="low" name="confidenceInput" value="low" checked> Low confidence</label><br>
+            <label><input type="radio" id="medium" name="confidenceInput" value="medium"> Medium confidence</label><br>
+            <label><input type="radio" id="high" name="confidenceInput" value="high"> High confidence</label><br>
+        </div>
+    
+        <hr>
+        <div id="results"></div>
+        <div>(Use this and the Severity Assessment Matrix to get a priority level.)</div>
+    </div>
+</div>
+
+<script>
+(function () {
+    'use strict';
+
+    // Multipliers for confidence that the breakage issue is more widespread.
+    const confidenceLevels = {
+        low: 1,
+        medium: 10,
+        high: 100
+    };
+
+    // Format results for display so they're between 0 and 100.
+    function formatResult (num) {
+        if (num === 0 || isNaN(num)) {
+            return 0;
+        } else if (num > 1) {
+            return 100;
+        } else {
+            num *= 100;
+            return num.toPrecision(3);
+        }
+    }
+
+    // Hide/display the domain rank and API usage fields.
+    function toggleTab (type) {
+        document.body.className = type;
+        if (type === 'domain') {
+            apiUsageInput.value = '';
+        } else {
+            domainRankInput.value = '';
+        }
+        doCalculation();
+    }
+
+    // Calculate breakage reach as a percentage of page loads.
+    function doCalculation () {
+        const domainRank = domainRankInput.value;
+        const apiUsage = apiUsageInput.value;
+        const reductionFactor = reductionFactorInput.value || 100;
+        const confidence = document.querySelector('input[name="confidenceInput"]:checked').value;
+        let result = '';
+
+        // Domain popularity is calculated using a trend line formula based on rank:pageload data from https://dl.acm.org/doi/10.1145/3517745.3561418
+        // Domain rank 1 is an outlier and therefore an exception to the formula.
+        let domainPopularity = 0;
+        if (domainRank) {
+            domainPopularity = (domainRank > 1) ? (0.0687189317758425 * Math.pow(domainRank, -1.03435633987409)) : 0.17;
+        }
+
+        const domainPopularityOutput = document.getElementById('domainPopularityOutput');
+        domainPopularityOutput.textContent = 'Domain pageloads: ' + formatResult(domainPopularity) + '%';
+
+        if (domainRank) {
+            result = domainPopularity * (reductionFactor / 100);
+        } else if (apiUsage) {
+            result = (apiUsage / 100) * (reductionFactor / 100);
+        }
+
+        result *= confidenceLevels[confidence];
+        document.getElementById('results').textContent = 'Platform pageloads affected: ' + formatResult(result) + '%';
+
+        // Update the URL parameters
+        const url = new URL(window.location.href); // Use current URL
+        const urlParams = url.searchParams; // get current params
+
+        // Set or update params
+        urlParams.set('domainrank', domainRankInput.value);
+        urlParams.set('apiusage', apiUsageInput.value);
+        urlParams.set('reductionfactor', reductionFactorInput.value);
+        urlParams.set('confidence', document.querySelector('input[name="confidenceInput"]:checked').value);
+
+        // Update the URL without reloading page
+        window.history.pushState({}, '', url);
+    }
+
+    // Get form elements.
+    const domainRankInput = document.getElementById('domainRankInput');
+    const apiUsageInput = document.getElementById('apiUsageInput');
+    const reductionFactorInput = document.getElementById('reductionFactorInput');
+
+    // Get URL parameters.
+    const urlSearchParams = new URLSearchParams(window.location.search.toLowerCase());
+
+    // Prefill inputs if URL parameters exist
+    if (urlSearchParams.has('domainrank')) domainRankInput.value = urlSearchParams.get('domainrank');
+    if (urlSearchParams.has('apiusage')) {
+        const apiUsageParam = urlSearchParams.get('apiusage');
+        apiUsageInput.value = apiUsageParam;
+        if (apiUsageParam > 0) toggleTab('api');
+    }
+    if (urlSearchParams.has('reductionfactor')) reductionFactorInput.value = urlSearchParams.get('reductionfactor');
+    if (urlSearchParams.has('confidence')) {
+        const confidenceValue = urlSearchParams.get('confidence');
+        const confidenceInput = document.querySelector('input[name=confidenceInput][value=' + confidenceValue + ']');
+        if (confidenceInput) confidenceInput.checked = true;
+    }
+
+    // Listen for user input.
+
+    domainRankInput.addEventListener('input', doCalculation);
+    apiUsageInput.addEventListener('input', doCalculation);
+    reductionFactorInput.addEventListener('input', doCalculation);
+
+    document.getElementById('low').addEventListener('change', doCalculation);
+    document.getElementById('medium').addEventListener('change', doCalculation);
+    document.getElementById('high').addEventListener('change', doCalculation);
+
+    document.getElementById('domainButton').addEventListener('click', function () {
+        toggleTab('domain');
+    });
+    document.getElementById('apiButton').addEventListener('click', function () {
+        toggleTab('api');
+    });
+
+    doCalculation();
+})();
+</script>
+
+</body>
+</html>

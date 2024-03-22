@@ -12,7 +12,11 @@
         
     <style>
         body {
-            padding: 0;
+            padding: 1em 0;
+        }
+        h2 {
+            margin-top: 0;
+            padding-top: 0;
         }
         #container {
             margin: 0 auto; /* Auto margins on left and right will center the element */
@@ -65,6 +69,9 @@
         #results {
             font-weight: bold;
         }
+        #faq {
+            margin-top: 1em;
+        }
         details {
             margin-bottom: 1em;
         }
@@ -102,12 +109,23 @@
         mrow {
             margin-bottom: 0.5em;
         }
-        @media screen and (max-width: 600px) {
-            body {
-                padding: 1em;
-            }
-            h2 {
+        
+        /* Styles for wide screens */
+        @media screen and (min-width: 800px) {
+            #container {
+                max-width: 1000px;
                 padding-top: 1em;
+            }
+            #form, #faq {
+                display: inline-block;
+                width: 50%;
+            }
+            #form {
+                float: left;
+            }
+            #faq {
+                margin-top: 0;
+                padding-left: 2em;
             }
         }
     </style>
@@ -116,6 +134,7 @@
 <div id="container">
     <h2>Site Breakage Reach Calculator</h2>
 
+    <div id="form">
     <div id="options">
         <button id="domainButton" class="tablink">Domains</button>
         <button id="apiButton" class="tablink">APIs/Features</button>
@@ -151,6 +170,7 @@
         <div>(Use this and the <a href="https://duckduckgo-my.sharepoint.com/:x:/p/lmattei/EcV1df19DeVMssJDG1YRcnABHgQpzVZHfchesN-AZj2VcA?e=Nyn7mu" target="_blank">Severity Assessment Matrix</a> to get a priority level.)</div>
     </div>
 
+</div><div id="faq">
     <h2>FAQ</h2>
 
     <details>
@@ -295,6 +315,7 @@
 
         <p>These are the constants that this calculator uses.</p>
     </details>
+</div>
 </div>
 
 <script>

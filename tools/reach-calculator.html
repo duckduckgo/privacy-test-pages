@@ -15,9 +15,10 @@
             padding: 0;
         }
         #container {
-            max-width: 600px; /* Set the maximum width of the element to 600px */
-            width: 100%; /* Allow the element to expand to the full width of its container */
             margin: 0 auto; /* Auto margins on left and right will center the element */
+            max-width: 600px;
+            padding-bottom: 1em;
+            width: 100%;
         }
         button {
             background: #fff;
@@ -55,11 +56,59 @@
         input[type="number"] {
             width: 8em;
         }
+        abbr {
+            cursor: help;
+        }
         hr {
             margin: 1em 0;
         }
         #results {
             font-weight: bold;
+        }
+        details {
+            margin-bottom: 1em;
+        }
+        summary {
+            cursor: pointer;
+            font-size: larger;
+            font-weight: bold;
+        }
+        details h3 {
+            font-size: larger;
+        }
+        dl dt {
+            float: left;
+            margin-bottom: 0;
+            margin-right: 1em;
+            width: auto;
+        }
+        dl dd {
+            clear: right;
+            margin-bottom: 0;
+            margin-left: 0;
+            width: auto;
+        }
+        details .answer {
+            font-weight: normal;
+            padding-left: 4em;
+        }
+        details .answer::before {
+            content: "> ";
+        }
+        math {
+            display: block;
+            margin-bottom: 1em;
+        }
+        mrow {
+            margin-bottom: 0.5em;
+        }
+        @media screen and (max-width: 600px) {
+            body {
+                padding: 1em;
+            }
+            h2 {
+                padding-top: 1em;
+            }
         }
     </style>
 </head>
@@ -86,21 +135,166 @@
         </div>
 
         <div>
-            <label><abbr title="Further reduction assumption, e.g. visiting 2+ pages, particular version, etc.">[Optional] Reduction assumption (%):<br>
-            <input type="number" id="reductionFactorInput" min="0" max="100"></abbr></label><br>
+            <label>[Optional] <abbr title="Should the reach of this breakage be reduced? This should be based on data if available, or your best estimate.">Reduction assumption (%):<br>
+            <input type="number" id="reductionFactorInput" min="0" max="100"></abbr></label>
         </div>
 
         <div>
-            <label for="confidenceInput">Additional unaccounted-for breakage?</label><br>
+            <abbr title="How confident are you that this breakage is happening on other domains or affects other APIs?">Additional unaccounted-for breakage?</abbr><br>
             <label><input type="radio" id="low" name="confidenceInput" value="low" checked> Low confidence</label><br>
             <label><input type="radio" id="medium" name="confidenceInput" value="medium"> Medium confidence</label><br>
-            <label><input type="radio" id="high" name="confidenceInput" value="high"> High confidence</label><br>
+            <label><input type="radio" id="high" name="confidenceInput" value="high"> High confidence</label>
         </div>
-    
+
         <hr>
         <div id="results"></div>
-        <div>(Use this and the Severity Assessment Matrix to get a priority level.)</div>
+        <div>(Use this and the <a href="https://duckduckgo-my.sharepoint.com/:x:/p/lmattei/EcV1df19DeVMssJDG1YRcnABHgQpzVZHfchesN-AZj2VcA?e=Nyn7mu" target="_blank">Severity Assessment Matrix</a> to get a priority level.)</div>
     </div>
+
+    <h2>FAQ</h2>
+
+    <details>
+        <summary>How do I use this?</summary>
+        <p>This tool is to calculate the reach of breakage issues, i.e. roughly the percentage of users affected on a particular platform. When combined with a severity level, you can look up a priority level for the issue in the <a href="https://duckduckgo-my.sharepoint.com/:x:/p/lmattei/EcV1df19DeVMssJDG1YRcnABHgQpzVZHfchesN-AZj2VcA?e=Nyn7mu" target="_blank">Severity Assessment Matrix</a>.</p>
+    </details>
+
+    <details>
+        <summary>What is "reduction assumption"?</summary>
+        <p>Should the reach of this breakage be reduced? This should be based on data if available, or your best estimate. Examples of when this could apply:</p>
+        <ul>
+            <li>A specific platform version, e.g. only Big Sur users, which might account for 5% of all macOS users.</li>
+            <li>A specific user action, e.g. only when users pause a video, which might be 10% of all video plays.</li>
+        </ul>
+    </details>
+
+    <details>
+        <summary>What is "unaccounted-for breakage"?</summary>
+        <p>How confident are you that this breakage is happening on other domains or affects other APIs?</p>
+    </details>
+
+    <details>
+        <summary>What if multiple domains are broken?</summary>
+        <p>There are a couple of ways to handle this:</p>
+        <ul>
+            <li>Use the calculator for the highest ranked domain you're aware of, then set "unaccounted-for breakage" to medium or high confidence.</li>
+            <li>Use the calculator for each broken domain, set the "unaccounted-for breakage" to low confidence, then sum the resulting percentages.</li>
+        </ul>
+    </details>
+
+    <details>
+        <summary>What are some example calculations?</summary>
+        <p>
+            <h3>Single domain example: example.com broken, only happens after 2+ clicks</h3>		
+            <dl>
+                <dt>Domain rank:</dt><dd>171</dd>
+                <dt class="answer">Initial % of all page loads:</dt><dd>0.0337%</dd>
+                <dt>Further reduction assumption:</dt><dd>50%</dd>
+                <dt class="answer">Updated % of page loads:</dt><dd>0.0168%</dd>
+                <dt>Additional unaccounted-for breakage:</dt><dd>High confidence</dd>
+                <dt class="answer">Final % of page loads:</dt><dd>1.68%</dd>
+            </dl>
+
+            <h3>Single API example: WebShare API not supported</h3>		
+            <dl>
+                <dt>API usage share:</dt><dd>0.07%</dd>
+                <dt class="answer">Initial % of all page loads:</dt><dd><a href="https://chromestatus.com/metrics/feature/timeline/popularity/2737" target="_blank">0.07%</a></dd>
+                <dt>Further reduction assumption:</dt><dd>[None]</dd>
+                <dt class="answer">Updated % of page loads:</dt><dd>0.07%</dd>
+                <dt>Additional unaccounted-for breakage:</dt><dd>Low confidence</dd>
+                <dt class="answer">Final % of page loads:</dt><dd>0.07%</dd>
+            </dl>
+
+            <h3>Extreme example 1: Google is broken for everyone</h3>		
+            <dl>
+                <dt>Domain rank:</dt><dd>1</dd>
+                <dt class="answer">Initial % of all page loads:</dt><dd>21.352%</dd>
+                <dt>Further reduction assumption:</dt><dd>[None]</dd>
+                <dt class="answer">Updated % of page loads:</dt><dd>21.352%</dd>
+                <dt>Additional unaccounted-for breakage:</dt><dd>Low confidence</dd>
+                <dt class="answer">Final % of page loads:</dt><dd>21.352%</dd>
+            </dl>
+
+            <h3>Extreme example 2: Videos not playing on my personal blog	</h3>		
+            <dl>
+                <dt>Domain rank:</dt><dd>1,000,000</dd>
+                <dt class="answer">Initial % of all page loads:</dt><dd>0.00011%</dd>
+                <dt>Further reduction assumption:</dt><dd>10%</dd>
+                <dt class="answer">Updated % of page loads:</dt><dd>0.000011%</dd>
+                <dt>Additional unaccounted-for breakage:</dt><dd>High confidence</dd>
+                <dt class="answer">Final % of page loads:</dt><dd>0.0011%</dd>
+            </dl>
+        </p>
+    </details>
+    
+    <details>
+        <summary>How is the page load percentage calculated from domain rank?</summary>
+        <p>The paper "<a href="https://dl.acm.org/doi/10.1145/3517745.3561418" target="_blank">A World Wide View of Browsing the World Wide Web</a>", written by researchers at Google and Stanford University, presents data from "several hundred million global users" revealing the following traffic statistics:</p>
+        <ul>
+            <li>The top website has 17% of traffic</li>
+            <li>The top 6 sites have 25% of traffic</li>
+            <li>The top 100 sites have 40% of traffic</li>
+            <li>The top 10K sites have 70% of traffic</li>
+            <li>The top 1M sites have 95%+ of traffic</li>
+        </ul>
+        <p>This is a logarithmic increase which, when plotted, gives us the following trend line formula:</p>
+
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <mrow>
+                <mi>f</mi>
+                <mo>(</mo>
+                <mi>x</mi>
+                <mo>)</mo>
+                <mo>=</mo>
+                <mn>0.0577045083370069</mn>
+                <mo>&times;</mo>
+                <mi>ln</mi>
+                <mo>(</mo>
+                <mi>x</mi>
+                <mo>)</mo>
+                <mo>+</mo>
+                <mn>0.154434582485181</mn>
+            </mrow>
+            <mrow>
+                <msup>
+                    <mi>R</mi>
+                    <mn>2</mn>
+                </msup>
+                <mo>=</mo>
+                <mn>0.9978</mn>
+            </mrow>
+        </math>
+
+        <p>Note that's a cumulative page load percentage &mdash; the running total for all domain ranks. To get individual domain ranks we can calculate the page load difference for each domain rank. I did this for the top 300 domains which can them be plotted to give another trend line formula:</p>
+
+        <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <mrow>
+                <mi>f</mi>
+                <mo>(</mo>
+                <mi>x</mi>
+                <mo>)</mo>
+                <mo>=</mo>
+                <mn>0.0687189317758425</mn>
+                <mo>&times;</mo>
+                <msup>
+                    <mi>x</mi>
+                    <mrow>
+                        <mo>-</mo>
+                        <mn>1.03435633987409</mn>
+                    </mrow>
+                </msup>
+            </mrow>
+            <mrow>
+                <msup>
+                    <mi>R</mi>
+                    <mn>2</mn>
+                </msup>
+                <mo>=</mo>
+                <mn>0.997267490393083</mn>
+            </mrow>
+        </math>
+
+        <p>These are the constants that this calculator uses.</p>
+    </details>
 </div>
 
 <script>

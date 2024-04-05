@@ -336,6 +336,7 @@
     let domainRank = 0;
     const domainMessage = document.getElementById('domainMessage');
     const domainName = document.getElementById('domainName');
+    const domainPopularityOutput = document.getElementById('domainPopularityOutput');
     const apiUsageInput = document.getElementById('apiUsageInput');
     const reductionFactorInput = document.getElementById('reductionFactorInput');
     const resultMessage = document.getElementById('result');
@@ -407,7 +408,7 @@
             return;
         }
         if (reductionFactor && (isNaN(reductionFactor) || reductionFactor < 0 || reductionFactor > 100)) {
-            console.error('Invalid reduction assumption input.')
+            console.error('Invalid reduction assumption input.');
             return;
         }
 
@@ -420,9 +421,8 @@
             let domainPopularity = 0;
             domainPopularity = (domainRank > 1) ? (0.0687189317758425 * Math.pow(domainRank, -1.03435633987409)) : 0.17;
             result = domainPopularity * (reductionFactor / 100);
-        
+
             // Show domain pageloads
-            const domainPopularityOutput = document.getElementById('domainPopularityOutput');
             domainPopularityOutput.textContent = 'Domain pageloads: ' + formatResult(domainPopularity) + '%';
         } else if (apiUsage) {
             result = (apiUsage / 100) * (reductionFactor / 100);
@@ -492,7 +492,7 @@
     });
     document.getElementById('domainForm').addEventListener('submit', async function (event) {
         event.preventDefault();
-        
+
         if (!domainName.value) {
             domainMessage.textContent = 'Please enter a valid domain name.';
             return;
@@ -503,7 +503,7 @@
             domainMessage.textContent = 'Please enter a valid domain name.';
             return;
         }
-        
+
         getReach();
     });
 

@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <title>Site Breakage Reach Calculator</title>
+    <meta name="description" content="A tool to calculate the reach of site breakage issues.">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -24,7 +25,7 @@
             padding-bottom: 1em;
             width: 100%;
         }
-        button {
+        #options button {
             background: #fff;
             border: solid 2px #4d4d4d;
             border-bottom: 0;
@@ -66,7 +67,7 @@
         hr {
             margin: 1em 0;
         }
-        #results {
+        #result {
             font-weight: bold;
         }
         #faq {
@@ -116,11 +117,11 @@
                 max-width: 1000px;
                 padding-top: 1em;
             }
-            #form, #faq {
+            main, #faq {
                 display: inline-block;
                 width: 50%;
             }
-            #form {
+            main {
                 float: left;
             }
             #faq {
@@ -134,193 +135,213 @@
 <div id="container">
     <h2>Site Breakage Reach Calculator</h2>
 
-    <div id="form">
-    <div id="options">
-        <button id="domainButton" class="tablink">Domains</button>
-        <button id="apiButton" class="tablink">APIs/Features</button>
-    </div>
-
-    <div id="calculator">
-        <div id="domainTab" class="optionTab">
-            <label>Domain rank from <a href="https://tranco-list.eu/query" target="_blank">Tranco</a>:<br>
-            <input type="number" id="domainRankInput" min="1" max="100000000"></label>
-            <div id="domainPopularityOutput"></div>
+    <main>
+        <div id="options">
+            <button id="domainButton" class="tablink">Domains</button>
+            <button id="apiButton" class="tablink">APIs/Features</button>
         </div>
 
-        <div id="apiTab" class="optionTab">
-            <label>API/feature usage share (%):<br>
-            <input type="number" id="apiUsageInput" min="0" max="100"></label>
-            <div>Note: <a href="https://chromestatus.com/metrics/feature/popularity" target="_blank">Chrome Platform Status</a> is useful for JS APIs.</div>
+        <div id="calculator">
+            <div id="domainTab" class="optionTab">
+                <form id="domainForm">
+                    <label>Domain name:<br>
+                    <input type="text" id="domainName" placeholder="example.com" required></label>
+                    <button type="submit">Get reach</button>
+                </form>
+                <div id="domainMessage"></div>
+                <div id="domainPopularityOutput"></div>
+            </div>
+
+            <div id="apiTab" class="optionTab">
+                <label>API/feature usage share (%):<br>
+                <input type="number" id="apiUsageInput" min="0" max="100"></label>
+            </div>
+
+            <div>
+                <label>[Optional] <abbr title="Should the reach of this breakage be reduced? This should be based on data if available, or your best estimate. 100% = no reduction.">Reduction assumption (%):<br>
+                <input type="number" id="reductionFactorInput" min="0" max="100"></abbr></label>
+            </div>
+
+            <div>
+                <abbr title="How confident are you that this breakage is happening on other domains or affects other APIs?">Additional unaccounted-for breakage?</abbr><br>
+                <label><input type="radio" id="low" name="confidenceInput" value="low" checked> Low confidence</label><br>
+                <label><input type="radio" id="medium" name="confidenceInput" value="medium"> Medium confidence</label><br>
+                <label><input type="radio" id="high" name="confidenceInput" value="high"> High confidence</label>
+            </div>
+
+            <hr>
+            <div id="result"></div>
+            <div>(Use this and the <a href="https://duckduckgo-my.sharepoint.com/:x:/p/lmattei/EcV1df19DeVMssJDG1YRcnABHgQpzVZHfchesN-AZj2VcA?e=Nyn7mu" target="_blank">Severity Assessment Matrix</a> to get a priority level.)</div>
         </div>
 
-        <div>
-            <label>[Optional] <abbr title="Should the reach of this breakage be reduced? This should be based on data if available, or your best estimate.">Reduction assumption (%):<br>
-            <input type="number" id="reductionFactorInput" min="0" max="100"></abbr></label>
-        </div>
+    </main>
+    <div id="faq">
+        <h2>FAQ</h2>
 
-        <div>
-            <abbr title="How confident are you that this breakage is happening on other domains or affects other APIs?">Additional unaccounted-for breakage?</abbr><br>
-            <label><input type="radio" id="low" name="confidenceInput" value="low" checked> Low confidence</label><br>
-            <label><input type="radio" id="medium" name="confidenceInput" value="medium"> Medium confidence</label><br>
-            <label><input type="radio" id="high" name="confidenceInput" value="high"> High confidence</label>
-        </div>
+        <details>
+            <summary>How do I use this?</summary>
+            <p>This tool is to calculate the reach of breakage issues, i.e. roughly the percentage of users affected on a particular platform. When combined with a severity level, you can look up a priority level for the issue in the <a href="https://duckduckgo-my.sharepoint.com/:x:/p/lmattei/EcV1df19DeVMssJDG1YRcnABHgQpzVZHfchesN-AZj2VcA?e=Nyn7mu" target="_blank">Severity Assessment Matrix</a>.</p>
+        </details>
+        
+        <details>
+            <summary>Where can I find API usage share?</summary>
+            <p><a href="https://chromestatus.com/metrics/feature/popularity" target="_blank">Chrome Platform Status</a> is useful for JavaScript APIs. Use <a href="https://github.com/duckduckgo/mdn-bcd-collector-results/blob/main/data/apititles.json" target="_blank">this lookup table</a> for mapping features to API names.</p>
+        </details>
 
-        <hr>
-        <div id="results"></div>
-        <div>(Use this and the <a href="https://duckduckgo-my.sharepoint.com/:x:/p/lmattei/EcV1df19DeVMssJDG1YRcnABHgQpzVZHfchesN-AZj2VcA?e=Nyn7mu" target="_blank">Severity Assessment Matrix</a> to get a priority level.)</div>
-    </div>
+        <details>
+            <summary>What is "reduction assumption"?</summary>
+            <p>Should the reach of this breakage be reduced? This should be based on data if available, or your best estimate. 100% (or no input) = no reduction. Examples of when this could apply:</p>
+            <ul>
+                <li>A specific platform version, e.g. only Big Sur users, which might account for 5% of all macOS users.</li>
+                <li>A specific user action, e.g. only when users pause a video, which might be 10% of all video plays.</li>
+            </ul>
+        </details>
 
-</div><div id="faq">
-    <h2>FAQ</h2>
+        <details>
+            <summary>What is "unaccounted-for breakage"?</summary>
+            <p>How confident are you that this breakage is happening on other domains or affects other APIs? For API usage, unaccounted-for breakage is probably "low confidence" unless you're pretty sure there are knock-on effects elsewhere.</p>
+        </details>
 
-    <details>
-        <summary>How do I use this?</summary>
-        <p>This tool is to calculate the reach of breakage issues, i.e. roughly the percentage of users affected on a particular platform. When combined with a severity level, you can look up a priority level for the issue in the <a href="https://duckduckgo-my.sharepoint.com/:x:/p/lmattei/EcV1df19DeVMssJDG1YRcnABHgQpzVZHfchesN-AZj2VcA?e=Nyn7mu" target="_blank">Severity Assessment Matrix</a>.</p>
-    </details>
+        <details>
+            <summary>What if multiple domains are broken?</summary>
+            <p>There are a couple of ways to handle this:</p>
+            <ul>
+                <li>Use the calculator for the highest ranked domain you're aware of, then set "unaccounted-for breakage" to medium or high confidence.</li>
+                <li>Use the calculator for each broken domain, set the "unaccounted-for breakage" to low confidence, then sum the resulting percentages.</li>
+            </ul>
+        </details>
 
-    <details>
-        <summary>What is "reduction assumption"?</summary>
-        <p>Should the reach of this breakage be reduced? This should be based on data if available, or your best estimate. Examples of when this could apply:</p>
-        <ul>
-            <li>A specific platform version, e.g. only Big Sur users, which might account for 5% of all macOS users.</li>
-            <li>A specific user action, e.g. only when users pause a video, which might be 10% of all video plays.</li>
-        </ul>
-    </details>
+        <details>
+            <summary>What are some example calculations?</summary>
+            <p>
+                <h3>Single domain example: example.com broken, only happens after 2+ clicks</h3>		
+                <dl>
+                    <dt>Domain rank:</dt><dd>171</dd>
+                    <dt class="answer">Initial % of all page loads:</dt><dd>0.0337%</dd>
+                    <dt>Further reduction assumption:</dt><dd>50% (because 2+ clicks are required.)</dd>
+                    <dt class="answer">Updated % of page loads:</dt><dd>0.0168%</dd>
+                    <dt>Additional unaccounted-for breakage:</dt><dd>High confidence (because this kind of breakage is very likely to happen on other sites.)</dd>
+                    <dt class="answer">Final % of page loads:</dt><dd>1.68%</dd>
+                </dl>
 
-    <details>
-        <summary>What is "unaccounted-for breakage"?</summary>
-        <p>How confident are you that this breakage is happening on other domains or affects other APIs?</p>
-    </details>
+                <h3>Single API example: WebShare API not supported</h3>		
+                <dl>
+                    <dt>API usage share:</dt><dd>0.07%</dd>
+                    <dt class="answer">Initial % of all page loads:</dt><dd><a href="https://chromestatus.com/metrics/feature/timeline/popularity/2737" target="_blank">0.07%</a></dd>
+                    <dt>Further reduction assumption:</dt><dd>[None]</dd>
+                    <dt class="answer">Updated % of page loads:</dt><dd>0.07%</dd>
+                    <dt>Additional unaccounted-for breakage:</dt><dd>Low confidence</dd>
+                    <dt class="answer">Final % of page loads:</dt><dd>0.07%</dd>
+                </dl>
 
-    <details>
-        <summary>What if multiple domains are broken?</summary>
-        <p>There are a couple of ways to handle this:</p>
-        <ul>
-            <li>Use the calculator for the highest ranked domain you're aware of, then set "unaccounted-for breakage" to medium or high confidence.</li>
-            <li>Use the calculator for each broken domain, set the "unaccounted-for breakage" to low confidence, then sum the resulting percentages.</li>
-        </ul>
-    </details>
+                <h3>Extreme example 1: Google is broken for everyone</h3>		
+                <dl>
+                    <dt>Domain rank:</dt><dd>1</dd>
+                    <dt class="answer">Initial % of all page loads:</dt><dd>21.352%</dd>
+                    <dt>Further reduction assumption:</dt><dd>[None]</dd>
+                    <dt class="answer">Updated % of page loads:</dt><dd>21.352%</dd>
+                    <dt>Additional unaccounted-for breakage:</dt><dd>Low confidence</dd>
+                    <dt class="answer">Final % of page loads:</dt><dd>21.352%</dd>
+                </dl>
 
-    <details>
-        <summary>What are some example calculations?</summary>
-        <p>
-            <h3>Single domain example: example.com broken, only happens after 2+ clicks</h3>		
-            <dl>
-                <dt>Domain rank:</dt><dd>171</dd>
-                <dt class="answer">Initial % of all page loads:</dt><dd>0.0337%</dd>
-                <dt>Further reduction assumption:</dt><dd>50%</dd>
-                <dt class="answer">Updated % of page loads:</dt><dd>0.0168%</dd>
-                <dt>Additional unaccounted-for breakage:</dt><dd>High confidence</dd>
-                <dt class="answer">Final % of page loads:</dt><dd>1.68%</dd>
-            </dl>
-
-            <h3>Single API example: WebShare API not supported</h3>		
-            <dl>
-                <dt>API usage share:</dt><dd>0.07%</dd>
-                <dt class="answer">Initial % of all page loads:</dt><dd><a href="https://chromestatus.com/metrics/feature/timeline/popularity/2737" target="_blank">0.07%</a></dd>
-                <dt>Further reduction assumption:</dt><dd>[None]</dd>
-                <dt class="answer">Updated % of page loads:</dt><dd>0.07%</dd>
-                <dt>Additional unaccounted-for breakage:</dt><dd>Low confidence</dd>
-                <dt class="answer">Final % of page loads:</dt><dd>0.07%</dd>
-            </dl>
-
-            <h3>Extreme example 1: Google is broken for everyone</h3>		
-            <dl>
-                <dt>Domain rank:</dt><dd>1</dd>
-                <dt class="answer">Initial % of all page loads:</dt><dd>21.352%</dd>
-                <dt>Further reduction assumption:</dt><dd>[None]</dd>
-                <dt class="answer">Updated % of page loads:</dt><dd>21.352%</dd>
-                <dt>Additional unaccounted-for breakage:</dt><dd>Low confidence</dd>
-                <dt class="answer">Final % of page loads:</dt><dd>21.352%</dd>
-            </dl>
-
-            <h3>Extreme example 2: Videos not playing on my personal blog	</h3>		
-            <dl>
-                <dt>Domain rank:</dt><dd>1,000,000</dd>
-                <dt class="answer">Initial % of all page loads:</dt><dd>0.00011%</dd>
-                <dt>Further reduction assumption:</dt><dd>10%</dd>
-                <dt class="answer">Updated % of page loads:</dt><dd>0.000011%</dd>
-                <dt>Additional unaccounted-for breakage:</dt><dd>High confidence</dd>
-                <dt class="answer">Final % of page loads:</dt><dd>0.0011%</dd>
-            </dl>
-        </p>
-    </details>
+                <h3>Extreme example 2: Videos not playing on my personal blog	</h3>		
+                <dl>
+                    <dt>Domain rank:</dt><dd>1,000,000</dd>
+                    <dt class="answer">Initial % of all page loads:</dt><dd>0.00011%</dd>
+                    <dt>Further reduction assumption:</dt><dd>10%</dd>
+                    <dt class="answer">Updated % of page loads:</dt><dd>0.000011% (because this only happens on an estimated 10% of website page loads.)</dd>
+                    <dt>Additional unaccounted-for breakage:</dt><dd>High confidence</dd>
+                    <dt class="answer">Final % of page loads:</dt><dd>0.0011% (because this is likely to be an issue on other websites too.)</dd>
+                </dl>
+            </p>
+        </details>
     
-    <details>
-        <summary>How is the page load percentage calculated from domain rank?</summary>
-        <p>The paper "<a href="https://dl.acm.org/doi/10.1145/3517745.3561418" target="_blank">A World Wide View of Browsing the World Wide Web</a>", written by researchers at Google and Stanford University, presents data from "several hundred million global users" revealing the following traffic statistics:</p>
-        <ul>
-            <li>The top website has 17% of traffic</li>
-            <li>The top 6 sites have 25% of traffic</li>
-            <li>The top 100 sites have 40% of traffic</li>
-            <li>The top 10K sites have 70% of traffic</li>
-            <li>The top 1M sites have 95%+ of traffic</li>
-        </ul>
-        <p>This is a logarithmic increase which, when plotted, gives us the following trend line formula:</p>
+        <details>
+            <summary>How is the page load percentage calculated from domain rank?</summary>
+            <p>The paper "<a href="https://dl.acm.org/doi/10.1145/3517745.3561418" target="_blank">A World Wide View of Browsing the World Wide Web</a>", written by researchers at Google and Stanford University, presents data from "several hundred million global users" revealing the following traffic statistics:</p>
+            <ul>
+                <li>The top website has 17% of traffic</li>
+                <li>The top 6 sites have 25% of traffic</li>
+                <li>The top 100 sites have 40% of traffic</li>
+                <li>The top 10K sites have 70% of traffic</li>
+                <li>The top 1M sites have 95%+ of traffic</li>
+            </ul>
+            <p>This is a logarithmic increase which, when plotted, gives us the following trend line formula:</p>
 
-        <math xmlns="http://www.w3.org/1998/Math/MathML">
-            <mrow>
-                <mi>f</mi>
-                <mo>(</mo>
-                <mi>x</mi>
-                <mo>)</mo>
-                <mo>=</mo>
-                <mn>0.0577045083370069</mn>
-                <mo>&times;</mo>
-                <mi>ln</mi>
-                <mo>(</mo>
-                <mi>x</mi>
-                <mo>)</mo>
-                <mo>+</mo>
-                <mn>0.154434582485181</mn>
-            </mrow>
-            <mrow>
-                <msup>
-                    <mi>R</mi>
-                    <mn>2</mn>
-                </msup>
-                <mo>=</mo>
-                <mn>0.9978</mn>
-            </mrow>
-        </math>
-
-        <p>Note that's a cumulative page load percentage &mdash; the running total for all domain ranks. To get individual domain ranks we can calculate the page load difference for each domain rank. I did this for the top 300 domains which can them be plotted to give another trend line formula:</p>
-
-        <math xmlns="http://www.w3.org/1998/Math/MathML">
-            <mrow>
-                <mi>f</mi>
-                <mo>(</mo>
-                <mi>x</mi>
-                <mo>)</mo>
-                <mo>=</mo>
-                <mn>0.0687189317758425</mn>
-                <mo>&times;</mo>
-                <msup>
+            <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <mrow>
+                    <mi>f</mi>
+                    <mo>(</mo>
                     <mi>x</mi>
-                    <mrow>
-                        <mo>-</mo>
-                        <mn>1.03435633987409</mn>
-                    </mrow>
-                </msup>
-            </mrow>
-            <mrow>
-                <msup>
-                    <mi>R</mi>
-                    <mn>2</mn>
-                </msup>
-                <mo>=</mo>
-                <mn>0.997267490393083</mn>
-            </mrow>
-        </math>
+                    <mo>)</mo>
+                    <mo>=</mo>
+                    <mn>0.0577045083370069</mn>
+                    <mo>&times;</mo>
+                    <mi>ln</mi>
+                    <mo>(</mo>
+                    <mi>x</mi>
+                    <mo>)</mo>
+                    <mo>+</mo>
+                    <mn>0.154434582485181</mn>
+                </mrow>
+                <mrow>
+                    <msup>
+                        <mi>R</mi>
+                        <mn>2</mn>
+                    </msup>
+                    <mo>=</mo>
+                    <mn>0.9978</mn>
+                </mrow>
+            </math>
 
-        <p>These are the constants that this calculator uses.</p>
-    </details>
-</div>
+            <p>Note that's a cumulative page load percentage &mdash; the running total for all domain ranks. To get individual domain ranks we can calculate the page load difference for each domain rank. I did this for the top 300 domains which can them be plotted to give another trend line formula:</p>
+
+            <math xmlns="http://www.w3.org/1998/Math/MathML">
+                <mrow>
+                    <mi>f</mi>
+                    <mo>(</mo>
+                    <mi>x</mi>
+                    <mo>)</mo>
+                    <mo>=</mo>
+                    <mn>0.0687189317758425</mn>
+                    <mo>&times;</mo>
+                    <msup>
+                        <mi>x</mi>
+                        <mrow>
+                            <mo>-</mo>
+                            <mn>1.03435633987409</mn>
+                        </mrow>
+                    </msup>
+                </mrow>
+                <mrow>
+                    <msup>
+                        <mi>R</mi>
+                        <mn>2</mn>
+                    </msup>
+                    <mo>=</mo>
+                    <mn>0.997267490393083</mn>
+                </mrow>
+            </math>
+
+            <p>These are the constants that this calculator uses.</p>
+        </details>
+    </div>
 </div>
 
 <script>
-(function () {
+(async function () {
     'use strict';
+
+    // Globals.
+    let domainRank = 0;
+    const domainMessage = document.getElementById('domainMessage');
+    const domainName = document.getElementById('domainName');
+    const apiUsageInput = document.getElementById('apiUsageInput');
+    const reductionFactorInput = document.getElementById('reductionFactorInput');
+    const resultMessage = document.getElementById('result');
+
+    // Get URL parameters.
+    const urlSearchParams = new URLSearchParams(window.location.search.toLowerCase());
 
     // Multipliers for confidence that the breakage issue is more widespread.
     const confidenceLevels = {
@@ -341,83 +362,121 @@
         }
     }
 
+    // Set URL parameters.
+    function setParams () {
+        const url = new URL(window.location.href); // Use current URL
+        const urlParams = url.searchParams; // Get current params
+
+        // Set values based on `reset` flag directly
+        urlParams.set('domainname', domainName.value);
+        urlParams.set('apiusage', apiUsageInput.value);
+        urlParams.set('reductionfactor', reductionFactorInput.value);
+        urlParams.set('confidence', document.querySelector('input[name="confidenceInput"]:checked').value);
+
+        // Update the URL without reloading the page
+        window.history.pushState({}, '', url);
+    }
+
     // Hide/display the domain rank and API usage fields.
     function toggleTab (type) {
         document.body.className = type;
-        if (type === 'domain') {
-            apiUsageInput.value = '';
-        } else {
-            domainRankInput.value = '';
-        }
-        doCalculation();
+
+        // Clear form values and URL parameters.
+        domainName.value = '';
+        domainRank = 0;
+        domainMessage.textContent = '';
+        domainPopularityOutput.textContent = '';
+        apiUsageInput.value = '';
+        reductionFactorInput.value = '';
+        document.querySelector('input[name=confidenceInput][value=low]').checked = true;
+        resultMessage.textContent = '';
+
+        setParams();
     }
 
     // Calculate breakage reach as a percentage of page loads.
     function doCalculation () {
-        const domainRank = domainRankInput.value;
-        const apiUsage = apiUsageInput.value;
-        const reductionFactor = reductionFactorInput.value || 100;
-        const confidence = document.querySelector('input[name="confidenceInput"]:checked').value;
-        let result = '';
+        let result = 0;
+        const apiUsage = parseFloat(apiUsageInput.value);
+        const reductionFactor = parseFloat(reductionFactorInput.value) || 100;
+        const confidence = document.querySelector('input[name="confidenceInput"]:checked')?.value;
 
-        // Domain popularity is calculated using a trend line formula based on rank:pageload data from https://dl.acm.org/doi/10.1145/3517745.3561418
-        // Domain rank 1 is an outlier and therefore an exception to the formula.
-        let domainPopularity = 0;
-        if (domainRank) {
-            domainPopularity = (domainRank > 1) ? (0.0687189317758425 * Math.pow(domainRank, -1.03435633987409)) : 0.17;
+        // Validate numeric inputs.
+        if (apiUsage && (isNaN(apiUsage) || apiUsage < 0 || apiUsage > 100)) {
+            console.error('Invalid API usage input.');
+            return;
+        }
+        if (reductionFactor && (isNaN(reductionFactor) || reductionFactor < 0 || reductionFactor > 100)) {
+            console.error('Invalid reduction assumption input.')
+            return;
         }
 
-        const domainPopularityOutput = document.getElementById('domainPopularityOutput');
-        domainPopularityOutput.textContent = 'Domain pageloads: ' + formatResult(domainPopularity) + '%';
+        // Exit if confidence level is invalid.
+        if (!confidenceLevels[confidence]) return;
 
         if (domainRank) {
+            // Domain popularity is calculated using a trend line formula based on rank:pageload data from https://dl.acm.org/doi/10.1145/3517745.3561418
+            // Domain rank 1 is an outlier and therefore an exception to the formula.
+            let domainPopularity = 0;
+            domainPopularity = (domainRank > 1) ? (0.0687189317758425 * Math.pow(domainRank, -1.03435633987409)) : 0.17;
             result = domainPopularity * (reductionFactor / 100);
+        
+            // Show domain pageloads
+            const domainPopularityOutput = document.getElementById('domainPopularityOutput');
+            domainPopularityOutput.textContent = 'Domain pageloads: ' + formatResult(domainPopularity) + '%';
         } else if (apiUsage) {
             result = (apiUsage / 100) * (reductionFactor / 100);
         }
 
         result *= confidenceLevels[confidence];
-        document.getElementById('results').textContent = 'Platform pageloads affected: ' + formatResult(result) + '%';
+        resultMessage.textContent = 'Platform pageloads affected: ' + formatResult(result) + '%';
 
         // Update the URL parameters
-        const url = new URL(window.location.href); // Use current URL
-        const urlParams = url.searchParams; // get current params
-
-        // Set or update params
-        urlParams.set('domainrank', domainRankInput.value);
-        urlParams.set('apiusage', apiUsageInput.value);
-        urlParams.set('reductionfactor', reductionFactorInput.value);
-        urlParams.set('confidence', document.querySelector('input[name="confidenceInput"]:checked').value);
-
-        // Update the URL without reloading page
-        window.history.pushState({}, '', url);
+        setParams();
     }
 
-    // Get form elements.
-    const domainRankInput = document.getElementById('domainRankInput');
-    const apiUsageInput = document.getElementById('apiUsageInput');
-    const reductionFactorInput = document.getElementById('reductionFactorInput');
-
-    // Get URL parameters.
-    const urlSearchParams = new URLSearchParams(window.location.search.toLowerCase());
+    // Get the rank of a domain from Tranco.
+    function getRank (domain) {
+        domainMessage.textContent = 'Getting domain rank…';
+        return new Promise((resolve, reject) => {
+            const encodedDomain = encodeURIComponent(domain);
+            fetch(`https://tranco-list.eu/api/ranks/domain/${encodedDomain}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch Tranco data.');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    let rank = 1000000; // Default rank
+                    rank = data.ranks[0].rank; // Fine to force an error if data doesn't exist.
+                    domainMessage.textContent = 'Domain rank: ' + rank;
+                    resolve(rank); // Successfully fetched rank
+                })
+                .catch(error => {
+                    // Instead of allowing the promise to be rejected, resolve it with 0 in case of failure.
+                    console.error(error.message);
+                    domainMessage.textContent = 'Unable to get rank so assuming 1,000,000.';
+                    resolve(1000000);
+                });
+        });
+    }
 
     // Prefill inputs if URL parameters exist
-    if (urlSearchParams.has('domainrank')) domainRankInput.value = urlSearchParams.get('domainrank');
+    if (urlSearchParams.has('domainname')) domainName.value = urlSearchParams.get('domainname');
     if (urlSearchParams.has('apiusage')) {
         const apiUsageParam = urlSearchParams.get('apiusage');
-        apiUsageInput.value = apiUsageParam;
         if (apiUsageParam > 0) toggleTab('api');
+        apiUsageInput.value = apiUsageParam;
     }
     if (urlSearchParams.has('reductionfactor')) reductionFactorInput.value = urlSearchParams.get('reductionfactor');
     if (urlSearchParams.has('confidence')) {
-        const confidenceValue = urlSearchParams.get('confidence');
+        const confidenceValue = urlSearchParams.get('confidence') || 'low';
         const confidenceInput = document.querySelector('input[name=confidenceInput][value=' + confidenceValue + ']');
         if (confidenceInput) confidenceInput.checked = true;
     }
 
     // Listen for user input.
-
-    domainRankInput.addEventListener('input', doCalculation);
     apiUsageInput.addEventListener('input', doCalculation);
     reductionFactorInput.addEventListener('input', doCalculation);
 
@@ -431,8 +490,37 @@
     document.getElementById('apiButton').addEventListener('click', function () {
         toggleTab('api');
     });
+    document.getElementById('domainForm').addEventListener('submit', async function (event) {
+        event.preventDefault();
+        
+        if (!domainName.value) {
+            domainMessage.textContent = 'Please enter a valid domain name.';
+            return;
+        }
+        // Further validate the domain format.
+        const domainPattern = /^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        if (!domainPattern.test(domainName.value.trim())) {
+            domainMessage.textContent = 'Please enter a valid domain name.';
+            return;
+        }
+        
+        getReach();
+    });
 
-    doCalculation();
+    async function getReach () {
+        try {
+            if (domainName.value) {
+                domainRank = await getRank(domainName.value.trim());
+            }
+        } catch (error) {
+            console.error('Error fetching the domain rank:', error);
+            domainMessage.textContent = 'Error retrieving rank. Please try again.';
+            return;
+        }
+        doCalculation();
+    }
+
+    getReach();
 })();
 </script>
 

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>URL Spoofing - JS page rewrite</title>
+  <script>
+    // eslint-disable-next-line no-unused-vars
+    function spoof () {
+        const newWindow = window.open('');
+        newWindow.document.write('<html><body style="background:#5DBCD2"><p style="text-align:center">This is not the content that belongs to the above URL</p></body></html>');
+        newWindow.location = 'https://duck.co';
+
+        const i = setInterval(() => {
+            try {
+                // eslint-disable-next-line no-unused-vars
+                const x = newWindow.location.href;
+            } catch (e) {
+                clearInterval(i);
+                newWindow.location.replace('http://tests.netsekure.org/slow.php?seconds=10000');
+            }
+        }, 1);
+    }
+  </script>
+</head>
+
+<body>
+  <p><a href="./index.html">[Back]</a></p>
+
+  This test will try to confuse the browser to show wrong domain in the URL bar by rewriting to a long-loading origin.
+
+  <button onclick="spoof()">Start</button>
+</body>
+
+</html>

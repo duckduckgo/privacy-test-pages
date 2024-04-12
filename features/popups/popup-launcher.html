@@ -1,0 +1,86 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>Popup test launcher</title>
+    <script language="JavaScript">
+        function getWindowFeatures() {
+            var accumulatedOptions = []
+
+            if (document.getElementById('popup').checked) {
+                accumulatedOptions.push('popup')
+            }
+
+            if (document.getElementById('width').value !== '') {
+                accumulatedOptions.push('width=' + document.getElementById('width').value)
+            }
+
+            if (document.getElementById('height').value !== '') {
+                accumulatedOptions.push('height=' + document.getElementById('height').value)
+            }
+
+            if (document.getElementById('top').value !== '') {
+                accumulatedOptions.push('top=' + document.getElementById('top').value)
+            }
+
+            if (document.getElementById('left').value !== '') {
+                accumulatedOptions.push('left=' + document.getElementById('left').value)
+            }
+
+            if (document.getElementById('noopener').checked) {
+                accumulatedOptions.push('noopener')
+            }
+
+            if (document.getElementById('noreferrer').checked) {
+                accumulatedOptions.push('noreferrer')
+            }
+
+            console.log('options are ' + accumulatedOptions.join(','))
+
+            return accumulatedOptions.join(',')
+        }
+    </script>
+</head>
+<body>
+    <form>
+        <table>
+            <tr>
+                <td width="100px">
+                    Target:<br />
+                    <input type="radio" id="_self" name="link_target" value="_self" checked>
+                    <label for="_self">_self</label><br />
+                    <input type="radio" id="_blank" name="link_target" value="_blank">
+                    <label for="_blank">_blank</label><br />
+                    <input type="radio" id="_parent" name="link_target" value="_parent">
+                    <label for="_parent">_parent</label><br />
+                    <input type="radio" id="_top" name="link_target" value="_top">
+                    <label for="_top">_top</label><br />
+                    <input type="radio" id="noTarget" name="link_target" value="">
+                    <label for="noTarget">No target</label><br />
+                </td>
+                <td>
+                    Window features:<br />
+                    <input type="checkbox" id="popup" />
+                    <label for="popup">popup</label><br />
+                    <label for="width">width</label>
+                    <input type="text" id="width" /><br />
+                    <label for="height">height</label>
+                    <input type="text" id="height" /><br />
+                    <label for="left">left</label>
+                    <input type="text" id="left" /><br />
+                    <label for="top">top</label>
+                    <input type="text" id="top" /><br />
+                    <input type="checkbox" id="noopener" />
+                    <label for="noopener">noopener</label><br />
+                    <input type="checkbox" id="noreferrer" />
+                    <label for="noreferrer">noreferrer</label><br />
+                </td>
+            </tr>
+        </table>
+    </form>
+    <button id="openPopup" onclick="window.open('popup-test-window.html', document.querySelector('input[name = link_target]:checked').value, getWindowFeatures())">
+        Open popup!
+    </button>
+</body>
+</html>

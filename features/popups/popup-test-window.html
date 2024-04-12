@@ -1,0 +1,18 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>Popup test</title>
+</head>
+<body>
+    <div id="ownerUrl">
+        Uninitialized
+    </div>
+    <script language="javascript">
+        if (window.opener !== undefined && window.opener !== null) {
+            document.getElementById('ownerUrl').innerHTML = window.opener.location.href;
+        }
+    </script>
+</body>
+</html>

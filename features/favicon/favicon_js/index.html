@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Favicon test JS</title>
+    <link rel="shortcut icon" href="favicon.png">
+</head>
+<body>
+<p><a href="../../index.html">[Home]</a>/<a href="../index.html">[Favicon]</a></p>
+
+<h1>PNG Favicon replaced at runtime dax > skeleton dax</h1>
+
+<p>
+    <button type="button" onclick="setDefault()">Set default now</button>
+    <br>
+    <small>Sets the <code>href</code> value of <code>link[rel='shortcut icon']</code> to
+        <code>./favicon.png</code></small>
+</p>
+<p>
+    <button type="button" onclick="setOverride()">Set override now</button>
+    <br>
+    <small>Sets the <code>href</code> value of <code>link[rel='shortcut icon']</code> to <code>./new_favicon.png</code></small>
+</p>
+<p>
+    <a href="?initial=override">Set override on page load </a>
+    <br>
+    <small>Reloads the page, and sets the override immediately</small>
+</p>
+<p>
+    <a href="?initial=delayed-override">Set override on page load, after 1s</a>
+    <br>
+    <small>Reloads the page, and sets the override after <code>1000ms (1s)</code></small>
+</p>
+
+<script>
+    function setDefault() {
+        document.querySelector("link[rel='shortcut icon']").href = "./favicon.png";
+    }
+
+    function setOverride() {
+        document.querySelector("link[rel='shortcut icon']").href = "./new_favicon.png";
+    }
+
+    // set an initial state
+    const initial = new URL(window.location.href).searchParams.get("initial");
+    if (initial) {
+        switch (initial) {
+            case "default":
+                setDefault();
+                break;
+            case "override":
+                setOverride();
+                break;
+            case "delayed-override":
+                setTimeout(setOverride, 1000)
+                break;
+            default:
+                console.warn("unsupported initial value")
+        }
+    }
+</script>
+
+</body>
+</html>

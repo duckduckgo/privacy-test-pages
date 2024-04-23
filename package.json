@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/duckduckgo/privacy-test-pages#readme",
   "dependencies": {
+    "@duckduckgo/content-scope-scripts": "github:duckduckgo/content-scope-scripts",
     "body-parser": "^1.20.1",
     "express": "^4.17.1",
     "node-cache": "^5.1.2",

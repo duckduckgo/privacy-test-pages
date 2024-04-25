@@ -36,13 +36,35 @@
                 accumulatedOptions.push('noreferrer')
             }
 
-            console.log('options are ' + accumulatedOptions.join(','))
-
             return accumulatedOptions.join(',')
+        }
+
+        function updateRelValue() {
+            var accumulatedOptions = []
+
+            if (document.getElementById('noopener').checked) {
+                accumulatedOptions.push('noopener')
+            }
+
+            if (document.getElementById('opener').checked) {
+                accumulatedOptions.push('opener')
+            }
+
+            if (document.getElementById('noreferrer').checked) {
+                accumulatedOptions.push('noreferrer')
+            }
+
+            var relValue = accumulatedOptions.join(' ')
+
+            if (relValue == '') {
+                document.getElementById('relLink').removeAttribute('rel')
+            } else {
+                document.getElementById('relLink').setAttribute('rel', relValue)
+            }
         }
     </script>
 </head>
-<body>
+<body onload="updateRelValue()">
     <form>
         <table>
             <tr>
@@ -71,9 +93,11 @@
                     <input type="text" id="left" /><br />
                     <label for="top">top</label>
                     <input type="text" id="top" /><br />
-                    <input type="checkbox" id="noopener" />
+                    <input type="checkbox" id="noopener" onclick="updateRelValue()" />
                     <label for="noopener">noopener</label><br />
-                    <input type="checkbox" id="noreferrer" />
+                    <input type="checkbox" id="opener" onclick="updateRelValue()" />
+                    <label for="opener">opener</label><br />
+                    <input type="checkbox" id="noreferrer" onclick="updateRelValue()" />
                     <label for="noreferrer">noreferrer</label><br />
                 </td>
             </tr>
@@ -82,5 +106,6 @@
     <button id="openPopup" onclick="window.open('popup-test-window.html', document.querySelector('input[name = link_target]:checked').value, getWindowFeatures())">
         Open popup!
     </button>
+    <a href="popup-test-window.html" id="relLink" target="_blank">_blank Link</a>
 </body>
 </html>

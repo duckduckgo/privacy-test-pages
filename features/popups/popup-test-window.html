@@ -9,9 +9,15 @@
     <div id="ownerUrl">
         Uninitialized
     </div>
+    <div id="referrer">
+        Uninitialized
+    </div>
     <script language="javascript">
         if (window.opener !== undefined && window.opener !== null) {
-            document.getElementById('ownerUrl').innerHTML = window.opener.location.href;
+            document.getElementById('ownerUrl').innerHTML = window.opener.location.href
+        }
+        if (document.referrer !== undefined && document.referrer !== '') {
+            document.getElementById('referrer').innerHTML = document.referrer
         }
     </script>
 </body>

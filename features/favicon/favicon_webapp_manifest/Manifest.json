@@ -1,0 +1,14 @@
+{
+  "name": "Favicon webapp manifest test",
+  "short_name": "favicontest",
+  "start_url": "/index.html",
+  "icons": [
+    {
+    "src": "dax.png",
+    "sizes": "128x128",
+    "type": "image/png"
+    }
+ ],
+  "theme_color": "#ffffff",
+  "background_color": "#ffffff"
+}

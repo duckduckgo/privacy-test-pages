@@ -158,7 +158,7 @@
             </div>
 
             <div>
-                <label>[Optional] <abbr title="Should the reach of this breakage be reduced? This should be based on data if available, or your best estimate. 100% = no reduction.">Reduction assumption (%):<br>
+                <label>[Optional] <abbr title="Percentage of users that might encounter this breakage. This should be based on data if available, or your best estimate. 100% = no reduction.">Reduction assumption (%):<br>
                 <input type="number" id="reductionFactorInput" min="0" max="100"></abbr></label>
             </div>
 
@@ -190,7 +190,7 @@
 
         <details>
             <summary>What is "reduction assumption"?</summary>
-            <p>Should the reach of this breakage be reduced? This should be based on data if available, or your best estimate. 100% (or no input) = no reduction. Examples of when this could apply:</p>
+            <p>Percentage of users that might encounter this breakage. You should adjust this if only a subset of all domain visitors are likely to experience breakage, for example visitors on a particular platform version. This should be based on data if available, or your best estimate. 100% (or no input) = no reduction. Examples of when this could apply:</p>
             <ul>
                 <li>A specific platform version, e.g. only Big Sur users, which might account for 5% of all macOS users.</li>
                 <li>A specific user action, e.g. only when users pause a video, which might be 10% of all video plays.</li>

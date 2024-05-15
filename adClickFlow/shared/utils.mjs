@@ -14,6 +14,10 @@ function getAdHostname (hostname) {
     return isLocalTest ? 'ad-company.example' : 'ad-company.site';
 }
 
+function isSafariOrDDG() {
+    return navigator.vendor && navigator.vendor.indexOf('Apple') > -1;
+}
+
 function getAdUrl (id, hostname) {
     // Build Ad Redirection URL
     const adHostname = getAdHostname(hostname);
@@ -341,8 +345,8 @@ export class FinishObserver {
         this.observer = new PerformanceObserver((list) => {
             const entries = list.getEntries();
             entries.map((entry) => {
-                // Safari doesn't support serverTiming nor does it fire events for blocked loads either.
-                if (entry.serverTiming) {
+                // WebKit doesn't seem to support serverTiming for cross-origin loads
+                if (entry.serverTiming && !isSafariOrDDG()) {
                     if (entry.serverTiming.length === 0) {
                         this.setResourceStatus(entry.name, 'blocked');
                     } else {

@@ -2,7 +2,7 @@ console.log('Ad conversion');
 
 const pixelUrl = new URL('./ping.gif', document.currentScript.src);
 
-function fireResource (status) {
+function fireConvertPingStatus (status) {
     window.dispatchEvent(new CustomEvent('resourceLoad', {
         detail: {
             url: pixelUrl.href,
@@ -16,9 +16,9 @@ img.src = pixelUrl;
 img.style.display = 'none';
 img.onload = () => {
     console.log('Ad conversion complete');
-    fireResource('loaded');
+    fireConvertPingStatus('loaded');
 };
 img.onerror = () => {
-    fireResource('blocked');
+    fireConvertPingStatus('blocked');
 };
 document.body.appendChild(img);

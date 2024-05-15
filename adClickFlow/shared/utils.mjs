@@ -443,6 +443,7 @@ export class FinishObserver {
 
     render() {
         const detailsElement = document.createElement('details');
+        detailsElement.open = true;
         const summaryElement = document.createElement('summary');
         summaryElement.textContent = 'Resources';
         const tableElement = document.createElement('table');

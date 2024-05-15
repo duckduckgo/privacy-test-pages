@@ -1,7 +1,8 @@
 console.log('Tracking');
 
 const trackingImgUrl = new URL('./ping.gif', document.currentScript.src);
-function fireResource (status) {
+
+function fireTrackingPingStatus (status) {
     window.dispatchEvent(new CustomEvent('resourceLoad', {
         detail: {
             url: trackingImgUrl.href,
@@ -14,9 +15,9 @@ const trackingImg = document.createElement('img');
 trackingImg.src = trackingImgUrl;
 trackingImg.style.display = 'none';
 trackingImg.onload = () => {
-    fireResource('loaded');
+    fireTrackingPingStatus('loaded');
 };
 trackingImg.onerror = () => {
-    fireResource('blocked');
+    fireTrackingPingStatus('blocked');
 };
 document.body.appendChild(trackingImg);

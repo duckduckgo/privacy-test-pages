@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>URL Canonicalization Tests</title>
+</head>
+<body>
+    <p><a href="../index.html">[Back]</a></p>
+    <h1>URL Canonicalization Tests</h1>
+    Each of the following links, when clicked, should raise an error page. It should never actually load the page - if it does, this indicates that our URL canonicalization has failed, which could potentially allow malformed or malicious URLs to be processed incorrectly.
+    <a id="test_specialchar1" href="https://www.%20privacy-test-pages.glitch.me/security/badware/phishing.html" target="_blank">Special Characters</a><br>
+    <a id="test_specialchar2" href="https://www.%7Eprivacy-test-pages.glitch.me/security/badware/phishing.html" target="_blank">Special Characters</a><br>
+    <a id="test_outofrangechars" href="https://www.🙃privacy-test-pages.glitch.me/security/badware/phishing.html" target="_blank">Out-of-Range Characters</a><br>
+    <a id="test_percentescapes" href="https://www.privacy-test-pages.glitch.me%20security%20badware/phishing.html" target="_blank">Percent Escapes</a><br>
+    <a id="test_doubledots" href="https://www..privacy-test-pages.glitch.me/security/badware/phishing.html" target="_blank">Multiple Full Stops</a><br>
+    <a id="test_trailingdots" href="https://www.privacy-test-pages.glitch.me./security/badware/phishing.html" target="_blank">Trailing Full Stops</a><br>
+</body>
+</html>

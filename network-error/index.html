@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Errors Tests</title>
+</head>
+<body>
+    <p><a href="../../">[Home]</a> ↣ <strong>[Network Error Tests]</strong></p>
+
+    <p>This page allows testing various HTTP statuses and network errors.</p>
+    <p>To test an HTTP status, simply pass it as a query param: <code>/network-error/http_status/?code=404</code></p>
+    <p>Examples below:</p>
+
+    <ul>
+        <li>
+            <a href="http_status/?code=401">401 Unauthorized</a>
+            - will also set the <code>WWW-Authenticate Response</code> header
+        </li>
+        <li><a href="http_status/?code=404">404 Not Found</a></li>
+        <li><a href="http_status/?code=500">500 Internal Server Error</a></li>
+    </ul>
+
+    <p>Available network errors:</p>
+
+    <ul>
+        <li><a href="drop">Connection drop</a></li>
+    </ul>
+
+</body>
+</html>

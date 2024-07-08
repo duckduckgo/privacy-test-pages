@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cookies</title>
+
+  <style>
+    .expected {
+      color: grey;
+      font-size: 14px;
+      margin-top: -10px;
+      margin-bottom: -4px;
+    }
+  </style>
+
+      <script>
+        function getCookie(name) {
+            let value = `; ${document.cookie}`;
+            let parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+            return null;
+        }
+
+        function setCookie(name, value, days) {
+            let expires = "";
+            if (days) {
+                let date = new Date();
+                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                expires = "; expires=" + date.toUTCString();
+            }
+            document.cookie = name + "=" + (value || "") + expires + "; path=/";
+        }
+
+        function incrementCookie() {
+            let cookieValue = getCookie('counter');
+            if (cookieValue) {
+                cookieValue = parseInt(cookieValue) + 1;
+            } else {
+                cookieValue = 1;
+            }
+            setCookie('counter', cookieValue, 7);
+            displayCookieValue();
+        }
+
+        function displayCookieValue() {
+            let cookieValue = getCookie('counter');
+            if (cookieValue) {
+                document.getElementById('cookieValue').innerText = `Cookie Value: ${cookieValue}`;
+            } else {
+                document.getElementById('cookieValue').innerText = "No Cookie Set";
+            }
+        }
+
+        window.onload = function() {
+            displayCookieValue();
+        }
+    </script>
+
+</head>
+<body>
+  <p><a href="../../">[Home]</a> ↣ <a href="../">[Privacy Protections Tests]</a> ↣ <strong>[Cookies]</strong></p>
+
+  <p>This test page creates or increments a cookie when the button is pressed and displays the current value.</P>
+
+  <p id="cookieValue">No Cookie Set</p>
+  <button onclick="incrementCookie()">Increment Cookie</button>
+
+</body>
+</html>

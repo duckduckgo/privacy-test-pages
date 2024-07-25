@@ -289,3 +289,6 @@ app.use('/security/address-bar-spoofing-download-redirect', addressBarSpoofingRo
 
 const phishingDetectionRoutes = require('./security/badware/server/routes.js');
 app.use('/security/badware/phishing-redirect', phishingDetectionRoutes);
+
+const networkErrorRoutes = require('./network-error/server/routes.js');
+app.use('/network-error', networkErrorRoutes);

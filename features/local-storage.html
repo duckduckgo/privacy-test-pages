@@ -16,6 +16,10 @@
       <button id='cleanup'>Cleanup data</button>
     </p>
 
+    <p>
+      <button id='manual'>Manual Increment</button>
+    </p>
+
     <h3>Current values</h3>
     <div id='tests'>
     </div>
@@ -23,11 +27,13 @@
     <script>
       const startButton = document.querySelector('#start');
       const cleanupButton = document.querySelector('#cleanup');
+      const manualButton = document.querySelector('#manual');
       const initialDiv = document.querySelector('#initial');
       const testsDiv = document.querySelector('#tests');
 
       startButton.addEventListener('click', () => startIncrementing());
       cleanupButton.addEventListener('click', () => cleanup());
+      manualButton.addEventListener('click', () => tick());
 
       initialDiv.innerHTML = countInfoAsHtml();
 

@@ -24,31 +24,18 @@
 <p id="demo"></p>
 
 <div class="">
-  <p>Sign in form present on pageload (<b>should prompt automatically</b>).</p>
-
-  <div class="dialog">
-    <form id="click-form" novalidate>
-      <h3>Sign in form</h3>
+  <form action="success.html" id="signup">
+      <h2>Password generation during signup</h2>
       <fieldset>
-        <label for="email">Email</label>
-        <input id="email" type="email">
-        <label for="password">Password</label>
-        <input id="password" type="password">
-        <button type="submit">Sign in</button>
+          <label for="email">Email</label>
+          <input id="email" type="email">
+          <label for="password">Password</label>
+          <input id="password" type="password" passwordrules="minlength: 5; maxlength: 10">
+          <label for="password-2">Password Confirmation</label>
+          <input id="password-2" type="password" passwordrules="minlength: 5; maxlength: 10">
+          <button id="submit-signup" type="submit">Sign up</button>
       </fieldset>
-    </form>
-  </div>
-  <script>
-    const clickForm = document.getElementById('click-form');
-    const button = clickForm?.querySelector('button');
-    const handler = (e) => {
-      e.preventDefault();
-      e.stopImmediatePropagation();
-      clickForm.outerHTML = '<h1>Submitted!</h1>';
-    };
-    button?.addEventListener('click', handler, true);
-    clickForm?.addEventListener('submit', handler, true);
-  </script>
+  </form>
 </div>
 
 </body>

@@ -34,6 +34,11 @@
       // Inject percent-encoded characters into the URL to bypass phishing detection
       window.location = "/%73%65%63%75%72%69%74%79/%62%61%64%77%61%72%65/%70%68%69%73%68%69%6e%67%2e%68%74%6d%6c"
     }
+
+    function capitalizeURL() {
+      // Capitalize the URL to bypass phishing detection
+      window.location = '/SECURITY/BADWARE/PHISHING.HTML';
+    }
   </script>
 </head>
 <body>
@@ -48,5 +53,6 @@
 <button onclick="injectedDoublePaths()">Injected Double Paths</button>
 <button onclick="injectedSinglePaths()">Injected Single Paths</button>
 <button onclick="percentEncodeURL()">Percent Encode URL</button>
+<button onclick="capitalizeURL()">Capitalize URL</button>
 </body>
 </html>

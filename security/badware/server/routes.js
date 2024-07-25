@@ -46,4 +46,14 @@ router.get("/iframe2", (req, res) => {
   res.redirect(301, "/security/badware/phishing-legit-iframe-loader.html");
 });
 
+// Returns a redirect to a page that renders a phishing page using a meta refresh (not flagged in dataset)
+router.get("/meta", (req, res) => {
+  res.redirect(301, "/security/badware/phishing-meta-redirect-clean.html");
+});
+
+// Returns a redirect to a page that renders a phishing page using a meta refresh (flagged in dataset)
+router.get("/meta2", (req, res) => {
+  res.redirect(301, "/security/badware/phishing-meta-redirect.html");
+});
+
 module.exports = router;

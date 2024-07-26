@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Phishing Form Submission</title>
+</head>
+
+<body>
+    <p><a href="./index.html">[Back]</a></p>
+
+    <h1>Phishing Page Form Submission</h1>
+
+    <p>This is an example page that, although it is not in our phishing dataset, it submits a form to an endpoint that is in our phishing dataset. If you arrive here by mistake; there's nothing to worry about, we just use this page to test if our
+        client blocking is working.</p>
+    <form method="post" action="/security/badware/phishing-redirect/form">
+        <input type="hidden" name="phishing" value="true">
+        <input type="submit" value="Submit">
+    </form>
+</body>
+
+</html>

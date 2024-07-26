@@ -56,4 +56,9 @@ router.get('/meta2', (req, res) => {
     res.redirect(301, '/security/badware/phishing-meta-redirect.html');
 });
 
+// Form handler for the phishing form
+router.post('/form', (req, res) => {
+    res.send('Form submitted');
+});
+
 module.exports = router;

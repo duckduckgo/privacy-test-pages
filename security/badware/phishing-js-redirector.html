@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Phishing page with JS redirect loop</title>
+    <script>
+        // eslint-disable-next-line no-unused-vars
+        window.location = '/security/badware/phishing-js-redirector-helper.html';
+    </script>
+</head>
+<body>
+<p><a href="./index.html">[Back]</a></p>
+
+<h1>Phishing Page JS Redirects (Indirect)</h1>
+
+<p>This is an example phishing page that attempts to load legitimate iframes to trick the browser into incorrectly classifying the page as legitimate when it should be classed as malware. If you arrive here by mistake; there's nothing to worry about, we just use this page to test if our client blocking is
+working.</p>
+</body>
+</html>

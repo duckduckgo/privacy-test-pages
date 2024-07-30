@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Phishing Page via Popups</title>
+    <script>
+        // eslint-disable-next-line no-unused-vars
+        function openPopup(target) {
+            window.open('/security/badware/phishing.html', target);
+        }
+    </script>
+</head>
+
+<body>
+    <p><a href="./index.html">[Back]</a></p>
+
+    <h1>Phishing Page Opener via Popups</h1>
+
+    <p>This is an example page that opens phishing pages via various pop-ups with different target types to test the in-browser phishing detection blocking. If you arrive here by mistake; there's nothing to worry about, we just use this page to test if our client blocking is
+    working.</p>
+
+    <h2>Test Popups</h2>
+    <button onclick="openPopup('_blank')">Open Phishing Popup (_blank)</button>
+    <button onclick="openPopup('_self')">Open Phishing Popup (_self)</button>
+    <button onclick="openPopup('_parent')">Open Phishing Popup (_parent)</button>
+    <button onclick="openPopup('_top')">Open Phishing Popup (_top)</button>
+    <button onclick="openPopup('')">Open Phishing Popup (no target)</button>
+    <button onclick="openPopup('invalid')">Open Phishing Popup (invalid target)</button>
+</body>
+
+</html>

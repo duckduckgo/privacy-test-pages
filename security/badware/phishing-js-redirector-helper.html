@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Phishing page with JS redirect loop - helper page</title>
+    <script>
+        // eslint-disable-next-line no-unused-vars
+        window.location = '/security/badware/phishing.html';
+    </script>
+</head>
+<body>
+<p><a href="./index.html">[Back]</a></p>
+
+<h1>Phishing Page JS Redirects (Direct)</h1>
+
+<p>This is a helper page that is used to redirect to a page that should be classified as phishing. This page itself should not be classified as phishing in our datasets, but since it redirects to a page that is, the error page should still be shown. If you arrive here by mistake; there's nothing to worry about, we just use this page to test if our client blocking is
+working.</p>
+</body>
+</html>

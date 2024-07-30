@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Phishing Page with URL Tampering</title>
+  <script>
+    // eslint-disable-next-line no-unused-vars
+    function injectedWhitespace() {
+      // Inject tab (0x09), CR (0x0d), and LF (0x0a) characters into the URL to bypass phishing detection
+      window.location = '/security/badware/phishing.html\t\r\n';
+    }
+
+    function injectedMiddleWhitespace() {
+      // Inject tab (0x09), CR (0x0d), and LF (0x0a) characters into the URL to bypass phishing detection
+      window.location = '/security/badware/\t\r\n\tphishing.html';
+    }
+
+    function injectedFragments() {
+      // Inject #frags into the URL to bypass phishing detection
+      window.location = '/security/badware/phishing.html#frags';
+    }
+
+    function injectedDoublePaths() {
+      // Inject "/../" in the path to bypass phishing detection
+      window.location = '/security/../security/badware/phishing.html';
+    }
+
+    function injectedSinglePaths() {
+      // Inject /./ in the path to bypass phishing detection
+      window.location = '/security/./badware/phishing.html';
+    }
+
+    function percentEncodeURL() {
+      // Inject percent-encoded characters into the URL to bypass phishing detection
+      window.location = "/%73%65%63%75%72%69%74%79/%62%61%64%77%61%72%65/%70%68%69%73%68%69%6e%67%2e%68%74%6d%6c"
+    }
+
+    function capitalizeURL() {
+      // Capitalize the URL to bypass phishing detection
+      window.location = '/SECURITY/BADWARE/PHISHING.HTML';
+    }
+  </script>
+</head>
+<body>
+  <p><a href="./index.html">[Back]</a></p>
+
+<h1>Phishing Opening via URL Tampering</h1>
+
+<p>This is an example malicious page that attempts to open phishing pages with tampered URLs to bypass the phishing detection logic. If you arrive here by mistake; there's nothing to worry about, we just use this page to test if our client blocking is working.</p>
+<button onclick="injectedWhitespace()">Injected Whitespace</button>
+<button onclick="injectedMiddleWhitespace()">Injected Middle Whitespace</button>
+<button onclick="injectedFragments()">Injected Fragments</button>
+<button onclick="injectedDoublePaths()">Injected Double Paths</button>
+<button onclick="injectedSinglePaths()">Injected Single Paths</button>
+<button onclick="percentEncodeURL()">Percent Encode URL</button>
+<button onclick="capitalizeURL()">Capitalize URL</button>
+</body>
+</html>

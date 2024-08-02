@@ -9,7 +9,8 @@
           "url": "https://www.search-company.site/#ad-id-1"
         },
         "expected": {
-          "url": "https://www.search-company.site/#ad-id-1"
+          "url": "https://www.search-company.site/#ad-id-1",
+          "pixels": []
         }
       },
       {
@@ -37,7 +38,8 @@
               "url": "https://www.ad-company.site/ping.gif",
               "status": "parent blocked"
             }
-          ]
+          ],
+          "pixels": []
         }
       }
     ]
@@ -52,7 +54,8 @@
           "url": "https://www.search-company.site/#ad-id-2"
         },
         "expected": {
-          "url": "https://www.search-company.site/#ad-id-2"
+          "url": "https://www.search-company.site/#ad-id-2",
+          "pixels": []
         }
       },
       {
@@ -81,7 +84,8 @@
               "url": "https://www.ad-company.site/ping.gif",
               "status": "parent blocked"
             }
-          ]
+          ],
+          "pixels": []
         }
       }
     ]
@@ -96,7 +100,8 @@
           "url": "https://www.search-company.site/#ad-id-3"
         },
         "expected": {
-          "url": "https://www.search-company.site/#ad-id-3"
+          "url": "https://www.search-company.site/#ad-id-3",
+          "pixels": []
         }
       },
       {
@@ -124,7 +129,8 @@
               "url": "https://www.ad-company.site/ping.gif",
               "status": "parent blocked"
             }
-          ]
+          ],
+          "pixels": []
         }
       }
     ]
@@ -139,7 +145,8 @@
           "url": "https://www.search-company.site/#ad-id-4"
         },
         "expected": {
-          "url": "https://www.search-company.site/#ad-id-4"
+          "url": "https://www.search-company.site/#ad-id-4",
+          "pixels": []
         }
       },
       {
@@ -168,7 +175,8 @@
               "url": "https://www.ad-company.site/ping.gif",
               "status": "parent blocked"
             }
-          ]
+          ],
+          "pixels": []
         }
       }
     ]
@@ -183,7 +191,8 @@
           "url": "https://www.search-company.site/#ad-id-5"
         },
         "expected": {
-          "url": "https://www.search-company.site/#ad-id-5"
+          "url": "https://www.search-company.site/#ad-id-5",
+          "pixels": []
         }
       },
       {
@@ -211,6 +220,29 @@
               "url": "https://www.ad-company.site/ping.gif",
               "status": "parent blocked"
             }
+          ],
+          "pixels": [
+            {
+              "name": "m_ad_click_detected",
+              "params": {
+                "appVersion": "APP_VERSION",
+                "domainDetection": "heuristic_only",
+                "heuristicDetectionEnabled": "1",
+                "domainDetectionEnabled": "1"
+              }
+            },
+            {
+              "name": "m_ad_click_active",
+              "params": {
+                "appVersion": "APP_VERSION"
+              }
+            },
+            {
+              "name": "m_pageloads_with_ad_attribution",
+              "params": {
+                "count": "1"
+              }
+            }
           ]
         }
       }
@@ -226,7 +258,8 @@
           "url": "https://www.search-company.site/#ad-id-6"
         },
         "expected": {
-          "url": "https://www.search-company.site/#ad-id-6"
+          "url": "https://www.search-company.site/#ad-id-6",
+          "pixels": []
         }
       },
       {
@@ -255,6 +288,29 @@
               "url": "https://www.ad-company.site/ping.gif",
               "status": "parent blocked"
             }
+          ],
+          "pixels": [
+            {
+              "name": "m_ad_click_detected",
+              "params": {
+                "appVersion": "APP_VERSION",
+                "domainDetection": "heuristic_only",
+                "heuristicDetectionEnabled": "1",
+                "domainDetectionEnabled": "1"
+              }
+            },
+            {
+              "name": "m_ad_click_active",
+              "params": {
+                "appVersion": "APP_VERSION"
+              }
+            },
+            {
+              "name": "m_pageloads_with_ad_attribution",
+              "params": {
+                "count": "1"
+              }
+            }
           ]
         }
       }
@@ -270,7 +326,8 @@
           "url": "https://www.search-company.site/#ad-id-7"
         },
         "expected": {
-          "url": "https://www.search-company.site/#ad-id-7"
+          "url": "https://www.search-company.site/#ad-id-7",
+          "pixels": []
         }
       },
       {
@@ -298,6 +355,29 @@
               "url": "https://www.ad-company.site/ping.gif",
               "status": "parent blocked"
             }
+          ],
+          "pixels": [
+            {
+              "name": "m_ad_click_detected",
+              "params": {
+                "appVersion": "APP_VERSION",
+                "domainDetection": "matched",
+                "heuristicDetectionEnabled": "1",
+                "domainDetectionEnabled": "1"
+              }
+            },
+            {
+              "name": "m_ad_click_active",
+              "params": {
+                "appVersion": "APP_VERSION"
+              }
+            },
+            {
+              "name": "m_pageloads_with_ad_attribution",
+              "params": {
+                "count": "1"
+              }
+            }
           ]
         }
       }
@@ -313,7 +393,8 @@
           "url": "https://www.search-company.site/#ad-id-8"
         },
         "expected": {
-          "url": "https://www.search-company.site/#ad-id-8"
+          "url": "https://www.search-company.site/#ad-id-8",
+          "pixels": []
         }
       },
       {
@@ -342,6 +423,29 @@
               "url": "https://www.ad-company.site/ping.gif",
               "status": "parent blocked"
             }
+          ],
+          "pixels": [
+            {
+              "name": "m_ad_click_detected",
+              "params": {
+                "appVersion": "APP_VERSION",
+                "domainDetection": "matched",
+                "heuristicDetectionEnabled": "1",
+                "domainDetectionEnabled": "1"
+              }
+            },
+            {
+                "name": "m_ad_click_active",
+                "params": {
+                  "appVersion": "APP_VERSION"
+                }
+            },
+            {
+                "name": "m_pageloads_with_ad_attribution",
+                "params": {
+                  "count": "1"
+                }
+            }
           ]
         }
       }
@@ -357,7 +461,8 @@
           "url": "https://www.search-company.site/#ad-id-5"
         },
         "expected": {
-          "url": "https://www.search-company.site/#ad-id-5"
+          "url": "https://www.search-company.site/#ad-id-5",
+          "pixels": []
         }
       },
       {
@@ -386,6 +491,23 @@
               "url": "https://www.ad-company.site/ping.gif",
               "status": "parent blocked"
             }
+          ],
+          "pixels": [
+            {
+              "name": "m_ad_click_detected",
+              "params": {
+                "appVersion": "APP_VERSION",
+                "domainDetection": "heuristic_only",
+                "heuristicDetectionEnabled": "1",
+                "domainDetectionEnabled": "1"
+              }
+            },
+            {
+              "name": "m_ad_click_active",
+              "params": {
+                "appVersion": "APP_VERSION"
+              }
+            }
           ]
         }
       },
@@ -413,6 +535,14 @@
             {
               "url": "https://www.ad-company.site/ping.gif",
               "status": "parent blocked"
+            }
+          ],
+          "pixels": [
+            {
+              "name": "m_pageloads_with_ad_attribution",
+              "params": {
+                "count": "2"
+              }
             }
           ]
         }
@@ -429,7 +559,8 @@
           "url": "https://www.search-company.site/#ad-id-5"
         },
         "expected": {
-          "url": "https://www.search-company.site/#ad-id-5"
+          "url": "https://www.search-company.site/#ad-id-5",
+          "pixels": []
         }
       },
       {
@@ -456,6 +587,23 @@
             {
               "url": "https://www.ad-company.site/ping.gif",
               "status": "parent blocked"
+            }
+          ],
+          "pixels": [
+            {
+              "name": "m_ad_click_detected",
+              "params": {
+                "appVersion": "APP_VERSION",
+                "domainDetection": "heuristic_only",
+                "heuristicDetectionEnabled": "1",
+                "domainDetectionEnabled": "1"
+              }
+            },
+            {
+              "name": "m_ad_click_active",
+              "params": {
+                "appVersion": "APP_VERSION"
+              }
             }
           ]
         }
@@ -485,6 +633,14 @@
             {
               "url": "https://www.ad-company.site/ping.gif",
               "status": "parent blocked"
+            }
+          ],
+          "pixels": [
+            {
+              "name": "m_pageloads_with_ad_attribution",
+              "params": {
+                "count": "2"
+              }
             }
           ]
         }

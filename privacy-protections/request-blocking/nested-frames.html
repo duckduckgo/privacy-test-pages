@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nested Frames Tracker Blocking Test</title>
+</head>
+
+<body>
+    <p><a href="/">[Home]</a></p>
+
+    <h1>Nested Frames Tracker Blocking Test</h1>
+
+    <p>
+        Example page that loads trackers in nested frames to check if tracker counts in the new tab page are updated
+        when child frame requests are blocked.
+    </p>
+
+    <button onclick="loadTracker('parent')">Load Tracker in Parent Frame</button>
+    <button onclick="loadTracker('child')">Load Tracker in Child Frame</button>
+
+    <script src="http://bad.third-party.site/privacy-protections/request-blocking/block-me/script.js"></script>
+    <script>
+        const [parentFrame, childFrame] = createFrames();
+
+        function createFrames() {
+            const parent = document.createElement('iframe');
+            const child = document.createElement('iframe');
+            parent.name = "parent-frame";
+            parent.id = "parent-frame";
+            child.name = "child-frame";
+            child.id = "child-frame";
+
+            document.body.appendChild(parent);
+            parent.contentDocument.body.appendChild(child);
+
+            return [parent, child];
+        }
+
+        function loadTracker(frameType) {
+            const trackerSrc = frameType === 'parent'
+                ? "http://broken.third-party.site/privacy-protections/request-blocking/block-me/script.js"
+                : "http://privacy-test-pages.site/privacy-protections/request-blocking/block-me/script.js";
+
+            const scriptElm = document.createElement('script');
+            scriptElm.src = trackerSrc;
+
+            if (frameType === 'parent') {
+                parentFrame.contentDocument.body.appendChild(scriptElm);
+            } else {
+                childFrame.contentDocument.body.appendChild(scriptElm);
+            }
+        }
+    </script>
+</body>
+
+</html>

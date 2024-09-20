@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Local port scanning</title>
+
+</head>
+<body>
+    <p><a href="../../">[Home]</a> ↣ <a href="../">[Privacy Protections Tests]</a> ↣ <strong>[Local Port Scanning]</strong></p>
+  
+<p>Trackers scan local network as a fingerprinting technique. This page runs such a scan.</p>
+<p>Depending if this page was loaded over http or https this page will load local resources over the same protocol.</P>
+
+<p>Scan range: <input id="range" value='192.168.1' />.*</p>
+<p>Timeout: <input id="timeout" value='1000' />ms</p>
+<button id="start">start</button>
+
+<ul id="output"></ul>
+
+<script>
+const protocol = location.protocol;
+const output = document.getElementById('output');
+
+async function run () {
+    output.innerHTML = '';
+    const timeout = Number.parseInt(document.getElementById('timeout').value, 10);
+    const ipPrefix = document.getElementById('range').value;
+
+    for (let i = 0; i < 256; i++) {
+        const fullIP = `${ipPrefix}.${i}`;
+        const url = `${protocol}//${fullIP}/`;
+        const startTime = Date.now();
+        try {
+            const result = await fetch(url, { signal: AbortSignal.timeout(timeout) });
+            console.log(result);
+        } catch {
+
+        }
+        const responseTime = Date.now() - startTime;
+
+        output.innerHTML += `<li style='color: ${responseTime < 50 ? 'green' : 'red'}'>${fullIP} (${responseTime}ms)</li>`;
+    }
+}
+
+document.getElementById('start').addEventListener('click', run);
+</script>
+  
+</body>
+</html>

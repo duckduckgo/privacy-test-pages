@@ -9,12 +9,13 @@
 <body>
     <p><a href="../../">[Home]</a> ↣ <a href="../">[Privacy Protections Tests]</a> ↣ <strong>[Local Port Scanning]</strong></p>
   
-<p>Trackers scan local network as a fingerprinting technique. This page runs such a scan.</p>
+<p>Trackers scan local network as a fingerprinting technique. This page allows to run a network scan and a port scan.</p>
 <p>Depending if this page was loaded over http or https this page will load local resources over the same protocol.</P>
 
 <p>Scan range: <input id="range" value='192.168.1' />.*</p>
 <p>Timeout: <input id="timeout" value='1000' />ms</p>
-<button id="start">start</button>
+<button id="startNetworkScan">start local network scan</button>
+<button id="startPortScan">start localhost port scan</button>
 
 <ul id="output"></ul>
 
@@ -22,7 +23,7 @@
 const protocol = location.protocol;
 const output = document.getElementById('output');
 
-async function run () {
+async function runNetworkScan () {
     output.innerHTML = '';
     const timeout = Number.parseInt(document.getElementById('timeout').value, 10);
     const ipPrefix = document.getElementById('range').value;
@@ -32,8 +33,7 @@ async function run () {
         const url = `${protocol}//${fullIP}/`;
         const startTime = Date.now();
         try {
-            const result = await fetch(url, { signal: AbortSignal.timeout(timeout) });
-            console.log(result);
+            await fetch(url, { signal: AbortSignal.timeout(timeout) });
         } catch {
 
         }
@@ -43,7 +43,38 @@ async function run () {
     }
 }
 
-document.getElementById('start').addEventListener('click', run);
+async function runPortScan () {
+    output.innerHTML = '';
+    // sorted by popularity
+    const commonPorts = [443, 80, 22, 5060, 8080, 1723, 53, 21, 8000, 3389, 8082, 8081, 993, 25, 23, 4567, 81, 3000];
+    const timeout = Number.parseInt(document.getElementById('timeout').value, 10);
+
+    for (const port of commonPorts) {
+        const url = `ws://localhost:${port}/`;
+        const startTime = Date.now();
+        try {
+            let res;
+            const promise = new Promise((resolve, reject) => { res = resolve; });
+            const ws = new WebSocket(url);
+            ws.onclose = res;
+            ws.onerror = res;
+            setTimeout(() => {
+                ws.close();
+                res();
+            }, timeout);
+
+            console.log(await promise);
+        } catch {
+
+        }
+        const responseTime = Date.now() - startTime;
+
+        output.innerHTML += `<li style='color: ${responseTime < 10 ? 'green' : 'red'}'>localhost:${port} (${responseTime}ms)</li>`;
+    }
+}
+
+document.getElementById('startNetworkScan').addEventListener('click', runNetworkScan);
+document.getElementById('startPortScan').addEventListener('click', runPortScan);
 </script>
   
 </body>

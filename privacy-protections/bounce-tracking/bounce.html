@@ -11,7 +11,7 @@
     <textarea id='note' style='width: 500px; height: 200px;' readonly></textarea>
     
     <script>
-        const destinationSafelist = ['privacy-test-pages.site', 'first-party.site', 'good.third-party.site', '127.0.0.1:3000'];
+        const destinationSafelist = ['privacy-test-pages.site', 'www.first-party.site', 'good.third-party.site', '127.0.0.1:3000'];
         const fieldName = 'bounceUID';
         let uid = localStorage.getItem(fieldName);
         const pageURL = new URL(location.href);

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bounce Tracking Test Page</title>
+
+    <script src='./main.js' defer></script>
+</head>
+<body>
+    <p><a href="../../">[Home]</a> ↣ <a href="../">[Privacy Protections Tests]</a> ↣ <strong>[Bounce Tracking Test Page]</strong></p>
+
+    <p>Below links allow to bounce of bad.third-party.site to different locations. bad.third-party.site will pass its local UID to the destination via URL param.</p>
+
+    <p><a href='https://bad.third-party.site/privacy-protections/bounce-tracking/bounce.html?destination=good.third-party.site'>Go to good.third-party.site</a></p>
+    <p><a href='https://bad.third-party.site/privacy-protections/bounce-tracking/bounce.html?destination=first-party.site'>Go to first-party.site</a></p>
+    <p><a href='https://bad.third-party.site/privacy-protections/bounce-tracking/bounce.html?destination=privacy-test-pages.site'>Go to privacy-test-pages.site</a></p>
+    <!--<p><a href='./bounce.html?destination=127.0.0.1:3000'>Bounce local test</a></p>-->
+
+    <p id="result" style="font-weight: bold;"></p>
+
+    <script>
+        const pageURL = new URL(location.href);
+
+        if (pageURL.searchParams.has('bounceUIDlocalStorage')) {
+            document.getElementById('result').innerText = `ID received back is "${pageURL.searchParams.get('bounceUIDlocalStorage')}".`;
+        }
+    </script>
+</body>
+</html>

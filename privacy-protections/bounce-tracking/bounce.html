@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bounce Tracking Test Page - Bounce Page</title>
+</head>
+<body>
+
+    <p>Log:</p>
+    <textarea id='note' style='width: 500px; height: 200px;' readonly></textarea>
+    
+    <script>
+        const destinationSafelist = ['privacy-test-pages.site', 'first-party.site', 'good.third-party.site', '127.0.0.1:3000'];
+        const fieldName = 'bounceUID';
+        let uid = localStorage.getItem(fieldName);
+        const pageURL = new URL(location.href);
+
+        function say (text) {
+            document.getElementById('note').value += text + '\n';
+        }
+
+        function run () {
+            if (!uid) {
+                say('No ID found, generating new ID. ');
+
+                uid = Math.round(Math.random() * 100);
+                localStorage.setItem(fieldName, uid);
+            }
+            say(`ID is ${uid}.`);
+
+            if (!pageURL.searchParams.has('destination')) {
+                say('No destination provided.');
+            } else {
+                const destination = pageURL.searchParams.get('destination');
+                const delay = Number.parseInt(pageURL.searchParams.get('delay')) || 0;
+
+                if (!destinationSafelist.includes(destination)) {
+                    say(`Invalid destination '${destination}'.`);
+                } else {
+                    const redirectURL = new URL(`/privacy-protections/bounce-tracking/?bounceUIDlocalStorage=${uid}`, 'https://' + destination);
+                    say(`Redirecting to '${redirectURL.toString()}'.`);
+
+                    setTimeout(() => { location.href = redirectURL; }, delay);
+                }
+            }
+        }
+
+        run();
+    </script>
+
+</body>
+</html>

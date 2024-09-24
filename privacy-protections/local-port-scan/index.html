@@ -50,7 +50,7 @@ async function runPortScan () {
     const timeout = Number.parseInt(document.getElementById('timeout').value, 10);
 
     for (const port of commonPorts) {
-        const url = `ws://localhost:${port}/`;
+        const url = `ws${protocol === 'http:' ? '' : 's'}://localhost:${port}/`;
         const startTime = Date.now();
         try {
             let res;

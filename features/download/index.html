@@ -40,8 +40,8 @@
 </script>
 
 <script>
-   var blob = new Blob(["Hello world!"], {type: "application/octet-stream"});
-   var link = document.getElementById("blobDownloadLink");
+   const blob = new Blob(["Hello world!"], {type: "application/octet-stream"});
+   const link = document.getElementById("blobDownloadLink");
    link.href = window.URL.createObjectURL(blob);
 </script>
 

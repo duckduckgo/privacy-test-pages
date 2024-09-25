@@ -23,6 +23,9 @@
 </ul>
 <div id="iframe-container"></div>
 
+<p>Download from BLOB</p>
+<a id="blobDownloadLink" download="test_blob_download.txt">Download BLOB file</a>
+
 <script>
    const iframeContainer = document.getElementById('iframe-container');
    const initIframeDownloadLinks = document.querySelectorAll('.init-iframe-download');
@@ -35,6 +38,12 @@
        });
    });
 </script>
-  
+
+<script>
+   const blob = new Blob(["Hello world!"], {type: "application/octet-stream"});
+   const link = document.getElementById("blobDownloadLink");
+   link.href = window.URL.createObjectURL(blob);
+</script>
+
 </body>
 </html>

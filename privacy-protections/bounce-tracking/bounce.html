@@ -60,7 +60,7 @@
                 if (!destinationSafelist.includes(destination)) {
                     say(`Invalid destination '${destination}'.`);
                 } else {
-                    const redirectURL = new URL(`/privacy-protections/bounce-tracking/?bounceUIDlocalStorage=${lsUID}&bounceUIDcookie=${cookieUID}&isNew=${newID}`, 'http://' + destination);
+                    const redirectURL = new URL(`/privacy-protections/bounce-tracking/?bounceUIDlocalStorage=${lsUID}&bounceUIDcookie=${cookieUID}&isNew=${newID}`, `http${(destination === '127.0.0.1:3000') ? '' : 's'}://` + destination);
                     say(`Redirecting to '${redirectURL.toString()}'.`);
 
                     setTimeout(() => { location.href = redirectURL; }, delay);

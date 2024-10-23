@@ -1,33 +1,55 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bounce Tracking Test Page - Bounce Page</title>
 </head>
+
 <body>
 
     <p>Log:</p>
     <textarea id='note' style='width: 500px; height: 200px;' readonly></textarea>
-    
+
     <script>
-        const destinationSafelist = ['privacy-test-pages.site', 'www.first-party.site', 'good.third-party.site', '127.0.0.1:3000'];
+        const destinationSafelist = ['privacy-test-pages.site', 'www.first-party.site', 'good.third-party.site', 'www.publisher-company.site', '127.0.0.1:3000'];
         const fieldName = 'bounceUID';
-        let uid = localStorage.getItem(fieldName);
+        const lsUID = localStorage.getItem(fieldName) || '';
+        const cookieUID = getCookie(fieldName);
         const pageURL = new URL(location.href);
+
+        function getCookie (cname) {
+            const name = cname + '=';
+            const decodedCookie = decodeURIComponent(document.cookie);
+            const ca = decodedCookie.split(';');
+            for (let i = 0; i < ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) === ' ') {
+                    c = c.substring(1);
+                }
+                if (c.indexOf(name) === 0) {
+                    return c.substring(name.length, c.length);
+                }
+            }
+            return '';
+        }
 
         function say (text) {
             document.getElementById('note').value += text + '\n';
         }
 
         function run () {
-            if (!uid) {
+            let newID = '';
+
+            if (!lsUID && !cookieUID) {
                 say('No ID found, generating new ID. ');
 
-                uid = Math.round(Math.random() * 100);
-                localStorage.setItem(fieldName, uid);
+                newID = Math.round(Math.random() * 100) + 1;
+                localStorage.setItem(fieldName, newID);
+                document.cookie = `${fieldName}=${newID};max-age=${60 * 60 * 24 * 60}`;
             }
-            say(`ID is ${uid}.`);
+            say(`ID is ${lsUID || cookieUID || newID}.`);
 
             if (!pageURL.searchParams.has('destination')) {
                 say('No destination provided.');
@@ -38,7 +60,7 @@
                 if (!destinationSafelist.includes(destination)) {
                     say(`Invalid destination '${destination}'.`);
                 } else {
-                    const redirectURL = new URL(`/privacy-protections/bounce-tracking/?bounceUIDlocalStorage=${uid}`, 'https://' + destination);
+                    const redirectURL = new URL(`/privacy-protections/bounce-tracking/?bounceUIDlocalStorage=${lsUID}&bounceUIDcookie=${cookieUID}&isNew=${newID}`, 'http://' + destination);
                     say(`Redirecting to '${redirectURL.toString()}'.`);
 
                     setTimeout(() => { location.href = redirectURL; }, delay);
@@ -50,4 +72,5 @@
     </script>
 
 </body>
+
 </html>

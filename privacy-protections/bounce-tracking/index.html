@@ -13,15 +13,23 @@
     <p><a href='https://bad.third-party.site/privacy-protections/bounce-tracking/bounce.html?destination=good.third-party.site'>Go to good.third-party.site</a></p>
     <p><a href='https://bad.third-party.site/privacy-protections/bounce-tracking/bounce.html?destination=www.first-party.site'>Go to first-party.site</a></p>
     <p><a href='https://bad.third-party.site/privacy-protections/bounce-tracking/bounce.html?destination=privacy-test-pages.site'>Go to privacy-test-pages.site</a></p>
-    <!--<p><a href='./bounce.html?destination=127.0.0.1:3000'>Bounce local test</a></p>-->
+    <p><a href='https://bad.third-party.site/privacy-protections/bounce-tracking/bounce.html?destination=www.publisher-company.site'>Go to www.publisher-company.site</a></p>
+    <!-- <p><a href='./bounce.html?destination=127.0.0.1:3000'>Bounce local test</a></p> -->
 
     <p id="result" style="font-weight: bold;"></p>
 
     <script>
         const pageURL = new URL(location.href);
 
-        if (pageURL.searchParams.has('bounceUIDlocalStorage')) {
-            document.getElementById('result').innerText = `ID received back is "${pageURL.searchParams.get('bounceUIDlocalStorage')}".`;
+        if (pageURL.searchParams.has('isNew') && pageURL.searchParams.get('isNew')) {
+            document.getElementById('result').innerText = `ID didn't exist and was generated - "${pageURL.searchParams.get('isNew')}".`;
+        } else {
+            if (pageURL.searchParams.has('bounceUIDlocalStorage')) {
+                document.getElementById('result').innerText = `bad.third-party.site localStorage ID: "${pageURL.searchParams.get('bounceUIDlocalStorage')}".\n`;
+            }
+            if (pageURL.searchParams.has('bounceUIDcookie')) {
+                document.getElementById('result').innerText += `bad.third-party.site cookie ID: "${pageURL.searchParams.get('bounceUIDcookie')}".`;
+            }
         }
     </script>
 </body>

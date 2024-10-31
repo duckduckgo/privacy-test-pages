@@ -17,7 +17,7 @@ function downloadJSON (res, suggestedFilename) {
 }
 
 router.get('/file/:type', (req, res) => {
-    const suggestedFilename = req.query.suggestedFilename || 'data.json'
+    const suggestedFilename = req.query.suggestedFilename || 'data.json';
     switch (req.params.type) {
     case 'json':
         downloadJSON(res, suggestedFilename);

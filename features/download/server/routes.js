@@ -10,7 +10,7 @@ function downloadJSON (res, suggestedFilename) {
     const buf = Buffer.from(json);
     res.writeHead(200, {
         'Content-Type': 'application/octet-stream',
-        'Content-disposition': 'attachment; filename=' + suggestedFilename
+        'Content-disposition': `attachment; filename="${suggestedFilename}"`
     });
     res.write(buf);
     res.end();

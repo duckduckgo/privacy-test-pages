@@ -19,7 +19,7 @@
 <p>Download via iframe</p>
 <ul>
   <li><a href="#" class="init-iframe-download" data-type="json" >Init iframe JSON load</a>
-  <li><a href="#" class="init-iframe-download" data-type="json" data-suggestedFilename="./../path/path/testComplex.json.">Init iframe JSON load, complex suggested path</a>
+  <li><a href="#" class="init-iframe-download" data-type="json" data-suggestedfilename="./../path/path/testComplex.json.">Init iframe JSON load, complex suggested path</a>
   <li><a href="#" class="init-iframe-download" data-type="pdf" >Init iframe PDF load</a>
 </ul>
 <div id="iframe-container"></div>
@@ -35,9 +35,9 @@
            const iframe = document.createElement('iframe');
            iframe.style.display = 'none';
            iframe.src = `./file/${link.dataset.type}`;
-           if (link.dataset.suggestedFilename) {
+           if (link.dataset.suggestedfilename) {
              const params = new URLSearchParams({
-               suggestedFilename: link.dataset.suggestedFilename
+               suggestedFilename: link.dataset.suggestedfilename
              });
              iframe.src += '?' + params.toString()
            }

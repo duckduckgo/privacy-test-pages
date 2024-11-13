@@ -61,4 +61,20 @@ router.post('/form', (req, res) => {
     res.send('Form submitted');
 });
 
+// Serves an arbitrary executable file to test download detection
+router.get('/download', (req, res) => {
+    // Create a buffer with a minimal valid PE header
+    const fileData = Buffer.alloc(64);
+    // MZ header (magic bytes)
+    const magicBytes = [0x4d, 0x5a];
+    // DOS stub filled with zeros
+    const dosStub = new Uint8Array(58).fill(0);
+    fileData.set(magicBytes, 0);
+    fileData.set(dosStub, 2);
+
+    res.setHeader('Content-Type', 'application/octet-stream');
+    res.setHeader('Content-Disposition', 'attachment; filename="test.exe"');
+    res.send(fileData);
+});
+
 module.exports = router;

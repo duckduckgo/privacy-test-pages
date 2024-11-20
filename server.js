@@ -279,7 +279,7 @@ const viewportRoutes = require('./viewport/server/routes.js');
 app.use('/viewport', viewportRoutes);
 
 const addressBarSpoofingRoutes = require('./security/address-bar-spoofing/server/routes.js');
-app.use('/security/address-bar-spoofing-download-redirect', addressBarSpoofingRoutes);
+app.use('/security/abs/', addressBarSpoofingRoutes);
 
 const phishingDetectionRoutes = require('./security/badware/server/routes.js');
 app.use('/security/badware/phishing-redirect', phishingDetectionRoutes);

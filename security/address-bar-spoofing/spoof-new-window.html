@@ -19,7 +19,7 @@
                 try {
                     w.location.href;
                 } catch (e) {
-                    w.location.href = 'https://broken.third-party.site/security/address-bar-spoofing/no-content';
+                    w.location.href = 'https://broken.third-party.site/security/abs/no-content';
                     clearInterval(i);
                 }
             }, 1);
@@ -37,7 +37,7 @@
     vulnerable to this attack. Note: this won't work if run from broken.third-party.site. Ensure it is run from 
     another origin such as https://privacy-test-pages.site.
 
-    
+
     <button onclick="newWindow()">New Window</button>
     <button onclick="spoof()">Spoof</button>
 </body>

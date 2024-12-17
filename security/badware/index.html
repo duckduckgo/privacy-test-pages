@@ -3,27 +3,30 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Test Pages - Phishing Detection</title>
+    <title>Test Pages - Malicious Site Protection</title>
 </head>
 
 <body>
-    <h1>Phishing Detection Test Pages</h1>
+    <h1>Malicious Site Protection Test Pages</h1>
     <a href="/">[Home]</a>
     <ul>
         <li><a href="./phishing.html">Standard Phishing Test</a></li>
         <li><a href="./malware.html">Standard Malware Test</a></li>
-        <li><a href="./malware-download.html">Malware Download Test</a></li>
         <li><a href="./phishing-iframe-loader.html">Phishing iFrame Loader</a></li>
-        <li><a href="./phishing-js-redirector-helper.html">Phishing JS Redirector (Direct)</a></li>
-        <li><a href="./phishing-js-redirector.html">Phishing JS Redirector (Indirect)</a></li>
         <li><a href="./phishing-legit-iframe-loader.html">Phishing Legit iFrame Loader</a></li>
-        <li><a href="./phishing-meta-redirect-clean.html">Phishing Redirect via Meta Refresh (Not Flagged in Dataset)</a></li>
-        <li><a href="./phishing-meta-redirect.html">Phishing Redirect via Meta Refresh (Flagged in Dataset)</a></li>
         <li><a href="./phishing-popups.html">Phishing Open via Popups</a></li>
         <li><a href="./phishing-url-tampering.html">Phishing Opening with URL Tampering</a></li>
         <li><a href="./phishing-form-submission.html">Phishing Form Submission</a></li>
-        <li><a href="./phishing-iframe-top-navigator.html">Phishing iFrame Top Navigator</a></li>
         <li><a href="./phishing-service-worker.html">Phishing Service Worker</a></li>
+        <li><a href="./malware-download.html">Malware Download Test</a></li>
+    </ul>
+
+    <h2>Redirects</h2>
+    <ul>
+        <li><a href="./phishing-meta-redirect-clean.html">Phishing Redirect via Meta Refresh (Not Flagged in Dataset)</a></li>
+        <li><a href="./phishing-meta-redirect.html">Phishing Redirect via Meta Refresh (Flagged in Dataset)</a></li>
+        <li><a href="./phishing-js-redirector-helper.html">Phishing JS Redirector (Direct)</a></li>
+        <li><a href="./phishing-js-redirector.html">Phishing JS Redirector (Indirect)</a></li>
         <li><a href="./phishing-iframe-top-navigator-parent.html">Phishing iFrame Top Navigator Parent</a></li>
         <li><a href="/security/badware/phishing-redirect/">HTTP 301 Redirect to Main Phishing Test Page</a></li>
         <li><a href="/security/badware/phishing-redirect/302">HTTP 302 Redirect to Main Phishing Test Page</a></li>
@@ -33,6 +36,18 @@
         <li><a href="/security/badware/phishing-redirect/iframe2">HTTP Redirect to Phishing Legit iFrame Loader</a></li>
         <li><a href="/security/badware/phishing-redirect/meta">HTTP Redirect to Clean Meta Refresh Redirector</a></li>
         <li><a href="/security/badware/phishing-redirect/meta2">HTTP Redirect to Flagged Meta Refresh Redirector</a></li>
+    </ul>
+
+    <h2>Edge Cases</h2>
+    <ul>
+        <li><a href="http://malware.privacy-test-pages.site/security/badware/malware.html">Page flagged by both DNS protection and in-browser protection</a> (⚠️ different domain)</li>
+        <li><a href="http://broken.privacy-test-pages.site/security/badware/malware.html">Page where malicious site protection is disabled via remote config exception</a> (⚠️ different domain)</li>
+        <li><a href="./local-check.html">Page flagged in the local data (doesn't require API request)</a></li>
+    </ul>
+
+    <h2>Utility</h2>
+    <ul>
+        <li><a href="./phishing-iframe-top-navigator.html">Phishing iFrame Top Navigator</a></li>
     </ul>
 </body>
 

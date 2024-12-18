@@ -23,6 +23,12 @@
             <li><a href="/come-back?testid=1p%20navigation">1p navigation</a></li>
             <li><a href="https://good.third-party.site/come-back?testid=3p%20navigation">3p navigation</a></li>
             <li><a href="https://bad.third-party.site/come-back?testid=3p%20tracker%20navigation">3p tracker navigation</a></li>
+            <li><a href="/come-back?testid=1p%20navigation" target=_blank>1p navigation [Target blank]</a></li>
+            <li><a href="https://good.third-party.site/come-back?testid=3p%20navigation" target=_blank>3p navigation [Target blank]</a></li>
+            <li><a href="https://bad.third-party.site/come-back?testid=3p%20tracker%20navigation" target=_blank>3p tracker navigation [Target blank]</a></li>
+            <li><button onclick = "window.open('/come-back?testid=1p%20navigation')">1p navigation [JS window.open]</button></li>
+            <li><button onclick = "window.open('https://good.third-party.site/come-back?testid=3p%20navigation')">3p navigation [JS window.open]</button></li>
+            <li><button onclick = "window.open('https://bad.third-party.site/come-back?testid=3p%20tracker%20navigation')">3p tracker navigation [JS window.open]</button></li>
         </ul>
     </details>
 

@@ -1,7 +1,7 @@
 const acceptButton = document.createElement('button');
 acceptButton.innerText = 'Accept all';
 acceptButton.id = 'accept-all';
-const banner = document.quesrySelector('#privacy-test-page-cmp-test-banner-filterlist');
+const banner = document.querySelector('#privacy-test-page-cmp-test-banner-filterlist');
 banner.appendChild(acceptButton);
 acceptButton.addEventListener('click', (ev) => {
     ev.target.innerText = 'Accept was clicked!';

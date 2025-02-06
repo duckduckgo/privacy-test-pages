@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Multi-step Signup Form</title>
+    <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+    <p><a href="../index.html#autofill">[Home]</a></p>
+
+    <div class="dialog">
+        <h2>Multi-step Signup Form</h2>
+        <p>Create account: email first, then set password</p>
+        
+        <form id="signup-form" action="/signup">
+            <div id="signup-step-1">
+                <fieldset>
+                    <label for="signup-email">Email</label>
+                    <input id="signup-email" type="email" autocomplete="username" required>
+                    <button type="button" onclick="showStep2()">Continue</button>
+                </fieldset>
+            </div>
+            <div id="signup-step-2" hidden>
+                <fieldset>
+                    <label for="signup-password">Password</label>
+                    <input id="signup-password" type="password" autocomplete="new-password" required>
+                    <button type="submit">Create Account</button>
+                </fieldset>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        function showStep2() {
+            if (document.getElementById('signup-email').checkValidity()) {
+                document.getElementById('signup-step-1').remove();
+                document.getElementById('signup-step-2').hidden = false;
+            }
+        }
+
+        document.getElementById('signup-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (e.target.checkValidity()) {
+                e.target.innerHTML = '<h3>Account created successfully!</h3>';
+            }
+        });
+    </script>
+</body>
+</html> 

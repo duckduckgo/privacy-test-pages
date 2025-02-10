@@ -75,16 +75,16 @@ router.get('/download?delay=:delay', (req, res) => {
         fileData.set(magicBytes, 0);
         fileData.set(dosStub, 2);
 
-        res.setHeader("Content-Type", "application/octet-stream");
+        res.setHeader('Content-Type', 'application/octet-stream');
         res.setHeader(
-        "Content-Disposition",
-        'attachment; filename="test.exe"'
+            'Content-Disposition',
+            'attachment; filename="test.exe"'
         );
         res.send(fileData);
     };
     if (req.query.delay && !isNaN(req.query.delay)) {
         if (req.query.delay > 5000) {
-            return res.status(400).send("Delay too long");
+            return res.status(400).send('Delay too long');
         }
         setTimeout(() => {
             returnFile();
@@ -95,11 +95,11 @@ router.get('/download?delay=:delay', (req, res) => {
 });
 
 // serve ./files/
-router.get("/files/:filename", (req, res) => {
+router.get('/files/:filename', (req, res) => {
     const filePath = path.join(__dirname, 'files', req.params.filename);
     fs.access(filePath, fs.constants.F_OK, (err) => {
         if (err) {
-            return res.status(404).send("File not found");
+            return res.status(404).send('File not found');
         }
         res.sendFile(filePath);
     });

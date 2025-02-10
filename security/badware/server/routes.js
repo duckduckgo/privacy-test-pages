@@ -77,4 +77,18 @@ router.get('/download', (req, res) => {
     res.send(fileData);
 });
 
+// Serves an arbitrary executable file to test download detection with a delay of 5 seconds
+router.get('/download-delayed', (req, res) => {
+    setTimeout(() => {
+        const fileData = Buffer.alloc(64);
+        const magicBytes = [0x4d, 0x5a];
+        const dosStub = new Uint8Array(58).fill(0);
+        fileData.set(magicBytes, 0);
+        fileData.set(dosStub, 2);
+        res.setHeader('Content-Type', 'application/octet-stream');
+        res.setHeader('Content-Disposition', 'attachment; filename="delayed.exe"');
+        res.send(fileData);
+    }, 5000);
+});
+
 module.exports = router;

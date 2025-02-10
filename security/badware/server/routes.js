@@ -64,7 +64,7 @@ router.post('/form', (req, res) => {
 });
 
 // Serves an arbitrary executable file to test download detection, with optional delay
-router.get('/download?delay=:delay', (req, res) => {
+router.get('/download', (req, res) => {
     const returnFile = () => {
         // Create a buffer with a minimal valid PE header
         const fileData = Buffer.alloc(64);

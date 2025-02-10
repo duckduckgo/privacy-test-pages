@@ -1,4 +1,6 @@
 const express = require('express');
+const path = require('path');
+const fs = require('fs');
 const router = express.Router();
 
 // Returns a 301 redirect to the main phishing test page
@@ -61,20 +63,46 @@ router.post('/form', (req, res) => {
     res.send('Form submitted');
 });
 
-// Serves an arbitrary executable file to test download detection
+// Serves an arbitrary executable file to test download detection, with optional delay
 router.get('/download', (req, res) => {
-    // Create a buffer with a minimal valid PE header
-    const fileData = Buffer.alloc(64);
-    // MZ header (magic bytes)
-    const magicBytes = [0x4d, 0x5a];
-    // DOS stub filled with zeros
-    const dosStub = new Uint8Array(58).fill(0);
-    fileData.set(magicBytes, 0);
-    fileData.set(dosStub, 2);
+    const returnFile = () => {
+        // Create a buffer with a minimal valid PE header
+        const fileData = Buffer.alloc(64);
+        // MZ header (magic bytes)
+        const magicBytes = [0x4d, 0x5a];
+        // DOS stub filled with zeros
+        const dosStub = new Uint8Array(58).fill(0);
+        fileData.set(magicBytes, 0);
+        fileData.set(dosStub, 2);
 
-    res.setHeader('Content-Type', 'application/octet-stream');
-    res.setHeader('Content-Disposition', 'attachment; filename="test.exe"');
-    res.send(fileData);
+        res.setHeader('Content-Type', 'application/octet-stream');
+        res.setHeader(
+            'Content-Disposition',
+            'attachment; filename="test.exe"'
+        );
+        res.send(fileData);
+    };
+    if (req.query.delay && !isNaN(req.query.delay)) {
+        if (req.query.delay > 5000) {
+            return res.status(400).send('Delay too long');
+        }
+        setTimeout(() => {
+            returnFile();
+        }, req.query.delay);
+    } else {
+        returnFile();
+    }
+});
+
+// serve ./files/
+router.get('/files/:filename', (req, res) => {
+    const filePath = path.join(__dirname, 'files', req.params.filename);
+    fs.access(filePath, fs.constants.F_OK, (err) => {
+        if (err) {
+            return res.status(404).send('File not found');
+        }
+        res.sendFile(filePath);
+    });
 });
 
 module.exports = router;

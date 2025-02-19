@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Site Breakage Reach Calculator</title>
+    <title>Site Breakage Reach and Priority Calculator</title>
     <meta name="description" content="A tool to calculate the reach of site breakage issues.">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -67,8 +67,12 @@
         hr {
             margin: 1em 0;
         }
-        #result {
+        #calculator #resultsContainer {
+            margin-bottom: 0;
+        }
+        #resultsContainer span {
             font-weight: bold;
+            display: block;
         }
         #faq {
             margin-top: 1em;
@@ -133,7 +137,7 @@
 </head>
 <body class="domain">
 <div id="container">
-    <h2>Site Breakage Reach Calculator</h2>
+    <h2>Site Breakage Reach and Priority Calculator</h2>
 
     <main>
         <div id="options">
@@ -169,9 +173,23 @@
                 <label><input type="radio" id="high" name="confidenceInput" value="high"> High confidence</label>
             </div>
 
+            <div>
+                <abbr title="What is the severity of this breakage task?">Breakage severity:</abbr><br>
+                <select id="breakageSeverityInput">
+                  <option value="edge-case">Edge case</option>
+                  <option value="affects-non-core">Affects non-core flow</option>
+                  <option value="breaks-non-core">Breaks non-core flow</option>
+                  <option value="affects-core">Affects core flow</option>
+                  <option value="breaks-core">Breaks core flow</option>
+                  <option value="crash">Crash</option>
+                </select>
+            </div>
+
             <hr>
-            <div id="result"></div>
-            <div>(Use this and the "Site Breakage" section of the <a href="https://duckduckgo-my.sharepoint.com/:x:/p/lmattei/EcV1df19DeVMssJDG1YRcnABHgQpzVZHfchesN-AZj2VcA?e=Nyn7mu" target="_blank">Severity Assessment Matrix</a> to get a priority level.)</div>
+            <div id="resultsContainer">
+              <span id="result"></span>
+              <span id="priorityResult"></span>
+            </div>
         </div>
 
     </main>
@@ -180,7 +198,7 @@
 
         <details>
             <summary>How do I use this?</summary>
-            <p>This tool is to calculate the reach of breakage issues, i.e. roughly the percentage of users affected on a particular platform. When combined with a severity level, you can look up a priority level for the issue in the <a href="https://duckduckgo-my.sharepoint.com/:x:/p/lmattei/EcV1df19DeVMssJDG1YRcnABHgQpzVZHfchesN-AZj2VcA?e=Nyn7mu" target="_blank">Severity Assessment Matrix</a>.</p>
+            <p>This tool is to calculate the reach of breakage issues, i.e. roughly the percentage of users affected on a particular platform. From that (and combined with the severity level), the priority level is calculated too. To see how the priority is calculated, see the <a href="https://duckduckgo-my.sharepoint.com/:x:/p/lmattei/EcV1df19DeVMssJDG1YRcnABHgQpzVZHfchesN-AZj2VcA?e=Nyn7mu" target="_blank">Severity Assessment Matrix</a>.</p>
         </details>
         
         <details>
@@ -325,6 +343,46 @@
 
             <p>These are the constants that this calculator uses.</p>
         </details>
+
+
+        <details>
+            <summary>What are some examples of breakage severity?</summary>
+            <b>Crash:</b>
+            <ul>
+              <li>Website consistently crashes when trying to load any page.</li>
+              <li>Clicking on any link within a website causes the browser to crash.</li>
+            </ul>
+
+            <b>Breaks Core Flow:</b>
+            <ul>
+              <li>Submit button on a banking website's payment form does nothing.</li>
+              <li>Video player on a video streaming website is not working.</li>
+            </ul>
+
+            <b>Affects Core Flow:</b>
+            <ul>
+              <li>Login button on a social media platform website is visible on the main page but not in other pages.</li>
+              <li>Shopping cart on an online store only shows saved items after refreshing the page.</li>
+            </ul>
+
+            <b>Breaks Non-Core Flow:</b>
+            <ul>
+              <li>Social media sharing buttons on a news website do not work.</li>
+              <li>Comments section on a blog website is not visible.</li>
+            </ul>
+
+            <b>Affects Non-Core Flow:</b>
+            <ul>
+              <li>Video player on a news website requires two clicks to play.</li>
+              <li>Search results show multiple pages but can't click past page one.</li>
+            </ul>
+
+            <b>Edge Case:</b>
+            <ul>
+              <li>Page flickers when scrolled to the very bottom.</li>
+              <li>Brief flash of white before page loads.</li>
+            </ul>
+        </details>
     </div>
 </div>
 
@@ -340,6 +398,8 @@
     const apiUsageInput = document.getElementById('apiUsageInput');
     const reductionFactorInput = document.getElementById('reductionFactorInput');
     const resultMessage = document.getElementById('result');
+    const priorityResultMessage = document.getElementById('priorityResult');
+    const breakageSeverityInput = document.getElementById('breakageSeverityInput');
 
     // Get URL parameters.
     const urlSearchParams = new URLSearchParams(window.location.search.toLowerCase());
@@ -349,6 +409,35 @@
         low: 1,
         medium: 10,
         high: 100
+    };
+
+    // Breakage severity matrix.
+    // See https://duckduckgo-my.sharepoint.com/:x:/p/lmattei/EcV1df19DeVMssJDG1YRcnABHgQpzVZHfchesN-AZj2VcA?e=Nyn7mu
+    const severityMatrix = {
+        'edge-case': [
+            { rangeStart: 0.1, priority: 'Normal' }
+        ],
+        'affects-non-core': [
+            { rangeStart: 0.1, priority: 'Normal' }
+        ],
+        'breaks-non-core': [
+            { rangeStart: 0.01, priority: 'Normal' },
+            { rangeStart: 0.5, priority: 'High' }
+        ],
+        'affects-core': [
+            { rangeStart: 0.01, priority: 'Normal' },
+            { rangeStart: 0.5, priority: 'High' }
+        ],
+        'breaks-core': [
+            { rangeStart: 0.0001, priority: 'Normal' },
+            { rangeStart: 0.1, priority: 'High' },
+            { rangeStart: 0.5, priority: 'Incident' }
+        ],
+        crash: [
+            { rangeStart: 0.0001, priority: 'Normal' },
+            { rangeStart: 0.1, priority: 'High' },
+            { rangeStart: 0.5, priority: 'Incident' }
+        ]
     };
 
     // Format results for display so they're between 0 and 100.
@@ -373,6 +462,7 @@
         urlParams.set('apiusage', apiUsageInput.value);
         urlParams.set('reductionfactor', reductionFactorInput.value);
         urlParams.set('confidence', document.querySelector('input[name="confidenceInput"]:checked').value);
+        urlParams.set('severity', breakageSeverityInput.value);
 
         // Update the URL without reloading the page
         window.history.pushState({}, '', url);
@@ -391,6 +481,8 @@
         reductionFactorInput.value = '';
         document.querySelector('input[name=confidenceInput][value=low]').checked = true;
         resultMessage.textContent = '';
+        priorityResultMessage.textContent = '';
+        breakageSeverityInput.value = 'edge-case';
 
         setParams();
     }
@@ -401,6 +493,7 @@
         const apiUsage = parseFloat(apiUsageInput.value);
         const reductionFactor = parseFloat(reductionFactorInput.value) || 100;
         const confidence = document.querySelector('input[name="confidenceInput"]:checked')?.value;
+        const severityName = breakageSeverityInput.value;
 
         // Validate numeric inputs.
         if (apiUsage && (isNaN(apiUsage) || apiUsage < 0 || apiUsage > 100)) {
@@ -430,6 +523,7 @@
 
         result *= confidenceLevels[confidence];
         resultMessage.textContent = 'Platform pageloads affected: ' + formatResult(result) + '%';
+        priorityResultMessage.textContent = 'Priority: ' + calculatePriority(result, severityName);
 
         // Update the URL parameters
         setParams();
@@ -475,6 +569,9 @@
         const confidenceInput = document.querySelector('input[name=confidenceInput][value=' + confidenceValue + ']');
         if (confidenceInput) confidenceInput.checked = true;
     }
+    if (urlSearchParams.has('severity')) {
+        breakageSeverityInput.value = urlSearchParams.get('severity') || 'edge-case';
+    }
 
     // Listen for user input.
     apiUsageInput.addEventListener('input', doCalculation);
@@ -483,6 +580,8 @@
     document.getElementById('low').addEventListener('change', doCalculation);
     document.getElementById('medium').addEventListener('change', doCalculation);
     document.getElementById('high').addEventListener('change', doCalculation);
+
+    breakageSeverityInput.addEventListener('change', doCalculation);
 
     document.getElementById('domainButton').addEventListener('click', function () {
         toggleTab('domain');
@@ -518,6 +617,24 @@
             return;
         }
         doCalculation();
+    }
+
+    function calculatePriority (reach, severityName) {
+        if (!severityMatrix[severityName]) {
+            return 'Error unknown severity!';
+        }
+
+        reach *= 100;
+
+        let result = 'Low';
+        for (const { rangeStart, priority } of severityMatrix[severityName]) {
+            if (reach < rangeStart) {
+                break;
+            }
+            result = priority;
+        }
+
+        return result;
     }
 
     getReach();

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Multi-step Signup with Confirmation</title>
+    <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+    <p><a href="../index.html#autofill">[Home]</a></p>
+
+    <div class="dialog">
+        <h2>Multi-step Signup with Password Confirmation</h2>
+        <p>Create account: email first, then set and confirm password</p>
+        
+        <form id="signup-form" action="/signup">
+            <div id="signup-step-1">
+                <fieldset>
+                    <label for="signup-email">Email</label>
+                    <input id="signup-email" type="email" autocomplete="username" required>
+                    <button type="button" onclick="showStep2()">Continue</button>
+                </fieldset>
+            </div>
+            <div id="signup-step-2" hidden>
+                <fieldset>
+                    <label for="signup-password">Password</label>
+                    <input id="signup-password" type="password" autocomplete="new-password" required>
+                    <label for="signup-password-confirm">Confirm Password</label>
+                    <input id="signup-password-confirm" type="password" autocomplete="new-password" required>
+                    <button type="submit">Create Account</button>
+                </fieldset>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        function showStep2() {
+            if (document.getElementById('signup-email').checkValidity()) {
+                document.getElementById('signup-step-1').remove();
+                document.getElementById('signup-step-2').hidden = false;
+            }
+        }
+
+        document.getElementById('signup-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const password1 = document.getElementById('signup-password').value;
+            const password2 = document.getElementById('signup-password-confirm').value;
+            
+            if (e.target.checkValidity() && password1 === password2) {
+                e.target.innerHTML = '<h3>Account created successfully!</h3>';
+            } else if (password1 !== password2) {
+                alert('Passwords do not match');
+            }
+        });
+    </script>
+</body>
+</html> 

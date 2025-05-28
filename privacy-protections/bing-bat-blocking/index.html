@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Bing BAT Request Blocking Test</title>
+
+        <script src='./main.js' defer></script>
+        <link href='./style.css' rel='stylesheet'></link>
+    </head>
+    <body>
+        <p><a href="../../">[Home]</a> ↣ <a href="../">[Privacy Protections Tests]</a> ↣ <strong>[Bing BAT Request Blocking Test]</strong></p>
+
+        <h1>Bing BAT Request Blocking Test</h1>
+
+        <p>This page tests if requests to Bing's Browser Activity Tracking (BAT) domains are being blocked by privacy protection tools.</p>
+
+        <p><strong>Tested domains:</strong></p>
+        <ul>
+            <li><code>bat.bing.com</code> - Primary BAT tracking domain</li>
+            <li><code>bat.bing.net</code> - Secondary BAT tracking domain</li>
+        </ul>
+
+        <p>If your privacy protection is working correctly, all requests below should be <strong>blocked</strong> (marked as failed or not loaded).</p>
+
+        <button id='start'>Start the test</button>
+
+        <div id='test-results'>
+            <h2>Test Results</h2>
+
+            <h3>bat.bing.com tests:</h3>
+            <ul id='bat-bing-com-results'>
+            </ul>
+
+            <h3>bat.bing.net tests:</h3>
+            <ul id='bat-bing-net-results'>
+            </ul>
+        </div>
+
+        <p><strong>Legend:</strong></p>
+        <ul>
+            <li><div class='status loaded'></div> - request has loaded (BAD - tracking not blocked)</li>
+            <li><div class='status'></div> - request hasn't loaded (GOOD - possibly blocked)</li>
+            <li><div class='status failed'></div> - request failed (GOOD - blocked by privacy protection)</li>
+        </ul>
+
+    </body>
+</html>

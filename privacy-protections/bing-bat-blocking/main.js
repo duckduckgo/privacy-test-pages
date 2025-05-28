@@ -69,122 +69,6 @@ function createTestsForDomain(domain) {
                         document.head.appendChild(script);
                     });
                 }
-            },
-            {
-                domain: domain,
-                id: 'fetch-bat',
-                description: `Try requesting the BAT script from ${domain} using fetch()`,
-                testFunction: () => {
-                    return new Promise((resolve) => {
-                        const timeout = setTimeout(() => {
-                            resolve('failed');
-                        }, 5000);
-
-                        fetch(`https://${domain}/bat.js?${random}`)
-                            .then(response => {
-                                clearTimeout(timeout);
-                                if (response.ok || response.status === 200) {
-                                    resolve('loaded');
-                                } else {
-                                    resolve('failed');
-                                }
-                            })
-                            .catch(error => {
-                                clearTimeout(timeout);
-                                resolve('failed');
-                            });
-                    });
-                }
-            },
-            {
-                domain: domain,
-                id: 'xhr-bat',
-                description: `Try requesting the BAT script from ${domain} using XMLHttpRequest`,
-                testFunction: () => {
-                    return new Promise((resolve) => {
-                        const xhr = new XMLHttpRequest();
-
-                        const timeout = setTimeout(() => {
-                            resolve('failed');
-                        }, 5000);
-
-                        xhr.onload = () => {
-                            clearTimeout(timeout);
-                            resolve('loaded');
-                        };
-
-                        xhr.onerror = () => {
-                            clearTimeout(timeout);
-                            resolve('failed');
-                        };
-
-                        xhr.ontimeout = () => {
-                            clearTimeout(timeout);
-                            resolve('failed');
-                        };
-
-                        try {
-                            xhr.open('GET', `https://${domain}/bat.js?${random}`, true);
-                            xhr.timeout = 5000;
-                            xhr.send();
-                        } catch (error) {
-                            clearTimeout(timeout);
-                            resolve('failed');
-                        }
-                    });
-                }
-            },
-            {
-                domain: domain,
-                id: 'iframe-bat',
-                description: `Try loading content from ${domain} using iframe`,
-                testFunction: () => {
-                    return new Promise((resolve) => {
-                        const iframe = document.createElement('iframe');
-                        iframe.src = `https://${domain}/bat.js?${random}`;
-                        iframe.style.display = 'none';
-
-                        const timeout = setTimeout(() => {
-                            resolve('failed');
-                        }, 5000);
-
-                        iframe.onload = () => {
-                            clearTimeout(timeout);
-                            resolve('loaded');
-                        };
-
-                        iframe.onerror = () => {
-                            clearTimeout(timeout);
-                            resolve('failed');
-                        };
-
-                        document.body.appendChild(iframe);
-                    });
-                }
-            },
-            {
-                domain: domain,
-                id: 'sendBeacon',
-                description: `Try sending data to ${domain} using navigator.sendBeacon()`,
-                testFunction: () => {
-                    return new Promise((resolve) => {
-                        if (!navigator.sendBeacon) {
-                            resolve('failed');
-                            return;
-                        }
-
-                        try {
-                            const success = navigator.sendBeacon(`https://${domain}/actionp/0?test=${random}`, 'test=data');
-                            if (success) {
-                                resolve('loaded');
-                            } else {
-                                resolve('failed');
-                            }
-                        } catch (error) {
-                            resolve('failed');
-                        }
-                    });
-                }
             }
         ];
     } else if (domain === 'bat.bing.net') {
@@ -285,30 +169,6 @@ function createTestsForDomain(domain) {
             },
             {
                 domain: domain,
-                id: 'sendBeacon-net',
-                description: `Try sending data to ${domain} using navigator.sendBeacon()`,
-                testFunction: () => {
-                    return new Promise((resolve) => {
-                        if (!navigator.sendBeacon) {
-                            resolve('failed');
-                            return;
-                        }
-
-                        try {
-                            const success = navigator.sendBeacon(`https://${domain}/actionp/0?ti=123456789&test=${random}`, 'test=data');
-                            if (success) {
-                                resolve('loaded');
-                            } else {
-                                resolve('failed');
-                            }
-                        } catch (error) {
-                            resolve('failed');
-                        }
-                    });
-                }
-            },
-            {
-                domain: domain,
                 id: 'tracking-endpoint',
                 description: `Test tracking endpoint on ${domain}`,
                 testFunction: () => {
@@ -335,6 +195,40 @@ function createTestsForDomain(domain) {
                                 } else {
                                     resolve('loaded'); // Got a response, just an HTTP error
                                 }
+                            });
+                    });
+                }
+            },
+            {
+                domain: domain,
+                id: 'form-submit',
+                description: `Try submitting form data to ${domain}`,
+                testFunction: () => {
+                    return new Promise((resolve) => {
+                        const timeout = setTimeout(() => {
+                            resolve('failed');
+                        }, 5000);
+
+                        const formData = new FormData();
+                        formData.append('ti', '123456');
+                        formData.append('test', random.toString());
+                        formData.append('evt', 'pageview');
+
+                        fetch(`https://${domain}/actionp/0`, {
+                            method: 'POST',
+                            body: formData
+                        })
+                            .then(response => {
+                                clearTimeout(timeout);
+                                if (response.status === 204 || response.ok) {
+                                    resolve('loaded');
+                                } else {
+                                    resolve('failed');
+                                }
+                            })
+                            .catch(error => {
+                                clearTimeout(timeout);
+                                resolve('failed');
                             });
                     });
                 }
@@ -409,21 +303,6 @@ async function runTests() {
 
     startButton.disabled = false;
     startButton.textContent = 'Start the test';
-
-    // Summary
-    const totalTests = results.results.length;
-    const blockedTests = results.results.filter(r => r.result === 'failed').length;
-    const loadedTests = results.results.filter(r => r.result === 'loaded').length;
-
-    const summaryDiv = document.createElement('div');
-    summaryDiv.innerHTML = `
-        <h2>Summary</h2>
-        <p><strong>Total tests:</strong> ${totalTests}</p>
-        <p><strong>Blocked requests (good):</strong> ${blockedTests}</p>
-        <p><strong>Loaded requests (bad):</strong> ${loadedTests}</p>
-        <p><strong>Protection effectiveness:</strong> ${((blockedTests / totalTests) * 100).toFixed(1)}%</p>
-    `;
-    document.querySelector('#test-results').appendChild(summaryDiv);
 }
 
 // Event listeners

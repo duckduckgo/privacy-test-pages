@@ -84,6 +84,10 @@
                 <div class="shadow-host" id="shadowHost"></div>
             </div>
             <div class="form-group">
+                <label>Shadow DOM Input (e.g. First Name):</label>
+                <div class="shadow-host" id="shadowHostIdentity"></div>
+            </div>
+            <div class="form-group">
                 <label>Programmatic Focus Button:</label>
                 <button type="button" id="focusHiddenInput">Focus Hidden Input</button>
             </div>
@@ -107,6 +111,15 @@
         shadowInput.name = 'shadowInput';
         shadowInput.placeholder = 'Secure note (Shadow DOM)';
         shadowRoot.appendChild(shadowInput);
+        
+        // Add a second shadow root for identity type
+        const shadowHostIdentity = document.getElementById('shadowHostIdentity');
+        const shadowRootIdentity = shadowHostIdentity.attachShadow({ mode: 'open' });
+        const shadowIdentityInput = document.createElement('input');
+        shadowIdentityInput.type = 'text';
+        shadowIdentityInput.name = 'shadowFirstName';
+        shadowIdentityInput.placeholder = 'First Name (Shadow DOM)';
+        shadowRootIdentity.appendChild(shadowIdentityInput);
 
         // Programmatic focus: button focuses the visually hidden input
         document.getElementById('focusHiddenInput').addEventListener('click', function () {

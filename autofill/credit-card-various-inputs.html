@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>Complex Credit Card & Identity Focus Events Form</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 900px; margin: 20px auto; }
+        .form-container { margin-bottom: 30px; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select, textarea { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+        button { background-color: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background-color: #45a049; }
+        .shadow-host { margin-top: 20px; }
+        .visually-hidden { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+        .contenteditable-div { padding: 8px; border: 1px dotted #888; min-height: 30px; }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h2>Credit Card & Identity Focus Events Form</h2>
+        <form id="complexFocusForm">
+            <!-- Standard credit card and identity fields -->
+            <div class="form-group">
+                <label for="cardNumber">Card Number:</label>
+                <input type="text" id="cardNumber" name="cardNumber" pattern="[0-9]{16}" maxlength="16" placeholder="1234 5678 9012 3456" autocomplete="cc-number" required>
+            </div>
+            <div class="form-group">
+                <label for="cardHolder">Card Holder Name:</label>
+                <input type="text" id="cardHolder" name="cardHolder" placeholder="John Doe" autocomplete="cc-name" required>
+            </div>
+            <div class="form-group">
+                <label for="expiryDate">Expiry Date:</label>
+                <input type="text" id="expiryDate" name="expiryDate" pattern="(0[1-9]|1[0-2])\/([0-9]{2})" placeholder="MM/YY" maxlength="5" autocomplete="cc-exp" required>
+            </div>
+            <div class="form-group">
+                <label for="cvv">CVV:</label>
+                <input type="text" id="cvv" name="cvv" pattern="[0-9]{3,4}" maxlength="4" placeholder="123" autocomplete="cc-csc" required>
+            </div>
+            <div class="form-group">
+                <label for="firstName">First Name:</label>
+                <input type="text" id="firstName" name="firstName" autocomplete="given-name" required>
+            </div>
+            <div class="form-group">
+                <label for="lastName">Last Name:</label>
+                <input type="text" id="lastName" name="lastName" autocomplete="family-name" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email Address:</label>
+                <input type="email" id="email" name="email" placeholder="example@email.com" autocomplete="email" required>
+            </div>
+            <div class="form-group">
+                <label for="address">Address:</label>
+                <input type="text" id="address" name="address" placeholder="123 Street Name" autocomplete="street-address" required>
+            </div>
+            <div class="form-group">
+                <label for="country">Country (select):</label>
+                <select id="country" name="country" autocomplete="country">
+                    <option value="">Select...</option>
+                    <option value="us">United States</option>
+                    <option value="ca">Canada</option>
+                    <option value="uk">United Kingdom</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="search-field">Search Field</label>
+                <input type="search" id="search-field" name="search-field" placeholder="Search for something...">
+            </div
+            <div class="form-group">
+                <label for="bio">Bio (textarea):</label>
+                <textarea id="bio" name="bio" rows="3" placeholder="Tell us about yourself..."></textarea>
+            </div>
+            <div class="form-group">
+                <label for="readonlyField">Readonly Field (e.g. Issuer):</label>
+                <input type="text" id="readonlyField" name="readonlyField" value="Bank of Example" readonly>
+            </div>
+            <div class="form-group">
+                <label for="disabledField">Disabled Field (e.g. Internal ID):</label>
+                <input type="text" id="disabledField" name="disabledField" value="ID-000123" disabled>
+            </div>
+            <div class="form-group">
+                <label>Shadow DOM Input (e.g. Secure Note):</label>
+                <div class="shadow-host" id="shadowHost"></div>
+            </div>
+            <div class="form-group">
+                <label>Programmatic Focus Button:</label>
+                <button type="button" id="focusHiddenInput">Focus Hidden Input</button>
+            </div>
+            <div class="form-group">
+                <label for="visuallyHiddenInput">Visually Hidden Input (focusable):</label>
+                <input type="text" id="visuallyHiddenInput" name="visuallyHiddenInput" class="visually-hidden" placeholder="I'm hidden but focusable">
+            </div>
+            <div class="form-group">
+                <label>Contenteditable Div:</label>
+                <div class="contenteditable-div" id="contentEditableDiv" contenteditable="true">Edit me! (contenteditable)</div>
+            </div>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+    <script>
+        // Add input inside Shadow DOM
+        const shadowHost = document.getElementById('shadowHost');
+        const shadowRoot = shadowHost.attachShadow({ mode: 'open' });
+        const shadowInput = document.createElement('input');
+        shadowInput.type = 'text';
+        shadowInput.name = 'shadowInput';
+        shadowInput.placeholder = 'Secure note (Shadow DOM)';
+        shadowRoot.appendChild(shadowInput);
+
+        // Programmatic focus: button focuses the visually hidden input
+        document.getElementById('focusHiddenInput').addEventListener('click', function () {
+            document.getElementById('visuallyHiddenInput').focus();
+        });
+    </script>
+</body>
+</html> 

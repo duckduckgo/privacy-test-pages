@@ -15,3 +15,6 @@
 
 # Cookie Prompt Managment 🍪
 /features/autoconsent/ @muodov @sammacbeth @kdzwinel @jonathanKingston
+
+#index.html doesn't need codeowners protection
+index.html

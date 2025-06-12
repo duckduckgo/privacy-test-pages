@@ -29,7 +29,7 @@
     "ws": "^8.13.0"
   },
   "devDependencies": {
-    "eslint": "^7.32.0",
+    "eslint": "^9.28.0",
     "eslint-config-standard": "^16.0.3",
     "eslint-plugin-html": "^8.1.1",
     "eslint-plugin-import": "^2.31.0",

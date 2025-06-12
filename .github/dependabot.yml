@@ -7,3 +7,7 @@ updates:
     target-branch: "main"
     labels:
       - "dependencies"
+    groups:
+        eslint:
+            patterns:
+                - 'eslint*'

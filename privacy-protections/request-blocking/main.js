@@ -1,4 +1,4 @@
-/* eslint-disable node/no-callback-literal */
+/* eslint-disable n/no-callback-literal */
 const random = Math.random();
 const debugDiv = document.querySelector('#debug');
 const startButton = document.querySelector('#start');

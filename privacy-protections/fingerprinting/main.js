@@ -1,4 +1,5 @@
 /* exported headers */
+/* globals DeepDiff, tests */
 const startButton = document.querySelector('#start');
 const downloadButton = document.querySelector('#download');
 

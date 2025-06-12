@@ -155,7 +155,7 @@ function runTests () {
     function addTestResult (testId, value) {
         results.results.push({
             id: testId,
-            value: value
+            value
         });
     }
 

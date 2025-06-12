@@ -32,7 +32,7 @@ function getAdUrl (id, hostname) {
     adUrl.searchParams.append('ID', id)
 
     if (customRedirect) {
-        adUrl.searchParams.append('customRedirect', ads[id]['customRedirect']);
+        adUrl.searchParams.append('customRedirect', ads[id].customRedirect);
     }
 
     // Build Search Redirection URL
@@ -72,7 +72,7 @@ function getAdUrl (id, hostname) {
     }
 
     if (customRedirect) {
-        searchUrl.searchParams.append('customRedirect', ads[id]['customRedirect']);
+        searchUrl.searchParams.append('customRedirect', ads[id].customRedirect);
     }
 
     // normal URLs use a different param, but we use 'u' here to avoid conflict with other params.
@@ -264,6 +264,7 @@ export function initializeBoilerplate () {
     const convertPixelUrl = new URL('/ping.gif', convertScriptUrl);
     const trackingPixelUrl = new URL('/ping.gif', trackingScriptUrl);
 
+    // eslint-disable-next-line no-new
     new FinishObserver([
         {
             url: convertScriptUrl,
@@ -332,7 +333,7 @@ export class FinishObserver {
         for (const resource of resources) {
             addUnique(resource.url);
             if (resource.subresources) {
-                resource.subresources.every(subresource => {
+                resource.subresources.forEach(subresource => {
                     addUnique(subresource.url);
                     if ('subresources' in subresource) {
                         throw new Error('Child subresources are not supported');
@@ -344,7 +345,7 @@ export class FinishObserver {
 
         this.observer = new PerformanceObserver((list) => {
             const entries = list.getEntries();
-            entries.map((entry) => {
+            entries.forEach((entry) => {
                 // WebKit doesn't seem to support serverTiming for cross-origin loads
                 if (entry.serverTiming && !isSafariOrDDG()) {
                     if (entry.serverTiming.length === 0) {

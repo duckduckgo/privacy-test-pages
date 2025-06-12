@@ -1,3 +1,4 @@
+/* globals testAPIs */
 function storeData (key, apis) {
     return Promise.all(Object.entries(apis).map(([apiName, api]) => {
         try {
@@ -37,7 +38,7 @@ function retrieveData (key, apis) {
                 return result
                     .then(value => ({
                         api: apiName,
-                        value: value
+                        value
                     }))
                     .catch(e => ({
                         api: apiName,

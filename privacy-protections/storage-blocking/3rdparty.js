@@ -1,3 +1,4 @@
+/* globals commonTests */
 /**
  * document.cookie test run in a 3rd party script.
  *

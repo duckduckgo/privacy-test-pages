@@ -6,7 +6,7 @@ function fireConvertPingStatus (status) {
     window.dispatchEvent(new CustomEvent('resourceLoad', {
         detail: {
             url: pixelUrl.href,
-            status: status
+            status
         }
     }));
 }

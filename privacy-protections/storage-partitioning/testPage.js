@@ -1,5 +1,6 @@
 const statusElement = document.querySelector('#status');
 const preElement = document.querySelector('#pre-status');
+/* globals FIRST_PARTY_HTTPS, THIRD_PARTY_HTTPS, FIRST_PARTY_HTTP, THIRD_PARTY_HTTP, accessStorageInIframe */
 
 const configurations = [
     {

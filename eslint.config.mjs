@@ -9,7 +9,8 @@ const htmlRulesToDisable = Object.fromEntries(
 export default [
     {
         ignores: [
-            "privacy-protections/fingerprinting/helpers/diff.js"
+            "privacy-protections/fingerprinting/helpers/diff.js",
+            "node_modules/",
         ]
     },
     ...ddgConfig,

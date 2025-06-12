@@ -1,5 +1,5 @@
 /* exported commonTests */
-/* global cookieStore, THIRD_PARTY_TRACKER_ORIGIN, THIRD_PARTY_ORIGIN, THIRD_PARTY_AD_ORIGIN */
+/* global DB, cookieStore, THIRD_PARTY_TRACKER_ORIGIN, THIRD_PARTY_ORIGIN, THIRD_PARTY_AD_ORIGIN */
 
 function generateCookieHeaderTest (namePrefix, origin, cookiename) {
     return {

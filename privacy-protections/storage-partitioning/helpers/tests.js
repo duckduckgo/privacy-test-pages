@@ -112,6 +112,7 @@ function validateCacheAPI (sameSites, crossSites) {
 // we want to set 'None' in an iframe for cookie to be accessible to us
 const sameSite = (window !== window.top) ? 'none' : 'lax';
 
+// @eslint-disable-next-line no-unused-vars
 const testAPIs = {
     'document.cookie': {
         type: 'storage',
@@ -154,7 +155,7 @@ const testAPIs = {
                 name: 'partition_test',
                 value: data,
                 expires: new Date('Wed, 21 Aug 2030 20:00:00 UTC').getTime(),
-                sameSite: sameSite
+                sameSite
             });
         },
         retrieve: async () => {
@@ -396,7 +397,7 @@ const testAPIs = {
         store: (key) => new Promise((resolve, reject) => {
             const req = new XMLHttpRequest();
             req.addEventListener('load', resolve, { once: true });
-            req.open('GET', getURL('resource', { fileType: 'xhr', key: key }));
+            req.open('GET', getURL('resource', { fileType: 'xhr', key }));
             req.setRequestHeader('Cache-Control', 'max-age=604800');
             req.send();
         }),
@@ -405,12 +406,12 @@ const testAPIs = {
             const xhrLoadPromise = new Promise((resolve, reject) => {
                 req.addEventListener('load', resolve, { once: true });
             });
-            req.open('GET', getURL('resource', { fileType: 'xhr', key: key }));
+            req.open('GET', getURL('resource', { fileType: 'xhr', key }));
             req.setRequestHeader('Cache-Control', 'max-age=604800');
             req.send();
             await xhrLoadPromise;
             const countResponse = await fetch(
-                getURL('ctr', { fileType: 'xhr', key: key }), { cache: 'reload' });
+                getURL('ctr', { fileType: 'xhr', key }), { cache: 'reload' });
             return parseInt((await countResponse.text()).trim());
         },
         validate: validateCacheAPI
@@ -421,7 +422,7 @@ const testAPIs = {
             const iframe = document.createElement('iframe');
             document.body.appendChild(iframe);
             iframe.addEventListener('load', () => resolve(key), { once: true });
-            iframe.src = getURL('resource', { fileType: 'page', key: key });
+            iframe.src = getURL('resource', { fileType: 'page', key });
         }),
         retrieve: async (key) => {
             const iframe = document.createElement('iframe');
@@ -429,11 +430,11 @@ const testAPIs = {
             const iframeLoadPromise = new Promise((resolve, reject) => {
                 iframe.addEventListener('load', resolve, { once: true });
             });
-            const address = getURL('resource', { fileType: 'page', key: key });
+            const address = getURL('resource', { fileType: 'page', key });
             iframe.src = address;
             await iframeLoadPromise;
             const countResponse = await fetch(
-                getURL('ctr', { fileType: 'page', key: key }), { cache: 'reload' });
+                getURL('ctr', { fileType: 'page', key }), { cache: 'reload' });
             return parseInt((await countResponse.text()).trim());
         },
         validate: validateCacheAPI
@@ -444,7 +445,7 @@ const testAPIs = {
             const img = document.createElement('img');
             document.body.appendChild(img);
             img.addEventListener('load', resolve, { once: true });
-            img.src = getURL('resource', { fileType: 'image', key: key });
+            img.src = getURL('resource', { fileType: 'image', key });
         }),
         retrieve: async (key) => {
             const img = document.createElement('img');
@@ -452,10 +453,10 @@ const testAPIs = {
             const imgLoadPromise = new Promise((resolve, reject) => {
                 img.addEventListener('load', resolve, { once: true });
             });
-            img.src = getURL('resource', { fileType: 'image', key: key });
+            img.src = getURL('resource', { fileType: 'image', key });
             await imgLoadPromise;
             const countResponse = await fetch(
-                getURL('ctr', { fileType: 'image', key: key }), { cache: 'reload' });
+                getURL('ctr', { fileType: 'image', key }), { cache: 'reload' });
             return parseInt((await countResponse.text()).trim());
         },
         validate: validateCacheAPI
@@ -469,7 +470,7 @@ const testAPIs = {
             // there isn't a way to do this synchronously.
             await sleepMs(500);
             const response = await fetch(
-                getURL('ctr', { fileType: 'favicon', key: key }), { cache: 'reload' });
+                getURL('ctr', { fileType: 'favicon', key }), { cache: 'reload' });
             const count = parseInt((await response.text()).trim());
             if (count === 0) {
                 throw new Error('No requests received');
@@ -483,19 +484,19 @@ const testAPIs = {
         store: async (key) => {
             const style = document.createElement('style');
             style.type = 'text/css';
-            const fontURI = getURL('resource', { fileType: 'font', key: key });
+            const fontURI = getURL('resource', { fileType: 'font', key });
             style.innerHTML = `@font-face {font-family: "myFont"; src: url("${fontURI}"); } body { font-family: "myFont" }`;
             document.getElementsByTagName('head')[0].appendChild(style);
         },
         retrieve: async (key) => {
             const style = document.createElement('style');
             style.type = 'text/css';
-            const fontURI = getURL('resource', { fileType: 'font', key: key });
+            const fontURI = getURL('resource', { fileType: 'font', key });
             style.innerHTML = `@font-face {font-family: "myFont"; src: url("${fontURI}"); } body { font-family: "myFont" }`;
             document.getElementsByTagName('head')[0].appendChild(style);
             await sleepMs(500);
             const response = await fetch(
-                getURL('ctr', { fileType: 'font', key: key }), { cache: 'reload' });
+                getURL('ctr', { fileType: 'font', key }), { cache: 'reload' });
             return parseInt((await response.text()).trim());
         },
         validate: validateCacheAPI
@@ -503,12 +504,12 @@ const testAPIs = {
     'CSS cache': {
         type: 'cache',
         store: async (key) => {
-            const href = getURL('resource', { fileType: 'css', key: key });
+            const href = getURL('resource', { fileType: 'css', key });
             const head = document.getElementsByTagName('head')[0];
             head.innerHTML += `<link type="text/css" rel="stylesheet" href="${href}">`;
         },
         retrieve: async (key) => {
-            const href = getURL('resource', { fileType: 'css', key: key });
+            const href = getURL('resource', { fileType: 'css', key });
             const head = document.getElementsByTagName('head')[0];
             head.innerHTML += `<link type="text/css" rel="stylesheet" href="${href}">`;
             const testElement = document.querySelector('#css');
@@ -550,17 +551,17 @@ const testAPIs = {
         store: async (key) => {
             const link = document.createElement('link');
             link.rel = 'prefetch';
-            link.href = getURL('resource', { fileType: 'prefetch', key: key });
+            link.href = getURL('resource', { fileType: 'prefetch', key });
             document.getElementsByTagName('head')[0].appendChild(link);
         },
         retrieve: async (key) => {
             const link = document.createElement('link');
             link.rel = 'prefetch';
-            link.href = getURL('resource', { fileType: 'prefetch', key: key }).href;
+            link.href = getURL('resource', { fileType: 'prefetch', key }).href;
             document.getElementsByTagName('head')[0].appendChild(link);
             await sleepMs(500);
             const response = await fetch(
-                getURL('ctr', { fileType: 'prefetch', key: key }), { cache: 'reload' });
+                getURL('ctr', { fileType: 'prefetch', key }), { cache: 'reload' });
             const count = parseInt((await response.text()).trim());
             if (count === 0) {
                 throw new Error('No requests received');

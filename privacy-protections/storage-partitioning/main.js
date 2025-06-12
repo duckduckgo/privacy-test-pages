@@ -1,3 +1,4 @@
+/* globals FIRST_PARTY_HTTPS, testAPIs, uuidv4, isLocalTest, testAPIs, accessStorageInIframe */
 const runButton = document.querySelector('#run');
 const downloadButton = document.querySelector('#download');
 const toggleDetailsButton = document.querySelector('#toggle-details');
@@ -90,7 +91,7 @@ function displayResults (allRetrievals, testResults) {
     function addTestResult (testId, value) {
         results.results.push({
             id: testId,
-            value: value
+            value
         });
     }
 

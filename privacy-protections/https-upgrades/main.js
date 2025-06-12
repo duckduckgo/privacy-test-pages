@@ -153,7 +153,7 @@ function runTests () {
                         updateSummary();
                     });
             } else {
-                valueSpan.innerHTML = resultToHTML(data);
+                valueSpan.innerHTML = resultToHTML(result);
                 resultObj.value = result || null;
             }
         } catch (e) {

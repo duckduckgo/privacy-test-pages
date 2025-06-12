@@ -113,7 +113,7 @@ const tests = [
     {
         id: 'history',
         store: (data) => {
-            history.pushState({ data: data }, 'data', `#${data}`);
+            history.pushState({ data }, 'data', `#${data}`);
         },
         retrive: () => {
             if (history.state) {
@@ -246,7 +246,7 @@ function retrieveData () {
     function addTestResult (testId, value) {
         results.results.push({
             id: testId,
-            value: value
+            value
         });
     }
 

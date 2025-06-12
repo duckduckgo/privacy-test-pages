@@ -1,5 +1,5 @@
 /* eslint-disable promise/param-names, no-return-assign */
-/* globals AmbientLightSensor, Gyroscope, Magnetometer, chrome, webkitOfflineAudioContext, applyFpExampleDataToCanvas */
+/* globals AmbientLightSensor, Gyroscope, Magnetometer, chrome, webkitOfflineAudioContext, applyFpExampleDataToCanvas, headers, codecsList, fontList, webglConstantsList */
 async function sha256 (str) {
     const buf = await crypto.subtle.digest('SHA-256', new TextEncoder('utf-8').encode(str));
     return Array.prototype.map.call(new Uint8Array(buf), x => (('00' + x.toString(16)).slice(-2))).join('');
@@ -18,31 +18,31 @@ function addCanvasToPage (canvas, reason) {
 
 const tests = [
     // headers
-    {
-        id: 'headers - accept',
-        category: 'headers',
-        getValue: () => headers.then(res => res.headers.accept)
-    },
-    {
-        id: 'headers - accept-encoding',
-        category: 'headers',
-        getValue: () => headers.then(res => res.headers['accept-encoding'])
-    },
-    {
-        id: 'headers - accept-language',
-        category: 'headers',
-        getValue: () => headers.then(res => res.headers['accept-language'])
-    },
-    {
-        id: 'headers - dnt',
-        category: 'headers',
-        getValue: () => headers.then(res => res.headers.dnt)
-    },
-    {
-        id: 'headers - user-agent',
-        category: 'headers',
-        getValue: () => headers.then(res => res.headers['user-agent'])
-    },
+        {
+            id: 'headers - accept',
+            category: 'headers',
+            getValue: () => headers.then(res => res.headers.accept)
+        },
+        {
+            id: 'headers - accept-encoding',
+            category: 'headers',
+            getValue: () => headers.then(res => res.headers['accept-encoding'])
+        },
+        {
+            id: 'headers - accept-language',
+            category: 'headers',
+            getValue: () => headers.then(res => res.headers['accept-language'])
+        },
+        {
+            id: 'headers - dnt',
+            category: 'headers',
+            getValue: () => headers.then(res => res.headers.dnt)
+        },
+        {
+            id: 'headers - user-agent',
+            category: 'headers',
+            getValue: () => headers.then(res => res.headers['user-agent'])
+        },
 
     // navigator
     {
@@ -262,7 +262,7 @@ const tests = [
             let resolve;
             const promise = new Promise((res, rej) => { resolve = res; });
 
-            navigator.webkitTemporaryStorage.queryUsageAndQuota((usage, quota) => resolve({ usage: usage, quota: quota }));
+            navigator.webkitTemporaryStorage.queryUsageAndQuota((usage, quota) => resolve({ usage, quota }));
 
             return promise;
         }
@@ -274,7 +274,7 @@ const tests = [
             let resolve;
             const promise = new Promise((res, rej) => { resolve = res; });
 
-            navigator.webkitPersistentStorage.queryUsageAndQuota((usage, quota) => resolve({ usage: usage, quota: quota }));
+            navigator.webkitPersistentStorage.queryUsageAndQuota((usage, quota) => resolve({ usage, quota }));
 
             return promise;
         }

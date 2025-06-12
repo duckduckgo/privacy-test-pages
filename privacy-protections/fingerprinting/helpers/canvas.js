@@ -1,5 +1,4 @@
 /* exported applyFpExampleDataToCanvas */
-
 function applyFpExampleDataToCanvas (canvas) {
     // Very simple now, need to make it more complex (geo shapes etc)
     const ctx = canvas.getContext('2d');

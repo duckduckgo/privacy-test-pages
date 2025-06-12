@@ -11,3 +11,10 @@ updates:
         eslint:
             patterns:
                 - 'eslint*'
+  - package-ecosystem: 'github-actions'
+    directory: '/'
+    schedule:
+        interval: 'weekly'
+    target-branch: 'main'
+    labels:
+        - 'dependencies'

@@ -1,0 +1,3 @@
+# .git-blame-ignore-revs
+# Update to our global eslint: https://github.com/duckduckgo/privacy-test-pages/pull/274
+56d6d6a83717b9ba38bdfcbd6cd936d3cbf715e3

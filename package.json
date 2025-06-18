@@ -23,7 +23,7 @@
   "dependencies": {
     "@duckduckgo/content-scope-scripts": "git+https://git@github.com/duckduckgo/content-scope-scripts#9.8.0",
     "body-parser": "^2.2.0",
-    "express": "^4.19.2",
+    "express": "^5.1.0",
     "node-cache": "^5.1.2",
     "node-cmd": "^5.0.0",
     "ws": "^8.18.2"

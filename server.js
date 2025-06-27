@@ -1,14 +1,16 @@
-const express = require('express');
-const ws = require('ws');
+import express from 'express';
+import ws from 'ws';
+import url from 'url';
+import cmd from 'node-cmd';
+import crypto from 'crypto';
+import fs from 'fs';
+import pkg from 'body-parser';
+import https from 'https';
+const { json } = pkg;
+
 const app = express();
 const port = process.env.PORT || 3000;
 const host = process.env.HOST || '127.0.0.1';
-const url = require('url');
-const cmd = require('node-cmd');
-const crypto = require('crypto');
-const fs = require('fs');
-const { json } = require('body-parser');
-const https = require('https');
 
 function fullUrl (req) {
     return url.format({
@@ -286,3 +288,5 @@ app.use('/security/badware/phishing-redirect', phishingDetectionRoutes);
 
 const networkErrorRoutes = require('./network-error/server/routes.js');
 app.use('/network-error', networkErrorRoutes);
+
+export default app;

@@ -67,6 +67,27 @@ const commonTests = [
         }
     },
     {
+        id: 'JS cookie (__Host)',
+        store: (data) => {
+            const sameSite = (window !== window.top) ? 'None' : 'Lax';
+            document.cookie = `__Host-jsdata_host=${data}; expires= Wed, 21 Aug 2030 20:00:00 UTC; Secure; SameSite=${sameSite}; Path=/`;
+        },
+        retrive: () => {
+            const match = document.cookie.match(/__Host-jsdata_host=([0-9]+)/);
+            return match ? match[1] : undefined;
+        },
+    },
+    {
+        id: 'JS cookie (no SameSite attribute)',
+        store: (data) => {
+            document.cookie = `jsdata_no_samesite=${data}; expires= Wed, 21 Aug 2030 20:00:00 UTC; Secure; Path=/`;
+        },
+        retrive: () => {
+            const match = document.cookie.match(/jsdata_no_samesite=([0-9]+)/);
+            return match ? match[1] : undefined;
+        },
+    },
+    {
         id: 'localStorage',
         store: (data) => {
             localStorage.setItem('data', data);

@@ -30,6 +30,6 @@
   },
   "devDependencies": {
     "@duckduckgo/eslint-config": "git+https://git@github.com/duckduckgo/eslint-config#v0.1.0",
-    "@html-eslint/eslint-plugin": "^0.41.0"
+    "@html-eslint/eslint-plugin": "^0.43.0"
   }
 }

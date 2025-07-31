@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<!--
+    Note: You MUST serve this file via HTTP (e.g. using a local web server) instead of opening directly via file:// protocol,
+    due to the way events are handled in JS, i.e. HTML5 pushState/replaceState.
+-->
+<html>
+<head>
+    <title>Navigation Pixel Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        button {
+            padding: 10px;
+            margin: 5px;
+        }
+
+        .section {
+            margin-top: 100px;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+
+        #log {
+            margin-top: 20px;
+            padding: 10px;
+            background: #e8e8e8;
+            font-family: monospace;
+        }
+
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Navigation Pixel Test Page</h1>
+    <p>Use this page to test different types of navigation events for pixel tracking.</p>
+
+    <div class="warning" id="warning">
+        <strong>Note:</strong> You MUST serve this file via HTTP (e.g., using a local web server) instead of opening directly via file:// protocol, because the HTML5 events it tests (pushState/popState) aren't' handled.  Use a web server, e.g.:<br/> 
+        <code>python -m http.server</code>
+    </div>
+
+    <div id="log">
+        <h3>Event Log</h3>
+        <div id="logContent"></div>
+    </div>
+
+    <div id="body" hidden>
+        <h2>History API Navigation (should fire client pixels)</h2>
+        <button onclick="testPushState('page1')">Push State (Page 1)</button>
+        <button onclick="testPushState('page2')">Push State (Page 2)</button>
+        <button onclick="testPushState('page3')">Push State (Page 3)</button>
+        <button onclick="history.back()">Back (Pop State)</button>
+        <button onclick="history.forward()">Forward (Pop State)</button>
+
+        <h2>Replace State (should NOT fire client pixels)</h2>
+        <button onclick="testReplaceState('replaced1')">Replace State 1</button>
+        <button onclick="testReplaceState('replaced2')">Replace State 2</button>
+
+        <h2>Hash Navigation (should fire client pixels)</h2>
+        <a href="#section1">Go to Section 1</a> |
+        <a href="#section2">Go to Section 2</a> |
+        <a href="#section3">Go to Section 3</a> |
+        <a href="#top">Back to Top</a>
+
+        <h2>Regular Navigation (should fire regular pixels)</h2>
+        <button onclick="window.location.href='https://example.com'">Navigate to Example.com</button>
+        <button onclick="window.location.href='https://httpbin.org'">Navigate to HTTPBin</button>
+
+        <div id="section1" class="section">
+            <h3>Section 1</h3>
+            <p>This is section 1. Hash navigation to here should fire a client pixel.</p>
+        </div>
+
+        <div id="section2" class="section">
+            <h3>Section 2</h3>
+            <p>This is section 2. Hash navigation to here should fire a client pixel.</p>
+        </div>
+
+        <div id="section3" class="section">
+            <h3>Section 3</h3>
+            <p>This is section 3. Hash navigation to here should fire a client pixel.</p>
+        </div>
+    </div>
+
+    <script>
+        function log(message) {
+            const logContent = document.getElementById('logContent');
+            const timestamp = new Date().toLocaleTimeString();
+            logContent.innerHTML += `[${timestamp}] ${message}<br>`;
+            logContent.scrollTop = logContent.scrollHeight;
+        }
+
+        function testPushState(page) {
+            try {
+                const state = { page: page, timestamp: Date.now() };
+                history.pushState(state, `Page ${page}`, `/${page}`);
+                log(`PushState: ${page} (Success)`);
+            } catch (error) {
+                log(`PushState Error: ${error.message}`);
+            }
+        }
+
+        function testReplaceState(page) {
+            try {
+                const state = { page: page, timestamp: Date.now(), replaced: true };
+                history.replaceState(state, `Replaced ${page}`, `/${page}`);
+                log(`ReplaceState: ${page} (Success)`);
+            } catch (error) {
+                log(`ReplaceState Error: ${error.message}`);
+            }
+        }
+
+        // Listen for popstate events
+        window.addEventListener('popstate', (event) => {
+            log(`PopState event: ${JSON.stringify(event.state)}`);
+        });
+
+        // Listen for hashchange events
+        window.addEventListener('hashchange', (event) => {
+            log(`HashChange: ${event.oldURL} → ${event.newURL}`);
+        });
+
+        // Log initial page load
+        window.addEventListener('DOMContentLoaded', () => {
+            const warning = document.getElementById('warning');
+            const body = document.getElementById('body');
+            const isFileProtocol = window.location.protocol === 'file:';
+
+            body.hidden = isFileProtocol;
+            warning.hidden = !isFileProtocol;
+
+            if (isFileProtocol) {
+                log('ERROR: Running on file:// protocol.  You must serve this file via HTTP');
+                return;
+            }
+
+            log('Ready for navigation testing');
+        });
+    </script>
+</body>
+</html>

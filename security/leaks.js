@@ -27,9 +27,11 @@ window.addEventListener('load', async () => {
                 return {};
             }
             const props = {};
-            const proplist = [];
+            const proplist = Object.getOwnPropertyNames(obj);
             for (const prop in obj) {
+              if (!proplist.includes(prop)) {
                 proplist.push(prop);
+              }
             }
             proplist.sort().forEach((prop) => {
                 try {
@@ -57,9 +59,9 @@ window.addEventListener('load', async () => {
         };
     }
 
-    window.collectedProps = collectProps();
-
-    async function run () {
+    async function run() {
+        delete window.collectedProps;
+        window.collectedProps = collectProps();
         // clear results
         Object.keys(sections).forEach((s) => {
             const ul = sections[s];

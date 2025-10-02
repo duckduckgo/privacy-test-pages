@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Identity Login Form</title>
+    <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+    <p><a href="../index.html#autofill">[Home]</a></p>
+
+    <div class="dialog">
+        <h2>Login to Your Account</h2>
+        <p>Enter your credentials to sign in</p>
+        
+        <form id="login-form" action="/login">
+            <fieldset>
+                <label for="first-name">First Name</label>
+                <input id="first-name" type="text" autocomplete="given-name">
+                
+                <label for="last-name">Last Name</label>
+                <input id="last-name" type="text" autocomplete="family-name">
+                
+                <label for="login-email">Email</label>
+                <input id="login-email" type="email" autocomplete="username">
+                
+                <label for="login-password">Password</label>
+                <input id="login-password" type="password" autocomplete="current-password">
+                
+                <button type="submit">Log In</button>
+            </fieldset>
+        </form>
+    </div>
+</body>
+</html>

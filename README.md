@@ -24,9 +24,11 @@ Please note that we are not taking external contributions for new test pages, bu
 We have couple of test domains, that all resolve to `privacy-test-pages.site`, which help us simulate various scenarios:
 
 - `www.first-party.site` - an alternative first-party domain used for tests that require first-party resources on other subdomains (e.g., `hsts.first-party.site`)
-- `good.third-party.site` - non-tracking third party, it's not on our blocklist and will not be blocked by our clients
-- `broken.third-party.site` - tracking third party that we can't block (e.g. due to brekage), it's on our blocklist, but it will not be blocked by our clients
-- `bad.third-party.site` - tracking third party that's on our blocklist and our clients will block
+- `good.third-party.site` - non-tracking third party domain, it's not in our blocklist and will not be blocked by our clients
+- `allowlisted.third-party.site` - non-tracking third-party domain, it's not in our blocklist and furthermore is explicitly allowlisted by the Tracker Allowlist (e.g. to prevent the Request Blocklist from applying)
+- `broken.third-party.site` - tracking third-party domain that we can't block (e.g. due to breakage), it's in our blocklist, but it will not be blocked by our clients (default action "ignore")
+- `bad.third-party.site` - tracking third-party domain that's in our blocklist and our clients will block
+
 
 We also have additional domains specifically for the Ad Attribution tests hosted [here](https://www.search-company.site):
 

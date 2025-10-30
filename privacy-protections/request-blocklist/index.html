@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Request Blocklist test page</title>
+
+  <style>
+    #notes { margin-bottom: 20px; }
+    #notes > * { margin: 0; font-style: italic; }
+    table { border-collapse: collapse; }
+    td { margin: 0; padding: 0px; width: 200px; height: 100px; border: 1px #000 solid; }
+    img, iframe { display: block; width: 100%; height: 100%; margin: 0; padding: 0; border: 0; }
+    .allow { background-color: red; background-image: url("./blocked-fail.png"); }
+    .block { background-color: green; background-image: url("./blocked-pass.png");}
+  </style>
+</head>
+<body>
+  <p><a href="../index.html">[Home]</a></p>
+
+  <p>
+    Simple test page that serves as a quick visual test to show if the Request
+    Blocklist feature is active and working.
+  </p>
+
+  <p>
+    Test cases are shown as green if they are blocked/allowed as expected, and
+    shown as red otherwise. Where possible, "Loaded"/"Blocked" text is also
+    shown.
+  </p>
+
+  <section id="notes">
+    <p><b>Notes:</b></p>
+    <ul>
+      <li>
+        Some browsers will display blocked frames as white/grey, instead of the
+        green/red background that we want. Consider that a pass for the
+        "Blocked ..." test cases, and a fail for the others.
+      </li>
+      <li>
+        For automated integration tests, prefer the
+        <a href="../request-blocking/">Request Blocking Test Page</a>. An empty
+        blocklist + suitable Request Blocklist configuration can be used to test
+        the feature.
+      </li>
+    </ul>
+  </section>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Test result</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="block">
+          <img src="./loaded-fail.png?block=true"
+               class="block">
+        </td>
+        <td>
+          Blocked first-party image
+        </td>
+      </tr>
+      <tr>
+        <td class="block">
+          <img src="https://third-party.site/privacy-protections/request-blocklist/loaded-fail.png?block=true"
+               class="block">
+        </td>
+        <td>
+          Blocked third-party image
+        </td>
+      </tr>
+      <tr>
+        <td class="block">
+          <iframe src="./loaded-fail.html?block=true"
+                  class="block">
+          </iframe>
+        </td>
+        <td>
+          Blocked first-party frame
+        </td>
+      </tr>
+      <tr>
+        <td class="block">
+          <iframe src="https://third-party.site/privacy-protections/request-blocklist/loaded-fail.html?block=true"
+                  class="block">
+          </iframe>
+        </td>
+        <td>
+          Blocked third-party frame
+        </td>
+      </tr>
+      <tr>
+        <td class="allow">
+          <img src="./loaded-pass.png?block=false"
+               class="allow">
+        </td>
+        <td>
+          Unblocked first-party image
+        </td>
+      </tr>
+      <tr>
+        <td class="allow">
+          <iframe src="./loaded-pass.html?block=false"
+                  class="allow">
+          </iframe>
+        </td>
+        <td>
+          Unblocked first-party frame
+        </td>
+      </tr>
+      <tr>
+        <td class="allow">
+          <img src="https://allowlisted.third-party.site/privacy-protections/request-blocklist/loaded-pass.png?block=true"
+               class="allow">
+        </td>
+        <td>
+          Allowlisted third-party image
+        </td>
+      </tr>
+      <tr>
+        <td class="allow">
+          <iframe src="https://allowlisted.third-party.site/privacy-protections/request-blocklist/loaded-pass.html?block=true"
+                  class="allow">
+          </iframe>
+        </td>
+        <td>
+          Allowlisted third-party frame
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</body>
+</html>

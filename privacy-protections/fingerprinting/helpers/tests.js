@@ -302,6 +302,143 @@ const tests = [
                 }));
         }
     },
+    {
+        id: 'navigator.userAgentData.brands - Sec-CH-UA consistency',
+        category: 'navigator',
+        getValue: async () => {
+            // Helper function to parse Sec-CH-UA header format
+            // Format: "Brand1";v="version1", "Brand2";v="version2"
+            function parseSecChUaHeader (headerValue) {
+                if (!headerValue) return [];
+                
+                const brands = [];
+                // Match patterns like "Brand";v="version" or "Brand"; v="version"
+                const regex = /"([^"]*)"\s*;\s*v\s*=\s*"([^"]*)"/g;
+                let match;
+                
+                while ((match = regex.exec(headerValue)) !== null) {
+                    brands.push({
+                        brand: match[1],
+                        version: match[2]
+                    });
+                }
+                
+                return brands;
+            }
+
+            // Helper function to compare two brand arrays
+            function compareBrands (headerBrands, jsBrands) {
+                const differences = [];
+                
+                if (headerBrands.length !== jsBrands.length) {
+                    differences.push({
+                        type: 'length',
+                        header: headerBrands.length,
+                        js: jsBrands.length
+                    });
+                }
+                
+                const maxLength = Math.max(headerBrands.length, jsBrands.length);
+                for (let i = 0; i < maxLength; i++) {
+                    const headerBrand = headerBrands[i];
+                    const jsBrand = jsBrands[i];
+                    
+                    if (!headerBrand && jsBrand) {
+                        differences.push({
+                            type: 'missing_in_header',
+                            index: i,
+                            jsBrand
+                        });
+                    } else if (headerBrand && !jsBrand) {
+                        differences.push({
+                            type: 'missing_in_js',
+                            index: i,
+                            headerBrand
+                        });
+                    } else if (headerBrand && jsBrand) {
+                        if (headerBrand.brand !== jsBrand.brand) {
+                            differences.push({
+                                type: 'brand_mismatch',
+                                index: i,
+                                header: headerBrand.brand,
+                                js: jsBrand.brand
+                            });
+                        }
+                        if (headerBrand.version !== jsBrand.version) {
+                            differences.push({
+                                type: 'version_mismatch',
+                                index: i,
+                                brand: headerBrand.brand,
+                                headerVersion: headerBrand.version,
+                                jsVersion: jsBrand.version
+                            });
+                        }
+                    }
+                }
+                
+                return differences;
+            }
+
+            // Retry logic for navigator.userAgentData availability
+            async function getNavigatorUserAgentDataWithRetry (maxRetries = 2, delayMs = 150) {
+                for (let attempt = 0; attempt <= maxRetries; attempt++) {
+                    if (navigator.userAgentData) {
+                        return navigator.userAgentData;
+                    }
+                    
+                    if (attempt < maxRetries) {
+                        await new Promise(resolve => setTimeout(resolve, delayMs));
+                    }
+                }
+                
+                return null;
+            }
+
+            // Main test logic
+            const userAgentData = await getNavigatorUserAgentDataWithRetry();
+            
+            if (!userAgentData) {
+                return {
+                    apiAvailable: false,
+                    error: 'navigator.userAgentData not available after retries'
+                };
+            }
+
+            // Get header data
+            const headersData = await headers;
+            const secChUaHeader = headersData.headers['sec-ch-ua'];
+            const headerBrands = parseSecChUaHeader(secChUaHeader);
+
+            // Get JS API data
+            const jsBrands = userAgentData.brands || [];
+            
+            // Get high entropy values including fullVersionList (extract only brand names)
+            let jsHighEntropyValuesBrands = [];
+            let fullVersionListError = null;
+            try {
+                const highEntropyValues = await userAgentData.getHighEntropyValues(['fullVersionList']);
+                const fullVersionList = highEntropyValues.fullVersionList || [];
+                jsHighEntropyValuesBrands = fullVersionList.map(item => item.brand);
+            } catch (e) {
+                fullVersionListError = e.message;
+            }
+
+            // Compare brands with header
+            const brandsDifferences = compareBrands(headerBrands, jsBrands);
+            const brandsMatch = brandsDifferences.length === 0;
+
+            return {
+                apiAvailable: true,
+                brandsMatch,
+                headerBrands,
+                jsBrands,
+                jsHighEntropyValuesBrands,
+                brandsDifferences,
+                fullVersionListError,
+                secChUaHeader
+            };
+        }
+    },
 
     // window
     {

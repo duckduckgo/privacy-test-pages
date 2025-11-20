@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>About:Blank Rewrite Spoof</title>
+    <script>
+        // eslint-disable-next-line no-unused-vars
+        function run() {
+            const w = window.open("");
+            w.document.write(`
+            <p style="text-align:center; margin-top:20px; font-size:18px;">
+                Should say about:blank in address bar, or privacy-test-pages.site, but not empty.
+            </p>`);
+        }
+    </script>
+</head>
+
+<body>
+    <p><a href="./index.html">[Back]</a></p>
+    This test will try to confuse the browser to show no domain in the URL bar by opening an empty origin page, and
+    rewriting the content. In some browsers, this may cause the address bar to be empty which appears to be a browser native page.
+    We expect the address bar to show either "about:blank" or the opener origin.
+    <span onclick="run()" style="cursor:pointer;">Click anywhere</span>
+</body>
+
+</html>

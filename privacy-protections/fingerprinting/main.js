@@ -100,7 +100,13 @@ function runTests () {
                     valueSpan.innerHTML = `(${Array.isArray(v) ? 'array' : (typeof v)}) - <code>${JSON.stringify(v, null, 2)}</code>`;
                     resultObj.value = v;
                 }).catch(e => {
-                    valueSpan.innerHTML = `❌ error thrown ("${e}")`;
+                    const errorDetails = {
+                        name: e.name,
+                        message: e.message,
+                        stack: e.stack
+                    };
+                    valueSpan.innerHTML = `❌ error thrown - <code>${JSON.stringify(errorDetails, null, 2)}</code>`;
+                    resultObj.value = errorDetails;
                     failed++;
                     updateSummary();
                 });
@@ -109,7 +115,13 @@ function runTests () {
                 resultObj.value = value;
             }
         } catch (e) {
-            valueSpan.innerHTML = `❌ error thrown ("${e}")`;
+            const errorDetails = {
+                name: e.name,
+                message: e.message,
+                stack: e.stack
+            };
+            valueSpan.innerHTML = `❌ error thrown - <code>${JSON.stringify(errorDetails, null, 2)}</code>`;
+            resultObj.value = errorDetails;
             failed++;
         }
     });

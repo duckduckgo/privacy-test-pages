@@ -395,48 +395,88 @@ const tests = [
             }
 
             // Main test logic
-            const userAgentData = await getNavigatorUserAgentDataWithRetry();
-            
-            if (!userAgentData) {
+            try {
+                const userAgentData = await getNavigatorUserAgentDataWithRetry();
+                
+                if (!userAgentData) {
+                    return {
+                        apiAvailable: false,
+                        error: 'navigator.userAgentData not available after retries'
+                    };
+                }
+
+                // Get header data
+                let headersData;
+                let headersError = null;
+                try {
+                    headersData = await headers;
+                    if (!headersData || typeof headersData !== 'object') {
+                        throw new Error(`Invalid headers response: expected object, got ${typeof headersData}`);
+                    }
+                    if (!headersData.headers || typeof headersData.headers !== 'object') {
+                        throw new Error(`Invalid headers structure: headers property missing or invalid`);
+                    }
+                } catch (e) {
+                    headersError = {
+                        name: e.name,
+                        message: e.message,
+                        stack: e.stack,
+                        responseType: typeof headersData,
+                        responsePreview: headersData ? String(headersData).substring(0, 200) : 'null'
+                    };
+                    return {
+                        apiAvailable: true,
+                        error: 'Failed to fetch headers',
+                        headersError
+                    };
+                }
+
+                const secChUaHeader = headersData.headers['sec-ch-ua'];
+                const headerBrands = parseSecChUaHeader(secChUaHeader);
+
+                // Get JS API data
+                const jsBrands = userAgentData.brands || [];
+                
+                // Get high entropy values including fullVersionList (extract only brand names)
+                let jsHighEntropyValuesBrands = [];
+                let fullVersionListError = null;
+                try {
+                    const highEntropyValues = await userAgentData.getHighEntropyValues(['fullVersionList']);
+                    const fullVersionList = highEntropyValues.fullVersionList || [];
+                    jsHighEntropyValuesBrands = fullVersionList.map(item => item.brand);
+                } catch (e) {
+                    fullVersionListError = {
+                        name: e.name,
+                        message: e.message,
+                        stack: e.stack
+                    };
+                }
+
+                // Compare brands with header
+                const brandsDifferences = compareBrands(headerBrands, jsBrands);
+                const brandsMatch = brandsDifferences.length === 0;
+
+                return {
+                    apiAvailable: true,
+                    brandsMatch,
+                    headerBrands,
+                    jsBrands,
+                    jsHighEntropyValuesBrands,
+                    brandsDifferences,
+                    fullVersionListError,
+                    secChUaHeader
+                };
+            } catch (e) {
                 return {
                     apiAvailable: false,
-                    error: 'navigator.userAgentData not available after retries'
+                    error: 'Unexpected error in test',
+                    errorDetails: {
+                        name: e.name,
+                        message: e.message,
+                        stack: e.stack
+                    }
                 };
             }
-
-            // Get header data
-            const headersData = await headers;
-            const secChUaHeader = headersData.headers['sec-ch-ua'];
-            const headerBrands = parseSecChUaHeader(secChUaHeader);
-
-            // Get JS API data
-            const jsBrands = userAgentData.brands || [];
-            
-            // Get high entropy values including fullVersionList (extract only brand names)
-            let jsHighEntropyValuesBrands = [];
-            let fullVersionListError = null;
-            try {
-                const highEntropyValues = await userAgentData.getHighEntropyValues(['fullVersionList']);
-                const fullVersionList = highEntropyValues.fullVersionList || [];
-                jsHighEntropyValuesBrands = fullVersionList.map(item => item.brand);
-            } catch (e) {
-                fullVersionListError = e.message;
-            }
-
-            // Compare brands with header
-            const brandsDifferences = compareBrands(headerBrands, jsBrands);
-            const brandsMatch = brandsDifferences.length === 0;
-
-            return {
-                apiAvailable: true,
-                brandsMatch,
-                headerBrands,
-                jsBrands,
-                jsHighEntropyValuesBrands,
-                brandsDifferences,
-                fullVersionListError,
-                secChUaHeader
-            };
         }
     },
 

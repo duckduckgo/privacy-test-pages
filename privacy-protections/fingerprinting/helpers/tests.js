@@ -437,19 +437,17 @@ const tests = [
                 // Get JS API data
                 const jsBrands = userAgentData.brands || [];
                 
-                // Get high entropy values including fullVersionList (extract only brand names)
+                // Get high entropy values including brands and fullVersionList
                 let jsHighEntropyValuesBrands = [];
-                let fullVersionListError = null;
+                let fullVersionList = null;
                 try {
-                    const highEntropyValues = await userAgentData.getHighEntropyValues(['fullVersionList']);
-                    const fullVersionList = highEntropyValues.fullVersionList || [];
-                    jsHighEntropyValuesBrands = fullVersionList.map(item => item.brand);
+                    const highEntropyValues = await userAgentData.getHighEntropyValues(['brands', 'fullVersionList']);
+                    // Extract brand names from brands property (not fullVersionList)
+                    jsHighEntropyValuesBrands = highEntropyValues.brands ? highEntropyValues.brands.map(item => item.brand) : [];
+                    // Include fullVersionList as-is, or error message if missing
+                    fullVersionList = highEntropyValues.fullVersionList || null;
                 } catch (e) {
-                    fullVersionListError = {
-                        name: e.name,
-                        message: e.message,
-                        stack: e.stack
-                    };
+                    fullVersionList = `Error: ${e.name} - ${e.message}`;
                 }
 
                 // Compare brands with header
@@ -463,7 +461,7 @@ const tests = [
                     jsBrands,
                     jsHighEntropyValuesBrands,
                     brandsDifferences,
-                    fullVersionListError,
+                    fullVersionList,
                     secChUaHeader
                 };
             } catch (e) {

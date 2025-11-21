@@ -306,7 +306,6 @@ const tests = [
         id: 'navigator.userAgentData.brands - Sec-CH-UA consistency',
         category: 'navigator',
         getValue: async () => {
-            // Helper function to parse Sec-CH-UA header format
             // Format: "Brand1";v="version1", "Brand2";v="version2"
             function parseSecChUaHeader (headerValue) {
                 if (!headerValue) return [];
@@ -326,7 +325,6 @@ const tests = [
                 return brands;
             }
 
-            // Helper function to compare two brand arrays
             function compareBrands (headerBrands, jsBrands) {
                 const differences = [];
                 
@@ -379,7 +377,6 @@ const tests = [
                 return differences;
             }
 
-            // Retry logic for navigator.userAgentData availability
             async function getNavigatorUserAgentDataWithRetry (maxRetries = 2, delayMs = 150) {
                 for (let attempt = 0; attempt <= maxRetries; attempt++) {
                     if (navigator.userAgentData) {
@@ -394,7 +391,6 @@ const tests = [
                 return null;
             }
 
-            // Main test logic
             try {
                 const userAgentData = await getNavigatorUserAgentDataWithRetry();
                 
@@ -405,7 +401,6 @@ const tests = [
                     };
                 }
 
-                // Get header data
                 let headersData;
                 let headersError = null;
                 try {
@@ -434,7 +429,6 @@ const tests = [
                 const secChUaHeader = headersData.headers['sec-ch-ua'];
                 const headerBrands = parseSecChUaHeader(secChUaHeader);
 
-                // Get JS API data
                 const jsBrands = userAgentData.brands || [];
                 
                 // Get high entropy values including brands and fullVersionList
@@ -442,15 +436,12 @@ const tests = [
                 let fullVersionList = null;
                 try {
                     const highEntropyValues = await userAgentData.getHighEntropyValues(['brands', 'fullVersionList']);
-                    // Extract brand names from brands property (not fullVersionList)
                     jsHighEntropyValuesBrands = highEntropyValues.brands ? highEntropyValues.brands.map(item => item.brand) : [];
-                    // Include fullVersionList as-is, or error message if missing
                     fullVersionList = highEntropyValues.fullVersionList || null;
                 } catch (e) {
                     fullVersionList = `Error: ${e.name} - ${e.message}`;
                 }
 
-                // Compare brands with header
                 const brandsDifferences = compareBrands(headerBrands, jsBrands);
                 const brandsMatch = brandsDifferences.length === 0;
 

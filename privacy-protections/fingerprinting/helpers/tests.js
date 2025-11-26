@@ -441,8 +441,8 @@ const tests = [
                   fullVersionListBrands.map((brand) => ({
                     brand: brand.brand,
                     version: brand.version
-                      ? brand.version.split(".")[0]
-                      : brand.version,
+                        ? brand.version.split(".")[0]
+                        : brand.version,
                   }));
                 const fullVersionListBrandsDifferences = compareBrands(
                   headerBrands,

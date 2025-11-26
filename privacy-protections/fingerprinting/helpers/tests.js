@@ -377,27 +377,17 @@ const tests = [
                 return differences;
             }
 
-            async function getNavigatorUserAgentDataWithRetry (maxRetries = 2, delayMs = 150) {
-                for (let attempt = 0; attempt <= maxRetries; attempt++) {
-                    if (navigator.userAgentData) {
-                        return navigator.userAgentData;
-                    }
-                    
-                    if (attempt < maxRetries) {
-                        await new Promise(resolve => setTimeout(resolve, delayMs));
-                    }
-                }
-                
-                return null;
+            function getNavigatorUserAgentData () {
+                return navigator.userAgentData || null;
             }
 
             try {
-                const userAgentData = await getNavigatorUserAgentDataWithRetry();
+                const userAgentData = getNavigatorUserAgentData();
                 
                 if (!userAgentData) {
                     return {
                         apiAvailable: false,
-                        error: 'navigator.userAgentData not available after retries'
+                        error: 'navigator.userAgentData not available'
                     };
                 }
 
@@ -432,28 +422,57 @@ const tests = [
                 const jsBrands = userAgentData.brands || [];
                 
                 // Get high entropy values including brands and fullVersionList
-                let jsHighEntropyValuesBrands = [];
-                let fullVersionList = null;
+                let highEntropyValuesBrands = [];
+                let fullVersionListBrands = [];
                 try {
                     const highEntropyValues = await userAgentData.getHighEntropyValues(['brands', 'fullVersionList']);
-                    jsHighEntropyValuesBrands = highEntropyValues.brands ? highEntropyValues.brands.map(item => item.brand) : [];
-                    fullVersionList = highEntropyValues.fullVersionList || null;
+                    highEntropyValuesBrands = highEntropyValues.brands || [];
+                    fullVersionListBrands = highEntropyValues.fullVersionList || [];
                 } catch (e) {
-                    fullVersionList = `Error: ${e.name} - ${e.message}`;
                 }
 
-                const brandsDifferences = compareBrands(headerBrands, jsBrands);
-                const brandsMatch = brandsDifferences.length === 0;
+                const jsBrandsDifferences = compareBrands(headerBrands, jsBrands);
+                const jsBrandsMatch = jsBrandsDifferences.length === 0;
+
+                const highEntropyValuesBrandsDifferences = compareBrands(headerBrands, highEntropyValuesBrands);
+                const highEntropyValuesBrandsMatch = highEntropyValuesBrandsDifferences.length === 0;
+
+                const normalizedFullVersionListBrands =
+                  fullVersionListBrands.map((brand) => ({
+                    brand: brand.brand,
+                    version: brand.version
+                      ? brand.version.split(".")[0]
+                      : brand.version,
+                  }));
+                const fullVersionListBrandsDifferences = compareBrands(
+                  headerBrands,
+                  normalizedFullVersionListBrands
+                );
+                const fullVersionListBrandsMatch = fullVersionListBrandsDifferences.length === 0;
 
                 return {
                     apiAvailable: true,
-                    brandsMatch,
+                    secChUaHeader,
                     headerBrands,
-                    jsBrands,
-                    jsHighEntropyValuesBrands,
-                    brandsDifferences,
-                    fullVersionList,
-                    secChUaHeader
+                    matches: {
+                        jsBrandsMatch,
+                        highEntropyValuesBrandsMatch,
+                        fullVersionListBrandsMatch
+                    },
+                    matchDetails: {
+                        jsBrands: {
+                            differences: jsBrandsDifferences,
+                            brands: jsBrands
+                        },
+                        highEntropyValuesBrands: {
+                            differences: highEntropyValuesBrandsDifferences,
+                            brands: highEntropyValuesBrands
+                        },
+                        fullVersionListBrands: {
+                            differences: fullVersionListBrandsDifferences,
+                            brands: fullVersionListBrands
+                        }
+                    }
                 };
             } catch (e) {
                 return {

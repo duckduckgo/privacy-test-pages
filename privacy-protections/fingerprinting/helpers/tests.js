@@ -302,6 +302,191 @@ const tests = [
                 }));
         }
     },
+    {
+        id: 'navigator.userAgentData.brands - Sec-CH-UA consistency',
+        category: 'navigator',
+        getValue: async () => {
+            // Format: "Brand1";v="version1", "Brand2";v="version2"
+            function parseSecChUaHeader (headerValue) {
+                if (!headerValue) return [];
+                
+                const brands = [];
+                // Match patterns like "Brand";v="version" or "Brand"; v="version"
+                const regex = /"([^"]*)"\s*;\s*v\s*=\s*"([^"]*)"/g;
+                let match;
+                
+                while ((match = regex.exec(headerValue)) !== null) {
+                    brands.push({
+                        brand: match[1],
+                        version: match[2]
+                    });
+                }
+                
+                return brands;
+            }
+
+            function compareBrands (headerBrands, jsBrands) {
+                const differences = [];
+                
+                if (headerBrands.length !== jsBrands.length) {
+                    differences.push({
+                        type: 'length',
+                        header: headerBrands.length,
+                        js: jsBrands.length
+                    });
+                }
+                
+                const maxLength = Math.max(headerBrands.length, jsBrands.length);
+                for (let i = 0; i < maxLength; i++) {
+                    const headerBrand = headerBrands[i];
+                    const jsBrand = jsBrands[i];
+                    
+                    if (!headerBrand && jsBrand) {
+                        differences.push({
+                            type: 'missing_in_header',
+                            index: i,
+                            jsBrand
+                        });
+                    } else if (headerBrand && !jsBrand) {
+                        differences.push({
+                            type: 'missing_in_js',
+                            index: i,
+                            headerBrand
+                        });
+                    } else if (headerBrand && jsBrand) {
+                        if (headerBrand.brand !== jsBrand.brand) {
+                            differences.push({
+                                type: 'brand_mismatch',
+                                index: i,
+                                header: headerBrand.brand,
+                                js: jsBrand.brand
+                            });
+                        }
+                        if (headerBrand.version !== jsBrand.version) {
+                            differences.push({
+                                type: 'version_mismatch',
+                                index: i,
+                                brand: headerBrand.brand,
+                                headerVersion: headerBrand.version,
+                                jsVersion: jsBrand.version
+                            });
+                        }
+                    }
+                }
+                
+                return differences;
+            }
+
+            function getNavigatorUserAgentData () {
+                return navigator.userAgentData || null;
+            }
+
+            try {
+                const userAgentData = getNavigatorUserAgentData();
+                
+                if (!userAgentData) {
+                    return {
+                        apiAvailable: false,
+                        error: 'navigator.userAgentData not available'
+                    };
+                }
+
+                let headersData;
+                let headersError = null;
+                try {
+                    headersData = await headers;
+                    if (!headersData || typeof headersData !== 'object') {
+                        throw new Error(`Invalid headers response: expected object, got ${typeof headersData}`);
+                    }
+                    if (!headersData.headers || typeof headersData.headers !== 'object') {
+                        throw new Error(`Invalid headers structure: headers property missing or invalid`);
+                    }
+                } catch (e) {
+                    headersError = {
+                        name: e.name,
+                        message: e.message,
+                        stack: e.stack,
+                        responseType: typeof headersData,
+                        responsePreview: headersData ? String(headersData).substring(0, 200) : 'null'
+                    };
+                    return {
+                        apiAvailable: true,
+                        error: 'Failed to fetch headers',
+                        headersError
+                    };
+                }
+
+                const secChUaHeader = headersData.headers['sec-ch-ua'];
+                const headerBrands = parseSecChUaHeader(secChUaHeader);
+
+                const jsBrands = userAgentData.brands || [];
+                
+                // Get high entropy values including brands and fullVersionList
+                let highEntropyValuesBrands = [];
+                let fullVersionListBrands = [];
+                try {
+                    const highEntropyValues = await userAgentData.getHighEntropyValues(['brands', 'fullVersionList']);
+                    highEntropyValuesBrands = highEntropyValues.brands || [];
+                    fullVersionListBrands = highEntropyValues.fullVersionList || [];
+                } catch (e) {
+                }
+
+                const jsBrandsDifferences = compareBrands(headerBrands, jsBrands);
+                const jsBrandsMatch = jsBrandsDifferences.length === 0;
+
+                const highEntropyValuesBrandsDifferences = compareBrands(headerBrands, highEntropyValuesBrands);
+                const highEntropyValuesBrandsMatch = highEntropyValuesBrandsDifferences.length === 0;
+
+                const normalizedFullVersionListBrands =
+                  fullVersionListBrands.map((brand) => ({
+                    brand: brand.brand,
+                    version: brand.version
+                        ? brand.version.split(".")[0]
+                        : brand.version,
+                  }));
+                const fullVersionListBrandsDifferences = compareBrands(
+                  headerBrands,
+                  normalizedFullVersionListBrands
+                );
+                const fullVersionListBrandsMatch = fullVersionListBrandsDifferences.length === 0;
+
+                return {
+                    apiAvailable: true,
+                    secChUaHeader,
+                    headerBrands,
+                    matches: {
+                        jsBrandsMatch,
+                        highEntropyValuesBrandsMatch,
+                        fullVersionListBrandsMatch
+                    },
+                    matchDetails: {
+                        jsBrands: {
+                            differences: jsBrandsDifferences,
+                            brands: jsBrands
+                        },
+                        highEntropyValuesBrands: {
+                            differences: highEntropyValuesBrandsDifferences,
+                            brands: highEntropyValuesBrands
+                        },
+                        fullVersionListBrands: {
+                            differences: fullVersionListBrandsDifferences,
+                            brands: fullVersionListBrands
+                        }
+                    }
+                };
+            } catch (e) {
+                return {
+                    apiAvailable: false,
+                    error: 'Unexpected error in test',
+                    errorDetails: {
+                        name: e.name,
+                        message: e.message,
+                        stack: e.stack
+                    }
+                };
+            }
+        }
+    },
 
     // window
     {

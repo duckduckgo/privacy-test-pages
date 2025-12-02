@@ -1,3 +1,17 @@
+// Track page loads using sessionStorage
+const pageLoadCount = parseInt(sessionStorage.getItem('cpmReloadLoopPageLoadCount') || '0', 10) + 1;
+sessionStorage.setItem('cpmReloadLoopPageLoadCount', pageLoadCount.toString());
+
+// Display the page load count
+const loadCountDisplay = document.querySelector('#page-load-count');
+loadCountDisplay.innerText = `Page load count: ${pageLoadCount}`;
+
+const resetCounterButton = document.querySelector('#reset-counter');
+resetCounterButton.addEventListener('click', (ev) => {
+    sessionStorage.removeItem('cpmReloadLoopPageLoadCount');
+    loadCountDisplay.innerText = 'Page load count: 0';
+});
+
 // dummy CMP
 const button = document.createElement('button');
 button.innerText = 'Reject all';

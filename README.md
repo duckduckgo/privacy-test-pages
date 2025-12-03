@@ -40,7 +40,7 @@ We also have additional domains specifically for the Ad Attribution tests hosted
 
 ### How to test it locally
 
-If you are working on a simple page you can start any local server (e.g. `python -m SimpleHTTPServer 8000`) in the main folder of the project.
+If you are working on a simple page you can start any local server (e.g. `python3 -m http.server 8000`) in the main folder of the project.
 
 #### Test pages with a server-side component
 Some test pages have a server-side component that must run using our custom server. First, install the dependencies (`npm -i`) and then start the server via `node server.js`.

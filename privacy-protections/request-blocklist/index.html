@@ -6,7 +6,7 @@
   <title>Request Blocklist test page</title>
 
   <style>
-    #notes { margin-bottom: 20px; }
+    header { margin-bottom: 20px; }
     #notes > * { margin: 0; font-style: italic; }
     table { border-collapse: collapse; }
     td { margin: 0; padding: 0px; width: 200px; height: 100px; border: 1px #000 solid; }
@@ -14,39 +14,60 @@
     .allow { background-color: red; background-image: url("./blocked-fail.png"); }
     .block { background-color: green; background-image: url("./blocked-pass.png");}
   </style>
+
+  <script>
+    const pageLoaded = new Promise(resolve => {
+      window.addEventListener('load', resolve);
+    });
+
+    const onError = async test => {
+      await pageLoaded;
+      logResult(test, 'not loaded');
+    };
+
+    const onLoad = async test => {
+      await pageLoaded;
+      logResult(test, 'loaded');
+    }
+
+    window.addEventListener('message', async ({ data: { test }}) => {
+      await pageLoaded;
+      logResult(test, 'loaded');
+    });
+  </script>
 </head>
 <body>
-  <p><a href="../index.html">[Home]</a></p>
+  <header>
+    <p><a href="../index.html">[Home]</a></p>
 
-  <p>
-    Simple test page that serves as a quick visual test to show if the Request
-    Blocklist feature is active and working.
-  </p>
+    <p>
+      Test page for the Request Blocklist feature.
+    </p>
 
-  <p>
-    Test cases are shown as green if they are blocked/allowed as expected, and
-    shown as red otherwise. Where possible, "Loaded"/"Blocked" text is also
-    shown.
-  </p>
+    <p>
+      Test cases are shown as green if they are blocked/allowed as expected, and
+      shown as red otherwise. Where possible, "Loaded"/"Blocked" text is also
+      shown.
+    </p>
 
-  <section id="notes">
-    <p><b>Notes:</b></p>
-    <ul>
-      <li>
-        Some browsers will display blocked frames as white/grey, instead of the
-        green/red background that we want. Consider that a pass for the
-        "Blocked ..." test cases, and a fail for the others.
-      </li>
-      <li>
-        For automated integration tests, prefer the
-        <a href="../request-blocking/">Request Blocking Test Page</a>. An empty
-        blocklist + suitable Request Blocklist configuration can be used to test
-        the feature.
-      </li>
-    </ul>
-  </section>
+    <p>
+      Results are also accessible through the <code>window.results</code>
+      variable, or by clicking the "Download the results" button.
+    </p>
 
-  <table>
+    <p>
+      <b>Note:</b>
+      Since blocked iframes aren't always reported by the browser, we
+      sometimes need to wait five seconds for them to timeout, at which point
+      the results will become available. This timeout can be adjusted by
+      passing the <code>timeout</code> parameter, e.g.
+      <code>?timeout=1000</code> would reduce the timeout to one second.
+    </p>
+
+    <button id="download" disabled="disabled">Download the results</button>
+  </header>
+
+  <table id="tests">
     <thead>
       <tr>
         <th>Test result</th>
@@ -57,80 +78,94 @@
       <tr>
         <td class="block">
           <img src="./loaded-fail.png?block=true"
-               class="block">
+               class="block"
+               onload="onLoad(0)"
+               onerror="onError(0)">
         </td>
-        <td>
+        <td class="description">
           Blocked first-party image
         </td>
       </tr>
       <tr>
         <td class="block">
           <img src="https://third-party.site/privacy-protections/request-blocklist/loaded-fail.png?block=true"
-               class="block">
+               class="block"
+               onload="onLoad(1)"
+               onerror="onError(1)">
         </td>
-        <td>
+        <td class="description">
           Blocked third-party image
         </td>
       </tr>
       <tr>
         <td class="block">
-          <iframe src="./loaded-fail.html?block=true"
-                  class="block">
+          <iframe src="./loaded-fail.html?block=true&test=2"
+                  class="block"
+                  onerror="onError(2)">
           </iframe>
         </td>
-        <td>
+        <td class="description">
           Blocked first-party frame
         </td>
       </tr>
       <tr>
         <td class="block">
-          <iframe src="https://third-party.site/privacy-protections/request-blocklist/loaded-fail.html?block=true"
-                  class="block">
+          <iframe src="https://third-party.site/privacy-protections/request-blocklist/loaded-fail.html?block=true&test=3"
+                  class="block"
+                  onerror="onError(3)">
           </iframe>
         </td>
-        <td>
+        <td class="description">
           Blocked third-party frame
         </td>
       </tr>
       <tr>
         <td class="allow">
           <img src="./loaded-pass.png?block=false"
-               class="allow">
+               class="allow"
+               onload="onLoad(4)"
+               onerror="onError(4)">
         </td>
-        <td>
+        <td class="description">
           Unblocked first-party image
         </td>
       </tr>
       <tr>
         <td class="allow">
-          <iframe src="./loaded-pass.html?block=false"
-                  class="allow">
+          <iframe src="./loaded-pass.html?block=false&test=5"
+                  class="allow"
+                  onerror="onError(5)">
           </iframe>
         </td>
-        <td>
+        <td class="description">
           Unblocked first-party frame
         </td>
       </tr>
       <tr>
         <td class="allow">
           <img src="https://allowlisted.third-party.site/privacy-protections/request-blocklist/loaded-pass.png?block=true"
-               class="allow">
+               class="allow"
+               onload="onLoad(6)"
+               onerror="onError(6)">
         </td>
-        <td>
+        <td class="description">
           Allowlisted third-party image
         </td>
       </tr>
       <tr>
         <td class="allow">
-          <iframe src="https://allowlisted.third-party.site/privacy-protections/request-blocklist/loaded-pass.html?block=true"
-                  class="allow">
+          <iframe src="https://allowlisted.third-party.site/privacy-protections/request-blocklist/loaded-pass.html?block=true&test=7"
+                  class="allow"
+                  onerror="onError(7)">
           </iframe>
         </td>
-        <td>
+        <td class="description">
           Allowlisted third-party frame
         </td>
       </tr>
     </tbody>
   </table>
+
+  <script src="main.js"></script>
 </body>
 </html>

@@ -18,6 +18,6 @@ acceptButton.addEventListener('click', (ev) => {
 });
 
 window.results = {
-    page: 'autoconsent',
+    page: 'autoconsent-heuristic',
     results: []
 };

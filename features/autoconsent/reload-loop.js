@@ -36,6 +36,6 @@ acceptButton.addEventListener('click', (ev) => {
 });
 
 window.results = {
-    page: 'autoconsent',
+    page: 'autoconsent-reload-loop',
     results: []
 };

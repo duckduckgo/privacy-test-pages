@@ -61,6 +61,7 @@
       flex-wrap: wrap;
       gap: 8px;
       margin-top: 8px;
+      align-items: center;
     }
     .status {
       display: grid;
@@ -98,24 +99,19 @@
 
   <h1>Video → Canvas Capture</h1>
 
-  <!--
-    Added for Android media playback investigation:
-    https://github.com/duckduckgo/Android/compare/cursor/android-media-playback-investigation-2e05
-  -->
-
   <p><strong>Goal:</strong> verify that a playing <code>&lt;video&gt;</code> can be rendered into a <code>&lt;canvas&gt;</code> (via <code>drawImage(video, ...)</code>), and that the resulting canvas output is capturable (via <code>canvas.captureStream()</code>).</p>
 
   <p><strong>Expected behavior:</strong></p>
   <ul>
     <li>When the source video is playing, the canvas shows the moving video (not a black/blank frame).</li>
     <li>The “Canvas capture preview” (a <code>&lt;video&gt;</code> fed by <code>canvas.captureStream()</code>) shows the same moving content.</li>
-    <li>No exceptions like <code>SecurityError</code> / “tainted canvas” when sampling pixels (if you use the default CORS-friendly source or a local file).</li>
+    <li>No exceptions like <code>SecurityError</code> / “tainted canvas” when sampling pixels (if you use the default CORS-friendly source, the camera, or a local file).</li>
   </ul>
 
   <h2>Test steps</h2>
   <ol>
-    <li>Tap “Load” (or pick a local file).</li>
-    <li>Press Play on the source video.</li>
+    <li>Pick a source: load URL, pick a local file, or start the camera.</li>
+    <li>Press Play on the source video (camera should auto-play if permitted).</li>
     <li>Tap “Start drawing video → canvas”. Confirm the canvas animates.</li>
     <li>Tap “Start canvas capture preview”. Confirm the preview animates.</li>
     <li>(Optional) Tap “Record 3 seconds” and play back/download the recording.</li>
@@ -135,12 +131,19 @@
           <label for="videoFile">Local file</label>
           <input id="videoFile" type="file" accept="video/*">
         </div>
+        <div>
+          <label>Camera</label>
+          <div class="buttons" style="margin:0">
+            <button id="startCameraBtn">Start camera</button>
+            <button id="stopCameraBtn" disabled>Stop camera</button>
+          </div>
+        </div>
       </div>
 
       <div class="buttons">
         <button id="loadBtn">Load</button>
         <button id="toggleMuteBtn">Unmute</button>
-        <span class="pill" id="corsPill">crossorigin=anonymous</span>
+        <span class="pill" id="sourcePill">crossorigin=anonymous</span>
       </div>
 
       <div class="status">
@@ -200,6 +203,9 @@
     const loadBtn = document.getElementById('loadBtn');
     const toggleMuteBtn = document.getElementById('toggleMuteBtn');
 
+    const startCameraBtn = document.getElementById('startCameraBtn');
+    const stopCameraBtn = document.getElementById('stopCameraBtn');
+
     const startDrawBtn = document.getElementById('startDrawBtn');
     const stopDrawBtn = document.getElementById('stopDrawBtn');
     const samplePixelBtn = document.getElementById('samplePixelBtn');
@@ -215,6 +221,7 @@
     const frameSignal = document.getElementById('frameSignal');
     const captureState = document.getElementById('captureState');
     const recorderState = document.getElementById('recorderState');
+    const sourcePill = document.getElementById('sourcePill');
     const logEl = document.getElementById('log');
 
     let rafId = null;
@@ -222,6 +229,9 @@
     let lastSignal = null;
     let canvasStream = null;
     let recorder = null;
+
+    let cameraStream = null;
+    let fileObjectUrl = null;
 
     function log(...args) {
       const line = args.map(a => (typeof a === 'string' ? a : JSON.stringify(a))).join(' ');
@@ -241,9 +251,80 @@
       captureState.textContent = text;
     }
 
+    function setSourcePill(text) {
+      sourcePill.textContent = text;
+    }
+
+    function revokeFileObjectUrlIfAny() {
+      if (fileObjectUrl) {
+        try { URL.revokeObjectURL(fileObjectUrl); } catch (e) { /* ignore */ }
+        fileObjectUrl = null;
+      }
+    }
+
+    function stopCamera() {
+      if (cameraStream) {
+        for (const track of cameraStream.getTracks()) track.stop();
+      }
+      cameraStream = null;
+      stopCameraBtn.disabled = true;
+      startCameraBtn.disabled = false;
+
+      if (sourceVideo.srcObject) {
+        sourceVideo.srcObject = null;
+      }
+    }
+
+    async function startCamera() {
+      stopDrawing();
+      stopCapture();
+      revokeFileObjectUrlIfAny();
+
+      downloadLink.style.display = 'none';
+      downloadLink.href = '#';
+
+      try {
+        if (!navigator.mediaDevices?.getUserMedia) {
+          setVideoState('getUserMedia not available');
+          log('getUserMedia not available');
+          return;
+        }
+
+        stopCamera();
+
+        cameraStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'user' },
+          audio: false
+        });
+
+        sourceVideo.pause();
+        sourceVideo.removeAttribute('src');
+        sourceVideo.removeAttribute('crossorigin');
+        sourceVideo.srcObject = cameraStream;
+
+        sourceVideo.muted = true;
+        updateMuteUi();
+
+        setSourcePill('srcObject=camera');
+
+        await sourceVideo.play();
+        setVideoState('Camera started');
+        updateVideoMeta();
+
+        stopCameraBtn.disabled = false;
+        startCameraBtn.disabled = true;
+
+        log('Camera started');
+      } catch (e) {
+        stopCamera();
+        setVideoState('Camera error (see log)');
+        log('Camera start failed:', String(e && (e.stack || e)));
+      }
+    }
+
     function updateVideoMeta() {
       const rs = sourceVideo.readyState;
-      const st = sourceVideo.currentSrc ? sourceVideo.currentSrc : '(no src)';
+      const st = sourceVideo.currentSrc ? sourceVideo.currentSrc : (sourceVideo.srcObject ? '(srcObject)' : '(no src)');
       const dims = (sourceVideo.videoWidth && sourceVideo.videoHeight) ? `${sourceVideo.videoWidth}x${sourceVideo.videoHeight}` : '—';
       videoMeta.textContent = `readyState=${rs}, dims=${dims}`;
       log(`video src=${st}`);
@@ -351,26 +432,41 @@
     }
 
     function setSourceFromUrl(url) {
+      stopDrawing();
+      stopCapture();
+      stopCamera();
+      revokeFileObjectUrlIfAny();
+
       downloadLink.style.display = 'none';
       downloadLink.href = '#';
 
       // CORS: must be set before src assignment for drawImage/getImageData to work with cross-origin media.
       sourceVideo.crossOrigin = 'anonymous';
+      sourceVideo.srcObject = null;
       sourceVideo.src = url;
       sourceVideo.load();
+      setSourcePill('crossorigin=anonymous');
       setVideoState('Loaded URL (press Play)');
       log(`Set source URL: ${url}`);
     }
 
     function setSourceFromFile(file) {
+      stopDrawing();
+      stopCapture();
+      stopCamera();
+
       downloadLink.style.display = 'none';
       downloadLink.href = '#';
 
-      const objUrl = URL.createObjectURL(file);
+      revokeFileObjectUrlIfAny();
+      fileObjectUrl = URL.createObjectURL(file);
+
       // For blob URLs created by this document, crossOrigin is not needed.
       sourceVideo.removeAttribute('crossorigin');
-      sourceVideo.src = objUrl;
+      sourceVideo.srcObject = null;
+      sourceVideo.src = fileObjectUrl;
       sourceVideo.load();
+      setSourcePill('src=blob:' );
       setVideoState(`Loaded file: ${file.name} (press Play)`);
       log(`Set source file: name=${file.name}, type=${file.type}, size=${file.size}`);
     }
@@ -392,6 +488,15 @@
       const file = videoFile.files && videoFile.files[0];
       if (!file) return;
       setSourceFromFile(file);
+    });
+
+    startCameraBtn.addEventListener('click', () => startCamera());
+    stopCameraBtn.addEventListener('click', () => {
+      stopCamera();
+      setVideoState('Camera stopped');
+      setSourcePill('—');
+      updateVideoMeta();
+      log('Camera stopped');
     });
 
     toggleMuteBtn.addEventListener('click', () => {

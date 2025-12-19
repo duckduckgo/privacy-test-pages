@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Blob URL Navigation Tests</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    h1 { color: #333; }
+    h2 { color: #555; margin-top: 2em; }
+    .test-section {
+      background: #f5f5f5;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+    .test-description {
+      color: #666;
+      margin-bottom: 15px;
+    }
+    button {
+      background: #3969EF;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      margin: 5px 5px 5px 0;
+    }
+    button:hover {
+      background: #2b4fc7;
+    }
+    button:active {
+      background: #1e3a8a;
+    }
+    .result {
+      margin-top: 15px;
+      padding: 10px;
+      border-radius: 4px;
+    }
+    .result.success {
+      background: #d4edda;
+      color: #155724;
+    }
+    .result.fail {
+      background: #f8d7da;
+      color: #721c24;
+    }
+    .info-box {
+      background: #e7f3ff;
+      border-left: 4px solid #3969EF;
+      padding: 15px;
+      margin: 20px 0;
+    }
+    iframe {
+      border: 2px solid #ccc;
+      border-radius: 4px;
+      width: 100%;
+      height: 200px;
+      margin-top: 10px;
+    }
+    #iframe-container {
+      margin-top: 15px;
+    }
+    code {
+      background: #e9ecef;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: "SF Mono", Monaco, monospace;
+    }
+  </style>
+</head>
+<body>
+  <p><a href="../../index.html">[Home]</a> <a href="../index.html">[Features]</a></p>
+
+  <h1>Blob URL Navigation Tests</h1>
+
+  <div class="info-box">
+    <strong>Purpose:</strong> These tests verify that <code>blob:</code> URL navigations intended for 
+    in-page rendering (not downloads) work correctly. This is important for sites that use blob URLs 
+    in payment/purchase flows, document viewers, or other interactive features.
+    <br><br>
+    <strong>Expected behavior:</strong> All tests should render HTML content from the blob URL, 
+    <em>not</em> trigger a download or show a blank page.
+    <br><br>
+    <strong>Related iOS fix:</strong> <a href="https://github.com/duckduckgo/ddg-workflow/pull/58" target="_blank">ddg-workflow PR #58</a>
+  </div>
+
+  <!-- Test 1: Navigate main frame to blob URL -->
+  <div class="test-section">
+    <h2>Test 1: Main Frame Navigation</h2>
+    <p class="test-description">
+      Clicking this button creates a blob URL containing HTML and navigates the current page to it.
+      This simulates scenarios like payment confirmation pages that use blob URLs.
+    </p>
+    <button id="test-main-frame">Navigate to Blob URL</button>
+  </div>
+
+  <!-- Test 2: window.open with blob URL -->
+  <div class="test-section">
+    <h2>Test 2: Window.open with Blob URL</h2>
+    <p class="test-description">
+      Opens a new window/tab with a blob URL. The new window should display the HTML content.
+    </p>
+    <button id="test-window-open">Open Blob URL in New Window</button>
+    <div id="window-open-result" class="result" style="display:none;"></div>
+  </div>
+
+  <!-- Test 3: Iframe with blob URL -->
+  <div class="test-section">
+    <h2>Test 3: Iframe with Blob URL</h2>
+    <p class="test-description">
+      Creates an iframe with a blob URL src. The iframe should render the HTML content below.
+    </p>
+    <button id="test-iframe">Load Blob URL in Iframe</button>
+    <div id="iframe-container"></div>
+  </div>
+
+  <!-- Test 4: Simulated Purchase Flow -->
+  <div class="test-section">
+    <h2>Test 4: Simulated Purchase Flow</h2>
+    <p class="test-description">
+      Simulates a multi-step flow similar to Nintendo's purchase process, where a blob URL
+      is used to display a confirmation/receipt page.
+    </p>
+    <button id="test-purchase-flow">Start Purchase Flow</button>
+    <div id="purchase-result" class="result" style="display:none;"></div>
+  </div>
+
+  <!-- Test 5: Blob URL with various content types -->
+  <div class="test-section">
+    <h2>Test 5: Blob URL Content Types</h2>
+    <p class="test-description">
+      Tests blob URLs with different MIME types that should render, not download.
+    </p>
+    <button id="test-text-html">text/html blob</button>
+    <button id="test-application-xhtml">application/xhtml+xml blob</button>
+    <div id="content-type-container"></div>
+  </div>
+
+  <script>
+    // Helper function to create a blob URL with HTML content
+    function createBlobURL(htmlContent, mimeType = 'text/html') {
+      const blob = new Blob([htmlContent], { type: mimeType });
+      return URL.createObjectURL(blob);
+    }
+
+    // Generate test HTML content
+    function generateTestPage(title, message, bgColor = '#d4edda') {
+      return `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>${title}</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 20px;
+      text-align: center;
+    }
+    .success-box {
+      background: ${bgColor};
+      border-radius: 12px;
+      padding: 30px;
+      margin: 20px 0;
+    }
+    h1 { color: #155724; }
+    .checkmark {
+      font-size: 64px;
+      margin-bottom: 20px;
+    }
+    .back-link {
+      display: inline-block;
+      margin-top: 20px;
+      color: #3969EF;
+    }
+  </style>
+</head>
+<body>
+  <div class="success-box">
+    <div class="checkmark">✓</div>
+    <h1>${title}</h1>
+    <p>${message}</p>
+    <p><strong>Blob URL navigation worked correctly!</strong></p>
+    <p style="color: #666; font-size: 14px;">
+      If you see this page, the browser correctly allowed the blob: URL navigation 
+      to render instead of forcing a download.
+    </p>
+  </div>
+  <a href="javascript:history.back()" class="back-link">← Go Back</a>
+</body>
+</html>`;
+    }
+
+    // Test 1: Main frame navigation
+    document.getElementById('test-main-frame').addEventListener('click', function() {
+      const html = generateTestPage(
+        'Main Frame Navigation Success',
+        'You successfully navigated to a blob: URL in the main frame.'
+      );
+      const blobURL = createBlobURL(html);
+      window.location.href = blobURL;
+    });
+
+    // Test 2: window.open
+    document.getElementById('test-window-open').addEventListener('click', function() {
+      const html = generateTestPage(
+        'New Window Success',
+        'This window was opened with a blob: URL via window.open().'
+      );
+      const blobURL = createBlobURL(html);
+      const newWindow = window.open(blobURL, '_blank');
+      
+      const resultDiv = document.getElementById('window-open-result');
+      resultDiv.style.display = 'block';
+      
+      if (newWindow) {
+        resultDiv.className = 'result success';
+        resultDiv.textContent = 'New window opened. Check if it displays the success message (not a blank page or download).';
+      } else {
+        resultDiv.className = 'result fail';
+        resultDiv.textContent = 'Popup was blocked. Please allow popups and try again.';
+      }
+    });
+
+    // Test 3: Iframe
+    document.getElementById('test-iframe').addEventListener('click', function() {
+      const html = generateTestPage(
+        'Iframe Success',
+        'This iframe loaded a blob: URL successfully.',
+        '#e7f3ff'
+      );
+      const blobURL = createBlobURL(html);
+      
+      const container = document.getElementById('iframe-container');
+      container.innerHTML = '';
+      
+      const iframe = document.createElement('iframe');
+      iframe.src = blobURL;
+      iframe.onload = function() {
+        console.log('Iframe loaded successfully');
+      };
+      iframe.onerror = function() {
+        console.error('Iframe failed to load');
+      };
+      container.appendChild(iframe);
+    });
+
+    // Test 4: Simulated purchase flow
+    document.getElementById('test-purchase-flow').addEventListener('click', function() {
+      const resultDiv = document.getElementById('purchase-result');
+      resultDiv.style.display = 'block';
+      resultDiv.className = 'result';
+      resultDiv.style.background = '#fff3cd';
+      resultDiv.style.color = '#856404';
+      resultDiv.innerHTML = 'Processing purchase... <em>(simulating async operation)</em>';
+      
+      // Simulate async purchase processing
+      setTimeout(function() {
+        const receiptHtml = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Purchase Complete</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      max-width: 500px;
+      margin: 30px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .receipt {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .header {
+      text-align: center;
+      border-bottom: 2px dashed #ddd;
+      padding-bottom: 20px;
+      margin-bottom: 20px;
+    }
+    .header h1 { margin: 0; color: #333; }
+    .header p { color: #666; margin: 5px 0 0; }
+    .item {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid #eee;
+    }
+    .total {
+      display: flex;
+      justify-content: space-between;
+      padding: 15px 0;
+      font-weight: bold;
+      font-size: 1.2em;
+    }
+    .success-badge {
+      background: #d4edda;
+      color: #155724;
+      padding: 15px;
+      border-radius: 8px;
+      text-align: center;
+      margin-top: 20px;
+    }
+    .order-id {
+      font-family: monospace;
+      background: #f8f9fa;
+      padding: 8px 12px;
+      border-radius: 4px;
+      display: inline-block;
+      margin-top: 10px;
+    }
+    .back-btn {
+      display: block;
+      text-align: center;
+      margin-top: 20px;
+      color: #3969EF;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="receipt">
+    <div class="header">
+      <h1>🎮 Purchase Complete</h1>
+      <p>Thank you for your order!</p>
+    </div>
+    
+    <div class="item">
+      <span>Digital Game Download</span>
+      <span>$59.99</span>
+    </div>
+    <div class="item">
+      <span>Tax</span>
+      <span>$5.40</span>
+    </div>
+    <div class="total">
+      <span>Total</span>
+      <span>$65.39</span>
+    </div>
+    
+    <div class="success-badge">
+      <strong>✓ Blob URL Navigation Working!</strong>
+      <p style="margin: 10px 0 0; font-size: 14px;">
+        This receipt page was loaded via a blob: URL, simulating 
+        real-world purchase flows like Nintendo's eShop.
+      </p>
+      <div class="order-id">Order #DDG-${Date.now()}</div>
+    </div>
+  </div>
+  <a href="javascript:history.back()" class="back-btn">← Return to Test Page</a>
+</body>
+</html>`;
+        
+        const blobURL = createBlobURL(receiptHtml);
+        window.location.href = blobURL;
+      }, 1500);
+    });
+
+    // Test 5: Different content types
+    document.getElementById('test-text-html').addEventListener('click', function() {
+      const html = generateTestPage(
+        'text/html Content Type',
+        'Blob created with MIME type: text/html'
+      );
+      const blobURL = createBlobURL(html, 'text/html');
+      
+      const container = document.getElementById('content-type-container');
+      container.innerHTML = '';
+      const iframe = document.createElement('iframe');
+      iframe.src = blobURL;
+      container.appendChild(iframe);
+    });
+
+    document.getElementById('test-application-xhtml').addEventListener('click', function() {
+      const xhtml = `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <title>XHTML Blob Test</title>
+  <style type="text/css">
+    body { font-family: sans-serif; padding: 20px; text-align: center; }
+    .box { background: #e7f3ff; padding: 20px; border-radius: 8px; }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h1>XHTML Content Type Success</h1>
+    <p>Blob created with MIME type: application/xhtml+xml</p>
+    <p><strong>Blob URL navigation worked correctly!</strong></p>
+  </div>
+</body>
+</html>`;
+      const blobURL = createBlobURL(xhtml, 'application/xhtml+xml');
+      
+      const container = document.getElementById('content-type-container');
+      container.innerHTML = '';
+      const iframe = document.createElement('iframe');
+      iframe.src = blobURL;
+      container.appendChild(iframe);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Video → Canvas Capture</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.4;
+      margin: 16px;
+      color: #111;
+    }
+    code, pre, textarea {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: flex-start;
+    }
+    .col {
+      flex: 1 1 360px;
+      min-width: 320px;
+    }
+    .panel {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 12px;
+    }
+    video, canvas {
+      width: 100%;
+      max-width: 640px;
+      background: #000;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+    }
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin: 8px 0 0;
+    }
+    .controls > div {
+      display: grid;
+      grid-template-columns: 160px 1fr;
+      gap: 10px;
+      align-items: center;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 6px 8px;
+    }
+    button {
+      padding: 8px 10px;
+      cursor: pointer;
+    }
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .status {
+      display: grid;
+      grid-template-columns: 160px 1fr;
+      gap: 10px;
+      align-items: baseline;
+      margin-top: 8px;
+    }
+    .status strong {
+      font-weight: 650;
+    }
+    pre {
+      white-space: pre-wrap;
+      word-break: break-word;
+      background: #fafafa;
+      border: 1px solid #eee;
+      border-radius: 8px;
+      padding: 10px;
+      min-height: 140px;
+      max-height: 260px;
+      overflow: auto;
+    }
+    .pill {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: #f3f4f6;
+      border: 1px solid #e5e7eb;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <p><a href="../index.html">[Home]</a></p>
+
+  <h1>Video → Canvas Capture</h1>
+
+  <!--
+    Added for Android media playback investigation:
+    https://github.com/duckduckgo/Android/compare/cursor/android-media-playback-investigation-2e05
+  -->
+
+  <p><strong>Goal:</strong> verify that a playing <code>&lt;video&gt;</code> can be rendered into a <code>&lt;canvas&gt;</code> (via <code>drawImage(video, ...)</code>), and that the resulting canvas output is capturable (via <code>canvas.captureStream()</code>).</p>
+
+  <p><strong>Expected behavior:</strong></p>
+  <ul>
+    <li>When the source video is playing, the canvas shows the moving video (not a black/blank frame).</li>
+    <li>The “Canvas capture preview” (a <code>&lt;video&gt;</code> fed by <code>canvas.captureStream()</code>) shows the same moving content.</li>
+    <li>No exceptions like <code>SecurityError</code> / “tainted canvas” when sampling pixels (if you use the default CORS-friendly source or a local file).</li>
+  </ul>
+
+  <h2>Test steps</h2>
+  <ol>
+    <li>Tap “Load” (or pick a local file).</li>
+    <li>Press Play on the source video.</li>
+    <li>Tap “Start drawing video → canvas”. Confirm the canvas animates.</li>
+    <li>Tap “Start canvas capture preview”. Confirm the preview animates.</li>
+    <li>(Optional) Tap “Record 3 seconds” and play back/download the recording.</li>
+  </ol>
+
+  <div class="row">
+    <div class="col panel">
+      <h2>Source video</h2>
+      <video id="sourceVideo" controls playsinline muted></video>
+
+      <div class="controls">
+        <div>
+          <label for="videoUrl">Video URL</label>
+          <input id="videoUrl" type="text" spellcheck="false" value="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4">
+        </div>
+        <div>
+          <label for="videoFile">Local file</label>
+          <input id="videoFile" type="file" accept="video/*">
+        </div>
+      </div>
+
+      <div class="buttons">
+        <button id="loadBtn">Load</button>
+        <button id="toggleMuteBtn">Unmute</button>
+        <span class="pill" id="corsPill">crossorigin=anonymous</span>
+      </div>
+
+      <div class="status">
+        <strong>Video state</strong>
+        <span id="videoState">Not loaded</span>
+        <strong>Video metadata</strong>
+        <span id="videoMeta">—</span>
+      </div>
+    </div>
+
+    <div class="col panel">
+      <h2>Canvas output</h2>
+      <canvas id="canvas" width="640" height="360"></canvas>
+      <div class="buttons">
+        <button id="startDrawBtn">Start drawing video → canvas</button>
+        <button id="stopDrawBtn" disabled>Stop drawing</button>
+        <button id="samplePixelBtn">Sample pixel (taint check)</button>
+      </div>
+      <div class="status">
+        <strong>Canvas draw</strong>
+        <span id="drawState">Idle</span>
+        <strong>Last frame signal</strong>
+        <span id="frameSignal">—</span>
+      </div>
+    </div>
+
+    <div class="col panel">
+      <h2>Canvas capture preview</h2>
+      <video id="capturePreview" controls playsinline muted></video>
+      <div class="buttons">
+        <button id="startCaptureBtn">Start canvas capture preview</button>
+        <button id="stopCaptureBtn" disabled>Stop capture</button>
+        <button id="record3sBtn">Record 3 seconds</button>
+        <a id="downloadLink" href="#" download="canvas-capture.webm" style="display:none">Download recording</a>
+      </div>
+      <div class="status">
+        <strong>Capture state</strong>
+        <span id="captureState">Idle</span>
+        <strong>Recorder</strong>
+        <span id="recorderState">—</span>
+      </div>
+    </div>
+  </div>
+
+  <h2>Log</h2>
+  <pre id="log"></pre>
+
+  <script>
+    const sourceVideo = document.getElementById('sourceVideo');
+    const capturePreview = document.getElementById('capturePreview');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d', { alpha: false });
+
+    const videoUrl = document.getElementById('videoUrl');
+    const videoFile = document.getElementById('videoFile');
+
+    const loadBtn = document.getElementById('loadBtn');
+    const toggleMuteBtn = document.getElementById('toggleMuteBtn');
+
+    const startDrawBtn = document.getElementById('startDrawBtn');
+    const stopDrawBtn = document.getElementById('stopDrawBtn');
+    const samplePixelBtn = document.getElementById('samplePixelBtn');
+
+    const startCaptureBtn = document.getElementById('startCaptureBtn');
+    const stopCaptureBtn = document.getElementById('stopCaptureBtn');
+    const record3sBtn = document.getElementById('record3sBtn');
+    const downloadLink = document.getElementById('downloadLink');
+
+    const videoState = document.getElementById('videoState');
+    const videoMeta = document.getElementById('videoMeta');
+    const drawState = document.getElementById('drawState');
+    const frameSignal = document.getElementById('frameSignal');
+    const captureState = document.getElementById('captureState');
+    const recorderState = document.getElementById('recorderState');
+    const logEl = document.getElementById('log');
+
+    let rafId = null;
+    let vfcHandle = null;
+    let lastSignal = null;
+    let canvasStream = null;
+    let recorder = null;
+
+    function log(...args) {
+      const line = args.map(a => (typeof a === 'string' ? a : JSON.stringify(a))).join(' ');
+      logEl.textContent += `${new Date().toISOString()} ${line}\n`;
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function setVideoState(text) {
+      videoState.textContent = text;
+    }
+
+    function setDrawState(text) {
+      drawState.textContent = text;
+    }
+
+    function setCaptureState(text) {
+      captureState.textContent = text;
+    }
+
+    function updateVideoMeta() {
+      const rs = sourceVideo.readyState;
+      const st = sourceVideo.currentSrc ? sourceVideo.currentSrc : '(no src)';
+      const dims = (sourceVideo.videoWidth && sourceVideo.videoHeight) ? `${sourceVideo.videoWidth}x${sourceVideo.videoHeight}` : '—';
+      videoMeta.textContent = `readyState=${rs}, dims=${dims}`;
+      log(`video src=${st}`);
+      log(`video readyState=${rs}, dims=${dims}`);
+    }
+
+    function stopDrawing() {
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
+        rafId = null;
+      }
+      if (vfcHandle !== null && typeof sourceVideo.cancelVideoFrameCallback === 'function') {
+        sourceVideo.cancelVideoFrameCallback(vfcHandle);
+        vfcHandle = null;
+      }
+      setDrawState('Stopped');
+      startDrawBtn.disabled = false;
+      stopDrawBtn.disabled = true;
+      log('Stopped drawing loop');
+    }
+
+    function drawOnce() {
+      try {
+        // Only attempt draw when metadata is available.
+        if (sourceVideo.readyState < 2) return;
+
+        // Draw video into canvas, scaling to fit.
+        ctx.drawImage(sourceVideo, 0, 0, canvas.width, canvas.height);
+
+        // Compute a cheap “frame signal”: sum of a few pixels. Useful for detecting frozen/black frames.
+        const sample = ctx.getImageData(0, 0, 2, 2).data;
+        const sum = sample[0] + sample[1] + sample[2] + sample[4] + sample[5] + sample[6];
+        lastSignal = sum;
+        frameSignal.textContent = `signal=${sum}`;
+      } catch (e) {
+        log('drawOnce error:', String(e && (e.stack || e)));
+        frameSignal.textContent = `error=${String(e)}`;
+        stopDrawing();
+      }
+    }
+
+    function startDrawing() {
+      stopDrawing();
+      setDrawState('Running');
+      startDrawBtn.disabled = true;
+      stopDrawBtn.disabled = false;
+
+      const useVfc = typeof sourceVideo.requestVideoFrameCallback === 'function';
+      log(`Starting draw loop (requestVideoFrameCallback=${useVfc})`);
+
+      if (useVfc) {
+        const onFrame = () => {
+          drawOnce();
+          vfcHandle = sourceVideo.requestVideoFrameCallback(onFrame);
+        };
+        vfcHandle = sourceVideo.requestVideoFrameCallback(onFrame);
+        return;
+      }
+
+      const loop = () => {
+        drawOnce();
+        rafId = requestAnimationFrame(loop);
+      };
+      rafId = requestAnimationFrame(loop);
+    }
+
+    function stopCapture() {
+      try {
+        capturePreview.pause();
+      } catch (e) {
+        // ignore
+      }
+      capturePreview.srcObject = null;
+      if (canvasStream) {
+        for (const t of canvasStream.getTracks()) t.stop();
+      }
+      canvasStream = null;
+      setCaptureState('Stopped');
+      startCaptureBtn.disabled = false;
+      stopCaptureBtn.disabled = true;
+      log('Stopped canvas capture stream');
+    }
+
+    function startCapture() {
+      stopCapture();
+      try {
+        const fps = 30;
+        canvasStream = canvas.captureStream(fps);
+        capturePreview.srcObject = canvasStream;
+        capturePreview.muted = true;
+        capturePreview.play().catch(() => {
+          // Playback might require user gesture; controls are available.
+        });
+        setCaptureState(`Streaming (${fps} fps requested)`);
+        startCaptureBtn.disabled = true;
+        stopCaptureBtn.disabled = false;
+
+        const tracks = canvasStream.getVideoTracks();
+        const settings = tracks[0] ? tracks[0].getSettings() : null;
+        log('Started canvas.captureStream()', { tracks: tracks.length, settings });
+      } catch (e) {
+        setCaptureState(`Error: ${String(e)}`);
+        log('captureStream error:', String(e && (e.stack || e)));
+      }
+    }
+
+    function setSourceFromUrl(url) {
+      downloadLink.style.display = 'none';
+      downloadLink.href = '#';
+
+      // CORS: must be set before src assignment for drawImage/getImageData to work with cross-origin media.
+      sourceVideo.crossOrigin = 'anonymous';
+      sourceVideo.src = url;
+      sourceVideo.load();
+      setVideoState('Loaded URL (press Play)');
+      log(`Set source URL: ${url}`);
+    }
+
+    function setSourceFromFile(file) {
+      downloadLink.style.display = 'none';
+      downloadLink.href = '#';
+
+      const objUrl = URL.createObjectURL(file);
+      // For blob URLs created by this document, crossOrigin is not needed.
+      sourceVideo.removeAttribute('crossorigin');
+      sourceVideo.src = objUrl;
+      sourceVideo.load();
+      setVideoState(`Loaded file: ${file.name} (press Play)`);
+      log(`Set source file: name=${file.name}, type=${file.type}, size=${file.size}`);
+    }
+
+    function updateMuteUi() {
+      toggleMuteBtn.textContent = sourceVideo.muted ? 'Unmute' : 'Mute';
+    }
+
+    loadBtn.addEventListener('click', () => {
+      const url = videoUrl.value.trim();
+      if (!url) {
+        log('No URL provided');
+        return;
+      }
+      setSourceFromUrl(url);
+    });
+
+    videoFile.addEventListener('change', () => {
+      const file = videoFile.files && videoFile.files[0];
+      if (!file) return;
+      setSourceFromFile(file);
+    });
+
+    toggleMuteBtn.addEventListener('click', () => {
+      sourceVideo.muted = !sourceVideo.muted;
+      updateMuteUi();
+    });
+
+    startDrawBtn.addEventListener('click', () => startDrawing());
+    stopDrawBtn.addEventListener('click', () => stopDrawing());
+
+    samplePixelBtn.addEventListener('click', () => {
+      try {
+        const d = ctx.getImageData(Math.floor(canvas.width / 2), Math.floor(canvas.height / 2), 1, 1).data;
+        log(`getImageData OK: rgba(${d[0]},${d[1]},${d[2]},${d[3]})`);
+      } catch (e) {
+        log('getImageData failed (likely tainted canvas or draw failure):', String(e && (e.stack || e)));
+      }
+    });
+
+    startCaptureBtn.addEventListener('click', () => startCapture());
+    stopCaptureBtn.addEventListener('click', () => stopCapture());
+
+    record3sBtn.addEventListener('click', async () => {
+      downloadLink.style.display = 'none';
+      downloadLink.href = '#';
+      recorderState.textContent = '—';
+
+      try {
+        if (!canvasStream) startCapture();
+        if (!canvasStream) {
+          recorderState.textContent = 'No stream available';
+          return;
+        }
+
+        if (typeof MediaRecorder === 'undefined') {
+          recorderState.textContent = 'MediaRecorder not supported';
+          log('MediaRecorder not supported in this environment');
+          return;
+        }
+
+        const chunks = [];
+        const options = {};
+
+        // Prefer vp8 webm; fallback to UA defaults.
+        if (MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported('video/webm;codecs=vp8')) {
+          options.mimeType = 'video/webm;codecs=vp8';
+        }
+
+        recorder = new MediaRecorder(canvasStream, options);
+        recorder.ondataavailable = (e) => {
+          if (e.data && e.data.size) chunks.push(e.data);
+        };
+        recorder.onerror = (e) => {
+          log('MediaRecorder error:', String(e && (e.error || e)));
+        };
+
+        const done = new Promise((resolve) => {
+          recorder.onstop = resolve;
+        });
+
+        recorder.start();
+        recorderState.textContent = `Recording (${recorder.mimeType || 'default'})`;
+        log('MediaRecorder started', { mimeType: recorder.mimeType });
+
+        await new Promise(r => setTimeout(r, 3000));
+        recorder.stop();
+        await done;
+
+        const blob = new Blob(chunks, { type: recorder.mimeType || 'video/webm' });
+        const url = URL.createObjectURL(blob);
+        downloadLink.href = url;
+        downloadLink.style.display = 'inline';
+        recorderState.textContent = `Recorded ${Math.round(blob.size / 1024)} KiB`;
+        log('MediaRecorder stopped', { bytes: blob.size });
+      } catch (e) {
+        recorderState.textContent = `Error: ${String(e)}`;
+        log('Record failed:', String(e && (e.stack || e)));
+      }
+    });
+
+    sourceVideo.addEventListener('loadedmetadata', () => {
+      updateVideoMeta();
+      setVideoState('Metadata loaded (press Play)');
+
+      // Resize canvas to match video aspect ratio (keeping reasonable max width).
+      if (sourceVideo.videoWidth && sourceVideo.videoHeight) {
+        const maxW = 640;
+        const w = Math.min(maxW, sourceVideo.videoWidth);
+        const h = Math.round(w * (sourceVideo.videoHeight / sourceVideo.videoWidth));
+        canvas.width = w;
+        canvas.height = h;
+        log(`Canvas resized to ${w}x${h}`);
+      }
+    });
+
+    sourceVideo.addEventListener('error', () => {
+      const err = sourceVideo.error;
+      log('Video element error:', err ? `code=${err.code}` : '(unknown)');
+      setVideoState('Error loading video (see log)');
+    });
+
+    sourceVideo.addEventListener('play', () => {
+      setVideoState('Playing');
+      updateVideoMeta();
+    });
+
+    sourceVideo.addEventListener('pause', () => {
+      setVideoState('Paused');
+    });
+
+    // Initialize with default URL.
+    updateMuteUi();
+    setSourceFromUrl(videoUrl.value.trim());
+    log('Ready');
+  </script>
+</body>
+</html>

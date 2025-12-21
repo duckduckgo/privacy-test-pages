@@ -293,6 +293,7 @@
     const scriptPlayOnLoad = getBoolParam('scriptplayonload', scriptPlayMode && (autoDraw || autoCapture));
     const scriptPlayMuted = getBoolParam('scriptplaymuted', getBoolParam('scriptplaymute', false));
     const autoCamera = getBoolParam('autocamera', false);
+    const cameraMuted = getBoolParam('cameramuted', getBoolParam('cameramute', true));
 
     function log(...args) {
       const line = args.map(a => (typeof a === 'string' ? a : JSON.stringify(a))).join(' ');
@@ -473,8 +474,10 @@
         sourceVideo.removeAttribute('crossorigin');
         sourceVideo.srcObject = cameraStream;
 
-        sourceVideo.muted = true;
-        updateMuteUi();
+        if (cameraMuted) {
+          sourceVideo.muted = true;
+          updateMuteUi();
+        }
 
         setSourcePill('srcObject=camera');
 

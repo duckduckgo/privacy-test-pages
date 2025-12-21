@@ -285,6 +285,13 @@
       if (['0', 'false', 'no', 'off'].includes(s)) return false;
       return defaultValue;
     }
+    function parseBoolString(v, defaultValue) {
+      if (v === null || v === undefined) return defaultValue;
+      const s = String(v).trim().toLowerCase();
+      if (['1', 'true', 'yes', 'on'].includes(s)) return true;
+      if (['0', 'false', 'no', 'off'].includes(s)) return false;
+      return defaultValue;
+    }
 
     const autoplayMode = getBoolParam('autoplay', false);
     const autoDraw = getBoolParam('autodraw', autoplayMode);
@@ -293,7 +300,8 @@
     const scriptPlayOnLoad = getBoolParam('scriptplayonload', scriptPlayMode && (autoDraw || autoCapture));
     const scriptPlayMuted = getBoolParam('scriptplaymuted', getBoolParam('scriptplaymute', false));
     const autoCamera = getBoolParam('autocamera', false);
-    const cameraMuted = getBoolParam('cameramuted', getBoolParam('cameramute', true));
+    const cameraMutedRaw = params.get('cameramuted') ?? params.get('cameramute');
+    const cameraMuted = parseBoolString(cameraMutedRaw, true);
 
     function log(...args) {
       const line = args.map(a => (typeof a === 'string' ? a : JSON.stringify(a))).join(' ');
@@ -474,10 +482,14 @@
         sourceVideo.removeAttribute('crossorigin');
         sourceVideo.srcObject = cameraStream;
 
-        if (cameraMuted) {
+        // Camera streams here are audio:false, but we still allow muting toggles for autoplay/policy testing.
+        // If cameramuted/cameramute is explicitly provided, set it to that value; otherwise default to muted=true.
+        if (cameraMutedRaw === null) {
           sourceVideo.muted = true;
-          updateMuteUi();
+        } else {
+          sourceVideo.muted = cameraMuted;
         }
+        updateMuteUi();
 
         setSourcePill('srcObject=camera');
 

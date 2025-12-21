@@ -284,6 +284,8 @@
     const autoDraw = getBoolParam('autodraw', autoplayMode);
     const autoCapture = getBoolParam('autocapture', autoplayMode);
     const scriptPlayMode = getBoolParam('scriptplay', false);
+    const scriptPlayOnLoad = getBoolParam('scriptplayonload', scriptPlayMode && (autoDraw || autoCapture));
+    const scriptPlayMuted = getBoolParam('scriptplaymuted', false);
 
     function log(...args) {
       const line = args.map(a => (typeof a === 'string' ? a : JSON.stringify(a))).join(' ');
@@ -369,14 +371,20 @@
     }
 
     async function attemptScriptPlay(reason) {
-      // In scriptPlay mode we intentionally do NOT force muted=true.
-      // This should exercise the same code-path as user-gesture initiated play() calls.
+      // In scriptPlay mode we intentionally do NOT force muted=true by default.
+      // If you want a "scripted play but muted" variant (more likely to pass autoplay policies),
+      // use ?scriptplaymuted=1.
       try {
         const hasSource = Boolean(sourceVideo.srcObject) || Boolean(sourceVideo.currentSrc) || Boolean(sourceVideo.src);
         if (!hasSource) {
           setVideoState('No source loaded');
           log(`Scripted play() ignored (${reason}): no source`);
           return;
+        }
+
+        if (scriptPlayMuted) {
+          sourceVideo.muted = true;
+          updateMuteUi();
         }
 
         // If we have a URL/blob src, ensure a load has been kicked and wait briefly for readiness.
@@ -813,6 +821,10 @@
       scriptPlayBtn.style.display = 'none';
     }
     setSourceFromUrl(videoUrl.value.trim());
+    if (scriptPlayMode && scriptPlayOnLoad) {
+      // Note: most browsers treat this as an autoplay attempt and may block it unless muted.
+      attemptScriptPlay('pageload');
+    }
     log('Ready');
   </script>
 </body>

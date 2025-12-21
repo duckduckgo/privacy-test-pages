@@ -300,7 +300,10 @@
     const scriptPlayOnLoad = getBoolParam('scriptplayonload', scriptPlayMode && (autoDraw || autoCapture));
     const scriptPlayMuted = getBoolParam('scriptplaymuted', getBoolParam('scriptplaymute', false));
     const autoCamera = getBoolParam('autocamera', false);
-    const cameraMutedRaw = params.get('cameramuted') ?? params.get('cameramute');
+    const cameraMutedRawValue =
+      (params.get('cameramuted') && params.get('cameramuted').trim() !== '' ? params.get('cameramuted') : null) ??
+      (params.get('cameramute') && params.get('cameramute').trim() !== '' ? params.get('cameramute') : null);
+    const cameraMutedRaw = cameraMutedRawValue;
     const cameraMuted = parseBoolString(cameraMutedRaw, true);
 
     function log(...args) {

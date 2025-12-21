@@ -134,11 +134,17 @@
     add <a href="?scriptplay=1"><code>?scriptplay=1</code></a> to call <code>video.play()</code> programmatically from user gestures (Load button / file picker / “Scripted play()”)
     without doing any automatic play attempts on page load.
   </p>
+  <p>
+    <strong>Auto camera mode:</strong>
+    add <a href="?autocamera=1"><code>?autocamera=1</code></a> to attempt starting the camera on page load (will prompt for permission; camera playback may still be blocked by playback policies).
+  </p>
   <p><strong>Presets:</strong>
     <a href="?autoplay=1"><code>?autoplay=1</code></a>,
     <a href="?autoplay=1&autodraw=1&autocapture=1"><code>?autoplay=1&amp;autodraw=1&amp;autocapture=1</code></a>,
     <a href="?scriptplay=1"><code>?scriptplay=1</code></a>,
-    <a href="?scriptplay=1&autodraw=1&autocapture=1"><code>?scriptplay=1&amp;autodraw=1&amp;autocapture=1</code></a>
+    <a href="?scriptplay=1&autodraw=1&autocapture=1"><code>?scriptplay=1&amp;autodraw=1&amp;autocapture=1</code></a>,
+    <a href="?scriptplay=1&scriptplaymute=1&autodraw=1&autocapture=1"><code>?scriptplay=1&amp;scriptplaymute=1&amp;autodraw=1&amp;autocapture=1</code></a>,
+    <a href="?autocamera=1&autodraw=1&autocapture=1"><code>?autocamera=1&amp;autodraw=1&amp;autocapture=1</code></a>
   </p>
 
   <h2>Test steps</h2>
@@ -285,7 +291,8 @@
     const autoCapture = getBoolParam('autocapture', autoplayMode);
     const scriptPlayMode = getBoolParam('scriptplay', false);
     const scriptPlayOnLoad = getBoolParam('scriptplayonload', scriptPlayMode && (autoDraw || autoCapture));
-    const scriptPlayMuted = getBoolParam('scriptplaymuted', false);
+    const scriptPlayMuted = getBoolParam('scriptplaymuted', getBoolParam('scriptplaymute', false));
+    const autoCamera = getBoolParam('autocamera', false);
 
     function log(...args) {
       const line = args.map(a => (typeof a === 'string' ? a : JSON.stringify(a))).join(' ');
@@ -820,10 +827,15 @@
     } else {
       scriptPlayBtn.style.display = 'none';
     }
-    setSourceFromUrl(videoUrl.value.trim());
-    if (scriptPlayMode && scriptPlayOnLoad) {
-      // Note: most browsers treat this as an autoplay attempt and may block it unless muted.
-      attemptScriptPlay('pageload');
+    if (!autoCamera) {
+      setSourceFromUrl(videoUrl.value.trim());
+      if (scriptPlayMode && scriptPlayOnLoad) {
+        // Note: most browsers treat this as an autoplay attempt and may block it unless muted.
+        attemptScriptPlay('pageload');
+      }
+    } else {
+      log('Auto camera requested (autocamera=1)');
+      startCamera();
     }
     log('Ready');
   </script>

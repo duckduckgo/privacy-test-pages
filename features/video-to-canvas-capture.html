@@ -108,6 +108,12 @@
     <li>No exceptions like <code>SecurityError</code> / “tainted canvas” when sampling pixels (if you use the default CORS-friendly source, the camera, or a local file).</li>
   </ul>
 
+  <p>
+    <strong>Autoplay mode:</strong>
+    add <code>?autoplay=1</code> to attempt to start playback automatically (muted). Optionally also auto-start draw/capture with
+    <code>&amp;autodraw=1</code> and <code>&amp;autocapture=1</code>. Use <code>0</code>/<code>false</code> to disable.
+  </p>
+
   <h2>Test steps</h2>
   <ol>
     <li>Pick a source: load URL, pick a local file, or start the camera.</li>
@@ -232,6 +238,22 @@
 
     let cameraStream = null;
     let fileObjectUrl = null;
+    let didAttemptAutoplayForCurrentSource = false;
+    let pendingAutoStartOnPlay = false;
+
+    const params = new URLSearchParams(location.search);
+    function getBoolParam(name, defaultValue = false) {
+      const v = params.get(name);
+      if (v === null) return defaultValue;
+      const s = String(v).trim().toLowerCase();
+      if (['1', 'true', 'yes', 'on'].includes(s)) return true;
+      if (['0', 'false', 'no', 'off'].includes(s)) return false;
+      return defaultValue;
+    }
+
+    const autoplayMode = getBoolParam('autoplay', false);
+    const autoDraw = getBoolParam('autodraw', autoplayMode);
+    const autoCapture = getBoolParam('autocapture', autoplayMode);
 
     function log(...args) {
       const line = args.map(a => (typeof a === 'string' ? a : JSON.stringify(a))).join(' ');
@@ -253,6 +275,36 @@
 
     function setSourcePill(text) {
       sourcePill.textContent = text;
+    }
+
+    function markNewSourceForAutoplay() {
+      didAttemptAutoplayForCurrentSource = false;
+      pendingAutoStartOnPlay = autoDraw || autoCapture;
+    }
+
+    function attemptAutoplay(reason) {
+      if (!autoplayMode) return;
+      if (didAttemptAutoplayForCurrentSource) return;
+      didAttemptAutoplayForCurrentSource = true;
+
+      // Autoplay is typically only allowed when muted.
+      sourceVideo.muted = true;
+      updateMuteUi();
+
+      try {
+        const p = sourceVideo.play();
+        if (p && typeof p.catch === 'function') {
+          p.catch((e) => {
+            setVideoState('Autoplay blocked (press Play)');
+            log(`Autoplay failed (${reason}):`, String(e && (e.name || e.message || e)));
+          });
+        }
+        setVideoState('Attempting autoplay…');
+        log(`Attempting autoplay (${reason})`);
+      } catch (e) {
+        setVideoState('Autoplay threw (press Play)');
+        log(`Autoplay threw (${reason}):`, String(e && (e.name || e.message || e)));
+      }
     }
 
     function revokeFileObjectUrlIfAny() {
@@ -279,6 +331,7 @@
       stopDrawing();
       stopCapture();
       revokeFileObjectUrlIfAny();
+      markNewSourceForAutoplay();
 
       downloadLink.style.display = 'none';
       downloadLink.href = '#';
@@ -315,6 +368,17 @@
         startCameraBtn.disabled = true;
 
         log('Camera started');
+
+        if (autoDraw && !stopDrawBtn.disabled) {
+          // draw already running
+        } else if (autoDraw) {
+          startDrawing();
+        }
+        if (autoCapture && startCaptureBtn.disabled) {
+          // capture already running
+        } else if (autoCapture) {
+          startCapture();
+        }
       } catch (e) {
         stopCamera();
         setVideoState('Camera error (see log)');
@@ -436,6 +500,7 @@
       stopCapture();
       stopCamera();
       revokeFileObjectUrlIfAny();
+      markNewSourceForAutoplay();
 
       downloadLink.style.display = 'none';
       downloadLink.href = '#';
@@ -446,14 +511,17 @@
       sourceVideo.src = url;
       sourceVideo.load();
       setSourcePill('crossorigin=anonymous');
-      setVideoState('Loaded URL (press Play)');
+      setVideoState(autoplayMode ? 'Loaded URL (attempting autoplay)' : 'Loaded URL (press Play)');
       log(`Set source URL: ${url}`);
+
+      attemptAutoplay('url');
     }
 
     function setSourceFromFile(file) {
       stopDrawing();
       stopCapture();
       stopCamera();
+      markNewSourceForAutoplay();
 
       downloadLink.style.display = 'none';
       downloadLink.href = '#';
@@ -467,8 +535,10 @@
       sourceVideo.src = fileObjectUrl;
       sourceVideo.load();
       setSourcePill('src=blob:' );
-      setVideoState(`Loaded file: ${file.name} (press Play)`);
+      setVideoState(autoplayMode ? `Loaded file: ${file.name} (attempting autoplay)` : `Loaded file: ${file.name} (press Play)`);
       log(`Set source file: name=${file.name}, type=${file.type}, size=${file.size}`);
+
+      attemptAutoplay('file');
     }
 
     function updateMuteUi() {
@@ -579,7 +649,12 @@
 
     sourceVideo.addEventListener('loadedmetadata', () => {
       updateVideoMeta();
-      setVideoState('Metadata loaded (press Play)');
+      if (!autoplayMode) {
+        setVideoState('Metadata loaded (press Play)');
+      } else if (sourceVideo.paused) {
+        // Some engines only allow/complete autoplay after metadata is available.
+        attemptAutoplay('loadedmetadata');
+      }
 
       // Resize canvas to match video aspect ratio (keeping reasonable max width).
       if (sourceVideo.videoWidth && sourceVideo.videoHeight) {
@@ -601,6 +676,13 @@
     sourceVideo.addEventListener('play', () => {
       setVideoState('Playing');
       updateVideoMeta();
+
+      if (pendingAutoStartOnPlay) {
+        pendingAutoStartOnPlay = false;
+        if (autoDraw && startDrawBtn.disabled === false) startDrawing();
+        if (autoCapture && startCaptureBtn.disabled === false) startCapture();
+        if (autoDraw || autoCapture) log(`Auto-started on play (autodraw=${autoDraw}, autocapture=${autoCapture})`);
+      }
     });
 
     sourceVideo.addEventListener('pause', () => {

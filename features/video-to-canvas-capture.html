@@ -295,16 +295,16 @@
     // Camera mute control (single tri-state param):
     // - cameramute=1/true/on  => force muted=true
     // - cameramute=0/false/off => force muted=false
-    // - cameramute=keep/leave (or empty) => do not change muted state
-    const cameraMuteParamRaw = params.get('cameramute');
-    const cameraMuteParam = cameraMuteParamRaw !== null ? cameraMuteParamRaw.trim().toLowerCase() : null;
-    const cameraMuteMode =
-      cameraMuteParam === null ? 'force-true' :
-      cameraMuteParam === '' ? 'keep' :
-      (cameraMuteParam === 'keep' || cameraMuteParam === 'leave') ? 'keep' :
-      (['1', 'true', 'yes', 'on'].includes(cameraMuteParam)) ? 'force-true' :
-      (['0', 'false', 'no', 'off'].includes(cameraMuteParam)) ? 'force-false' :
-      'force-true';
+    // - cameramute=keep (or empty) => do not change muted state
+    function getCameraMuteMode() {
+      const raw = params.get('cameramute');
+      if (raw === null) return 'force-true';
+      const v = raw.trim().toLowerCase();
+      if (v === '' || v === 'keep') return 'keep';
+      if (v === '0' || v === 'false' || v === 'off') return 'force-false';
+      return 'force-true';
+    }
+    const cameraMuteMode = getCameraMuteMode();
 
     function log(...args) {
       const line = args.map(a => (typeof a === 'string' ? a : JSON.stringify(a))).join(' ');

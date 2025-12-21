@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Video → Canvas Capture</title>
   <style>
+    * { box-sizing: border-box; }
     body {
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
       line-height: 1.4;
@@ -51,6 +52,7 @@
     input[type="text"] {
       width: 100%;
       padding: 6px 8px;
+      min-width: 0;
     }
     button {
       padding: 8px 10px;
@@ -92,6 +94,19 @@
       border: 1px solid #e5e7eb;
       font-size: 12px;
     }
+
+    @media (max-width: 480px) {
+      .col {
+        min-width: 0;
+      }
+      .controls > div,
+      .status {
+        grid-template-columns: 1fr;
+      }
+      .buttons {
+        gap: 10px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -110,13 +125,19 @@
 
   <p>
     <strong>Autoplay mode:</strong>
-    add <code>?autoplay=1</code> to attempt to start playback automatically (muted). Optionally also auto-start draw/capture with
-    <code>&amp;autodraw=1</code> and <code>&amp;autocapture=1</code>. Use <code>0</code>/<code>false</code> to disable.
+    add <a href="?autoplay=1"><code>?autoplay=1</code></a> to attempt to start playback automatically (muted). Optionally also auto-start draw/capture with
+    <a href="?autoplay=1&autodraw=1"><code>&amp;autodraw=1</code></a> and <a href="?autoplay=1&autocapture=1"><code>&amp;autocapture=1</code></a>.
+    Use <code>0</code>/<code>false</code> to disable.
   </p>
   <p>
     <strong>Scripted play mode (no autoplay):</strong>
-    add <code>?scriptplay=1</code> to call <code>video.play()</code> programmatically from user gestures (Load button / file picker / “Scripted play()”)
+    add <a href="?scriptplay=1"><code>?scriptplay=1</code></a> to call <code>video.play()</code> programmatically from user gestures (Load button / file picker / “Scripted play()”)
     without doing any automatic play attempts on page load.
+  </p>
+  <p><strong>Presets:</strong>
+    <a href="?autoplay=1"><code>?autoplay=1</code></a>,
+    <a href="?autoplay=1&autodraw=1&autocapture=1"><code>?autoplay=1&amp;autodraw=1&amp;autocapture=1</code></a>,
+    <a href="?scriptplay=1"><code>?scriptplay=1</code></a>
   </p>
 
   <h2>Test steps</h2>
@@ -136,7 +157,7 @@
       <div class="controls">
         <div>
           <label for="videoUrl">Video URL</label>
-          <input id="videoUrl" type="text" spellcheck="false" value="https://upload.wikimedia.org/wikipedia/commons/transcoded/8/83/Big_Buck_Bunny_%282008%29.webm/Big_Buck_Bunny_%282008%29.webm.480p.webm">
+          <input id="videoUrl" type="text" spellcheck="false" value="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4">
         </div>
         <div>
           <label for="videoFile">Local file</label>
@@ -316,22 +337,75 @@
       }
     }
 
-    function attemptScriptPlay(reason) {
+    function waitForAnyEvent(target, eventNames, timeoutMs) {
+      return new Promise((resolve, reject) => {
+        const timer = setTimeout(() => {
+          cleanup();
+          reject(new Error(`Timed out waiting for ${eventNames.join(', ')}`));
+        }, timeoutMs);
+        const onEvent = (e) => {
+          cleanup();
+          resolve(e.type);
+        };
+        function cleanup() {
+          clearTimeout(timer);
+          for (const name of eventNames) target.removeEventListener(name, onEvent);
+        }
+        for (const name of eventNames) target.addEventListener(name, onEvent, { once: true });
+      });
+    }
+
+    function mediaErrorToString(err) {
+      if (!err) return 'none';
+      // https://html.spec.whatwg.org/multipage/media.html#mediaerror
+      switch (err.code) {
+        case 1: return 'MEDIA_ERR_ABORTED';
+        case 2: return 'MEDIA_ERR_NETWORK';
+        case 3: return 'MEDIA_ERR_DECODE';
+        case 4: return 'MEDIA_ERR_SRC_NOT_SUPPORTED';
+        default: return `MEDIA_ERR_${err.code}`;
+      }
+    }
+
+    async function attemptScriptPlay(reason) {
       // In scriptPlay mode we intentionally do NOT force muted=true.
       // This should exercise the same code-path as user-gesture initiated play() calls.
       try {
-        const p = sourceVideo.play();
-        if (p && typeof p.catch === 'function') {
-          p.catch((e) => {
-            setVideoState('Scripted play() failed (see log)');
-            log(`Scripted play() failed (${reason}):`, String(e && (e.name || e.message || e)));
-          });
+        const hasSource = Boolean(sourceVideo.srcObject) || Boolean(sourceVideo.currentSrc) || Boolean(sourceVideo.src);
+        if (!hasSource) {
+          setVideoState('No source loaded');
+          log(`Scripted play() ignored (${reason}): no source`);
+          return;
         }
+
+        // If we have a URL/blob src, ensure a load has been kicked and wait briefly for readiness.
+        if (!sourceVideo.srcObject) {
+          if (sourceVideo.readyState === 0) sourceVideo.load();
+          if (sourceVideo.readyState < 2) {
+            try {
+              await waitForAnyEvent(sourceVideo, ['loadeddata', 'canplay', 'canplaythrough', 'error'], 2000);
+            } catch (e) {
+              // Keep going; play() itself will surface the real failure.
+              log(`Scripted play() pre-wait (${reason}) failed:`, String(e && (e.message || e)));
+            }
+          }
+        }
+
         setVideoState('Calling play()…');
         log(`Calling play() (${reason})`);
+
+        const p = sourceVideo.play();
+        if (p && typeof p.then === 'function') await p;
       } catch (e) {
         setVideoState('Scripted play() threw (see log)');
-        log(`Scripted play() threw (${reason}):`, String(e && (e.name || e.message || e)));
+        log(`Scripted play() failed (${reason}):`, String(e && (e.name || e.message || e)));
+        log('Video debug:', {
+          readyState: sourceVideo.readyState,
+          networkState: sourceVideo.networkState,
+          currentSrc: sourceVideo.currentSrc,
+          hasSrcObject: Boolean(sourceVideo.srcObject),
+          error: mediaErrorToString(sourceVideo.error)
+        });
       }
     }
 

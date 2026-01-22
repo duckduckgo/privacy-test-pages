@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width">
-  <title>Programmatic CSV Download</title>
+<title>Programmatic CSV Download (Anchor Click)</title>
 </head>
 <body>
 <p>
@@ -17,30 +17,46 @@
   triggers <code>element.click()</code> on it.
 </p>
 <ol>
-  <li>Click the download link below.</li>
-  <li>Expected: a CSV file named <code>dynamic-download.csv</code> downloads.</li>
+  <li>Click the synchronous download link.</li>
+  <li>Expected: a CSV file named <code>test.csv</code> downloads.</li>
+  <li>
+    A separate asynchronous link uses <code>setTimeout(..., 0)</code> and should
+    download in engines that block the synchronous case.
+  </li>
 </ol>
 
-<p><a id="download-link" href="#">Download CSV via generated anchor</a></p>
+<p>
+  <a href="#" onclick="downloadCsv(event)">Download CSV anchor (sync)</a>
+</p>
+<p>
+  <a href="#" onclick="downloadCsvAsync(event)">Download CSV anchor (async)</a>
+</p>
 
 <script>
-  const csv = [
-    'name,score',
-    'Alice,10',
-    'Bob,20'
-  ].join('\n');
-  const fileName = 'dynamic-download.csv';
-  const downloadLink = document.getElementById('download-link');
+  function downloadCsv(event) {
+    if (event) {
+      event.preventDefault();
+    }
 
-  downloadLink.addEventListener('click', (event) => {
-    event.preventDefault();
+    const csv = 'Name,Age,City\nJohn,30,New York\nJane,25,London';
+    const fileName = 'test.csv';
 
-    const anchor = document.createElement('a');
-    anchor.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
-    anchor.target = '_blank';
-    anchor.download = fileName;
-    anchor.click();
-  });
+    const anker = document.createElement('a');
+    anker.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
+    anker.target = '_blank';
+    anker.download = fileName;
+    anker.click();
+  }
+
+  function downloadCsvAsync(event) {
+    if (event) {
+      event.preventDefault();
+    }
+
+    setTimeout(() => {
+      downloadCsv();
+    }, 0);
+  }
 </script>
 </body>
 </html>

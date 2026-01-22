@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Programmatic CSV Download</title>
+</head>
+<body>
+<p>
+  <a href="../../index.html">[Home]</a>
+  <a href="./index.html">[Download index]</a>
+</p>
+
+<h1>Programmatic CSV download from anchor click</h1>
+<p>
+  This page creates an anchor in the click handler of another anchor and
+  triggers <code>element.click()</code> on it.
+</p>
+<ol>
+  <li>Click the download link below.</li>
+  <li>Expected: a CSV file named <code>dynamic-download.csv</code> downloads.</li>
+</ol>
+
+<p><a id="download-link" href="#">Download CSV via generated anchor</a></p>
+
+<script>
+  const csv = [
+    'name,score',
+    'Alice,10',
+    'Bob,20'
+  ].join('\n');
+  const fileName = 'dynamic-download.csv';
+  const downloadLink = document.getElementById('download-link');
+
+  downloadLink.addEventListener('click', (event) => {
+    event.preventDefault();
+
+    const anchor = document.createElement('a');
+    anchor.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
+    anchor.target = '_blank';
+    anchor.download = fileName;
+    anchor.click();
+  });
+</script>
+</body>
+</html>

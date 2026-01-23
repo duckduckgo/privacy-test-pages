@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width">
-<title>Programmatic CSV Download (Anchor Click)</title>
+  <title>CSV Download Test (sync vs async)</title>
 </head>
 <body>
 <p>
@@ -13,31 +13,33 @@
 
 <h1>Programmatic CSV download from anchor click</h1>
 <p>
-  This page creates an anchor in the click handler of another anchor and
+  This page creates an anchor in an inline <code>onclick</code> handler and
   triggers <code>element.click()</code> on it.
 </p>
 <ol>
   <li>Click the synchronous download link.</li>
   <li>Expected: a CSV file named <code>test.csv</code> downloads.</li>
-  <li>
-    A separate asynchronous link uses <code>setTimeout(..., 0)</code> and should
-    download in engines that block the synchronous case.
-  </li>
+  <li>Two async variants use <code>setTimeout(..., 0)</code> and often succeed.</li>
 </ol>
 
-<p>
-  <a href="#" onclick="downloadCsv(event)">Download CSV anchor (sync)</a>
-</p>
-<p>
-  <a href="#" onclick="downloadCsvAsync(event)">Download CSV anchor (async)</a>
-</p>
+<ul>
+  <li>
+    <a href="#" onclick="downloadCsv()">Download CSV anchor (sync inline)</a>
+  </li>
+  <li>
+    <a href="#" onclick="setTimeout(function(){downloadCsv()}, 0)">
+      Download CSV anchor (async wrapper)
+    </a>
+  </li>
+  <li>
+    <a href="#" onclick="downloadCsvAsyncClick()">
+      Download CSV anchor (async anchor.click)
+    </a>
+  </li>
+</ul>
 
 <script>
-  function downloadCsv(event) {
-    if (event) {
-      event.preventDefault();
-    }
-
+  function buildCsvAnchor() {
     const csv = 'Name,Age,City\nJohn,30,New York\nJane,25,London';
     const fileName = 'test.csv';
 
@@ -45,16 +47,18 @@
     anker.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
     anker.target = '_blank';
     anker.download = fileName;
+    return anker;
+  }
+
+  function downloadCsv() {
+    const anker = buildCsvAnchor();
     anker.click();
   }
 
-  function downloadCsvAsync(event) {
-    if (event) {
-      event.preventDefault();
-    }
-
-    setTimeout(() => {
-      downloadCsv();
+  function downloadCsvAsyncClick() {
+    const anker = buildCsvAnchor();
+    setTimeout(function() {
+      anker.click();
     }, 0);
   }
 </script>

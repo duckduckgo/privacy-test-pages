@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>PDF Viewer Capability</title>
+    <script src="../tracker-reporting/utils.js"></script>
+    <script>
+        // eslint-disable-next-line no-unused-vars
+        function init () {
+            // eslint-disable-next-line no-undef
+            callAfterDelay(reportCapability);
+        }
+
+        function reportCapability () {
+            const pdfViewerEnabled = navigator.pdfViewerEnabled;
+            const hasPdfViewerEnabled = 'pdfViewerEnabled' in navigator;
+            const hasPlugins = 'plugins' in navigator;
+            const pluginsValue = navigator.plugins;
+            const plugins = pluginsValue ? Array.from(pluginsValue).map((plugin) => ({
+                name: plugin.name,
+                filename: plugin.filename,
+                description: plugin.description
+            })) : null;
+
+            const results = {
+                page: 'pdf-viewer-capability',
+                date: (new Date()).toUTCString(),
+                results: [
+                    { id: 'pdfViewerEnabledSupported', value: hasPdfViewerEnabled },
+                    { id: 'pdfViewerEnabled', value: pdfViewerEnabled },
+                    { id: 'pluginsSupported', value: hasPlugins },
+                    { id: 'pluginsCount', value: pluginsValue ? pluginsValue.length : 0 },
+                    { id: 'plugins', value: plugins }
+                ]
+            };
+
+            for (const result of results.results) {
+                const element = document.getElementById(result.id);
+                if (element) {
+                    const displayValue = typeof result.value === 'object'
+                        ? JSON.stringify(result.value, null, 2)
+                        : result.value;
+                    element.textContent = `${result.id}: ${displayValue}`;
+                }
+            }
+
+            window.results = results;
+        }
+    </script>
+</head>
+<body onload="init()">
+<p><a href="../index.html">[Home]</a></p>
+
+<p>Checks <code>navigator.pdfViewerEnabled</code> and <code>navigator.plugins</code> availability and values.</p>
+
+<p id="pdfViewerEnabledSupported"></p>
+<p id="pdfViewerEnabled"></p>
+<p id="pluginsSupported"></p>
+<p id="pluginsCount"></p>
+<pre id="plugins"></pre>
+
+</body>
+</html>

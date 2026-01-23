@@ -1,0 +1,92 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+button {
+    margin: 10px 5px 10px 0;
+    padding: 8px 16px;
+}
+
+select {
+    padding: 4px 8px;
+    font-size: 14px;
+}
+
+.test-section {
+    margin: 20px 0;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.test-section h3 {
+    margin-top: 0;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.test-result {
+    margin: 10px 0;
+}
+
+.test-result h4 {
+    margin: 5px 0;
+    font-size: 14px;
+}
+
+.result-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin: 10px 0;
+}
+
+.result-table th,
+.result-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+    vertical-align: top;
+}
+
+.result-table th {
+    background: #f5f5f5;
+    width: 200px;
+}
+
+.result-table td {
+    font-family: monospace;
+    word-break: break-all;
+    white-space: pre-wrap;
+}
+
+.result-table td.empty {
+    color: #999;
+    font-style: italic;
+}
+
+.result-table td.error-value {
+    color: #c0392b;
+    font-weight: 500;
+}
+
+pre {
+    background: #f8f8f8;
+    padding: 10px;
+    overflow-x: auto;
+    font-size: 12px;
+    border-radius: 4px;
+}
+
+.description {
+    color: #666;
+    font-size: 13px;
+    margin-bottom: 10px;
+}

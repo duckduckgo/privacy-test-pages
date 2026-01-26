@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Local Network Access</title>
+</head>
+<body>
+    <p><a href="../../">[Home]</a> ↣ <a href="../">[Privacy Protections Tests]</a> ↣ <strong>[Local Network Access]</strong></p>
+
+    <p>This page tests if the browser blocks fetch requests to local network addresses (Private Network Access protection).</p>
+    <p>The test attempts to fetch resources from <code>127.0.0.1</code> and <code>localhost</code> on port 5000.</p>
+
+    <button id="start">Start the test</button>
+
+    <ul id="tests-output"></ul>
+    <p id="tests-summary"></p>
+
+<script>
+const startButton = document.querySelector('#start');
+const testsOutput = document.querySelector('#tests-output');
+const testsSummary = document.querySelector('#tests-summary');
+
+// object that contains results of all tests
+const results = {
+    page: 'local-network-access',
+    date: null,
+    results: []
+};
+
+const tests = [
+    { id: 'localhost-127.0.0.1', name: 'Localhost fetch (127.0.0.1)', url: 'http://127.0.0.1:5000/ping' },
+    { id: 'localhost-hostname', name: 'Localhost fetch (localhost)', url: 'http://localhost:5000/ping' }
+];
+
+async function testEndpoint(test) {
+    const { id, name, url } = test;
+    try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000);
+
+        const response = await fetch(url, {
+            method: 'GET',
+            mode: 'cors',
+            signal: controller.signal
+        });
+
+        clearTimeout(timeoutId);
+
+        if (response.ok) {
+            return { id, test: name, result: 'request loaded (not blocked)' };
+        } else {
+            return { id, test: name, result: `request failed with HTTP ${response.status}` };
+        }
+    } catch (error) {
+        const errorMsg = error.name === 'AbortError'
+            ? 'request timeout (likely blocked or no server)'
+            : `request blocked or failed (${error.message})`;
+        return { id, test: name, result: errorMsg };
+    }
+}
+
+async function runTests() {
+    startButton.setAttribute('disabled', 'disabled');
+    testsOutput.innerHTML = '';
+    testsSummary.textContent = '';
+
+    results.date = (new Date()).toUTCString();
+    results.results = [];
+
+    const testResults = await Promise.all(tests.map(t => testEndpoint(t)));
+
+    let loadedCount = 0;
+    let blockedCount = 0;
+
+    testResults.forEach(testResult => {
+        results.results.push(testResult);
+
+        const li = document.createElement('li');
+        const isLoaded = testResult.result.includes('loaded');
+
+        if (isLoaded) {
+            loadedCount++;
+            li.style.color = 'green';
+        } else {
+            blockedCount++;
+            li.style.color = 'red';
+        }
+
+        li.textContent = `${testResult.test}: ${testResult.result}`;
+        testsOutput.appendChild(li);
+    });
+
+    testsSummary.textContent = `${blockedCount} blocked, ${loadedCount} loaded`;
+    testsSummary.style.fontWeight = 'bold';
+    testsSummary.style.color = blockedCount === 0 ? 'green' : 'red';
+
+    startButton.removeAttribute('disabled');
+}
+
+// run tests if button was clicked or…
+startButton.addEventListener('click', () => runTests());
+
+// if url query is '?run' start tests immediately
+if (document.location.search === '?run') {
+    runTests();
+}
+</script>
+
+</body>
+</html>

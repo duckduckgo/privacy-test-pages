@@ -35,28 +35,28 @@ const tests = [
 
 async function testEndpoint(test) {
     const { id, name, url } = test;
-    try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 3000);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
 
+    try {
         const response = await fetch(url, {
             method: 'GET',
             mode: 'cors',
             signal: controller.signal
         });
 
-        clearTimeout(timeoutId);
-
         if (response.ok) {
-            return { id, test: name, result: 'request loaded (not blocked)' };
+            return { id, test: name, result: 'request loaded (not blocked)', success: true };
         } else {
-            return { id, test: name, result: `request failed with HTTP ${response.status}` };
+            return { id, test: name, result: `request failed with HTTP ${response.status}`, success: false };
         }
     } catch (error) {
         const errorMsg = error.name === 'AbortError'
             ? 'request timeout (likely blocked or no server)'
             : `request blocked or failed (${error.message})`;
-        return { id, test: name, result: errorMsg };
+        return { id, test: name, result: errorMsg, success: false };
+    } finally {
+        clearTimeout(timeoutId);
     }
 }
 
@@ -77,9 +77,8 @@ async function runTests() {
         results.results.push(testResult);
 
         const li = document.createElement('li');
-        const isLoaded = testResult.result.includes('loaded');
 
-        if (isLoaded) {
+        if (testResult.success) {
             loadedCount++;
             li.style.color = 'green';
         } else {

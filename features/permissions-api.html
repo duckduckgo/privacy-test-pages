@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Permissions API (WebCompat)</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.4;
+      margin: 16px;
+      color: #111;
+    }
+    code, pre, input, button {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+    h1, h2 {
+      margin-top: 20px;
+    }
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 8px 0;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      max-width: 980px;
+    }
+    th, td {
+      border: 1px solid #d0d0d0;
+      padding: 6px 8px;
+      vertical-align: top;
+      text-align: left;
+    }
+    th {
+      background: #f6f6f6;
+    }
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      word-break: break-word;
+    }
+    #log {
+      border: 1px solid #d0d0d0;
+      background: #f7f7f7;
+      padding: 8px;
+      max-height: 240px;
+      overflow: auto;
+      white-space: pre-wrap;
+    }
+    input[type="text"] {
+      width: 220px;
+    }
+  </style>
+</head>
+<body>
+<p><a href="../index.html">[Home]</a></p>
+
+<h1>Permissions API (WebCompat)</h1>
+<p>Validates the C-S-S webCompat Permissions API shim and native query path.</p>
+<p><strong>Expected behavior:</strong> <code>navigator.permissions.query</code> returns the correct state for native
+permissions (camera and microphone). After granting or denying a permission, the returned state should match the
+native permission state. For native permissions, the returned <code>name</code> should use the configured override
+(for example, <code>video_capture</code> or <code>audio_capture</code>).</p>
+<p><strong>Bug behavior:</strong> when the Permissions API already exists, native permissions may not be intercepted
+and the returned state can be incorrect or unchanged after granting or denying.</p>
+<!-- Related branch: jkt/permissionAPIFix -->
+
+<h2>Test steps</h2>
+<ol>
+  <li>Open this page in a DuckDuckGo browser build with the fix.</li>
+  <li>Check Runtime info for Permissions API presence and query function.</li>
+  <li>Click Query all and confirm camera and microphone are returned with override names.</li>
+  <li>Use Request camera and Request microphone, allow or deny, then re-query to confirm state updates.</li>
+  <li>Use Query (custom) with an invalid name and confirm a TypeError is returned.</li>
+</ol>
+<p><strong>Notes:</strong> To test the API-present path, ensure <code>webCompat.permissionsPresent</code> is enabled in
+remote config for this build. The native messaging path is only used for permissions marked <code>native</code>
+(camera and microphone in the Android override).</p>
+
+<h2>Runtime info</h2>
+<ul>
+  <li id="secure-context"></li>
+  <li id="permissions-present"></li>
+  <li id="permissions-query"></li>
+  <li id="permissions-query-source" class="mono"></li>
+</ul>
+
+<h2>Actions</h2>
+<div class="buttons">
+  <button id="query-all">Query all</button>
+  <button id="clear-log">Clear log</button>
+</div>
+
+<h2>Permission queries</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Query name</th>
+      <th>Returned name</th>
+      <th>State</th>
+      <th>Error</th>
+      <th>Updated</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr data-name="camera">
+      <td class="mono" data-cell="requested">camera</td>
+      <td class="mono" data-cell="returned">(not queried)</td>
+      <td class="mono" data-cell="state">-</td>
+      <td class="mono" data-cell="error">-</td>
+      <td data-cell="updated">-</td>
+      <td><button data-action="query" data-name="camera">Query</button></td>
+    </tr>
+    <tr data-name="microphone">
+      <td class="mono" data-cell="requested">microphone</td>
+      <td class="mono" data-cell="returned">(not queried)</td>
+      <td class="mono" data-cell="state">-</td>
+      <td class="mono" data-cell="error">-</td>
+      <td data-cell="updated">-</td>
+      <td><button data-action="query" data-name="microphone">Query</button></td>
+    </tr>
+    <tr data-name="geolocation">
+      <td class="mono" data-cell="requested">geolocation</td>
+      <td class="mono" data-cell="returned">(not queried)</td>
+      <td class="mono" data-cell="state">-</td>
+      <td class="mono" data-cell="error">-</td>
+      <td data-cell="updated">-</td>
+      <td><button data-action="query" data-name="geolocation">Query</button></td>
+    </tr>
+    <tr data-name="notifications">
+      <td class="mono" data-cell="requested">notifications</td>
+      <td class="mono" data-cell="returned">(not queried)</td>
+      <td class="mono" data-cell="state">-</td>
+      <td class="mono" data-cell="error">-</td>
+      <td data-cell="updated">-</td>
+      <td><button data-action="query" data-name="notifications">Query</button></td>
+    </tr>
+    <tr data-name="push">
+      <td class="mono" data-cell="requested">push</td>
+      <td class="mono" data-cell="returned">(not queried)</td>
+      <td class="mono" data-cell="state">-</td>
+      <td class="mono" data-cell="error">-</td>
+      <td data-cell="updated">-</td>
+      <td><button data-action="query" data-name="push">Query</button></td>
+    </tr>
+    <tr data-name="custom">
+      <td>
+        <input id="custom-name" type="text" value="not-a-permission">
+      </td>
+      <td class="mono" data-cell="returned">(not queried)</td>
+      <td class="mono" data-cell="state">-</td>
+      <td class="mono" data-cell="error">-</td>
+      <td data-cell="updated">-</td>
+      <td><button id="query-custom">Query (custom)</button></td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Request permission</h2>
+<div class="buttons">
+  <button id="request-camera">Request camera</button>
+  <button id="request-microphone">Request microphone</button>
+  <button id="request-geolocation">Request geolocation</button>
+  <button id="request-notifications">Request notifications</button>
+  <button id="stop-media">Stop media streams</button>
+</div>
+
+<h2>Log</h2>
+<pre id="log"></pre>
+
+<script>
+  const logEl = document.getElementById('log');
+  const defaultPermissions = ['camera', 'microphone', 'geolocation', 'notifications', 'push'];
+  const activeStreams = [];
+
+  function logLine(message) {
+    const ts = new Date().toISOString();
+    logEl.textContent += `[${ts}] ${message}\n`;
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  function formatQuerySource(fn) {
+    if (typeof fn !== 'function') return 'n/a';
+    const text = String(fn).replace(/\s+/g, ' ').trim();
+    return text.length > 140 ? `${text.slice(0, 140)}...` : text;
+  }
+
+  function updateRuntimeInfo() {
+    document.getElementById('secure-context').textContent = `secureContext: ${window.isSecureContext}`;
+    const permissions = navigator.permissions;
+    document.getElementById('permissions-present').textContent = `navigator.permissions: ${Boolean(permissions)}`;
+    const queryType = permissions ? typeof permissions.query : 'n/a';
+    document.getElementById('permissions-query').textContent = `permissions.query: ${queryType}`;
+    document.getElementById('permissions-query-source').textContent =
+      `permissions.query.toString(): ${formatQuerySource(permissions?.query)}`;
+  }
+
+  function getRow(rowKey) {
+    return document.querySelector(`tr[data-name="${rowKey}"]`);
+  }
+
+  function setCell(row, cell, value) {
+    const el = row.querySelector(`[data-cell="${cell}"]`);
+    if (el) el.textContent = value;
+  }
+
+  function updateRow(rowKey, data) {
+    const row = getRow(rowKey);
+    if (!row) return;
+    if (data.requested !== undefined) setCell(row, 'requested', data.requested);
+    setCell(row, 'returned', data.returnedName ?? '-');
+    setCell(row, 'state', data.state ?? '-');
+    setCell(row, 'error', data.error ?? '-');
+    setCell(row, 'updated', new Date().toLocaleTimeString());
+  }
+
+  async function queryPermission(name, rowKey = name) {
+    updateRuntimeInfo();
+    if (!navigator.permissions || typeof navigator.permissions.query !== 'function') {
+      updateRow(rowKey, {
+        requested: name,
+        returnedName: '-',
+        state: '-',
+        error: 'Permissions API not available',
+      });
+      logLine(`query ${name}: Permissions API not available`);
+      return;
+    }
+
+    try {
+      const status = await navigator.permissions.query({ name });
+      const returnedName = status && status.name !== undefined ? String(status.name) : '(missing)';
+      const state = status && status.state !== undefined ? String(status.state) : '(missing)';
+      updateRow(rowKey, { requested: name, returnedName, state, error: '-' });
+      logLine(`query ${name}: name=${returnedName} state=${state}`);
+    } catch (e) {
+      const error = e && e.message ? e.message : String(e);
+      updateRow(rowKey, { requested: name, returnedName: '-', state: '-', error });
+      logLine(`query ${name} error: ${error}`);
+    }
+  }
+
+  async function queryAll() {
+    for (const name of defaultPermissions) {
+      // sequential to keep logs readable
+      // eslint-disable-next-line no-await-in-loop
+      await queryPermission(name);
+    }
+  }
+
+  async function requestMedia(constraints, label, permissionName) {
+    if (!navigator.mediaDevices || typeof navigator.mediaDevices.getUserMedia !== 'function') {
+      logLine(`${label}: getUserMedia not available`);
+      return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      activeStreams.push(stream);
+      logLine(`${label}: granted`);
+    } catch (e) {
+      const error = e && e.message ? e.message : String(e);
+      logLine(`${label}: error ${error}`);
+    }
+    await queryPermission(permissionName);
+  }
+
+  function stopMediaStreams() {
+    while (activeStreams.length) {
+      const stream = activeStreams.pop();
+      if (!stream) continue;
+      for (const track of stream.getTracks()) {
+        track.stop();
+      }
+    }
+    logLine('Stopped media streams');
+  }
+
+  function requestGeolocation() {
+    if (!navigator.geolocation) {
+      logLine('Geolocation: not available');
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        logLine(`Geolocation: success lat=${pos.coords.latitude} lon=${pos.coords.longitude}`);
+        queryPermission('geolocation');
+      },
+      (err) => {
+        logLine(`Geolocation: error ${err.message}`);
+        queryPermission('geolocation');
+      },
+    );
+  }
+
+  async function requestNotifications() {
+    if (!('Notification' in window)) {
+      logLine('Notifications: API not available');
+      return;
+    }
+    try {
+      const result = await Notification.requestPermission();
+      logLine(`Notifications: ${result}`);
+    } catch (e) {
+      const error = e && e.message ? e.message : String(e);
+      logLine(`Notifications: error ${error}`);
+    }
+    await queryPermission('notifications');
+    await queryPermission('push');
+  }
+
+  document.getElementById('query-all').addEventListener('click', queryAll);
+  document.getElementById('clear-log').addEventListener('click', () => {
+    logEl.textContent = '';
+  });
+
+  document.querySelectorAll('button[data-action="query"]').forEach((button) => {
+    button.addEventListener('click', () => queryPermission(button.dataset.name));
+  });
+
+  document.getElementById('query-custom').addEventListener('click', () => {
+    const customName = document.getElementById('custom-name').value.trim();
+    queryPermission(customName || '(empty)', 'custom');
+  });
+
+  document.getElementById('request-camera').addEventListener('click', () => {
+    requestMedia({ video: true, audio: false }, 'Camera', 'camera');
+  });
+  document.getElementById('request-microphone').addEventListener('click', () => {
+    requestMedia({ video: false, audio: true }, 'Microphone', 'microphone');
+  });
+  document.getElementById('request-geolocation').addEventListener('click', requestGeolocation);
+  document.getElementById('request-notifications').addEventListener('click', requestNotifications);
+  document.getElementById('stop-media').addEventListener('click', stopMediaStreams);
+
+  updateRuntimeInfo();
+</script>
+</body>
+</html>

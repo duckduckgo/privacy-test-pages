@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>DuckDuckGo Detection (Bowser)</title>
+  <style>
+      body {
+          font-family: sans-serif;
+      }
+      .status {
+          font-weight: 600;
+      }
+      .pass {
+          color: #0a7;
+      }
+      .fail {
+          color: #b00;
+      }
+      pre {
+          background: #f6f6f6;
+          padding: 8px;
+          overflow: auto;
+      }
+  </style>
+  <script type="module">
+      import Bowser from '/node_modules/bowser/src/bowser.js';
+
+      const BOWSER_SOURCE = '/node_modules/bowser/src/bowser.js';
+
+      function getBrandList (uaData) {
+          if (!uaData || !Array.isArray(uaData.brands)) {
+              return [];
+          }
+          return uaData.brands;
+      }
+
+      function render () {
+          const userAgent = navigator.userAgent;
+          const uaData = navigator.userAgentData || null;
+          const result = Bowser.parse(userAgent, uaData);
+          const browserName = result?.browser?.name || 'unknown';
+          const browserVersion = result?.browser?.version || 'unknown';
+          const brands = getBrandList(uaData);
+          const hasDuckDuckGoBrand = brands.some((entry) => entry.brand === 'DuckDuckGo');
+          const ddgSuffixMatch = userAgent.match(/\sDdg\/([\d.]+)$/i);
+          const isDuckDuckGo = browserName === 'DuckDuckGo';
+
+          const status = document.getElementById('status');
+          status.textContent = isDuckDuckGo
+              ? 'PASS: Bowser identifies this as DuckDuckGo.'
+              : 'FAIL: Bowser does not identify this as DuckDuckGo.';
+          status.className = `status ${isDuckDuckGo ? 'pass' : 'fail'}`;
+
+          document.getElementById('library-source-link').textContent = BOWSER_SOURCE;
+          document.getElementById('userAgent').textContent = `navigator.userAgent: ${userAgent}`;
+          document.getElementById('userAgentData').textContent = `navigator.userAgentData.brands: ${uaData ? JSON.stringify(brands) : 'n/a'}`;
+          document.getElementById('ddgBrand').textContent = `DuckDuckGo brand present: ${hasDuckDuckGoBrand}`;
+          document.getElementById('ddgSuffix').textContent = `UA Ddg/<version> suffix: ${ddgSuffixMatch ? ddgSuffixMatch[1] : 'n/a'}`;
+          document.getElementById('browserName').textContent = `Bowser browser.name: ${browserName}`;
+          document.getElementById('browserVersion').textContent = `Bowser browser.version: ${browserVersion}`;
+          document.getElementById('bowserResult').textContent = JSON.stringify(result, null, 2);
+
+          window.results = {
+              page: 'bowser-ddg-detection',
+              date: (new Date()).toUTCString(),
+              results: [
+                  { id: 'isDuckDuckGo', value: isDuckDuckGo },
+                  { id: 'browserName', value: browserName },
+                  { id: 'browserVersion', value: browserVersion },
+                  { id: 'userAgent', value: userAgent },
+                  { id: 'userAgentDataBrands', value: brands }
+              ]
+          };
+      }
+
+      window.addEventListener('DOMContentLoaded', render);
+  </script>
+</head>
+<body>
+<p><a href="../index.html">[Home]</a></p>
+
+<h1>DuckDuckGo detection (Bowser PR 595)</h1>
+<p>This page uses Bowser from <code>jonathanKingston:jkt/ddg</code> to validate DuckDuckGo browser detection.</p>
+<p>Library source: <a href="/node_modules/bowser/src/bowser.js" id="library-source-link">/node_modules/bowser/src/bowser.js</a></p>
+
+<p id="status" class="status"></p>
+<ul>
+  <li id="browserName"></li>
+  <li id="browserVersion"></li>
+  <li id="ddgBrand"></li>
+  <li id="ddgSuffix"></li>
+  <li id="userAgentData"></li>
+  <li id="userAgent"></li>
+</ul>
+
+<h2>Bowser parse result</h2>
+<pre id="bowserResult"></pre>
+
+</body>
+</html>

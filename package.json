@@ -27,7 +27,7 @@
     "express": "^4.19.2",
     "node-cache": "^5.1.2",
     "node-cmd": "^5.0.0",
-    "ws": "^8.18.2"
+    "ws": "^8.19.0"
   },
   "devDependencies": {
     "@duckduckgo/eslint-config": "git+https://git@github.com/duckduckgo/eslint-config#v0.1.0",

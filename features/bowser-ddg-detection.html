@@ -24,9 +24,9 @@
       }
   </style>
   <script type="module">
-      import Bowser from 'https://cdn.jsdelivr.net/gh/jonathanKingston/bowser@jkt/ddg/src/bowser.js';
+      import Bowser from '/node_modules/bowser/src/bowser.js';
 
-      const BOWSER_SOURCE = 'https://cdn.jsdelivr.net/gh/jonathanKingston/bowser@jkt/ddg/src/bowser.js';
+      const BOWSER_SOURCE = '/node_modules/bowser/src/bowser.js';
 
       function getBrandList (uaData) {
           if (!uaData || !Array.isArray(uaData.brands)) {
@@ -82,7 +82,7 @@
 
 <h1>DuckDuckGo detection (Bowser PR 595)</h1>
 <p>This page uses Bowser from <code>jonathanKingston:jkt/ddg</code> to validate DuckDuckGo browser detection.</p>
-<p>Library source: <a href="https://cdn.jsdelivr.net/gh/jonathanKingston/bowser@jkt/ddg/src/bowser.js" id="library-source-link">https://cdn.jsdelivr.net/gh/jonathanKingston/bowser@jkt/ddg/src/bowser.js</a></p>
+<p>Library source: <a href="/node_modules/bowser/src/bowser.js" id="library-source-link">/node_modules/bowser/src/bowser.js</a></p>
 
 <p id="status" class="status"></p>
 <ul>

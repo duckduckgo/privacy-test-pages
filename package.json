@@ -22,7 +22,7 @@
   "homepage": "https://github.com/duckduckgo/privacy-test-pages#readme",
   "dependencies": {
     "@duckduckgo/content-scope-scripts": "git+https://git@github.com/duckduckgo/content-scope-scripts#12.37.0",
-    "body-parser": "^2.2.1",
+    "body-parser": "^2.2.2",
     "bowser": "github:jonathanKingston/bowser#jkt/ddg",
     "express": "^4.19.2",
     "node-cache": "^5.1.2",

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Late Style Change</title>
+    <link rel="stylesheet" href="../../shared/style.css">
+    <style>
+        html,
+        body {
+            overscroll-behavior: auto;
+        }
+    </style>
+</head>
+<body>
+    <script src="../../shared/utils.js"></script>
+    <p><a href="../index.html">[Browser UI Lock]</a></p>
+    <p>This page updates overscroll-behavior after a delay.</p>
+    <div id="results-container"></div>
+    <script>
+        setTimeout(() => {
+            document.documentElement.style.overscrollBehavior = 'none';
+            document.body.style.overscrollBehavior = 'none';
+        }, 350);
+
+        test('late overscroll change', async () => {
+            await new Promise((resolve) => setTimeout(resolve, 450));
+            const htmlStyle = getComputedStyle(document.documentElement);
+            const bodyStyle = getComputedStyle(document.body);
+            return [
+                { name: 'html overscroll-behavior', result: htmlStyle.overscrollBehavior, expected: 'none' },
+                { name: 'body overscroll-behavior', result: bodyStyle.overscrollBehavior, expected: 'none' },
+            ];
+        });
+        renderResults();
+    </script>
+</body>
+</html>

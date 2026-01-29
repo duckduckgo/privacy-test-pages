@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Overscroll Behavior None</title>
+    <link rel="stylesheet" href="../../shared/style.css">
+    <style>
+        html,
+        body {
+            overscroll-behavior: none;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <script src="../../shared/utils.js"></script>
+    <p><a href="../index.html">[Browser UI Lock]</a></p>
+    <p>This page sets overscroll-behavior: none on html/body.</p>
+    <div id="results-container"></div>
+    <script>
+        test('overscroll-behavior none', async () => {
+            const htmlStyle = getComputedStyle(document.documentElement);
+            const bodyStyle = getComputedStyle(document.body);
+            return [
+                { name: 'html overscroll-behavior', result: htmlStyle.overscrollBehavior, expected: 'none' },
+                { name: 'body overscroll-behavior', result: bodyStyle.overscrollBehavior, expected: 'none' },
+            ];
+        });
+        renderResults();
+    </script>
+</body>
+</html>

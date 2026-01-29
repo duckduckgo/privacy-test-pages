@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Normal Scroll</title>
+    <link rel="stylesheet" href="../../shared/style.css">
+    <style>
+        html,
+        body {
+            overscroll-behavior: auto;
+            overflow: auto;
+        }
+        .content {
+            height: 200vh;
+        }
+    </style>
+</head>
+<body>
+    <script src="../../shared/utils.js"></script>
+    <p><a href="../index.html">[Browser UI Lock]</a></p>
+    <p>This page keeps default scroll settings.</p>
+    <div class="content"></div>
+    <div id="results-container"></div>
+    <script>
+        test('normal scroll settings', async () => {
+            const htmlStyle = getComputedStyle(document.documentElement);
+            const bodyStyle = getComputedStyle(document.body);
+            return [
+                { name: 'html overscroll-behavior', result: htmlStyle.overscrollBehavior, expected: 'auto' },
+                { name: 'body overscroll-behavior', result: bodyStyle.overscrollBehavior, expected: 'auto' },
+                { name: 'body overflow', result: bodyStyle.overflow, expected: 'auto' },
+            ];
+        });
+        renderResults();
+    </script>
+</body>
+</html>

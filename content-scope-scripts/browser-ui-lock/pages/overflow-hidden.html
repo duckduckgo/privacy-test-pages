@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Overflow Hidden</title>
+    <link rel="stylesheet" href="../../shared/style.css">
+    <style>
+        body {
+            overflow: hidden;
+            height: 100vh;
+        }
+    </style>
+</head>
+<body>
+    <script src="../../shared/utils.js"></script>
+    <p><a href="../index.html">[Browser UI Lock]</a></p>
+    <p>This page sets overflow: hidden on body.</p>
+    <div id="results-container"></div>
+    <script>
+        test('overflow hidden', async () => {
+            const bodyStyle = getComputedStyle(document.body);
+            return [{ name: 'body overflow', result: bodyStyle.overflow, expected: 'hidden' }];
+        });
+        renderResults();
+    </script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+{
+    "readme": "Config for browser UI lock integration tests.",
+    "version": 1,
+    "unprotectedTemporary": [],
+    "features": {
+        "browserUiLock": {
+            "state": "enabled",
+            "exceptions": [],
+            "settings": {
+                "overscrollBehavior": "enabled",
+                "overflow": "enabled",
+                "overflowClip": "disabled",
+                "observeMutations": "enabled",
+                "postLoadDelayMs": 300
+            }
+        }
+    }
+}

@@ -3,15 +3,18 @@
     "version": 1,
     "unprotectedTemporary": [],
     "features": {
-        "browserUiLock": {
+        "webCompat": {
             "state": "enabled",
             "exceptions": [],
             "settings": {
-                "overscrollBehavior": "enabled",
-                "overflow": "enabled",
-                "overflowClip": "disabled",
-                "observeMutations": "enabled",
-                "postLoadDelayMs": 300
+                "browserUiLock": {
+                    "state": "enabled",
+                    "overscrollBehavior": "enabled",
+                    "overflow": "enabled",
+                    "overflowClip": "disabled",
+                    "observeMutations": "enabled",
+                    "postLoadDelayMs": 300
+                }
             }
         }
     }

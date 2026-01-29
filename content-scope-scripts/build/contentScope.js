@@ -15422,6 +15422,267 @@ ul.messages {
 
   // src/features/web-compat.js
   init_define_import_meta_trackerLookup();
+
+  // src/features/web-compat/ui-lock.js
+  init_define_import_meta_trackerLookup();
+  var OVERSCROLL_LOCK_VALUES = /* @__PURE__ */ new Set(["none", "contain"]);
+  var OVERFLOW_LOCK_VALUES = /* @__PURE__ */ new Set(["hidden", "clip"]);
+  var OVERFLOW_LOCK_VALUES_NO_CLIP = /* @__PURE__ */ new Set(["hidden"]);
+  function readStyleValues(style, prop, propY) {
+    if (!style) {
+      return null;
+    }
+    return {
+      value: style[prop] || null,
+      valueY: style[propY] || null
+    };
+  }
+  function matchesLockValues(values, lockValues) {
+    if (!values) {
+      return false;
+    }
+    const valueMatches = values.value ? lockValues.has(values.value) : false;
+    const valueYMatches = values.valueY ? lockValues.has(values.valueY) : false;
+    return valueMatches || valueYMatches;
+  }
+  function computeUiLockState({ htmlStyle, bodyStyle, useOverscroll, useOverflow, includeOverflowClip }) {
+    const overscrollHtml = readStyleValues(htmlStyle, "overscrollBehavior", "overscrollBehaviorY");
+    const overscrollBody = readStyleValues(bodyStyle, "overscrollBehavior", "overscrollBehaviorY");
+    const overflowHtml = readStyleValues(htmlStyle, "overflow", "overflowY");
+    const overflowBody = readStyleValues(bodyStyle, "overflow", "overflowY");
+    const overflowLockValues = includeOverflowClip ? OVERFLOW_LOCK_VALUES : OVERFLOW_LOCK_VALUES_NO_CLIP;
+    const overscrollMatches = useOverscroll && (matchesLockValues(overscrollHtml, OVERSCROLL_LOCK_VALUES) || matchesLockValues(overscrollBody, OVERSCROLL_LOCK_VALUES));
+    const overflowMatches = useOverflow && (matchesLockValues(overflowHtml, overflowLockValues) || matchesLockValues(overflowBody, overflowLockValues));
+    return {
+      locked: overscrollMatches || overflowMatches,
+      signals: {
+        overscrollBehavior: {
+          html: overscrollHtml,
+          body: overscrollBody,
+          matches: overscrollMatches
+        },
+        overflow: {
+          html: overflowHtml,
+          body: overflowBody,
+          matches: overflowMatches
+        }
+      }
+    };
+  }
+  function getSettingEnabled(settings, key, defaultState, platform) {
+    if (!settings) {
+      return isStateEnabled(defaultState, platform);
+    }
+    const value = settings[key] ?? defaultState;
+    if (typeof value === "object") {
+      return isStateEnabled(value.state, platform);
+    }
+    return isStateEnabled(value, platform);
+  }
+  function getSettingNumber(settings, key, defaultValue) {
+    if (!settings) {
+      return defaultValue;
+    }
+    const value = settings[key];
+    return typeof value === "number" ? value : defaultValue;
+  }
+  var BrowserUiLockController = class {
+    /**
+     * @param {object} params
+     * @param {object | undefined} params.settings
+     * @param {import('../../utils.js').Platform | undefined} params.platform
+     * @param {(payload: { locked: boolean, signals: UiLockSignals | null }) => void} params.notify
+     * @param {() => void} params.addDebugFlag
+     */
+    constructor({ settings, platform, notify, addDebugFlag }) {
+      /** @type {object | undefined} */
+      __publicField(this, "settings");
+      /** @type {import('../../utils.js').Platform | undefined} */
+      __publicField(this, "platform");
+      /** @type {(payload: { locked: boolean, signals: UiLockSignals | null }) => void} */
+      __publicField(this, "notify");
+      /** @type {() => void} */
+      __publicField(this, "addDebugFlag");
+      /** @type {boolean} */
+      __publicField(this, "pendingEvaluation", false);
+      /** @type {number | null} */
+      __publicField(this, "evaluationFrameId", null);
+      /** @type {ReturnType<typeof setTimeout> | null} */
+      __publicField(this, "delayedEvaluationTimer", null);
+      /** @type {MutationObserver[]} */
+      __publicField(this, "mutationObservers", []);
+      /** @type {boolean | null} */
+      __publicField(this, "lastLocked", null);
+      this.settings = settings;
+      this.platform = platform;
+      this.notify = notify;
+      this.addDebugFlag = addDebugFlag;
+    }
+    init() {
+      if (isBeingFramed()) {
+        return;
+      }
+      this.setupObservers();
+      this.runOnDomReady(() => {
+        this.scheduleEvaluation();
+        this.scheduleDelayedEvaluation();
+        this.observeBodyIfNeeded();
+      });
+    }
+    urlChanged() {
+      this.scheduleEvaluation();
+      this.scheduleDelayedEvaluation();
+    }
+    runOnDomReady(callback) {
+      if (document.readyState === "loading") {
+        window.addEventListener(
+          "DOMContentLoaded",
+          () => {
+            callback();
+          },
+          { once: true }
+        );
+      } else {
+        callback();
+      }
+    }
+    setupObservers() {
+      if (!getSettingEnabled(this.settings, "observeMutations", "enabled", this.platform)) {
+        return;
+      }
+      this.observeElementAttributes(document.documentElement);
+      this.observeHead();
+      this.observeBodyIfNeeded();
+    }
+    observeBodyIfNeeded() {
+      if (document.body) {
+        this.observeElementAttributes(document.body);
+        return;
+      }
+      this.runOnDomReady(() => {
+        if (document.body) {
+          this.observeElementAttributes(document.body);
+        }
+      });
+    }
+    /**
+     * @param {HTMLElement} element
+     */
+    observeElementAttributes(element) {
+      const observer = new MutationObserver(() => {
+        this.scheduleEvaluation();
+      });
+      observer.observe(element, {
+        attributes: true,
+        attributeFilter: ["class", "style"]
+      });
+      this.mutationObservers.push(observer);
+    }
+    observeHead() {
+      if (!document.head) {
+        this.runOnDomReady(() => {
+          this.observeHead();
+        });
+        return;
+      }
+      const observer = new MutationObserver((mutations) => {
+        const hasRelevantMutation = mutations.some((mutation) => {
+          if (mutation.type === "attributes") {
+            return this.isStyleOrLink(mutation.target);
+          }
+          if (mutation.type === "childList") {
+            return Array.from(mutation.addedNodes).some((node) => this.isStyleOrLink(node));
+          }
+          return false;
+        });
+        if (hasRelevantMutation) {
+          this.scheduleEvaluation();
+        }
+      });
+      observer.observe(document.head, {
+        attributes: true,
+        childList: true,
+        subtree: true
+      });
+      this.mutationObservers.push(observer);
+    }
+    /**
+     * @param {Node} node
+     * @returns {boolean}
+     */
+    isStyleOrLink(node) {
+      return node.nodeType === Node.ELEMENT_NODE && (node.nodeName === "STYLE" || node.nodeName === "LINK");
+    }
+    scheduleEvaluation() {
+      if (this.pendingEvaluation) {
+        return;
+      }
+      this.pendingEvaluation = true;
+      const runEvaluation = () => {
+        this.pendingEvaluation = false;
+        this.evaluateLockState();
+      };
+      if (typeof globalThis.requestAnimationFrame === "function") {
+        this.evaluationFrameId = globalThis.requestAnimationFrame(runEvaluation);
+      } else {
+        this.evaluationFrameId = window.setTimeout(runEvaluation, 16);
+      }
+    }
+    scheduleDelayedEvaluation() {
+      if (this.delayedEvaluationTimer) {
+        clearTimeout(this.delayedEvaluationTimer);
+      }
+      const delayMs = getSettingNumber(this.settings, "postLoadDelayMs", 300);
+      this.delayedEvaluationTimer = setTimeout(() => {
+        this.scheduleEvaluation();
+      }, delayMs);
+    }
+    evaluateLockState() {
+      if (!document.documentElement) {
+        return;
+      }
+      try {
+        const htmlStyle = window.getComputedStyle(document.documentElement);
+        const bodyStyle = document.body ? window.getComputedStyle(document.body) : null;
+        const useOverscroll = getSettingEnabled(this.settings, "overscrollBehavior", "enabled", this.platform);
+        const useOverflow = getSettingEnabled(this.settings, "overflow", "enabled", this.platform);
+        const includeOverflowClip = getSettingEnabled(this.settings, "overflowClip", "disabled", this.platform);
+        const { locked, signals } = computeUiLockState({
+          htmlStyle,
+          bodyStyle,
+          useOverscroll,
+          useOverflow,
+          includeOverflowClip
+        });
+        this.updateLockState(locked, signals);
+      } catch (_e3) {
+        this.updateLockState(false, null);
+      }
+    }
+    /**
+     * @param {boolean} locked
+     * @param {UiLockSignals | null} signals
+     */
+    updateLockState(locked, signals) {
+      if (this.lastLocked === null && !locked) {
+        this.lastLocked = locked;
+        return;
+      }
+      if (this.lastLocked === locked) {
+        return;
+      }
+      this.lastLocked = locked;
+      if (locked) {
+        this.addDebugFlag();
+      }
+      try {
+        this.notify({ locked, signals });
+      } catch (_e3) {
+      }
+    }
+  };
+
+  // src/features/web-compat.js
   function windowSizingFix() {
     if (window.outerHeight !== 0 && window.outerWidth !== 0) {
       return;
@@ -15477,7 +15738,7 @@ ul.messages {
     }
     return dataToSend;
   }
-  var _activeShareRequest, _activeScreenLockRequest, _webNotifications;
+  var _activeShareRequest, _activeScreenLockRequest, _webNotifications, _uiLockController;
   var WebCompat = class extends ContentFeature {
     constructor() {
       super(...arguments);
@@ -15487,6 +15748,8 @@ ul.messages {
       __privateAdd(this, _activeScreenLockRequest, null);
       /** @type {Map<string, object>} */
       __privateAdd(this, _webNotifications, /* @__PURE__ */ new Map());
+      /** @type {BrowserUiLockController | null} */
+      __privateAdd(this, _uiLockController, null);
       // Opt in to receive configuration updates from initial ping responses
       __publicField(this, "listenForConfigUpdates", true);
     }
@@ -15540,6 +15803,10 @@ ul.messages {
       if (this.getFeatureSettingEnabled("viewportWidthLegacy", "disabled")) {
         this.viewportWidthFix();
       }
+      this.initBrowserUiLock();
+    }
+    urlChanged() {
+      __privateGet(this, _uiLockController)?.urlChanged();
     }
     /**
      * Handle user preference updates when merged during initialization.
@@ -15551,6 +15818,22 @@ ul.messages {
       if (this.getFeatureSettingEnabled("viewportWidth")) {
         this.viewportWidthFix();
       }
+    }
+    initBrowserUiLock() {
+      const uiLockSettings = this.getFeatureSetting("browserUiLock");
+      if (!uiLockSettings || typeof uiLockSettings !== "object") {
+        return;
+      }
+      if (!isStateEnabled(uiLockSettings.state ?? "disabled", this.args?.platform)) {
+        return;
+      }
+      __privateSet(this, _uiLockController, new BrowserUiLockController({
+        settings: uiLockSettings,
+        platform: this.args?.platform,
+        notify: (payload) => this.messaging.notify("uiLockChanged", payload),
+        addDebugFlag: () => this.addDebugFlag()
+      }));
+      __privateGet(this, _uiLockController).init();
     }
     /**
      * Shim Web Share API in Android WebView
@@ -16367,6 +16650,7 @@ ul.messages {
   _activeShareRequest = new WeakMap();
   _activeScreenLockRequest = new WeakMap();
   _webNotifications = new WeakMap();
+  _uiLockController = new WeakMap();
   var web_compat_default = WebCompat;
 
   // src/features/web-interference-detection.js

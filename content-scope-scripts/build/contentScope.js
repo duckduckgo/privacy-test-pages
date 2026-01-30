@@ -15422,9 +15422,61 @@ ul.messages {
 
   // src/features/web-compat.js
   init_define_import_meta_trackerLookup();
-
-  // src/features/web-compat/ui-lock.js
-  init_define_import_meta_trackerLookup();
+  function windowSizingFix() {
+    if (window.outerHeight !== 0 && window.outerWidth !== 0) {
+      return;
+    }
+    window.outerHeight = window.innerHeight;
+    window.outerWidth = window.innerWidth;
+  }
+  var MSG_WEB_SHARE = "webShare";
+  var MSG_PERMISSIONS_QUERY = "permissionsQuery";
+  var MSG_SCREEN_LOCK = "screenLock";
+  var MSG_SCREEN_UNLOCK = "screenUnlock";
+  var MSG_DEVICE_ENUMERATION = "deviceEnumeration";
+  function canShare(data2) {
+    if (typeof data2 !== "object") return false;
+    data2 = Object.assign({}, data2);
+    for (const key of ["url", "title", "text", "files"]) {
+      if (data2[key] === void 0 || data2[key] === null) {
+        delete data2[key];
+      }
+    }
+    if (!("url" in data2) && !("title" in data2) && !("text" in data2)) return false;
+    if ("files" in data2) {
+      if (!(Array.isArray(data2.files) || data2.files instanceof FileList)) return false;
+      if (data2.files.length > 0) return false;
+    }
+    if ("title" in data2 && typeof data2.title !== "string") return false;
+    if ("text" in data2 && typeof data2.text !== "string") return false;
+    if ("url" in data2) {
+      if (typeof data2.url !== "string") return false;
+      try {
+        const url = new URL2(data2.url, location.href);
+        if (url.protocol !== "http:" && url.protocol !== "https:") return false;
+      } catch (err) {
+        return false;
+      }
+    }
+    return true;
+  }
+  function cleanShareData(data2) {
+    const dataToSend = {};
+    for (const key of ["title", "text", "url"]) {
+      if (key in data2) dataToSend[key] = data2[key];
+    }
+    if ("url" in data2) {
+      dataToSend.url = new URL2(data2.url, location.href).href;
+    }
+    if ("url" in dataToSend && "text" in dataToSend) {
+      dataToSend.text = `${dataToSend.text} ${dataToSend.url}`;
+      delete dataToSend.url;
+    }
+    if (!("url" in dataToSend) && !("text" in dataToSend)) {
+      dataToSend.text = "";
+    }
+    return dataToSend;
+  }
   var OVERSCROLL_LOCK_VALUES = /* @__PURE__ */ new Set(["none", "contain"]);
   var OVERFLOW_LOCK_VALUES = /* @__PURE__ */ new Set(["hidden", "clip"]);
   var OVERFLOW_LOCK_VALUES_NO_CLIP = /* @__PURE__ */ new Set(["hidden"]);
@@ -15469,36 +15521,21 @@ ul.messages {
       }
     };
   }
-  function getSettingEnabled(settings, key, defaultState, platform) {
-    if (!settings) {
-      return isStateEnabled(defaultState, platform);
-    }
-    const value = settings[key] ?? defaultState;
-    if (typeof value === "object") {
-      return isStateEnabled(value.state, platform);
-    }
-    return isStateEnabled(value, platform);
-  }
-  function getSettingNumber(settings, key, defaultValue) {
-    if (!settings) {
-      return defaultValue;
-    }
-    const value = settings[key];
-    return typeof value === "number" ? value : defaultValue;
-  }
   var BrowserUiLockController = class {
     /**
      * @param {object} params
-     * @param {object | undefined} params.settings
-     * @param {import('../../utils.js').Platform | undefined} params.platform
+     * @param {object} params.options
+     * @param {boolean} params.options.useOverscroll
+     * @param {boolean} params.options.useOverflow
+     * @param {boolean} params.options.includeOverflowClip
+     * @param {boolean} params.options.observeMutations
+     * @param {number} params.options.postLoadDelayMs
      * @param {(payload: { locked: boolean, signals: UiLockSignals | null }) => void} params.notify
      * @param {() => void} params.addDebugFlag
      */
-    constructor({ settings, platform, notify, addDebugFlag }) {
-      /** @type {object | undefined} */
-      __publicField(this, "settings");
-      /** @type {import('../../utils.js').Platform | undefined} */
-      __publicField(this, "platform");
+    constructor({ options, notify, addDebugFlag }) {
+      /** @type {object} */
+      __publicField(this, "options");
       /** @type {(payload: { locked: boolean, signals: UiLockSignals | null }) => void} */
       __publicField(this, "notify");
       /** @type {() => void} */
@@ -15513,8 +15550,9 @@ ul.messages {
       __publicField(this, "mutationObservers", []);
       /** @type {boolean | null} */
       __publicField(this, "lastLocked", null);
-      this.settings = settings;
-      this.platform = platform;
+      /** @type {number} */
+      __publicField(this, "evaluationCount", 0);
+      this.options = options;
       this.notify = notify;
       this.addDebugFlag = addDebugFlag;
     }
@@ -15547,7 +15585,7 @@ ul.messages {
       }
     }
     setupObservers() {
-      if (!getSettingEnabled(this.settings, "observeMutations", "enabled", this.platform)) {
+      if (!this.options.observeMutations) {
         return;
       }
       this.observeElementAttributes(document.documentElement);
@@ -15632,27 +15670,24 @@ ul.messages {
       if (this.delayedEvaluationTimer) {
         clearTimeout(this.delayedEvaluationTimer);
       }
-      const delayMs = getSettingNumber(this.settings, "postLoadDelayMs", 300);
       this.delayedEvaluationTimer = setTimeout(() => {
         this.scheduleEvaluation();
-      }, delayMs);
+      }, this.options.postLoadDelayMs);
     }
     evaluateLockState() {
+      this.evaluationCount += 1;
       if (!document.documentElement) {
         return;
       }
       try {
         const htmlStyle = window.getComputedStyle(document.documentElement);
         const bodyStyle = document.body ? window.getComputedStyle(document.body) : null;
-        const useOverscroll = getSettingEnabled(this.settings, "overscrollBehavior", "enabled", this.platform);
-        const useOverflow = getSettingEnabled(this.settings, "overflow", "enabled", this.platform);
-        const includeOverflowClip = getSettingEnabled(this.settings, "overflowClip", "disabled", this.platform);
         const { locked, signals } = computeUiLockState({
           htmlStyle,
           bodyStyle,
-          useOverscroll,
-          useOverflow,
-          includeOverflowClip
+          useOverscroll: this.options.useOverscroll,
+          useOverflow: this.options.useOverflow,
+          includeOverflowClip: this.options.includeOverflowClip
         });
         this.updateLockState(locked, signals);
       } catch (_e3) {
@@ -15681,63 +15716,6 @@ ul.messages {
       }
     }
   };
-
-  // src/features/web-compat.js
-  function windowSizingFix() {
-    if (window.outerHeight !== 0 && window.outerWidth !== 0) {
-      return;
-    }
-    window.outerHeight = window.innerHeight;
-    window.outerWidth = window.innerWidth;
-  }
-  var MSG_WEB_SHARE = "webShare";
-  var MSG_PERMISSIONS_QUERY = "permissionsQuery";
-  var MSG_SCREEN_LOCK = "screenLock";
-  var MSG_SCREEN_UNLOCK = "screenUnlock";
-  var MSG_DEVICE_ENUMERATION = "deviceEnumeration";
-  function canShare(data2) {
-    if (typeof data2 !== "object") return false;
-    data2 = Object.assign({}, data2);
-    for (const key of ["url", "title", "text", "files"]) {
-      if (data2[key] === void 0 || data2[key] === null) {
-        delete data2[key];
-      }
-    }
-    if (!("url" in data2) && !("title" in data2) && !("text" in data2)) return false;
-    if ("files" in data2) {
-      if (!(Array.isArray(data2.files) || data2.files instanceof FileList)) return false;
-      if (data2.files.length > 0) return false;
-    }
-    if ("title" in data2 && typeof data2.title !== "string") return false;
-    if ("text" in data2 && typeof data2.text !== "string") return false;
-    if ("url" in data2) {
-      if (typeof data2.url !== "string") return false;
-      try {
-        const url = new URL2(data2.url, location.href);
-        if (url.protocol !== "http:" && url.protocol !== "https:") return false;
-      } catch (err) {
-        return false;
-      }
-    }
-    return true;
-  }
-  function cleanShareData(data2) {
-    const dataToSend = {};
-    for (const key of ["title", "text", "url"]) {
-      if (key in data2) dataToSend[key] = data2[key];
-    }
-    if ("url" in data2) {
-      dataToSend.url = new URL2(data2.url, location.href).href;
-    }
-    if ("url" in dataToSend && "text" in dataToSend) {
-      dataToSend.text = `${dataToSend.text} ${dataToSend.url}`;
-      delete dataToSend.url;
-    }
-    if (!("url" in dataToSend) && !("text" in dataToSend)) {
-      dataToSend.text = "";
-    }
-    return dataToSend;
-  }
   var _activeShareRequest, _activeScreenLockRequest, _webNotifications, _uiLockController;
   var WebCompat = class extends ContentFeature {
     constructor() {
@@ -15824,12 +15802,18 @@ ul.messages {
       if (!uiLockSettings || typeof uiLockSettings !== "object") {
         return;
       }
-      if (!isStateEnabled(uiLockSettings.state ?? "disabled", this.args?.platform)) {
+      if (!isStateEnabled(uiLockSettings.state ?? "enabled", this.args?.platform)) {
         return;
       }
+      const options = {
+        useOverscroll: uiLockSettings.overscrollBehavior !== "disabled",
+        useOverflow: uiLockSettings.overflow !== "disabled",
+        includeOverflowClip: uiLockSettings.overflowClip === "enabled",
+        observeMutations: uiLockSettings.observeMutations !== "disabled",
+        postLoadDelayMs: typeof uiLockSettings.postLoadDelayMs === "number" ? uiLockSettings.postLoadDelayMs : 300
+      };
       __privateSet(this, _uiLockController, new BrowserUiLockController({
-        settings: uiLockSettings,
-        platform: this.args?.platform,
+        options,
         notify: (payload) => this.messaging.notify("uiLockChanged", payload),
         addDebugFlag: () => this.addDebugFlag()
       }));

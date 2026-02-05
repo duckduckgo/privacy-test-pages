@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>window.onerror Test</title>
+    <style>
+        .indicator {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .no-error {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .has-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .error-log {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 10px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .error-entry {
+            border-bottom: 1px solid #dee2e6;
+            padding: 8px 0;
+            margin-bottom: 8px;
+        }
+        .error-entry:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+        button {
+            margin: 5px 5px 5px 0;
+            padding: 8px 12px;
+        }
+        .section {
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <p><a href="../index.html">[Home]</a></p>
+    <h1>window.onerror Test</h1>
+    <p>Tests the global <code>window.onerror</code> handler. The indicator below shows if any uncaught errors have been captured.</p>
+
+    <div class="section">
+        <h3>Error Indicator</h3>
+        <div id="indicator" class="indicator no-error">No errors captured</div>
+        <p>Error count: <span id="errorCount">0</span></p>
+        <button id="reset">Reset Indicator</button>
+    </div>
+
+    <div class="section">
+        <h3>Trigger Test Errors</h3>
+        <button id="triggerReferenceError">ReferenceError (undefined variable)</button>
+        <button id="triggerTypeError">TypeError (null property access)</button>
+        <button id="triggerSyntaxError">SyntaxError (eval)</button>
+        <button id="triggerCustomError">Custom throw</button>
+        <button id="triggerAsyncError">Async Error (setTimeout)</button>
+    </div>
+
+    <div class="section">
+        <h3>Error Log</h3>
+        <div id="errorLog" class="error-log">No errors logged yet.</div>
+    </div>
+
+    <div class="section">
+        <h3>Handler Status</h3>
+        <p>window.onerror installed: <span id="handlerStatus">checking...</span></p>
+    </div>
+
+    <script>
+        /* eslint-disable no-unused-vars, no-undef */
+        const indicator = document.getElementById('indicator');
+        const errorCountSpan = document.getElementById('errorCount');
+        const errorLog = document.getElementById('errorLog');
+        const handlerStatus = document.getElementById('handlerStatus');
+
+        let errorCount = 0;
+        const errors = [];
+
+        // Install global error handler
+        window.onerror = function (message, source, lineno, colno, error) {
+            errorCount++;
+            const errorInfo = {
+                timestamp: new Date().toISOString(),
+                message: message,
+                source: source,
+                line: lineno,
+                column: colno,
+                errorObject: error ? error.toString() : 'N/A',
+                stack: error && error.stack ? error.stack : 'N/A'
+            };
+            errors.push(errorInfo);
+
+            updateIndicator();
+            updateErrorLog();
+
+            // Return true to prevent default browser error handling
+            return true;
+        };
+
+        function updateIndicator () {
+            indicator.className = 'indicator has-error';
+            indicator.textContent = `Error captured! (${errorCount} total)`;
+            errorCountSpan.textContent = errorCount;
+        }
+
+        function updateErrorLog () {
+            if (errors.length === 0) {
+                errorLog.innerHTML = 'No errors logged yet.';
+                return;
+            }
+
+            errorLog.innerHTML = errors.map((err, i) => `
+                <div class="error-entry">
+                    <strong>#${i + 1}</strong> [${err.timestamp}]<br>
+                    <strong>Message:</strong> ${escapeHtml(err.message)}<br>
+                    <strong>Source:</strong> ${escapeHtml(err.source)}<br>
+                    <strong>Location:</strong> Line ${err.line}, Column ${err.column}<br>
+                    <strong>Error:</strong> ${escapeHtml(err.errorObject)}<br>
+                    <strong>Stack:</strong><br><pre style="margin:5px 0;white-space:pre-wrap;">${escapeHtml(err.stack)}</pre>
+                </div>
+            `).join('');
+        }
+
+        function escapeHtml (text) {
+            if (text === null || text === undefined) return 'N/A';
+            const div = document.createElement('div');
+            div.textContent = String(text);
+            return div.innerHTML;
+        }
+
+        function resetIndicator () {
+            errorCount = 0;
+            errors.length = 0;
+            indicator.className = 'indicator no-error';
+            indicator.textContent = 'No errors captured';
+            errorCountSpan.textContent = '0';
+            errorLog.innerHTML = 'No errors logged yet.';
+        }
+
+        // Check handler status
+        handlerStatus.textContent = typeof window.onerror === 'function' ? 'Yes' : 'No';
+
+        // Button handlers
+        document.getElementById('reset').addEventListener('click', resetIndicator);
+
+        document.getElementById('triggerReferenceError').addEventListener('click', function () {
+            // Access undefined variable - triggers ReferenceError
+            setTimeout(function () {
+                undefinedVariable.property;
+            }, 0);
+        });
+
+        document.getElementById('triggerTypeError').addEventListener('click', function () {
+            // Access property on null - triggers TypeError
+            setTimeout(function () {
+                const obj = null;
+                obj.property;
+            }, 0);
+        });
+
+        document.getElementById('triggerSyntaxError').addEventListener('click', function () {
+            // Eval invalid syntax - triggers SyntaxError
+            setTimeout(function () {
+                eval('function {');
+            }, 0);
+        });
+
+        document.getElementById('triggerCustomError').addEventListener('click', function () {
+            // Throw custom error
+            setTimeout(function () {
+                throw new Error('Custom test error thrown intentionally');
+            }, 0);
+        });
+
+        document.getElementById('triggerAsyncError').addEventListener('click', function () {
+            // Error in async callback
+            setTimeout(function () {
+                throw new Error('Async error from setTimeout');
+            }, 100);
+        });
+    </script>
+</body>
+</html>

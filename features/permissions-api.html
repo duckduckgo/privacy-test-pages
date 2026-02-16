@@ -74,6 +74,7 @@ and the returned state can be incorrect or unchanged after granting or denying.<
   <li>Click Query all and confirm camera and microphone are returned with override names.</li>
   <li>Use Request camera and Request microphone, allow or deny, then re-query to confirm state updates.</li>
   <li>Use Query (custom) with an invalid name and confirm a TypeError is returned.</li>
+  <li>Click the "Query, request, and wait" buttons, and ensure that the message changes to "Success: granted/denied" after you are prompted.</li>
 </ol>
 <p><strong>Notes:</strong> To test the API-present path, ensure <code>webCompat.permissionsPresent</code> is enabled in
 remote config for this build. The native messaging path is only used for permissions marked <code>native</code>
@@ -166,6 +167,20 @@ remote config for this build. The native messaging path is only used for permiss
   <button id="request-geolocation">Request geolocation</button>
   <button id="request-notifications">Request notifications</button>
   <button id="stop-media">Stop media streams</button>
+</div>
+
+<h2>Request permission and wait</h2>
+<p>Query the camera permission and wait for the state to change via a <code>change</code> event.
+If the permission is already granted or denied, you will be asked to clear and try again. After
+you are prompted to grant/deny the permission, the status string should change from "Waiting..."
+to "Success: granted/denied".</p>
+<div class="buttons">
+  <button id="request-and-wait-addEventListener-button">Query, request, and wait (addEventListener)</button>
+  <span id="request-and-wait-addEventListener-status">...</span>
+</div>
+<div class="buttons">
+  <button id="request-and-wait-onchange-button">Query, request, and wait (onchange)</button>
+  <span id="request-and-wait-onchange-status">...</span>
 </div>
 
 <h2>Log</h2>
@@ -334,6 +349,52 @@ remote config for this build. The native messaging path is only used for permiss
   document.getElementById('request-geolocation').addEventListener('click', requestGeolocation);
   document.getElementById('request-notifications').addEventListener('click', requestNotifications);
   document.getElementById('stop-media').addEventListener('click', stopMediaStreams);
+
+  async function requestAndWaitForChange(method) {
+    const statusEl = document.getElementById(`request-and-wait-${method}-status`);
+    statusEl.textContent = '...';
+    try {
+      // Check the current status of the camera permission.
+      const status = await navigator.permissions.query({ name: 'camera' });
+      if (status.state !== 'prompt') {
+        statusEl.textContent = `Permission already ${status.state}, clear and try again`;
+        logLine(`wait(${method}): already ${status.state}`);
+        return;
+      }
+
+      // Watch for changes to the permission.
+      statusEl.textContent = 'Waiting...';
+      logLine(`wait(${method}): state is prompt, waiting for change...`);
+      const changePromise = new Promise((resolve) => {
+        if (method === 'onchange') {
+          status.onchange = () => resolve(status.state);
+        } else {
+          status.addEventListener('change', () => resolve(status.state), { once: true });
+        }
+      });
+
+      // Request the user for the permission.
+      if (!navigator.mediaDevices || typeof navigator.mediaDevices.getUserMedia !== 'function') {
+        statusEl.textContent = 'Failed to request (use HTTPS)';
+        logLine(`wait(${method}): getUserMedia not available`);
+        return;
+      }
+      logLine(`wait(${method}): requesting camera via getUserMedia...`);
+      requestMedia({ video: true, audio: false }, `Camera (${method})`, 'camera');
+
+      // Wait for the user to make their decision.
+      const newState = await changePromise;
+      statusEl.textContent = `Success: ${newState}`;
+      logLine(`wait(${method}): changed to ${newState}`);
+    } catch (e) {
+      const error = e && e.message ? e.message : String(e);
+      statusEl.textContent = `Error: ${error}`;
+      logLine(`wait(${method}): error ${error}`);
+    }
+  }
+
+  document.getElementById('request-and-wait-addEventListener-button').addEventListener('click', () => requestAndWaitForChange('addEventListener'));
+  document.getElementById('request-and-wait-onchange-button').addEventListener('click', () => requestAndWaitForChange('onchange'));
 
   updateRuntimeInfo();
 </script>

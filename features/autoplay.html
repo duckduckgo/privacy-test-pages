@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>WebKit Autoplay Policy Tests</title>
+  <style>
+    body { font-family: -apple-system, system-ui, sans-serif; max-width: 800px; margin: 0 auto; padding: 16px; }
+    .test { margin: 16px 0; padding: 12px; border: 1px solid #ddd; border-radius: 4px; }
+    .test h3 { margin-top: 0; }
+    .result { font-weight: bold; padding: 4px 8px; border-radius: 3px; display: inline-block; }
+    .allowed { color: #1a7f37; background: #dafbe1; }
+    .blocked { color: #cf222e; background: #ffebe9; }
+    .pending { color: #656d76; background: #eee; }
+    video, audio { display: block; margin: 8px 0; }
+    button { margin: 16px 0; padding: 8px 16px; font-size: 14px; }
+  </style>
+</head>
+<body>
+<p><a href="../index.html">[Home]</a></p>
+
+<h1>WebKit Autoplay Policy Tests</h1>
+<p>Tests which autoplay scenarios are allowed or blocked based on the current
+<code>mediaTypesRequiringUserActionForPlayback</code> configuration.
+Each test creates a media element and attempts to play it without user interaction.</p>
+
+<button id="run">Run all tests</button>
+
+<div id="tests">
+  <div class="test" id="test-1">
+    <h3>1. Muted video autoplay</h3>
+    <p>A <code>&lt;video&gt;</code> element with <code>muted autoplay</code>. Most browsers allow this by default.</p>
+    <span class="result pending" id="result-1">Pending</span>
+  </div>
+
+  <div class="test" id="test-2">
+    <h3>2. Unmuted video autoplay</h3>
+    <p>A <code>&lt;video&gt;</code> element with <code>autoplay</code> (not muted). Browsers with audio blocking will reject this.</p>
+    <span class="result pending" id="result-2">Pending</span>
+  </div>
+
+  <div class="test" id="test-3">
+    <h3>3. Audio element autoplay</h3>
+    <p>An <code>&lt;audio&gt;</code> element with <code>autoplay</code>. Should be blocked when audio autoplay is blocked.</p>
+    <span class="result pending" id="result-3">Pending</span>
+  </div>
+
+  <div class="test" id="test-4">
+    <h3>4. Programmatic play() - muted video</h3>
+    <p>A muted <code>&lt;video&gt;</code> element with <code>play()</code> called from script (no autoplay attribute).</p>
+    <span class="result pending" id="result-4">Pending</span>
+  </div>
+
+  <div class="test" id="test-5">
+    <h3>5. Programmatic play() - unmuted video</h3>
+    <p>An unmuted <code>&lt;video&gt;</code> element with <code>play()</code> called from script.</p>
+    <span class="result pending" id="result-5">Pending</span>
+  </div>
+</div>
+
+<h2>Expected results</h2>
+<p style="font-size: 13px;">Based on the <code>WKAudiovisualMediaTypes</code> value set on
+<code>WKWebViewConfiguration.mediaTypesRequiringUserActionForPlayback</code>.</p>
+<table border="1" cellpadding="6" cellspacing="0" style="border-collapse: collapse; font-size: 14px;">
+  <tr>
+    <th>Test</th>
+    <th>[] (allow all)</th>
+    <th>.audio</th>
+    <th>.all</th>
+  </tr>
+  <tr><td>1. Muted video</td><td>Allowed</td><td>Allowed</td><td>Allowed*</td></tr>
+  <tr><td>2. Unmuted video</td><td>Allowed</td><td>Blocked</td><td>Blocked</td></tr>
+  <tr><td>3. Audio element</td><td>Allowed</td><td>Blocked</td><td>Blocked</td></tr>
+  <tr><td>4. play() muted</td><td>Allowed</td><td>Allowed</td><td>Blocked</td></tr>
+  <tr><td>5. play() unmuted</td><td>Allowed</td><td>Blocked</td><td>Blocked</td></tr>
+</table>
+<p style="font-size: 13px; color: #656d76;">* WebKit exempts muted video with the <code>autoplay</code> attribute
+from restrictions regardless of configuration. Programmatic <code>play()</code>
+on muted video (test 4) is still blocked under <code>.all</code>.</p>
+
+<div id="media-container" style="margin-top: 16px;"></div>
+
+<script>
+var VIDEO_BASE = 'https://cdn.jsdelivr.net/gh/mediaelement/mediaelement-files@master/big_buck_bunny.mp4';
+
+function videoUrl(testId) {
+  return VIDEO_BASE + '?t=' + testId;
+}
+
+function setResult(id, allowed) {
+  var el = document.getElementById('result-' + id);
+  el.textContent = allowed ? 'Allowed' : 'Blocked';
+  el.className = 'result ' + (allowed ? 'allowed' : 'blocked');
+}
+
+function tryAutoplay(element) {
+  // Wait briefly so autoplay has time to either start or be blocked.
+  return new Promise(function (resolve) {
+    setTimeout(function () {
+      resolve(!element.paused);
+    }, 2500);
+  });
+}
+
+function tryPlay(element) {
+  return element.play().then(function () {
+    return true;
+  }).catch(function () {
+    return false;
+  });
+}
+
+var container = document.getElementById('media-container');
+
+async function runTests() {
+  for (var i = 1; i <= 5; i++) {
+    var el = document.getElementById('result-' + i);
+    el.textContent = 'Running...';
+    el.className = 'result pending';
+  }
+
+  container.innerHTML = '';
+
+  // Test 1: Muted video with autoplay attribute
+  var v1 = document.createElement('video');
+  v1.src = videoUrl(1);
+  v1.muted = true;
+  v1.autoplay = true;
+  v1.width = 160;
+  v1.playsInline = true;
+  container.appendChild(v1);
+  setResult(1, await tryAutoplay(v1));
+
+  // Test 2: Unmuted video with autoplay attribute
+  var v2 = document.createElement('video');
+  v2.src = videoUrl(2);
+  v2.muted = false;
+  v2.autoplay = true;
+  v2.width = 160;
+  v2.playsInline = true;
+  container.appendChild(v2);
+  setResult(2, await tryAutoplay(v2));
+
+  // Test 3: Audio element with autoplay
+  var a3 = document.createElement('audio');
+  a3.src = videoUrl(3);
+  a3.autoplay = true;
+  container.appendChild(a3);
+  setResult(3, await tryAutoplay(a3));
+
+  // Test 4: Programmatic play() on muted video
+  var v4 = document.createElement('video');
+  v4.src = videoUrl(4);
+  v4.muted = true;
+  v4.width = 160;
+  v4.playsInline = true;
+  container.appendChild(v4);
+  setResult(4, await tryPlay(v4));
+
+  // Test 5: Programmatic play() on unmuted video
+  var v5 = document.createElement('video');
+  v5.src = videoUrl(5);
+  v5.muted = false;
+  v5.width = 160;
+  v5.playsInline = true;
+  container.appendChild(v5);
+  setResult(5, await tryPlay(v5));
+}
+
+document.getElementById('run').addEventListener('click', runTests);
+</script>
+
+</body>
+</html>

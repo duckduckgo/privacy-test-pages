@@ -94,18 +94,11 @@ function setResult(id, allowed) {
 }
 
 function tryAutoplay(element) {
-  // Check multiple times to handle cases where playback starts briefly
-  // before being blocked by the autoplay policy.
+  // Wait briefly so autoplay has time to either start or be blocked.
   return new Promise(function (resolve) {
-    var checks = 0;
-    var maxChecks = 5;
-    var interval = setInterval(function () {
-      checks++;
-      if (checks >= maxChecks) {
-        clearInterval(interval);
-        resolve(!element.paused);
-      }
-    }, 500);
+    setTimeout(function () {
+      resolve(!element.paused);
+    }, 2500);
   });
 }
 

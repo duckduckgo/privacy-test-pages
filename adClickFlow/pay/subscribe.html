@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Test Payment - DuckDuckGo Subscription</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f6f8fa;
+      color: #1a1a1a;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .checkout-container {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 32px;
+      max-width: 440px;
+      width: 100%;
+    }
+    .checkout-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .checkout-header h1 {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .checkout-header .subtitle {
+      font-size: 14px;
+      color: #666;
+    }
+    .checkout-header .badge {
+      display: inline-block;
+      background: #fff3cd;
+      color: #856404;
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-top: 8px;
+    }
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: #555;
+      margin-bottom: 6px;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+      background: #f9f9f9;
+    }
+    .form-group input:focus {
+      outline: none;
+      border-color: #3969ef;
+      box-shadow: 0 0 0 2px rgba(57,105,239,0.2);
+    }
+    .form-row {
+      display: flex;
+      gap: 12px;
+    }
+    .form-row .form-group { flex: 1; }
+    .debug-info {
+      background: #f0f0f0;
+      border-radius: 6px;
+      padding: 12px;
+      margin-bottom: 16px;
+      font-size: 12px;
+      font-family: monospace;
+      word-break: break-all;
+    }
+    .debug-info dt {
+      font-weight: 600;
+      color: #555;
+      margin-top: 4px;
+    }
+    .debug-info dt:first-child { margin-top: 0; }
+    .debug-info dd {
+      color: #333;
+      margin-left: 0;
+      margin-bottom: 4px;
+    }
+    #pay-button {
+      width: 100%;
+      padding: 14px;
+      background: #3969ef;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    #pay-button:hover { background: #2b4fc7; }
+    #pay-button:active { background: #1e3a9f; }
+    #pay-button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    .error-message {
+      background: #fce4e4;
+      color: #c0392b;
+      border-radius: 6px;
+      padding: 12px;
+      margin-bottom: 16px;
+      font-size: 13px;
+      display: none;
+    }
+    .auto-pay-notice {
+      text-align: center;
+      font-size: 12px;
+      color: #888;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="checkout-container">
+  <div class="checkout-header">
+    <h1>Test Payment Checkout</h1>
+    <p class="subtitle">Fake Stripe checkout for automation testing</p>
+    <span class="badge">⚠ TEST MODE — No real charges</span>
+  </div>
+
+  <div id="error-message" class="error-message"></div>
+
+  <dl class="debug-info">
+    <dt>Token:</dt>
+    <dd id="debug-token">—</dd>
+    <dt>Plan:</dt>
+    <dd id="debug-plan">—</dd>
+    <dt>Return URL:</dt>
+    <dd id="debug-return-url">—</dd>
+  </dl>
+
+  <form id="checkout-form">
+    <div class="form-group">
+      <label for="cc-name">Cardholder Name</label>
+      <input type="text" id="cc-name" name="cc-name" autocomplete="cc-name" value="Test User" />
+    </div>
+
+    <div class="form-group">
+      <label for="cc-number">Card Number</label>
+      <input type="text" id="cc-number" name="cc-number" autocomplete="cc-number" value="4242424242424242" />
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="cc-exp">Expiry</label>
+        <input type="text" id="cc-exp" name="cc-exp" autocomplete="cc-exp" value="12/28" />
+      </div>
+      <div class="form-group">
+        <label for="cc-csc">CVC</label>
+        <input type="text" id="cc-csc" name="cc-csc" autocomplete="cc-csc" value="123" />
+      </div>
+    </div>
+
+    <button type="submit" id="pay-button">Pay &amp; Subscribe</button>
+  </form>
+
+  <p class="auto-pay-notice" id="auto-pay-notice" style="display:none">
+    Auto-pay enabled — redirecting automatically…
+  </p>
+</div>
+
+<script>
+(function () {
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get('token');
+  const returnURL = params.get('returnURL') || params.get('returnUrl') || params.get('return_url');
+  const plan = params.get('plan') || params.get('planId') || 'unknown';
+  const autoPay = params.get('autoPay') === 'true';
+
+  // Populate debug info
+  document.getElementById('debug-token').textContent = token
+    ? token.substring(0, 12) + '…' + token.substring(token.length - 4)
+    : '(none)';
+  document.getElementById('debug-plan').textContent = plan;
+  document.getElementById('debug-return-url').textContent = returnURL || '(none)';
+
+  // Validate required parameters
+  var errorEl = document.getElementById('error-message');
+  if (!returnURL) {
+    errorEl.textContent = 'Missing returnURL parameter. The subscription frontend must provide a return URL.';
+    errorEl.style.display = 'block';
+    document.getElementById('pay-button').disabled = true;
+    return;
+  }
+
+  // Handle form submission
+  document.getElementById('checkout-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    completePayment();
+  });
+
+  function completePayment() {
+    var btn = document.getElementById('pay-button');
+    btn.disabled = true;
+    btn.textContent = 'Processing…';
+
+    // Build the return URL with success signal
+    // Append success=true to indicate the fake payment succeeded
+    var url = new URL(returnURL);
+    url.searchParams.set('success', 'true');
+    if (token) {
+      url.searchParams.set('token', token);
+    }
+
+    // Short delay to make it visible in automation logs
+    setTimeout(function () {
+      window.location.href = url.toString();
+    }, 300);
+  }
+
+  // Auto-pay mode for fully automated runs — no manual click needed
+  if (autoPay) {
+    document.getElementById('auto-pay-notice').style.display = 'block';
+    setTimeout(function () {
+      completePayment();
+    }, 500);
+  }
+})();
+</script>
+
+</body>
+</html>

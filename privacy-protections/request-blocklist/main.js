@@ -8,8 +8,10 @@ let failed = false;
 const seenResults = new Set();
 const tests = [];
 for (const test of document.getElementById('tests').querySelectorAll('tr')) {
-    const description = test.querySelector('.description')?.innerText;
-    const testClass = test.querySelector('td')?.className;
+    const descriptionElement = test.querySelector('.description');
+    const description = descriptionElement ? descriptionElement.innerText : undefined;
+    const testClassElement = test.querySelector('td');
+    const testClass = testClassElement ? testClassElement.className : undefined;
 
     if (!testClass || !description) {
         continue;

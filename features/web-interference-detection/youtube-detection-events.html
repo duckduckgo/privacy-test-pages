@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>YouTube Detection Events Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 20px;
+            max-width: 800px;
+        }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 16px 0;
+        }
+        button {
+            padding: 8px 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background: #f8f8f8;
+            cursor: pointer;
+        }
+        button:hover { background: #e8e8e8; }
+        button.active { background: #4a90d9; color: white; border-color: #357abd; }
+        #player-container {
+            border: 2px dashed #ccc;
+            padding: 20px;
+            margin: 16px 0;
+            min-height: 100px;
+            position: relative;
+        }
+        #event-log {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 12px;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+            font-size: 13px;
+            border-radius: 4px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        #event-log .timestamp { color: #6a9955; }
+        #event-log .event-type { color: #569cd6; }
+        .status { padding: 8px; border-radius: 4px; margin: 8px 0; }
+        .status.active { background: #e8f5e9; }
+        .status.inactive { background: #fafafa; color: #999; }
+        h3 { margin: 20px 0 8px; }
+    </style>
+</head>
+<body>
+    <h1>YouTube Detection Events Test</h1>
+    <p>
+        This page mocks YouTube player DOM elements to trigger the <code>YouTubeAdDetector</code>.
+        Use the buttons below to simulate detection conditions, then check native debug tooling
+        for <code>webEvent</code> messages with <code>youtube_</code> prefixed types.
+    </p>
+
+    <div id="detector-status" class="status inactive">
+        Detector status: waiting for initialization...
+    </div>
+
+    <h3>Simulate Detections</h3>
+    <div class="controls">
+        <button id="btn-adblocker" onclick="toggleAdBlockerModal()">Show Ad-Blocker Modal</button>
+        <button id="btn-playability" onclick="togglePlayabilityError()">Show Playability Error</button>
+        <button id="btn-clear" onclick="clearAll()">Clear All</button>
+    </div>
+
+    <h3>Mock YouTube Player</h3>
+    <div id="player-container">
+        <div id="movie_player" class="html5-video-player">
+            <video id="mock-video" src="about:blank"></video>
+            <div id="mock-error" class="ytp-error" style="display: none;">
+                <div class="playability-status-message">This video is unavailable</div>
+            </div>
+        </div>
+        <div id="mock-adblocker-dialog" role="dialog" aria-modal="true" style="display: none;">
+            <div class="yt-core-attributed-string" role="text">Ad blockers are not allowed on YouTube</div>
+        </div>
+    </div>
+
+    <h3>Event Log</h3>
+    <p>Events fired by the detector (via <code>webEvents.fireEvent</code>):</p>
+    <div id="event-log">Waiting for events...\n</div>
+
+    <script>
+        const logEl = document.getElementById('event-log');
+        const statusEl = document.getElementById('detector-status');
+
+        function log(message) {
+            const time = new Date().toLocaleTimeString();
+            logEl.innerHTML += `<span class="timestamp">[${time}]</span> ${message}\n`;
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        function toggleAdBlockerModal() {
+            const modal = document.getElementById('mock-adblocker-dialog');
+            const btn = document.getElementById('btn-adblocker');
+            const showing = modal.style.display !== 'none';
+            modal.style.display = showing ? 'none' : 'block';
+            btn.classList.toggle('active', !showing);
+            log(showing ? 'Removed ad-blocker modal' : 'Showing ad-blocker modal');
+        }
+
+        function togglePlayabilityError() {
+            const error = document.getElementById('mock-error');
+            const btn = document.getElementById('btn-playability');
+            const showing = error.style.display !== 'none';
+            error.style.display = showing ? 'none' : 'block';
+            btn.classList.toggle('active', !showing);
+            log(showing ? 'Removed playability error' : 'Showing playability error');
+        }
+
+        function clearAll() {
+            document.getElementById('mock-adblocker-dialog').style.display = 'none';
+            document.getElementById('mock-error').style.display = 'none';
+            document.getElementById('btn-adblocker').classList.remove('active');
+            document.getElementById('btn-playability').classList.remove('active');
+            log('Cleared all mock detections');
+        }
+
+        // Monitor detector initialization
+        let checkCount = 0;
+        const initCheck = setInterval(() => {
+            checkCount++;
+            if (checkCount > 30) {
+                clearInterval(initCheck);
+                statusEl.textContent = 'Detector status: did not initialize (is webInterferenceDetection enabled in config?)';
+                return;
+            }
+        }, 1000);
+
+        log('Page loaded. Toggle detections above and watch for <span class="event-type">webEvent</span> messages in native debug tooling.');
+        log('Expected event types: <span class="event-type">youtube_adBlocker</span>, <span class="event-type">youtube_playabilityError</span>');
+        statusEl.textContent = 'Detector status: page ready (detector runs via C-S-S injection)';
+        statusEl.className = 'status active';
+    </script>
+</body>
+</html>

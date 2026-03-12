@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>State dropdown autofill conflict</title>
+  <link rel="stylesheet" href="./style.css" />
+  <style>
+    .form-section {
+      margin-bottom: 2em;
+      padding: 1em;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .form-section h3 {
+      margin-top: 0;
+    }
+    .custom-select-wrapper {
+      position: relative;
+      display: inline-block;
+      width: 100%;
+    }
+    .custom-select-wrapper input {
+      width: 100%;
+    }
+    .custom-select-wrapper .caret {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      font-size: 0.8em;
+      color: #666;
+    }
+    .listbox {
+      display: none;
+      position: absolute;
+      z-index: 10;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-top: none;
+      max-height: 200px;
+      overflow-y: auto;
+      width: 100%;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .listbox.open {
+      display: block;
+    }
+    .listbox li {
+      padding: 6px 10px;
+      cursor: pointer;
+    }
+    .listbox li:hover,
+    .listbox li[aria-selected="true"] {
+      background: #e0e7ff;
+    }
+  </style>
+</head>
+
+<body>
+  <p><a href="../index.html#autofill">[Home]</a></p>
+
+  <h2>State dropdown autofill conflict</h2>
+  <p>
+    These forms test the interaction between DuckDuckGo's autofill identity tooltip and state/province
+    dropdown fields. The autofill tooltip should not appear on custom dropdown inputs that already have
+    their own picker UI.
+  </p>
+
+  <!-- Form 1: Native <select> for state (baseline — tooltip already not shown) -->
+  <div class="form-section" id="form-native-select">
+    <h3>Form 1: Native <code>&lt;select&gt;</code> for state</h3>
+    <p>Baseline. Autofill already handles native selects correctly — no tooltip shown on the select element.</p>
+    <form>
+      <fieldset>
+        <label for="f1-firstname">First Name</label>
+        <input id="f1-firstname" type="text" name="firstName" autocomplete="given-name">
+
+        <label for="f1-lastname">Last Name</label>
+        <input id="f1-lastname" type="text" name="lastName" autocomplete="family-name">
+
+        <label for="f1-address">Address</label>
+        <input id="f1-address" type="text" name="address" autocomplete="street-address">
+
+        <label for="f1-city">City</label>
+        <input id="f1-city" type="text" name="city" autocomplete="address-level2">
+
+        <label for="f1-state">State / Province / Region</label>
+        <select id="f1-state" name="state" autocomplete="address-level1">
+          <option value="">Select a state...</option>
+          <option value="AL">Alabama</option>
+          <option value="AK">Alaska</option>
+          <option value="AZ">Arizona</option>
+          <option value="CA">California</option>
+          <option value="CO">Colorado</option>
+          <option value="CT">Connecticut</option>
+          <option value="FL">Florida</option>
+          <option value="NY">New York</option>
+          <option value="PA">Pennsylvania</option>
+          <option value="TX">Texas</option>
+          <option value="WA">Washington</option>
+        </select>
+
+        <label for="f1-zip">Postal Code</label>
+        <input id="f1-zip" type="text" name="zip" autocomplete="postal-code">
+
+        <button type="submit">Submit</button>
+      </fieldset>
+    </form>
+  </div>
+
+  <!-- Form 2: Custom combobox input for state (reproduces the bug) -->
+  <div class="form-section" id="form-combobox">
+    <h3>Form 2: Custom combobox input for state</h3>
+    <p>
+      This uses an <code>&lt;input role="combobox"&gt;</code> with a listbox dropdown.
+      The autofill tooltip should <strong>not</strong> appear on this field since it already has a dropdown.
+    </p>
+    <form>
+      <fieldset>
+        <label for="f2-firstname">First Name</label>
+        <input id="f2-firstname" type="text" name="firstName" autocomplete="given-name">
+
+        <label for="f2-lastname">Last Name</label>
+        <input id="f2-lastname" type="text" name="lastName" autocomplete="family-name">
+
+        <label for="f2-address">Address</label>
+        <input id="f2-address" type="text" name="address" autocomplete="street-address">
+
+        <label for="f2-city">City</label>
+        <input id="f2-city" type="text" name="city" autocomplete="address-level2">
+
+        <label for="f2-state">State / Province / Region</label>
+        <div class="custom-select-wrapper">
+          <input
+            id="f2-state"
+            type="text"
+            name="state"
+            autocomplete="address-level1"
+            role="combobox"
+            aria-expanded="false"
+            aria-haspopup="listbox"
+            aria-controls="f2-state-listbox"
+            aria-autocomplete="list"
+            placeholder="Select a state..."
+          >
+          <span class="caret">▼</span>
+          <ul id="f2-state-listbox" class="listbox" role="listbox" aria-label="States">
+            <li role="option" data-value="AL">Alabama</li>
+            <li role="option" data-value="AK">Alaska</li>
+            <li role="option" data-value="AZ">Arizona</li>
+            <li role="option" data-value="CA">California</li>
+            <li role="option" data-value="CO">Colorado</li>
+            <li role="option" data-value="CT">Connecticut</li>
+            <li role="option" data-value="FL">Florida</li>
+            <li role="option" data-value="NY">New York</li>
+            <li role="option" data-value="PA">Pennsylvania</li>
+            <li role="option" data-value="TX">Texas</li>
+            <li role="option" data-value="WA">Washington</li>
+          </ul>
+        </div>
+
+        <label for="f2-zip">Postal Code</label>
+        <input id="f2-zip" type="text" name="zip" autocomplete="postal-code">
+
+        <button type="submit">Submit</button>
+      </fieldset>
+    </form>
+  </div>
+
+  <!-- Form 3: Plain text input for state (tooltip should still show) -->
+  <div class="form-section" id="form-plain-text">
+    <h3>Form 3: Plain text input for state</h3>
+    <p>
+      This is a simple <code>&lt;input type="text"&gt;</code> with no dropdown indicators.
+      The autofill tooltip <strong>should</strong> appear here since it's a plain text field.
+    </p>
+    <form>
+      <fieldset>
+        <label for="f3-firstname">First Name</label>
+        <input id="f3-firstname" type="text" name="firstName" autocomplete="given-name">
+
+        <label for="f3-lastname">Last Name</label>
+        <input id="f3-lastname" type="text" name="lastName" autocomplete="family-name">
+
+        <label for="f3-address">Address</label>
+        <input id="f3-address" type="text" name="address" autocomplete="street-address">
+
+        <label for="f3-city">City</label>
+        <input id="f3-city" type="text" name="city" autocomplete="address-level2">
+
+        <label for="f3-state">State / Province / Region</label>
+        <input id="f3-state" type="text" name="state" autocomplete="address-level1">
+
+        <label for="f3-zip">Postal Code</label>
+        <input id="f3-zip" type="text" name="zip" autocomplete="postal-code">
+
+        <button type="submit">Submit</button>
+      </fieldset>
+    </form>
+  </div>
+
+  <script>
+    // Simple custom combobox behavior for Form 2
+    (function () {
+      const input = document.getElementById('f2-state');
+      const listbox = document.getElementById('f2-state-listbox');
+      if (!input || !listbox) return;
+
+      const options = listbox.querySelectorAll('[role="option"]');
+
+      function openListbox() {
+        listbox.classList.add('open');
+        input.setAttribute('aria-expanded', 'true');
+      }
+
+      function closeListbox() {
+        listbox.classList.remove('open');
+        input.setAttribute('aria-expanded', 'false');
+      }
+
+      function selectOption(option) {
+        input.value = option.textContent;
+        input.dataset.value = option.dataset.value;
+        options.forEach(o => o.removeAttribute('aria-selected'));
+        option.setAttribute('aria-selected', 'true');
+        closeListbox();
+      }
+
+      input.addEventListener('focus', openListbox);
+      input.addEventListener('click', openListbox);
+
+      input.addEventListener('input', function () {
+        const filter = input.value.toLowerCase();
+        options.forEach(option => {
+          const matches = option.textContent.toLowerCase().includes(filter);
+          option.style.display = matches ? '' : 'none';
+        });
+        openListbox();
+      });
+
+      options.forEach(option => {
+        option.addEventListener('mousedown', function (e) {
+          e.preventDefault(); // Prevent input blur
+          selectOption(option);
+        });
+      });
+
+      input.addEventListener('blur', function () {
+        // Small delay to allow option click to register
+        setTimeout(closeListbox, 150);
+      });
+
+      input.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+          closeListbox();
+          input.blur();
+        }
+      });
+    })();
+  </script>
+</body>
+
+</html>

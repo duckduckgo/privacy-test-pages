@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Fireproofing Cookie Test</title>
+</head>
+<body>
+    <p><a href="../index.html">[Home]</a></p>
+
+    <h2>Fireproofing Cookie Test</h2>
+
+    <p>This page sets and reads cookies scoped to the parent domain.
+       Use it to test cross-subdomain fireproofing (eTLD+1).</p>
+
+    <h3>Set a cookie</h3>
+    <button id="set-cookie">Set Test Cookie</button>
+    <button id="delete-cookie">Delete Test Cookie</button>
+    <p id="set-status"></p>
+
+    <h3>Current cookies</h3>
+    <p id="cookies">Loading...</p>
+
+    <script>
+        var cookieName = 'ddg_fireproof_test';
+        var cookieValue = 'fireproofed';
+
+        function getParentDomain () {
+            var parts = window.location.hostname.split('.');
+            if (parts.length > 2) {
+                return parts.slice(-2).join('.');
+            }
+            return window.location.hostname;
+        }
+
+        function setCookie () {
+            var domain = getParentDomain();
+            var expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toUTCString();
+            document.cookie = cookieName + '=' + cookieValue + '; domain=' + domain + '; path=/; expires=' + expires + '; SameSite=Lax';
+            document.getElementById('set-status').textContent = 'Cookie set: ' + cookieName + '=' + cookieValue + ' (domain=' + domain + ')';
+            displayCookies();
+        }
+
+        function displayCookies () {
+            var cookies = document.cookie;
+            var el = document.getElementById('cookies');
+            if (cookies) {
+                el.textContent = cookies;
+            } else {
+                el.textContent = 'No cookies found.';
+            }
+        }
+
+        function deleteCookie () {
+            var domain = getParentDomain();
+            document.cookie = cookieName + '=; domain=' + domain + '; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+            document.getElementById('set-status').textContent = 'Cookie deleted: ' + cookieName;
+            displayCookies();
+        }
+
+        document.getElementById('set-cookie').addEventListener('click', setCookie);
+        document.getElementById('delete-cookie').addEventListener('click', deleteCookie);
+        displayCookies();
+    </script>
+</body>
+</html>

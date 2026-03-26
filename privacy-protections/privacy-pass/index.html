@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Pass ACT Prototype Test</title>
+    <style>
+        body { font-family: system-ui, sans-serif; max-width: 800px; margin: 40px auto; padding: 0 20px; }
+        h1 { font-size: 1.4em; }
+        .test { padding: 8px 12px; margin: 4px 0; border-radius: 4px; font-family: monospace; font-size: 0.9em; }
+        .pass { background: #d4edda; color: #155724; }
+        .fail { background: #f8d7da; color: #721c24; }
+        .pending { background: #fff3cd; color: #856404; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        #summary { margin-top: 20px; font-weight: bold; font-size: 1.1em; }
+        pre { background: #f5f5f5; padding: 10px; border-radius: 4px; overflow-x: auto; font-size: 0.85em; }
+    </style>
+</head>
+<body>
+    <h1>Privacy Pass ACT (draft-schlesinger-privacypass-act) Prototype Test</h1>
+    <p>Tests the <code>navigator.privacyPass</code> API: credential issuance, credit spending, balance queries, and token redemption.</p>
+    <div id="results"></div>
+    <div id="summary"></div>
+    <script src="main.js"></script>
+</body>
+</html>

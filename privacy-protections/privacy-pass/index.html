@@ -14,13 +14,27 @@
         .info { background: #d1ecf1; color: #0c5460; }
         #summary { margin-top: 20px; font-weight: bold; font-size: 1.1em; }
         pre { background: #f5f5f5; padding: 10px; border-radius: 4px; overflow-x: auto; font-size: 0.85em; }
+        code { background: #e5e7eb; padding: 2px 6px; border-radius: 3px; }
     </style>
 </head>
 <body>
-    <h1>Privacy Pass ACT (draft-schlesinger-privacypass-act) Prototype Test</h1>
-    <p>Tests the <code>navigator.privacyPass</code> API: credential issuance, credit spending, balance queries, and token redemption.</p>
+    <h1>Privacy Pass ACT (draft-schlesinger-privacypass-act) Test</h1>
+
+    <p>This page tests the browser's Privacy Pass ACT implementation against the test server
+    at <code id="server-url">http://127.0.0.1:8443</code>.</p>
+
+    <h2>How it works</h2>
+    <p>Privacy Pass operates at the <strong>HTTP layer</strong>, not JavaScript. The browser should:</p>
+    <ol>
+        <li>Detect <code>401 + WWW-Authenticate: PrivateToken</code> from <code>/protected</code></li>
+        <li>Run ACT issuance with the issuer (via <code>/token-request</code>)</li>
+        <li>Spend credits and retry with <code>Authorization: PrivateToken token=&lt;SpendProof&gt;</code></li>
+    </ol>
+
+    <h2>Test Results</h2>
     <div id="results"></div>
     <div id="summary"></div>
+
     <script src="main.js"></script>
 </body>
 </html>

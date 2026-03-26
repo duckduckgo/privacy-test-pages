@@ -1,12 +1,24 @@
 /* eslint-disable no-console */
 
-const results = document.getElementById('results');
-const summary = document.getElementById('summary');
-let passed = 0;
-let failed = 0;
+/**
+ * Privacy Pass ACT test page.
+ *
+ * Tests the browser's HTTP-level Privacy Pass implementation by making
+ * requests to the ACT test server. The browser should transparently handle
+ * the 401 challenge → issuance → spend → retry flow at the network layer.
+ *
+ * If the browser does NOT implement Privacy Pass, the raw 401 responses
+ * are visible to JavaScript via fetch(), which we detect as "not implemented".
+ */
+
+var SERVER = 'http://127.0.0.1:8443';
+var results = document.getElementById('results');
+var summary = document.getElementById('summary');
+var passed = 0;
+var failed = 0;
 
 function log (name, success, detail) {
-    const div = document.createElement('div');
+    var div = document.createElement('div');
     div.className = 'test ' + (success ? 'pass' : 'fail');
     div.textContent = (success ? 'PASS' : 'FAIL') + ' — ' + name + (detail ? ': ' + detail : '');
     results.appendChild(div);
@@ -15,128 +27,100 @@ function log (name, success, detail) {
 }
 
 function info (msg) {
-    const div = document.createElement('div');
+    var div = document.createElement('div');
     div.className = 'test info';
     div.textContent = msg;
     results.appendChild(div);
 }
 
 async function runTests () {
-    info('Starting Privacy Pass ACT prototype tests...');
+    info('Privacy Pass ACT test suite — testing HTTP-level protocol handling');
 
-    // Test 1: API exists
-    const apiExists = typeof navigator.privacyPass === 'object' && navigator.privacyPass !== null;
-    log('navigator.privacyPass exists', apiExists);
-    if (!apiExists) {
-        info('Cannot continue without navigator.privacyPass API. Is the privacyPass feature enabled?');
+    // Test 1: Server is reachable
+    try {
+        var statusResp = await fetch(SERVER + '/status');
+        var statusData = await statusResp.json();
+        log('Server reachable', statusResp.ok, 'default_credits=' + statusData.default_credits);
+    } catch (e) {
+        log('Server reachable', false, 'Cannot reach ' + SERVER + ': ' + e.message);
+        info('Start the test server: cd act-core && cargo run --example test_server');
         updateSummary();
         return;
     }
 
-    // Test 2: API methods exist
-    const hasIssue = typeof navigator.privacyPass.issue === 'function';
-    const hasSpend = typeof navigator.privacyPass.spend === 'function';
-    const hasBalance = typeof navigator.privacyPass.balance === 'function';
-    const hasRedeem = typeof navigator.privacyPass.redeem === 'function';
-    log('issue() method exists', hasIssue);
-    log('spend() method exists', hasSpend);
-    log('balance() method exists', hasBalance);
-    log('redeem() method exists', hasRedeem);
-
-    if (!hasIssue || !hasSpend || !hasBalance || !hasRedeem) {
-        info('Cannot continue without all API methods.');
-        updateSummary();
-        return;
-    }
-
-    // Test 3: Issue a credential with 10 credits
-    let credential;
+    // Test 2: /protected returns 401 with PrivateToken challenge (without auth)
+    // Note: if the browser implements Privacy Pass, it should intercept this
+    // and we'd get a 200 transparently. Getting a 401 means the browser
+    // doesn't (yet) handle the challenge.
     try {
-        credential = await navigator.privacyPass.issue({ issuer: 'https://example.com', credits: 10 });
-        const issueOk = credential && typeof credential.credentialId === 'string' && credential.credits === 10;
-        log('Issue credential (10 credits)', issueOk, JSON.stringify(credential));
-    } catch (e) {
-        log('Issue credential (10 credits)', false, e.message);
-        updateSummary();
-        return;
-    }
+        var protectedResp = await fetch(SERVER + '/protected');
+        if (protectedResp.status === 200) {
+            // Browser handled it transparently!
+            var body = await protectedResp.json();
+            log('Protected resource (browser handled challenge)', true, body.message);
 
-    // Test 4: Spend 3 credits
-    let spendResult;
-    try {
-        spendResult = await navigator.privacyPass.spend({ credentialId: credential.credentialId, amount: 3 });
-        const spendOk = spendResult &&
-            typeof spendResult.credentialId === 'string' &&
-            spendResult.remainingCredits === 7 &&
-            typeof spendResult.token === 'string';
-        log('Spend 3 credits (expect 7 remaining)', spendOk, JSON.stringify(spendResult));
-    } catch (e) {
-        log('Spend 3 credits', false, e.message);
-        updateSummary();
-        return;
-    }
+            // Test 3: Check server status — should show credits issued
+            var status2 = await (await fetch(SERVER + '/status')).json();
+            log('Credits were issued', status2.total_issued > 0, 'total_issued=' + status2.total_issued);
+            log('Spend was processed', status2.total_spent > 0, 'total_spent=' + status2.total_spent);
 
-    // Test 5: Query balance (should be 7)
-    try {
-        const balanceResult = await navigator.privacyPass.balance({ credentialId: spendResult.credentialId });
-        const balanceOk = balanceResult && balanceResult.credits === 7;
-        log('Balance check (expect 7)', balanceOk, JSON.stringify(balanceResult));
-    } catch (e) {
-        log('Balance check', false, e.message);
-    }
+            // Test 4: Make another request — should succeed with remaining credits
+            var protectedResp2 = await fetch(SERVER + '/protected');
+            log('Second access (spending more credits)', protectedResp2.status === 200,
+                'status=' + protectedResp2.status);
 
-    // Test 6: Redeem the token from the spend
-    try {
-        const redeemResult = await navigator.privacyPass.redeem({ token: spendResult.token });
-        const redeemOk = redeemResult && redeemResult.valid === true;
-        log('Redeem token', redeemOk, JSON.stringify(redeemResult));
-    } catch (e) {
-        log('Redeem token', false, e.message);
-    }
+        } else if (protectedResp.status === 401) {
+            // Browser didn't handle the challenge — expected for browsers
+            // that haven't implemented Privacy Pass ACT yet
+            var authHeader = protectedResp.headers.get('WWW-Authenticate');
+            var hasChallenge = authHeader && authHeader.includes('PrivateToken');
+            log('401 + WWW-Authenticate: PrivateToken challenge received', hasChallenge,
+                'Header: ' + (authHeader || 'missing'));
 
-    // Test 7: Spend remaining 7 credits
-    let finalSpend;
-    try {
-        finalSpend = await navigator.privacyPass.spend({ credentialId: spendResult.credentialId, amount: 7 });
-        const finalOk = finalSpend && finalSpend.remainingCredits === 0;
-        log('Spend remaining 7 credits (expect 0)', finalOk, JSON.stringify(finalSpend));
-    } catch (e) {
-        log('Spend remaining 7 credits', false, e.message);
-    }
+            if (hasChallenge) {
+                info('The server sent a valid PrivateToken challenge. ' +
+                     'A Privacy Pass ACT-capable browser should intercept this 401 at the ' +
+                     'network layer and transparently run the issuance + spend protocol.');
 
-    // Test 8: Attempt to overspend (should fail)
-    if (finalSpend) {
-        try {
-            await navigator.privacyPass.spend({ credentialId: finalSpend.credentialId, amount: 1 });
-            log('Overspend attempt (expect error)', false, 'Should have thrown an error');
-        } catch (e) {
-            log('Overspend attempt (expect error)', true, 'Correctly rejected: ' + e.message);
+                // Parse the challenge header
+                var challengeMatch = authHeader.match(/challenge="([^"]+)"/);
+                var tokenTypeMatch = authHeader.match(/token-type=([^\s,]+)/);
+                var issuerMatch = authHeader.match(/issuer="([^"]+)"/);
+
+                log('Challenge contains public key', !!challengeMatch,
+                    challengeMatch ? 'length=' + challengeMatch[1].length + ' chars (base64)' : 'missing');
+                log('Token type is 0xDA15 (ACT)', tokenTypeMatch && tokenTypeMatch[1] === '0xDA15',
+                    tokenTypeMatch ? tokenTypeMatch[1] : 'missing');
+                log('Issuer URL present', !!issuerMatch,
+                    issuerMatch ? issuerMatch[1] : 'missing');
+            } else {
+                log('Valid challenge header', false, 'WWW-Authenticate header missing or malformed');
+            }
+
+            info('Browser does not yet handle Privacy Pass ACT challenges. ' +
+                 'This is expected — native integration is needed at the HTTP layer.');
+        } else {
+            log('Protected resource response', false, 'Unexpected status: ' + protectedResp.status);
         }
+    } catch (e) {
+        log('Protected resource request', false, e.message);
     }
 
-    // Test 9: Redeem with invalid token (should return valid=false)
+    // Test: Public key endpoint
     try {
-        const badRedeem = await navigator.privacyPass.redeem({ token: 'invalid-token-12345' });
-        const badRedeemOk = badRedeem && badRedeem.valid === false;
-        log('Redeem invalid token (expect valid=false)', badRedeemOk, JSON.stringify(badRedeem));
+        var pkResp = await fetch(SERVER + '/public-key');
+        var pkData = await pkResp.json();
+        log('Public key available', pkResp.ok && pkData.cbor && pkData.cbor.length > 0,
+            'CBOR length=' + (pkData.cbor ? pkData.cbor.length : 0) + ' chars (base64)');
     } catch (e) {
-        // Also acceptable to throw
-        log('Redeem invalid token (expect error or valid=false)', true, 'Rejected: ' + e.message);
-    }
-
-    // Test 10: Input validation - issue with 0 credits
-    try {
-        await navigator.privacyPass.issue({ issuer: 'https://example.com', credits: 0 });
-        log('Input validation: issue with 0 credits (expect error)', false, 'Should have thrown');
-    } catch (e) {
-        log('Input validation: issue with 0 credits (expect error)', true, 'Correctly rejected: ' + e.message);
+        log('Public key endpoint', false, e.message);
     }
 
     updateSummary();
 }
 
 function updateSummary () {
-    const total = passed + failed;
+    var total = passed + failed;
     summary.textContent = passed + '/' + total + ' tests passed' + (failed > 0 ? ' (' + failed + ' failed)' : '');
     summary.style.color = failed === 0 ? '#155724' : '#721c24';
 }

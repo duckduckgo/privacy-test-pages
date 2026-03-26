@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Fireproofing Cookie Test</title>
+</head>
+<body>
+    <p><a href="../index.html">[Home]</a></p>
+
+    <h2>Fireproofing Cookie Test</h2>
+
+    <p>This page sets and reads cookies for testing cross-subdomain fireproofing (eTLD+1).
+       Two cookie types are available: parent-domain scoped (shared across subdomains)
+       and host-only (scoped to the exact hostname).</p>
+
+    <h3>Parent-domain cookie</h3>
+    <p>Scoped to the eTLD+1 (e.g., <code>domain=first-party.site</code>). Visible from all subdomains.</p>
+    <button id="set-parent-cookie">Set Parent Cookie</button>
+    <button id="delete-parent-cookie">Delete Parent Cookie</button>
+
+    <h3>Host-only cookie</h3>
+    <p>Scoped to this exact hostname (e.g., <code>www.first-party.site</code>). Not visible from other subdomains.</p>
+    <button id="set-host-cookie">Set Host-Only Cookie</button>
+    <button id="delete-host-cookie">Delete Host-Only Cookie</button>
+
+    <p id="set-status"></p>
+
+    <h3>Current cookies</h3>
+    <p id="cookies">Loading...</p>
+
+    <script>
+        var parentCookieName = 'ddg_fireproof_test';
+        var hostCookieName = 'ddg_fireproof_host_test';
+        var cookieValue = 'fireproofed';
+
+        function getParentDomain () {
+            var parts = window.location.hostname.split('.');
+            if (parts.length > 2) {
+                return parts.slice(-2).join('.');
+            }
+            return window.location.hostname;
+        }
+
+        function setParentCookie () {
+            var domain = getParentDomain();
+            var expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toUTCString();
+            document.cookie = parentCookieName + '=' + cookieValue + '; domain=' + domain + '; path=/; expires=' + expires + '; SameSite=Lax';
+            document.getElementById('set-status').textContent = 'Parent cookie set: ' + parentCookieName + '=' + cookieValue + ' (domain=' + domain + ')';
+            displayCookies();
+        }
+
+        function deleteParentCookie () {
+            var domain = getParentDomain();
+            document.cookie = parentCookieName + '=; domain=' + domain + '; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+            document.getElementById('set-status').textContent = 'Parent cookie deleted';
+            displayCookies();
+        }
+
+        function setHostCookie () {
+            var expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toUTCString();
+            document.cookie = hostCookieName + '=' + cookieValue + '; path=/; expires=' + expires + '; SameSite=Lax';
+            document.getElementById('set-status').textContent = 'Host-only cookie set: ' + hostCookieName + '=' + cookieValue + ' (host=' + window.location.hostname + ')';
+            displayCookies();
+        }
+
+        function deleteHostCookie () {
+            document.cookie = hostCookieName + '=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+            document.getElementById('set-status').textContent = 'Host-only cookie deleted';
+            displayCookies();
+        }
+
+        function displayCookies () {
+            var cookies = document.cookie;
+            var el = document.getElementById('cookies');
+            if (cookies) {
+                el.textContent = cookies;
+            } else {
+                el.textContent = 'No cookies found.';
+            }
+        }
+
+        document.getElementById('set-parent-cookie').addEventListener('click', setParentCookie);
+        document.getElementById('delete-parent-cookie').addEventListener('click', deleteParentCookie);
+        document.getElementById('set-host-cookie').addEventListener('click', setHostCookie);
+        document.getElementById('delete-host-cookie').addEventListener('click', deleteHostCookie);
+        displayCookies();
+    </script>
+</body>
+</html>

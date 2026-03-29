@@ -188,11 +188,15 @@
 request originates from an iframe rather than the top-level page. This exposes bugs where the
 browser stores a permission grant against the iframe's requester origin instead of a normalised
 site key, causing unexpected dialogs, duplicate prompts, or unrecognisable settings entries.</p>
+<p>The cross-origin iframe loads this same page from one of the repo's
+<a href="https://github.com/duckduckgo/privacy-test-pages#test-domains">test domains</a>
+(<code>good.third-party.site</code> on live, <code>third-party.example</code> locally).
+Both resolve to the same server and serve the same files, so no external dependency is needed.</p>
 
 <h2>Configuration</h2>
 <div class="config-bar">
   <label for="child-url">Cross-origin iframe URL:</label>
-  <input type="text" id="child-url" placeholder="https://permission.site/">
+  <input type="text" id="child-url">
   <button id="reload-iframes">Reload iframes</button>
 </div>
 
@@ -237,7 +241,7 @@ site key, causing unexpected dialogs, duplicate prompts, or unrecognisable setti
       Which domain is the grant stored against?
       Is it the iframe origin, the top-level site, or an eTLD+1?</li>
   <li>Navigate the top-level page to the iframe's origin directly
-      (e.g. open <code>permission.site</code> in a new tab).</li>
+      (e.g. open <code>good.third-party.site</code> in a new tab).</li>
   <li>Request the same permission again — are you prompted again, or is the grant reused?</li>
 </ol>
 
@@ -257,7 +261,7 @@ site key, causing unexpected dialogs, duplicate prompts, or unrecognisable setti
     Both hostnames in the mkcert certificate:
     <pre>mkcert first-party.example "*.first-party.example" ...</pre>
   </li>
-  <li>Set <code>?child=https://sub.first-party.example:8000/features/iframe-permissions.html</code></li>
+  <li>Set <code>?child=https://sub.first-party.example/features/iframe-permissions.html</code></li>
   <li>Follow the same steps as Test 1.</li>
   <li>After granting, navigate to <code>first-party.example</code> directly and re-request
       the same permission.
@@ -288,10 +292,10 @@ site key, causing unexpected dialogs, duplicate prompts, or unrecognisable setti
   </select>
 
   <label for="obs-dialog-domain">Domain shown in dialog</label>
-  <input type="text" id="obs-dialog-domain" placeholder="e.g. permission.site">
+  <input type="text" id="obs-dialog-domain" placeholder="e.g. good.third-party.site">
 
   <label for="obs-stored-domain">Domain stored in settings</label>
-  <input type="text" id="obs-stored-domain" placeholder="e.g. permission.site">
+  <input type="text" id="obs-stored-domain" placeholder="e.g. good.third-party.site">
 
   <label>Re-prompted after navigation?</label>
   <div class="radio-group">
@@ -324,9 +328,9 @@ site key, causing unexpected dialogs, duplicate prompts, or unrecognisable setti
       <td>No</td>
     </tr>
     <tr>
-      <td>Cross-origin iframe (permission.site)</td>
-      <td>permission.site</td>
-      <td>permission.site</td>
+      <td>Cross-origin iframe (good.third-party.site)</td>
+      <td>good.third-party.site</td>
+      <td>good.third-party.site</td>
       <td>N/A (different site)</td>
     </tr>
     <tr>
@@ -351,9 +355,9 @@ site key, causing unexpected dialogs, duplicate prompts, or unrecognisable setti
       <td>No</td>
     </tr>
     <tr>
-      <td>Cross-origin iframe (permission.site)</td>
-      <td>permission.site</td>
-      <td>permission.site</td>
+      <td>Cross-origin iframe (good.third-party.site)</td>
+      <td>good.third-party.site</td>
+      <td>good.third-party.site</td>
       <td>N/A (different site)</td>
     </tr>
     <tr>
@@ -371,6 +375,7 @@ site key, causing unexpected dialogs, duplicate prompts, or unrecognisable setti
 
 <script>
   const IS_CHILD = window.self !== window.top;
+  const PAGE_PATH = '/features/iframe-permissions.html';
 
   /* -------------------------------------------------------
      Child mode — permission-request buttons + postMessage
@@ -472,8 +477,25 @@ site key, causing unexpected dialogs, duplicate prompts, or unrecognisable setti
      Parent mode — full test-page orchestration
      ------------------------------------------------------- */
   if (!IS_CHILD) {
-    const DEFAULT_CROSS_ORIGIN = 'https://permission.site/';
+    const CROSS_ORIGIN_MAP = {
+      'privacy-test-pages.site': 'good.third-party.site',
+      'first-party.site': 'good.third-party.site',
+      'first-party.example': 'third-party.example',
+    };
+
+    function defaultCrossOriginUrl() {
+      const hostname = location.hostname;
+      for (const [parentHost, crossHost] of Object.entries(CROSS_ORIGIN_MAP)) {
+        if (hostname === parentHost || hostname.endsWith('.' + parentHost)) {
+          const crossOrigin = location.protocol + '//' + crossHost + (location.port ? ':' + location.port : '');
+          return crossOrigin + PAGE_PATH;
+        }
+      }
+      return location.origin + PAGE_PATH;
+    }
+
     const SAME_ORIGIN_CHILD = 'iframe-permissions.html';
+    const DEFAULT_CROSS_ORIGIN = defaultCrossOriginUrl();
 
     const logEl = document.getElementById('log');
     const childUrlInput = document.getElementById('child-url');
@@ -586,6 +608,7 @@ site key, causing unexpected dialogs, duplicate prompts, or unrecognisable setti
     });
 
     childUrlInput.value = getChildUrl();
+    childUrlInput.placeholder = DEFAULT_CROSS_ORIGIN;
     loadIframes();
   }
 </script>

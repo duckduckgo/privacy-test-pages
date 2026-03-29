@@ -17,7 +17,35 @@
     h1, h2, h3 { margin-top: 20px; }
     a { color: #3969ef; }
 
-    /* Configuration bar */
+    /* --- Child mode (inside iframe) --- */
+    body.child-mode { margin: 12px; }
+    .child-ui { display: none; }
+    body.child-mode .child-ui { display: block; }
+    body.child-mode .parent-ui { display: none; }
+
+    .child-ui .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 8px 0;
+    }
+    .child-ui button { padding: 6px 14px; cursor: pointer; }
+    .child-ui .status {
+      margin-top: 8px;
+      padding: 6px 8px;
+      background: #f7f7f7;
+      border: 1px solid #d0d0d0;
+      font-size: 0.9em;
+      white-space: pre-wrap;
+      min-height: 1.4em;
+    }
+    .child-ui .origin-info {
+      font-size: 0.85em;
+      color: #555;
+      margin-bottom: 8px;
+    }
+
+    /* --- Parent mode (top-level) --- */
     .config-bar {
       display: flex;
       flex-wrap: wrap;
@@ -37,7 +65,6 @@
     }
     .config-bar button { padding: 4px 14px; cursor: pointer; }
 
-    /* Iframe panels */
     .panels {
       display: grid;
       grid-template-columns: 1fr;
@@ -89,12 +116,10 @@
       min-height: 1.6em;
     }
 
-    /* Test steps */
     .test-steps { max-width: 800px; }
     .test-steps ol { padding-left: 24px; }
     .test-steps li { margin-bottom: 4px; }
 
-    /* Observation log */
     .obs-form { max-width: 600px; margin: 16px 0; }
     .obs-form label { display: block; font-weight: 600; margin-top: 10px; }
     .obs-form select,
@@ -111,7 +136,6 @@
     .obs-actions { display: flex; gap: 8px; margin-top: 12px; }
     .obs-actions button { padding: 6px 14px; cursor: pointer; }
 
-    /* Expected outcomes tables */
     table {
       border-collapse: collapse;
       width: 100%;
@@ -138,6 +162,25 @@
   </style>
 </head>
 <body>
+
+<!-- ============================================================
+     Child mode: shown only when this page is loaded inside an iframe.
+     ============================================================ -->
+<div class="child-ui">
+  <p class="origin-info">Child origin: <code id="child-origin"></code></p>
+  <div class="buttons">
+    <button data-permission="geolocation">Geolocation</button>
+    <button data-permission="camera">Camera</button>
+    <button data-permission="microphone">Microphone</button>
+    <button data-permission="drm">DRM (EME)</button>
+  </div>
+  <div class="status" id="status">Ready</div>
+</div>
+
+<!-- ============================================================
+     Parent mode: the full test-page UI.
+     ============================================================ -->
+<div class="parent-ui">
 <p><a href="../index.html">[Home]</a></p>
 
 <h1>Site Permissions in Iframes</h1>
@@ -155,7 +198,6 @@ site key, causing unexpected dialogs, duplicate prompts, or unrecognisable setti
 
 <h2>Iframe Panels</h2>
 <div class="panels">
-  <!-- Same-origin panel -->
   <div class="panel" id="panel-same">
     <div class="panel-header">
       <h3>Same-origin <span class="badge badge-same">same-origin</span></h3>
@@ -169,7 +211,6 @@ site key, causing unexpected dialogs, duplicate prompts, or unrecognisable setti
     <div class="child-status" id="same-status">—</div>
   </div>
 
-  <!-- Cross-origin panel -->
   <div class="panel" id="panel-cross">
     <div class="panel-header">
       <h3>Cross-origin <span class="badge badge-cross" id="cross-badge">cross-origin</span></h3>
@@ -216,7 +257,7 @@ site key, causing unexpected dialogs, duplicate prompts, or unrecognisable setti
     Both hostnames in the mkcert certificate:
     <pre>mkcert first-party.example "*.first-party.example" ...</pre>
   </li>
-  <li>Set <code>?child=https://sub.first-party.example:8000/features/iframe-permissions-child.html</code></li>
+  <li>Set <code>?child=https://sub.first-party.example:8000/features/iframe-permissions.html</code></li>
   <li>Follow the same steps as Test 1.</li>
   <li>After granting, navigate to <code>first-party.example</code> directly and re-request
       the same permission.
@@ -326,139 +367,227 @@ site key, causing unexpected dialogs, duplicate prompts, or unrecognisable setti
 
 <h2>Event Log</h2>
 <pre id="log"></pre>
+</div><!-- /.parent-ui -->
 
 <script>
-  const DEFAULT_CROSS_ORIGIN = 'https://permission.site/';
-  const SAME_ORIGIN_CHILD = 'iframe-permissions-child.html';
+  const IS_CHILD = window.self !== window.top;
 
-  const logEl = document.getElementById('log');
-  const childUrlInput = document.getElementById('child-url');
-  const iframeSame = document.getElementById('iframe-same');
-  const iframeCross = document.getElementById('iframe-cross');
+  /* -------------------------------------------------------
+     Child mode — permission-request buttons + postMessage
+     ------------------------------------------------------- */
+  if (IS_CHILD) {
+    document.body.classList.add('child-mode');
+    document.getElementById('child-origin').textContent = location.origin;
 
-  function log(msg) {
-    const ts = new Date().toISOString();
-    logEl.textContent += `[${ts}] ${msg}\n`;
-    logEl.scrollTop = logEl.scrollHeight;
-  }
-
-  function getChildUrl() {
-    const params = new URLSearchParams(location.search);
-    return params.get('child') || DEFAULT_CROSS_ORIGIN;
-  }
-
-  function classifyRelationship(parentOrigin, childOrigin) {
-    if (parentOrigin === childOrigin) return 'same-origin';
-    try {
-      const parent = new URL(parentOrigin);
-      const child = new URL(childOrigin);
-      const parentParts = parent.hostname.split('.');
-      const childParts = child.hostname.split('.');
-      const parentETLD1 = parentParts.slice(-2).join('.');
-      const childETLD1 = childParts.slice(-2).join('.');
-      if (parentETLD1 === childETLD1) return 'same-eTLD+1';
-    } catch { /* ignore */ }
-    return 'cross-origin';
-  }
-
-  function loadIframes() {
-    const crossUrl = childUrlInput.value.trim() || DEFAULT_CROSS_ORIGIN;
-    const parentOrigin = location.origin;
-
-    // Same-origin
-    iframeSame.src = SAME_ORIGIN_CHILD;
-    document.getElementById('same-src-label').textContent = parentOrigin + '/features/' + SAME_ORIGIN_CHILD;
-    document.getElementById('same-parent-label').textContent = parentOrigin;
-    document.getElementById('same-status').textContent = '—';
-
-    // Cross-origin
-    iframeCross.src = crossUrl;
-    let crossOriginStr;
-    try { crossOriginStr = new URL(crossUrl).origin; } catch { crossOriginStr = crossUrl; }
-    document.getElementById('cross-src-label').textContent = crossOriginStr;
-    document.getElementById('cross-parent-label').textContent = parentOrigin;
-    document.getElementById('cross-status').textContent = '—';
-
-    const rel = classifyRelationship(parentOrigin, crossOriginStr);
-    const badge = document.getElementById('cross-badge');
-    badge.textContent = rel;
-    badge.className = 'badge';
-    if (rel === 'same-origin') badge.classList.add('badge-same');
-    else if (rel === 'same-eTLD+1') badge.classList.add('badge-etld');
-    else badge.classList.add('badge-cross');
-
-    log(`Loaded same-origin iframe: ${SAME_ORIGIN_CHILD}`);
-    log(`Loaded cross-origin iframe: ${crossUrl} (${rel})`);
-  }
-
-  // Listen for postMessage from child iframes
-  window.addEventListener('message', (event) => {
-    if (!event.data || event.data.type !== 'permission-result') return;
-    const { permission, outcome, detail, origin } = event.data;
-    const msg = `${permission}: ${outcome}${detail ? ' — ' + detail : ''} (from ${origin})`;
-    log(msg);
-
-    // Update the relevant panel status
-    const sameOrigin = location.origin;
-    let statusEl;
-    if (origin === sameOrigin) {
-      statusEl = document.getElementById('same-status');
-    } else {
-      statusEl = document.getElementById('cross-status');
+    function postResult(permission, outcome, detail) {
+      window.parent.postMessage(
+        { type: 'permission-result', permission, outcome, detail, origin: location.origin },
+        '*',
+      );
     }
-    if (statusEl) statusEl.textContent = msg;
-  });
 
-  // Observation log: Copy as JSON
-  document.getElementById('obs-copy-json').addEventListener('click', () => {
-    const repromptRadio = document.querySelector('input[name="obs-reprompt"]:checked');
-    const observation = {
-      permission: document.getElementById('obs-permission').value,
-      context: document.getElementById('obs-context').value,
-      dialogDomain: document.getElementById('obs-dialog-domain').value,
-      storedDomain: document.getElementById('obs-stored-domain').value,
-      rePrompted: repromptRadio ? repromptRadio.value : null,
-      notes: document.getElementById('obs-notes').value,
-      parentOrigin: location.origin,
-      crossOriginSrc: childUrlInput.value.trim() || DEFAULT_CROSS_ORIGIN,
-      userAgent: navigator.userAgent,
-      timestamp: new Date().toISOString(),
+    function setStatus(text) {
+      document.getElementById('status').textContent = text;
+    }
+
+    async function requestGeolocation() {
+      if (!navigator.geolocation) {
+        setStatus('Geolocation: API not available');
+        postResult('geolocation', 'error', 'API not available');
+        return;
+      }
+      setStatus('Geolocation: requesting...');
+      navigator.geolocation.getCurrentPosition(
+        () => { setStatus('Geolocation: granted'); postResult('geolocation', 'granted', ''); },
+        (err) => {
+          const outcome = err.code === 1 ? 'denied' : 'error';
+          setStatus(`Geolocation: ${outcome} — ${err.message}`);
+          postResult('geolocation', outcome, err.message);
+        },
+      );
+    }
+
+    async function requestMedia(kind, constraints) {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        setStatus(`${kind}: getUserMedia not available`);
+        postResult(kind.toLowerCase(), 'error', 'getUserMedia not available');
+        return;
+      }
+      setStatus(`${kind}: requesting...`);
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        stream.getTracks().forEach((t) => t.stop());
+        setStatus(`${kind}: granted`);
+        postResult(kind.toLowerCase(), 'granted', '');
+      } catch (e) {
+        const outcome = e.name === 'NotAllowedError' ? 'denied' : 'error';
+        setStatus(`${kind}: ${outcome} — ${e.message}`);
+        postResult(kind.toLowerCase(), outcome, e.message);
+      }
+    }
+
+    async function requestDRM() {
+      if (!navigator.requestMediaKeySystemAccess) {
+        setStatus('DRM: Encrypted Media Extensions not available');
+        postResult('drm', 'error', 'EME not available');
+        return;
+      }
+      setStatus('DRM: requesting...');
+      const configs = [{
+        initDataTypes: ['cenc'],
+        videoCapabilities: [{ contentType: 'video/mp4; codecs="avc1.42E01E"' }],
+      }];
+      try {
+        await navigator.requestMediaKeySystemAccess('com.widevine.alpha', configs);
+        setStatus('DRM: access granted (Widevine)');
+        postResult('drm', 'granted', 'Widevine');
+      } catch (e1) {
+        try {
+          await navigator.requestMediaKeySystemAccess('com.apple.fps.1_0', configs);
+          setStatus('DRM: access granted (FairPlay)');
+          postResult('drm', 'granted', 'FairPlay');
+        } catch (e2) {
+          setStatus(`DRM: not available — ${e1.message}`);
+          postResult('drm', 'error', e1.message);
+        }
+      }
+    }
+
+    const handlers = {
+      geolocation: requestGeolocation,
+      camera: () => requestMedia('Camera', { video: true, audio: false }),
+      microphone: () => requestMedia('Microphone', { video: false, audio: true }),
+      drm: requestDRM,
     };
-    const json = JSON.stringify(observation, null, 2);
-    navigator.clipboard.writeText(json).then(
-      () => log('Observation copied to clipboard as JSON'),
-      () => {
-        log('Clipboard write failed — JSON logged below');
-        log(json);
-      },
-    );
-  });
 
-  document.getElementById('obs-clear').addEventListener('click', () => {
-    document.getElementById('obs-dialog-domain').value = '';
-    document.getElementById('obs-stored-domain').value = '';
-    document.getElementById('obs-notes').value = '';
-    const na = document.querySelector('input[name="obs-reprompt"][value="n/a"]');
-    if (na) na.checked = true;
-    log('Observation form cleared');
-  });
+    document.querySelectorAll('.child-ui button[data-permission]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const fn = handlers[btn.dataset.permission];
+        if (fn) fn();
+      });
+    });
+  }
 
-  // Reload button
-  document.getElementById('reload-iframes').addEventListener('click', () => {
-    const newUrl = childUrlInput.value.trim() || DEFAULT_CROSS_ORIGIN;
-    const url = new URL(location.href);
-    if (newUrl !== DEFAULT_CROSS_ORIGIN) {
-      url.searchParams.set('child', newUrl);
-    } else {
-      url.searchParams.delete('child');
+  /* -------------------------------------------------------
+     Parent mode — full test-page orchestration
+     ------------------------------------------------------- */
+  if (!IS_CHILD) {
+    const DEFAULT_CROSS_ORIGIN = 'https://permission.site/';
+    const SAME_ORIGIN_CHILD = 'iframe-permissions.html';
+
+    const logEl = document.getElementById('log');
+    const childUrlInput = document.getElementById('child-url');
+    const iframeSame = document.getElementById('iframe-same');
+    const iframeCross = document.getElementById('iframe-cross');
+
+    function log(msg) {
+      const ts = new Date().toISOString();
+      logEl.textContent += `[${ts}] ${msg}\n`;
+      logEl.scrollTop = logEl.scrollHeight;
     }
-    history.replaceState(null, '', url.toString());
-    loadIframes();
-  });
 
-  // Initialise
-  childUrlInput.value = getChildUrl();
-  loadIframes();
+    function getChildUrl() {
+      const params = new URLSearchParams(location.search);
+      return params.get('child') || DEFAULT_CROSS_ORIGIN;
+    }
+
+    function classifyRelationship(parentOrigin, childOrigin) {
+      if (parentOrigin === childOrigin) return 'same-origin';
+      try {
+        const parent = new URL(parentOrigin);
+        const child = new URL(childOrigin);
+        const parentETLD1 = parent.hostname.split('.').slice(-2).join('.');
+        const childETLD1 = child.hostname.split('.').slice(-2).join('.');
+        if (parentETLD1 === childETLD1) return 'same-eTLD+1';
+      } catch { /* ignore */ }
+      return 'cross-origin';
+    }
+
+    function loadIframes() {
+      const crossUrl = childUrlInput.value.trim() || DEFAULT_CROSS_ORIGIN;
+      const parentOrigin = location.origin;
+
+      iframeSame.src = SAME_ORIGIN_CHILD;
+      document.getElementById('same-src-label').textContent = parentOrigin + '/features/' + SAME_ORIGIN_CHILD;
+      document.getElementById('same-parent-label').textContent = parentOrigin;
+      document.getElementById('same-status').textContent = '—';
+
+      iframeCross.src = crossUrl;
+      let crossOriginStr;
+      try { crossOriginStr = new URL(crossUrl).origin; } catch { crossOriginStr = crossUrl; }
+      document.getElementById('cross-src-label').textContent = crossOriginStr;
+      document.getElementById('cross-parent-label').textContent = parentOrigin;
+      document.getElementById('cross-status').textContent = '—';
+
+      const rel = classifyRelationship(parentOrigin, crossOriginStr);
+      const badge = document.getElementById('cross-badge');
+      badge.textContent = rel;
+      badge.className = 'badge';
+      if (rel === 'same-origin') badge.classList.add('badge-same');
+      else if (rel === 'same-eTLD+1') badge.classList.add('badge-etld');
+      else badge.classList.add('badge-cross');
+
+      log(`Loaded same-origin iframe: ${SAME_ORIGIN_CHILD}`);
+      log(`Loaded cross-origin iframe: ${crossUrl} (${rel})`);
+    }
+
+    window.addEventListener('message', (event) => {
+      if (!event.data || event.data.type !== 'permission-result') return;
+      const { permission, outcome, detail, origin } = event.data;
+      const msg = `${permission}: ${outcome}${detail ? ' — ' + detail : ''} (from ${origin})`;
+      log(msg);
+
+      const statusEl = origin === location.origin
+        ? document.getElementById('same-status')
+        : document.getElementById('cross-status');
+      if (statusEl) statusEl.textContent = msg;
+    });
+
+    document.getElementById('obs-copy-json').addEventListener('click', () => {
+      const repromptRadio = document.querySelector('input[name="obs-reprompt"]:checked');
+      const observation = {
+        permission: document.getElementById('obs-permission').value,
+        context: document.getElementById('obs-context').value,
+        dialogDomain: document.getElementById('obs-dialog-domain').value,
+        storedDomain: document.getElementById('obs-stored-domain').value,
+        rePrompted: repromptRadio ? repromptRadio.value : null,
+        notes: document.getElementById('obs-notes').value,
+        parentOrigin: location.origin,
+        crossOriginSrc: childUrlInput.value.trim() || DEFAULT_CROSS_ORIGIN,
+        userAgent: navigator.userAgent,
+        timestamp: new Date().toISOString(),
+      };
+      const json = JSON.stringify(observation, null, 2);
+      navigator.clipboard.writeText(json).then(
+        () => log('Observation copied to clipboard as JSON'),
+        () => { log('Clipboard write failed — JSON logged below'); log(json); },
+      );
+    });
+
+    document.getElementById('obs-clear').addEventListener('click', () => {
+      document.getElementById('obs-dialog-domain').value = '';
+      document.getElementById('obs-stored-domain').value = '';
+      document.getElementById('obs-notes').value = '';
+      const na = document.querySelector('input[name="obs-reprompt"][value="n/a"]');
+      if (na) na.checked = true;
+      log('Observation form cleared');
+    });
+
+    document.getElementById('reload-iframes').addEventListener('click', () => {
+      const newUrl = childUrlInput.value.trim() || DEFAULT_CROSS_ORIGIN;
+      const url = new URL(location.href);
+      if (newUrl !== DEFAULT_CROSS_ORIGIN) {
+        url.searchParams.set('child', newUrl);
+      } else {
+        url.searchParams.delete('child');
+      }
+      history.replaceState(null, '', url.toString());
+      loadIframes();
+    });
+
+    childUrlInput.value = getChildUrl();
+    loadIframes();
+  }
 </script>
 </body>
 </html>

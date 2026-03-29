@@ -513,14 +513,27 @@ Both resolve to the same server and serve the same files, so no external depende
       return params.get('child') || DEFAULT_CROSS_ORIGIN;
     }
 
+    const SAME_SITE_PAIRS = [
+      ['privacy-test-pages.site', 'privacy-test-pages.site'],
+      ['first-party.site', 'first-party.site'],
+      ['first-party.example', 'first-party.example'],
+      ['third-party.site', 'third-party.site'],
+      ['third-party.example', 'third-party.example'],
+    ];
+
+    function registrableDomain(hostname) {
+      for (const [base] of SAME_SITE_PAIRS) {
+        if (hostname === base || hostname.endsWith('.' + base)) return base;
+      }
+      return null;
+    }
+
     function classifyRelationship(parentOrigin, childOrigin) {
       if (parentOrigin === childOrigin) return 'same-origin';
       try {
-        const parent = new URL(parentOrigin);
-        const child = new URL(childOrigin);
-        const parentETLD1 = parent.hostname.split('.').slice(-2).join('.');
-        const childETLD1 = child.hostname.split('.').slice(-2).join('.');
-        if (parentETLD1 === childETLD1) return 'same-eTLD+1';
+        const parentRD = registrableDomain(new URL(parentOrigin).hostname);
+        const childRD = registrableDomain(new URL(childOrigin).hostname);
+        if (parentRD && childRD && parentRD === childRD) return 'same-eTLD+1';
       } catch { /* ignore */ }
       return 'cross-origin';
     }

@@ -101,6 +101,7 @@
       font-weight: 600;
       color: #fff;
     }
+    .badge-first { background: #0969da; }
     .badge-same { background: #2a7e2e; }
     .badge-cross { background: #b35900; }
     .badge-etld { background: #7b2d8b; }
@@ -205,6 +206,25 @@ Both resolve to the same server and serve the same files, so no external depende
   <button id="reload-iframes">Reload iframes</button>
 </div>
 
+<h2>First-party Panel</h2>
+<div class="panels" style="grid-template-columns:1fr;">
+  <div class="panel" id="panel-first-party">
+    <div class="panel-header">
+      <h3>First-party <span class="badge badge-first">first-party</span></h3>
+      <p class="panel-meta">Origin: <code id="first-party-origin-label">—</code></p>
+    </div>
+    <div style="padding:12px;">
+      <div class="buttons" style="display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;">
+        <button data-fp-permission="geolocation">Geolocation</button>
+        <button data-fp-permission="camera">Camera</button>
+        <button data-fp-permission="microphone">Microphone</button>
+        <button data-fp-permission="drm">DRM (EME)</button>
+      </div>
+    </div>
+    <div class="child-status" id="first-party-status">—</div>
+  </div>
+</div>
+
 <h2>Iframe Panels</h2>
 <div class="panels">
   <div class="panel" id="panel-same">
@@ -235,6 +255,15 @@ Both resolve to the same server and serve the same files, so no external depende
 
 <h2>Test Steps</h2>
 <div class="test-steps">
+
+<h3>Test 0 — First-party baseline</h3>
+<ol>
+  <li>In the <strong>First-party</strong> panel, click a permission button (e.g. <em>Geolocation</em> or <em>Camera</em>).</li>
+  <li>Observe the permission dialog — the domain shown should be the top-level page origin.</li>
+  <li>Grant the permission (tap <em>Allow</em>).</li>
+  <li>Open browser <strong>Settings &gt; Site Permissions</strong>. Verify the grant is stored against the top-level site domain.</li>
+  <li>This establishes the baseline: the same permission requested from an iframe should behave identically in terms of which domain is shown and how the grant is keyed.</li>
+</ol>
 
 <h3>Test 1 — Cross-origin permission identity</h3>
 <ol>
@@ -291,6 +320,7 @@ Both resolve to the same server and serve the same files, so no external depende
 
   <label for="obs-context">Iframe context</label>
   <select id="obs-context">
+    <option value="first-party">First-party</option>
     <option value="same-origin">Same-origin</option>
     <option value="cross-origin">Cross-origin</option>
     <option value="same-etld1">Same-eTLD+1</option>
@@ -328,6 +358,12 @@ Both resolve to the same server and serve the same files, so no external depende
   </thead>
   <tbody>
     <tr>
+      <td>First-party (no iframe)</td>
+      <td>privacy-test-pages.site</td>
+      <td>privacy-test-pages.site</td>
+      <td>No</td>
+    </tr>
+    <tr>
       <td>Same-origin iframe</td>
       <td>privacy-test-pages.site</td>
       <td>privacy-test-pages.site</td>
@@ -356,6 +392,12 @@ Both resolve to the same server and serve the same files, so no external depende
     <tr><th>Scenario</th><th>Dialog shows</th><th>Stored against</th><th>Re-prompted?</th></tr>
   </thead>
   <tbody>
+    <tr>
+      <td>First-party (no iframe)</td>
+      <td>privacy-test-pages.site</td>
+      <td>privacy-test-pages.site</td>
+      <td>No</td>
+    </tr>
     <tr>
       <td>Same-origin iframe</td>
       <td>privacy-test-pages.site</td>
@@ -615,6 +657,86 @@ Both resolve to the same server and serve the same files, so no external depende
       }
       history.replaceState(null, '', url.toString());
       loadIframes();
+    });
+
+    /* -------------------------------------------------------
+       First-party panel — permission requests from top-level
+       ------------------------------------------------------- */
+    const fpStatusEl = document.getElementById('first-party-status');
+    document.getElementById('first-party-origin-label').textContent = location.origin;
+
+    function fpLog(permission, outcome, detail) {
+      const msg = `${permission}: ${outcome}${detail ? ' — ' + detail : ''} (first-party)`;
+      fpStatusEl.textContent = msg;
+      log(msg);
+    }
+
+    async function fpRequestGeolocation() {
+      if (!navigator.geolocation) {
+        fpLog('geolocation', 'error', 'API not available');
+        return;
+      }
+      fpStatusEl.textContent = 'Geolocation: requesting...';
+      navigator.geolocation.getCurrentPosition(
+        () => fpLog('geolocation', 'granted', ''),
+        (err) => {
+          const outcome = err.code === 1 ? 'denied' : 'error';
+          fpLog('geolocation', outcome, err.message);
+        },
+      );
+    }
+
+    async function fpRequestMedia(kind, constraints) {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        fpLog(kind.toLowerCase(), 'error', 'getUserMedia not available');
+        return;
+      }
+      fpStatusEl.textContent = `${kind}: requesting...`;
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        stream.getTracks().forEach((t) => t.stop());
+        fpLog(kind.toLowerCase(), 'granted', '');
+      } catch (e) {
+        const outcome = e.name === 'NotAllowedError' ? 'denied' : 'error';
+        fpLog(kind.toLowerCase(), outcome, e.message);
+      }
+    }
+
+    async function fpRequestDRM() {
+      if (!navigator.requestMediaKeySystemAccess) {
+        fpLog('drm', 'error', 'EME not available');
+        return;
+      }
+      fpStatusEl.textContent = 'DRM: requesting...';
+      const configs = [{
+        initDataTypes: ['cenc'],
+        videoCapabilities: [{ contentType: 'video/mp4; codecs="avc1.42E01E"' }],
+      }];
+      try {
+        await navigator.requestMediaKeySystemAccess('com.widevine.alpha', configs);
+        fpLog('drm', 'granted', 'Widevine');
+      } catch (e1) {
+        try {
+          await navigator.requestMediaKeySystemAccess('com.apple.fps.1_0', configs);
+          fpLog('drm', 'granted', 'FairPlay');
+        } catch (e2) {
+          fpLog('drm', 'error', e1.message);
+        }
+      }
+    }
+
+    const fpHandlers = {
+      geolocation: fpRequestGeolocation,
+      camera: () => fpRequestMedia('Camera', { video: true, audio: false }),
+      microphone: () => fpRequestMedia('Microphone', { video: false, audio: true }),
+      drm: fpRequestDRM,
+    };
+
+    document.querySelectorAll('[data-fp-permission]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const fn = fpHandlers[btn.dataset.fpPermission];
+        if (fn) fn();
+      });
     });
 
     childUrlInput.value = getChildUrl();

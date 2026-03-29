@@ -14,6 +14,8 @@
     code, pre, input, button, select, textarea {
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     }
+    code { word-break: break-all; }
+    pre { overflow-x: auto; }
     h1, h2, h3 { margin-top: 20px; }
     a { color: #3969ef; }
 
@@ -136,11 +138,14 @@
     .obs-actions { display: flex; gap: 8px; margin-top: 12px; }
     .obs-actions button { padding: 6px 14px; cursor: pointer; }
 
+    .table-wrap {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      margin: 8px 0 16px;
+    }
     table {
       border-collapse: collapse;
-      width: 100%;
       max-width: 800px;
-      margin: 8px 0 16px;
     }
     th, td {
       border: 1px solid #d0d0d0;
@@ -316,6 +321,7 @@ Both resolve to the same server and serve the same files, so no external depende
 <h2>Expected Outcomes</h2>
 
 <h3>Before the permission identity fix</h3>
+<div class="table-wrap">
 <table>
   <thead>
     <tr><th>Scenario</th><th>Dialog shows</th><th>Stored against</th><th>Re-prompted?</th></tr>
@@ -341,8 +347,10 @@ Both resolve to the same server and serve the same files, so no external depende
     </tr>
   </tbody>
 </table>
+</div>
 
 <h3>After the permission identity fix</h3>
+<div class="table-wrap">
 <table>
   <thead>
     <tr><th>Scenario</th><th>Dialog shows</th><th>Stored against</th><th>Re-prompted?</th></tr>
@@ -368,6 +376,7 @@ Both resolve to the same server and serve the same files, so no external depende
     </tr>
   </tbody>
 </table>
+</div>
 
 <h2>Event Log</h2>
 <pre id="log"></pre>

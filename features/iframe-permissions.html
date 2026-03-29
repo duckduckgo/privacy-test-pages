@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Site Permissions in Iframes</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.4;
+      margin: 16px;
+      color: #111;
+    }
+    code, pre, input, button, select, textarea {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+    h1, h2, h3 { margin-top: 20px; }
+    a { color: #3969ef; }
+
+    /* Configuration bar */
+    .config-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin: 12px 0;
+      padding: 10px 12px;
+      background: #f6f6f6;
+      border: 1px solid #d0d0d0;
+      border-radius: 4px;
+    }
+    .config-bar label { font-weight: 600; white-space: nowrap; }
+    .config-bar input[type="text"] {
+      flex: 1;
+      min-width: 260px;
+      padding: 4px 8px;
+    }
+    .config-bar button { padding: 4px 14px; cursor: pointer; }
+
+    /* Iframe panels */
+    .panels {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      margin: 16px 0;
+    }
+    @media (min-width: 960px) {
+      .panels { grid-template-columns: 1fr 1fr; }
+    }
+    .panel {
+      border: 1px solid #d0d0d0;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .panel-header {
+      background: #f6f6f6;
+      padding: 8px 12px;
+      border-bottom: 1px solid #d0d0d0;
+    }
+    .panel-header h3 { margin: 0 0 4px; }
+    .panel-meta {
+      font-size: 0.85em;
+      color: #555;
+      margin: 2px 0;
+    }
+    .panel-meta code { font-size: 0.95em; }
+    .badge {
+      display: inline-block;
+      padding: 1px 6px;
+      border-radius: 3px;
+      font-size: 0.8em;
+      font-weight: 600;
+      color: #fff;
+    }
+    .badge-same { background: #2a7e2e; }
+    .badge-cross { background: #b35900; }
+    .badge-etld { background: #7b2d8b; }
+    .panel iframe {
+      width: 100%;
+      height: 380px;
+      border: none;
+      display: block;
+    }
+    .panel .child-status {
+      padding: 6px 12px;
+      font-size: 0.85em;
+      background: #fafafa;
+      border-top: 1px solid #e0e0e0;
+      min-height: 1.6em;
+    }
+
+    /* Test steps */
+    .test-steps { max-width: 800px; }
+    .test-steps ol { padding-left: 24px; }
+    .test-steps li { margin-bottom: 4px; }
+
+    /* Observation log */
+    .obs-form { max-width: 600px; margin: 16px 0; }
+    .obs-form label { display: block; font-weight: 600; margin-top: 10px; }
+    .obs-form select,
+    .obs-form input[type="text"],
+    .obs-form textarea {
+      width: 100%;
+      padding: 4px 8px;
+      margin-top: 4px;
+      box-sizing: border-box;
+    }
+    .obs-form textarea { height: 60px; resize: vertical; }
+    .obs-form .radio-group { display: flex; gap: 16px; margin-top: 4px; }
+    .obs-form .radio-group label { font-weight: normal; display: inline; }
+    .obs-actions { display: flex; gap: 8px; margin-top: 12px; }
+    .obs-actions button { padding: 6px 14px; cursor: pointer; }
+
+    /* Expected outcomes tables */
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      max-width: 800px;
+      margin: 8px 0 16px;
+    }
+    th, td {
+      border: 1px solid #d0d0d0;
+      padding: 6px 8px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th { background: #f6f6f6; }
+
+    pre#log {
+      border: 1px solid #d0d0d0;
+      background: #f7f7f7;
+      padding: 8px;
+      max-height: 200px;
+      overflow: auto;
+      white-space: pre-wrap;
+      font-size: 0.85em;
+    }
+  </style>
+</head>
+<body>
+<p><a href="../index.html">[Home]</a></p>
+
+<h1>Site Permissions in Iframes</h1>
+<p>Verifies which origin the browser uses for <strong>permission identity</strong> when a permission
+request originates from an iframe rather than the top-level page. This exposes bugs where the
+browser stores a permission grant against the iframe's requester origin instead of a normalised
+site key, causing unexpected dialogs, duplicate prompts, or unrecognisable settings entries.</p>
+
+<h2>Configuration</h2>
+<div class="config-bar">
+  <label for="child-url">Cross-origin iframe URL:</label>
+  <input type="text" id="child-url" placeholder="https://permission.site/">
+  <button id="reload-iframes">Reload iframes</button>
+</div>
+
+<h2>Iframe Panels</h2>
+<div class="panels">
+  <!-- Same-origin panel -->
+  <div class="panel" id="panel-same">
+    <div class="panel-header">
+      <h3>Same-origin <span class="badge badge-same">same-origin</span></h3>
+      <p class="panel-meta">Iframe src: <code id="same-src-label">—</code></p>
+      <p class="panel-meta">Parent origin: <code id="same-parent-label">—</code></p>
+    </div>
+    <iframe id="iframe-same"
+      allow="geolocation; camera; microphone; encrypted-media"
+      sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+    ></iframe>
+    <div class="child-status" id="same-status">—</div>
+  </div>
+
+  <!-- Cross-origin panel -->
+  <div class="panel" id="panel-cross">
+    <div class="panel-header">
+      <h3>Cross-origin <span class="badge badge-cross" id="cross-badge">cross-origin</span></h3>
+      <p class="panel-meta">Iframe src: <code id="cross-src-label">—</code></p>
+      <p class="panel-meta">Parent origin: <code id="cross-parent-label">—</code></p>
+    </div>
+    <iframe id="iframe-cross"
+      allow="geolocation; camera; microphone; encrypted-media"
+    ></iframe>
+    <div class="child-status" id="cross-status">—</div>
+  </div>
+</div>
+
+<h2>Test Steps</h2>
+<div class="test-steps">
+
+<h3>Test 1 — Cross-origin permission identity</h3>
+<ol>
+  <li>In the <strong>Cross-origin</strong> iframe panel, click a permission button
+      (e.g. <em>Geolocation</em> or <em>Camera</em>) inside the embedded page.</li>
+  <li>Observe the permission dialog — which domain does it display? Record it below.</li>
+  <li>Grant the permission (tap <em>Allow</em>).</li>
+  <li>Open browser <strong>Settings &gt; Site Permissions</strong>.
+      Which domain is the grant stored against?
+      Is it the iframe origin, the top-level site, or an eTLD+1?</li>
+  <li>Navigate the top-level page to the iframe's origin directly
+      (e.g. open <code>permission.site</code> in a new tab).</li>
+  <li>Request the same permission again — are you prompted again, or is the grant reused?</li>
+</ol>
+
+<h3>Test 2 — Same-origin baseline</h3>
+<ol>
+  <li>In the <strong>Same-origin</strong> iframe panel, click the same permission button.</li>
+  <li>Observe the permission dialog — the domain shown should match the top-level page.</li>
+  <li>Grant the permission.</li>
+  <li>Verify in Settings that the grant is stored against the top-level site domain.</li>
+</ol>
+
+<h3>Test 3 — Same-eTLD+1 subdomain (local dev only)</h3>
+<ol>
+  <li>Set up local hostnames per the repo README:
+    <pre>127.0.0.1  first-party.example
+127.0.0.1  sub.first-party.example</pre>
+    Both hostnames in the mkcert certificate:
+    <pre>mkcert first-party.example "*.first-party.example" ...</pre>
+  </li>
+  <li>Set <code>?child=https://sub.first-party.example:8000/features/iframe-permissions-child.html</code></li>
+  <li>Follow the same steps as Test 1.</li>
+  <li>After granting, navigate to <code>first-party.example</code> directly and re-request
+      the same permission.
+    <ul>
+      <li><strong>BUG (current):</strong> you get prompted again because the grant is keyed
+          to the subdomain.</li>
+      <li><strong>FIXED:</strong> the grant should be reused because both share the same eTLD+1.</li>
+    </ul>
+  </li>
+</ol>
+</div>
+
+<h2>Observation Log</h2>
+<div class="obs-form">
+  <label for="obs-permission">Permission type tested</label>
+  <select id="obs-permission">
+    <option value="geolocation">Geolocation</option>
+    <option value="camera">Camera</option>
+    <option value="microphone">Microphone</option>
+    <option value="drm">DRM (EME)</option>
+  </select>
+
+  <label for="obs-context">Iframe context</label>
+  <select id="obs-context">
+    <option value="same-origin">Same-origin</option>
+    <option value="cross-origin">Cross-origin</option>
+    <option value="same-etld1">Same-eTLD+1</option>
+  </select>
+
+  <label for="obs-dialog-domain">Domain shown in dialog</label>
+  <input type="text" id="obs-dialog-domain" placeholder="e.g. permission.site">
+
+  <label for="obs-stored-domain">Domain stored in settings</label>
+  <input type="text" id="obs-stored-domain" placeholder="e.g. permission.site">
+
+  <label>Re-prompted after navigation?</label>
+  <div class="radio-group">
+    <label><input type="radio" name="obs-reprompt" value="yes"> Yes</label>
+    <label><input type="radio" name="obs-reprompt" value="no"> No</label>
+    <label><input type="radio" name="obs-reprompt" value="n/a" checked> N/A</label>
+  </div>
+
+  <label for="obs-notes">Notes</label>
+  <textarea id="obs-notes" placeholder="Additional observations..."></textarea>
+
+  <div class="obs-actions">
+    <button id="obs-copy-json">Copy as JSON</button>
+    <button id="obs-clear">Clear</button>
+  </div>
+</div>
+
+<h2>Expected Outcomes</h2>
+
+<h3>Before the permission identity fix</h3>
+<table>
+  <thead>
+    <tr><th>Scenario</th><th>Dialog shows</th><th>Stored against</th><th>Re-prompted?</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Same-origin iframe</td>
+      <td>privacy-test-pages.site</td>
+      <td>privacy-test-pages.site</td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td>Cross-origin iframe (permission.site)</td>
+      <td>permission.site</td>
+      <td>permission.site</td>
+      <td>N/A (different site)</td>
+    </tr>
+    <tr>
+      <td>Same-eTLD+1 subdomain (local)</td>
+      <td>sub.first-party.example</td>
+      <td>sub.first-party.example</td>
+      <td>Yes (bug)</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>After the permission identity fix</h3>
+<table>
+  <thead>
+    <tr><th>Scenario</th><th>Dialog shows</th><th>Stored against</th><th>Re-prompted?</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Same-origin iframe</td>
+      <td>privacy-test-pages.site</td>
+      <td>privacy-test-pages.site</td>
+      <td>No</td>
+    </tr>
+    <tr>
+      <td>Cross-origin iframe (permission.site)</td>
+      <td>permission.site</td>
+      <td>permission.site</td>
+      <td>N/A (different site)</td>
+    </tr>
+    <tr>
+      <td>Same-eTLD+1 subdomain (local)</td>
+      <td>first-party.example (eTLD+1)</td>
+      <td>first-party.example (eTLD+1)</td>
+      <td>No (fixed)</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Event Log</h2>
+<pre id="log"></pre>
+
+<script>
+  const DEFAULT_CROSS_ORIGIN = 'https://permission.site/';
+  const SAME_ORIGIN_CHILD = 'iframe-permissions-child.html';
+
+  const logEl = document.getElementById('log');
+  const childUrlInput = document.getElementById('child-url');
+  const iframeSame = document.getElementById('iframe-same');
+  const iframeCross = document.getElementById('iframe-cross');
+
+  function log(msg) {
+    const ts = new Date().toISOString();
+    logEl.textContent += `[${ts}] ${msg}\n`;
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  function getChildUrl() {
+    const params = new URLSearchParams(location.search);
+    return params.get('child') || DEFAULT_CROSS_ORIGIN;
+  }
+
+  function classifyRelationship(parentOrigin, childOrigin) {
+    if (parentOrigin === childOrigin) return 'same-origin';
+    try {
+      const parent = new URL(parentOrigin);
+      const child = new URL(childOrigin);
+      const parentParts = parent.hostname.split('.');
+      const childParts = child.hostname.split('.');
+      const parentETLD1 = parentParts.slice(-2).join('.');
+      const childETLD1 = childParts.slice(-2).join('.');
+      if (parentETLD1 === childETLD1) return 'same-eTLD+1';
+    } catch { /* ignore */ }
+    return 'cross-origin';
+  }
+
+  function loadIframes() {
+    const crossUrl = childUrlInput.value.trim() || DEFAULT_CROSS_ORIGIN;
+    const parentOrigin = location.origin;
+
+    // Same-origin
+    iframeSame.src = SAME_ORIGIN_CHILD;
+    document.getElementById('same-src-label').textContent = parentOrigin + '/features/' + SAME_ORIGIN_CHILD;
+    document.getElementById('same-parent-label').textContent = parentOrigin;
+    document.getElementById('same-status').textContent = '—';
+
+    // Cross-origin
+    iframeCross.src = crossUrl;
+    let crossOriginStr;
+    try { crossOriginStr = new URL(crossUrl).origin; } catch { crossOriginStr = crossUrl; }
+    document.getElementById('cross-src-label').textContent = crossOriginStr;
+    document.getElementById('cross-parent-label').textContent = parentOrigin;
+    document.getElementById('cross-status').textContent = '—';
+
+    const rel = classifyRelationship(parentOrigin, crossOriginStr);
+    const badge = document.getElementById('cross-badge');
+    badge.textContent = rel;
+    badge.className = 'badge';
+    if (rel === 'same-origin') badge.classList.add('badge-same');
+    else if (rel === 'same-eTLD+1') badge.classList.add('badge-etld');
+    else badge.classList.add('badge-cross');
+
+    log(`Loaded same-origin iframe: ${SAME_ORIGIN_CHILD}`);
+    log(`Loaded cross-origin iframe: ${crossUrl} (${rel})`);
+  }
+
+  // Listen for postMessage from child iframes
+  window.addEventListener('message', (event) => {
+    if (!event.data || event.data.type !== 'permission-result') return;
+    const { permission, outcome, detail, origin } = event.data;
+    const msg = `${permission}: ${outcome}${detail ? ' — ' + detail : ''} (from ${origin})`;
+    log(msg);
+
+    // Update the relevant panel status
+    const sameOrigin = location.origin;
+    let statusEl;
+    if (origin === sameOrigin) {
+      statusEl = document.getElementById('same-status');
+    } else {
+      statusEl = document.getElementById('cross-status');
+    }
+    if (statusEl) statusEl.textContent = msg;
+  });
+
+  // Observation log: Copy as JSON
+  document.getElementById('obs-copy-json').addEventListener('click', () => {
+    const repromptRadio = document.querySelector('input[name="obs-reprompt"]:checked');
+    const observation = {
+      permission: document.getElementById('obs-permission').value,
+      context: document.getElementById('obs-context').value,
+      dialogDomain: document.getElementById('obs-dialog-domain').value,
+      storedDomain: document.getElementById('obs-stored-domain').value,
+      rePrompted: repromptRadio ? repromptRadio.value : null,
+      notes: document.getElementById('obs-notes').value,
+      parentOrigin: location.origin,
+      crossOriginSrc: childUrlInput.value.trim() || DEFAULT_CROSS_ORIGIN,
+      userAgent: navigator.userAgent,
+      timestamp: new Date().toISOString(),
+    };
+    const json = JSON.stringify(observation, null, 2);
+    navigator.clipboard.writeText(json).then(
+      () => log('Observation copied to clipboard as JSON'),
+      () => {
+        log('Clipboard write failed — JSON logged below');
+        log(json);
+      },
+    );
+  });
+
+  document.getElementById('obs-clear').addEventListener('click', () => {
+    document.getElementById('obs-dialog-domain').value = '';
+    document.getElementById('obs-stored-domain').value = '';
+    document.getElementById('obs-notes').value = '';
+    const na = document.querySelector('input[name="obs-reprompt"][value="n/a"]');
+    if (na) na.checked = true;
+    log('Observation form cleared');
+  });
+
+  // Reload button
+  document.getElementById('reload-iframes').addEventListener('click', () => {
+    const newUrl = childUrlInput.value.trim() || DEFAULT_CROSS_ORIGIN;
+    const url = new URL(location.href);
+    if (newUrl !== DEFAULT_CROSS_ORIGIN) {
+      url.searchParams.set('child', newUrl);
+    } else {
+      url.searchParams.delete('child');
+    }
+    history.replaceState(null, '', url.toString());
+    loadIframes();
+  });
+
+  // Initialise
+  childUrlInput.value = getChildUrl();
+  loadIframes();
+</script>
+</body>
+</html>

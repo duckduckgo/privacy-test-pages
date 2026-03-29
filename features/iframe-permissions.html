@@ -382,7 +382,7 @@ Both resolve to the same server and serve the same files, so no external depende
 <pre id="log"></pre>
 </div><!-- /.parent-ui -->
 
-<script>
+<script type="module">
   const IS_CHILD = window.self !== window.top;
   const PAGE_PATH = '/features/iframe-permissions.html';
 
@@ -522,26 +522,14 @@ Both resolve to the same server and serve the same files, so no external depende
       return params.get('child') || DEFAULT_CROSS_ORIGIN;
     }
 
-    const SAME_SITE_PAIRS = [
-      ['privacy-test-pages.site', 'privacy-test-pages.site'],
-      ['first-party.site', 'first-party.site'],
-      ['first-party.example', 'first-party.example'],
-      ['third-party.site', 'third-party.site'],
-      ['third-party.example', 'third-party.example'],
-    ];
-
-    function registrableDomain(hostname) {
-      for (const [base] of SAME_SITE_PAIRS) {
-        if (hostname === base || hostname.endsWith('.' + base)) return base;
-      }
-      return null;
-    }
+    const { getDomain } = await import('https://cdn.jsdelivr.net/npm/tldts/+esm');
+    const tldtsOpts = { allowPrivateDomains: true };
 
     function classifyRelationship(parentOrigin, childOrigin) {
       if (parentOrigin === childOrigin) return 'same-origin';
       try {
-        const parentRD = registrableDomain(new URL(parentOrigin).hostname);
-        const childRD = registrableDomain(new URL(childOrigin).hostname);
+        const parentRD = getDomain(parentOrigin, tldtsOpts);
+        const childRD = getDomain(childOrigin, tldtsOpts);
         if (parentRD && childRD && parentRD === childRD) return 'same-eTLD+1';
       } catch { /* ignore */ }
       return 'cross-origin';

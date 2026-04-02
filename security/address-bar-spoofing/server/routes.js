@@ -21,7 +21,8 @@ router.get('/redirect', (req, res) => {
     }
 
     const delay = parseInt(req.query.delay);
-    const status = parseInt(req.query.status) || 302;
+    const parsedStatus = parseInt(req.query.status);
+    const status = parsedStatus >= 100 && parsedStatus <= 999 ? parsedStatus : 302;
 
     if (delay && !isNaN(delay)) {
         if (delay > 5000) {

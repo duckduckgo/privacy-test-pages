@@ -1,0 +1,22 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//DuckDuckGo//Privacy Test Pages//EN
+BEGIN:VEVENT
+UID:multi-first@privacy-test-pages.site
+DTSTAMP:20260513T120000Z
+DTSTART:20260601T140000Z
+DTEND:20260601T150000Z
+SUMMARY:First Test Event
+DESCRIPTION:First of two events. Used to verify multi-VEVENT fallback behaviour.
+LOCATION:Privacy Test Pages
+END:VEVENT
+BEGIN:VEVENT
+UID:multi-second@privacy-test-pages.site
+DTSTAMP:20260513T120000Z
+DTSTART:20260602T140000Z
+DTEND:20260602T150000Z
+SUMMARY:Second Test Event
+DESCRIPTION:Second of two events.
+LOCATION:Privacy Test Pages
+END:VEVENT
+END:VCALENDAR

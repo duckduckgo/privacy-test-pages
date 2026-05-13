@@ -1,0 +1,10 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//DuckDuckGo//Privacy Test Pages//EN
+BEGIN:VEVENT
+UID:malformed@privacy-test-pages.site
+DTSTAMP:20260513T120000Z
+DTSTART:not-a-real-date
+SUMMARY:Malformed DTSTART
+END:VEVENT
+END:VCALENDAR

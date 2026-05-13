@@ -1,0 +1,11 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//DuckDuckGo//Privacy Test Pages//EN
+BEGIN:VEVENT
+UID:unrecognized-tz@privacy-test-pages.site
+DTSTAMP:20260513T120000Z
+DTSTART;TZID=Definitely Not A Real Timezone:20260601T140000
+DTEND;TZID=Definitely Not A Real Timezone:20260601T150000
+SUMMARY:Unrecognized Time Zone
+END:VEVENT
+END:VCALENDAR

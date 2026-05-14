@@ -1,0 +1,13 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//DuckDuckGo//Privacy Test Pages//EN
+BEGIN:VEVENT
+UID:single-event@privacy-test-pages.site
+DTSTAMP:20260513T120000Z
+DTSTART:20260601T140000Z
+DTEND:20260601T150000Z
+SUMMARY:Privacy Test Pages — Single Event
+DESCRIPTION:Test fixture used to verify .ics download handling. Tap "Add" to add it to your calendar; tap "Cancel" to discard.
+LOCATION:Privacy Test Pages
+END:VEVENT
+END:VCALENDAR

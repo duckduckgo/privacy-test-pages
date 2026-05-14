@@ -1,0 +1,14 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//DuckDuckGo//Privacy Test Pages//EN
+BEGIN:VEVENT
+UID:recurring-daily@privacy-test-pages.site
+DTSTAMP:20260513T120000Z
+DTSTART:20260601T090000Z
+DTEND:20260601T093000Z
+SUMMARY:Privacy Test Pages — Daily Until June 30
+DESCRIPTION:Every day from June 1 to June 30 (UTC). The editor should show a daily recurrence with an end date.
+LOCATION:Daily Standup
+RRULE:FREQ=DAILY;UNTIL=20260630T235959Z
+END:VEVENT
+END:VCALENDAR

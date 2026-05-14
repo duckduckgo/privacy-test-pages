@@ -1,0 +1,13 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//DuckDuckGo//Privacy Test Pages//EN
+BEGIN:VEVENT
+UID:tz-outlook@privacy-test-pages.site
+DTSTAMP:20260513T120000Z
+DTSTART;TZID=Eastern Standard Time:20260601T140000
+DTEND;TZID=Eastern Standard Time:20260601T150000
+SUMMARY:Privacy Test Pages — Outlook Time Zone (2 PM ET)
+DESCRIPTION:DTSTART uses TZID=Eastern Standard Time (Outlook style). Parser should map this to America/New_York via CLDR.
+LOCATION:Outlook-style time zone
+END:VEVENT
+END:VCALENDAR

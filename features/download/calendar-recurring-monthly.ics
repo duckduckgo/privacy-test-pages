@@ -1,0 +1,14 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//DuckDuckGo//Privacy Test Pages//EN
+BEGIN:VEVENT
+UID:recurring-monthly@privacy-test-pages.site
+DTSTAMP:20260513T120000Z
+DTSTART:20260601T160000Z
+DTEND:20260601T170000Z
+SUMMARY:Privacy Test Pages — First Monday of Every Month (12 occurrences)
+DESCRIPTION:Monthly on the first Monday for 12 occurrences. The editor should show a monthly positional recurrence.
+LOCATION:Conference Room
+RRULE:FREQ=MONTHLY;BYDAY=1MO;COUNT=12
+END:VEVENT
+END:VCALENDAR

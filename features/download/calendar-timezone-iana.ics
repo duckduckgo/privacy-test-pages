@@ -1,0 +1,13 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//DuckDuckGo//Privacy Test Pages//EN
+BEGIN:VEVENT
+UID:tz-iana@privacy-test-pages.site
+DTSTAMP:20260513T120000Z
+DTSTART;TZID=America/New_York:20260601T140000
+DTEND;TZID=America/New_York:20260601T150000
+SUMMARY:Privacy Test Pages — IANA Time Zone (2 PM ET)
+DESCRIPTION:DTSTART uses TZID=America/New_York. The editor should show 2 PM in the New York time zone (or its equivalent in your local zone).
+LOCATION:Manhattan
+END:VEVENT
+END:VCALENDAR

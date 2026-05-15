@@ -1,0 +1,14 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//DuckDuckGo//Privacy Test Pages//EN
+BEGIN:VEVENT
+UID:recurring-weekly@privacy-test-pages.site
+DTSTAMP:20260513T120000Z
+DTSTART:20260601T140000Z
+DTEND:20260601T150000Z
+SUMMARY:Privacy Test Pages — Weekly Mondays (4 occurrences)
+DESCRIPTION:Weekly on Mondays for 4 occurrences. The editor should show a weekly recurrence on Mondays.
+LOCATION:Recurring Test Room
+RRULE:FREQ=WEEKLY;COUNT=4;BYDAY=MO
+END:VEVENT
+END:VCALENDAR

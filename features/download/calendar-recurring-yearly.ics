@@ -1,0 +1,14 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//DuckDuckGo//Privacy Test Pages//EN
+BEGIN:VEVENT
+UID:recurring-yearly@privacy-test-pages.site
+DTSTAMP:20260513T120000Z
+DTSTART;VALUE=DATE:20261225
+DTEND;VALUE=DATE:20261226
+SUMMARY:Privacy Test Pages — Yearly on Dec 25
+DESCRIPTION:All-day yearly recurrence on December 25. The editor should show a yearly recurrence.
+LOCATION:Worldwide
+RRULE:FREQ=YEARLY;BYMONTH=12;BYMONTHDAY=25
+END:VEVENT
+END:VCALENDAR

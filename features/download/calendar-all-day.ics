@@ -1,0 +1,13 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//DuckDuckGo//Privacy Test Pages//EN
+BEGIN:VEVENT
+UID:all-day@privacy-test-pages.site
+DTSTAMP:20260513T120000Z
+DTSTART;VALUE=DATE:20260615
+DTEND;VALUE=DATE:20260616
+SUMMARY:Privacy Test Pages — All-Day Event
+DESCRIPTION:All-day event used to verify VALUE=DATE parsing. The editor should show this as an all-day event.
+LOCATION:Privacy Test Pages
+END:VEVENT
+END:VCALENDAR

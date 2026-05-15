@@ -1,0 +1,14 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//DuckDuckGo//Privacy Test Pages//EN
+BEGIN:VEVENT
+UID:multi-line@privacy-test-pages.site
+DTSTAMP:20260513T120000Z
+DTSTART:20260620T180000Z
+DTEND:20260620T193000Z
+SUMMARY:Privacy Test Pages — Long Description
+DESCRIPTION:Line one of the description.\nLine two with a comma\, and a semicolon\; included.\nLine three.
+LOCATION:Building A\, Room 42
+URL:https://privacy-test-pages.site/features/download/
+END:VEVENT
+END:VCALENDAR

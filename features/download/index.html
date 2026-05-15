@@ -16,12 +16,30 @@
   <li><a href="download.pdf" download>Download PDF</a>
 </ul>
 
-<p>Download iCalendar (.ics)</p>
+<p>Download iCalendar (.ics) — happy paths</p>
 <ul>
-  <li><a href="calendar-single.ics">Single-event .ics (text/calendar)</a>
-  <li><a href="calendar-multi.ics">Multi-event .ics (text/calendar)</a>
-  <li><a href="calendar-malformed.ics">Malformed .ics (broken DTSTART)</a>
-  <li><a href="calendar-unrecognized-timezone.ics">Unrecognized time zone .ics</a>
+  <li><a href="calendar-single.ics">Single timed event</a>
+  <li><a href="calendar-all-day.ics">All-day event (VALUE=DATE)</a>
+  <li><a href="calendar-multi-line.ics">Multi-line description with escaped text and URL</a>
+  <li><a href="calendar-duration.ics">DURATION without DTEND</a>
+  <li><a href="calendar-timezone-iana.ics">IANA time zone (America/New_York)</a>
+  <li><a href="calendar-timezone-outlook.ics">Outlook-style time zone (Eastern Standard Time)</a>
+</ul>
+
+<p>Download iCalendar (.ics) — recurring events</p>
+<ul>
+  <li><a href="calendar-recurring-daily.ics">Daily until June 30</a>
+  <li><a href="calendar-recurring-weekly.ics">Weekly on Mondays (4 occurrences)</a>
+  <li><a href="calendar-recurring-monthly.ics">First Monday of every month (12 occurrences)</a>
+  <li><a href="calendar-recurring-yearly.ics">Yearly on Dec 25</a>
+  <li><a href="calendar-recurring-unsupported-part.ics">Recurrence with unsupported RRULE part</a>
+</ul>
+
+<p>Download iCalendar (.ics) — fallback paths (toast + QuickLook)</p>
+<ul>
+  <li><a href="calendar-multi.ics">Multiple events (unsupported, falls back)</a>
+  <li><a href="calendar-malformed.ics">Malformed file (broken DTSTART)</a>
+  <li><a href="calendar-unrecognized-timezone.ics">Unrecognized time zone</a>
 </ul>
 
 <p>Dynamic download (data URL)</p>

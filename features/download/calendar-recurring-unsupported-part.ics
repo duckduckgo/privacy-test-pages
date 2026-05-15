@@ -1,0 +1,14 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//DuckDuckGo//Privacy Test Pages//EN
+BEGIN:VEVENT
+UID:recurring-unsupported@privacy-test-pages.site
+DTSTAMP:20260513T120000Z
+DTSTART:20260601T130000Z
+DTEND:20260601T140000Z
+SUMMARY:Privacy Test Pages — Recurrence With Unsupported Part
+DESCRIPTION:Monthly on the last Monday using BYSETPOS. The parser drops BYSETPOS silently\, so the editor opens with a plain monthly Monday recurrence (no user-visible warning); the m_ics_calendar_unsupported_rrule pixel fires in the background.
+LOCATION:Privacy Test Pages
+RRULE:FREQ=MONTHLY;BYDAY=MO;BYSETPOS=-1;COUNT=6
+END:VEVENT
+END:VCALENDAR

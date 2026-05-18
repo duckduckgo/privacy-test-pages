@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Iframe Media Prompt Child</title>
+  <style>
+    body {
+      background: #eef4ff;
+      color: #111;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.5;
+      margin: 0;
+      min-height: 100vh;
+    }
+
+    code,
+    pre {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    .shell {
+      box-sizing: border-box;
+      display: grid;
+      gap: 12px;
+      min-height: 100vh;
+      padding: 16px;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.92);
+      border: 1px solid rgba(0, 0, 0, 0.12);
+      border-radius: 8px;
+      padding: 12px;
+    }
+
+    .badge {
+      background: #0969da;
+      border-radius: 999px;
+      color: #fff;
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      padding: 4px 10px;
+      text-transform: uppercase;
+    }
+
+    pre {
+      background: #f7f7f7;
+      border: 1px solid #d0d0d0;
+      margin: 0;
+      max-height: 220px;
+      overflow: auto;
+      padding: 8px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <section class="card">
+      <strong>Cross-origin media iframe</strong>
+      <div style="margin-top: 8px;">
+        <span class="badge" id="status-badge">waiting</span>
+      </div>
+    </section>
+
+    <section class="card">
+      <p>
+        This frame waits for the parent handshake, then runs
+        <code>enumerateDevices()</code> followed by <code>getUserMedia({ video: true })</code>.
+      </p>
+      <pre id="local-log"></pre>
+    </section>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const parentOrigin = params.get('parentOrigin') || '*';
+    const statusBadge = document.getElementById('status-badge');
+    const localLog = document.getElementById('local-log');
+
+    let hasStarted = false;
+
+    function appendLog(message) {
+      const line = `[${new Date().toISOString()}] ${message}`;
+      localLog.textContent = localLog.textContent
+        ? `${localLog.textContent}\n${line}`
+        : line;
+    }
+
+    function setStatus(value) {
+      statusBadge.textContent = value;
+      appendLog(value);
+    }
+
+    function postToParent(message) {
+      window.parent.postMessage(message, parentOrigin);
+    }
+
+    async function runMediaSequence() {
+      if (hasStarted) {
+        return;
+      }
+
+      hasStarted = true;
+      setStatus('running');
+
+      let enumerateDevicesResult = null;
+      let getUserMediaResult = null;
+
+      try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        enumerateDevicesResult = {
+          count: devices.length,
+          kinds: Array.from(devices).map((device) => device.kind),
+        };
+        appendLog(`enumerateDevices -> ${JSON.stringify(enumerateDevicesResult)}`);
+      } catch (error) {
+        enumerateDevicesResult = {
+          count: -1,
+          kinds: [error instanceof Error ? `${error.name}: ${error.message}` : String(error)],
+        };
+        appendLog(`enumerateDevices error -> ${JSON.stringify(enumerateDevicesResult)}`);
+      }
+
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        getUserMediaResult = {
+          state: 'resolved',
+          audioTracks: stream.getAudioTracks().length,
+          videoTracks: stream.getVideoTracks().length,
+        };
+        stream.getTracks().forEach((track) => track.stop());
+        appendLog(`getUserMedia resolved -> ${JSON.stringify(getUserMediaResult)}`);
+      } catch (error) {
+        getUserMediaResult = {
+          state: 'rejected',
+          errorName: error instanceof Error ? error.name : String(error),
+          error: error instanceof Error ? error.message : String(error),
+        };
+        appendLog(`getUserMedia rejected -> ${JSON.stringify(getUserMediaResult)}`);
+      }
+
+      setStatus('done');
+      postToParent({
+        type: 'media-run-complete',
+        enumerateDevices: enumerateDevicesResult,
+        getUserMedia: getUserMediaResult,
+      });
+    }
+
+    window.addEventListener('message', (event) => {
+      if (parentOrigin !== '*' && event.origin !== parentOrigin) {
+        return;
+      }
+
+      if (event.data && event.data.type === 'host-ack') {
+        setStatus('connected');
+        postToParent({ type: 'child-connected' });
+        return;
+      }
+
+      if (event.data && event.data.type === 'begin-media-run') {
+        void runMediaSequence();
+      }
+    });
+
+    window.addEventListener('load', () => {
+      setStatus('ready');
+      postToParent({ type: 'child-ready' });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Iframe Media Prompt Repro</title>
+  <style>
+    body {
+      color: #111;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.5;
+      margin: 16px;
+    }
+
+    code,
+    button,
+    input,
+    pre {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    .config-bar {
+      align-items: center;
+      background: #f6f6f6;
+      border: 1px solid #d0d0d0;
+      border-radius: 4px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 12px 0 20px;
+      padding: 10px 12px;
+    }
+
+    .config-bar label {
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .config-bar input[type="text"] {
+      flex: 1;
+      min-width: 280px;
+      padding: 4px 8px;
+    }
+
+    .config-bar input[type="checkbox"] {
+      margin-right: 4px;
+    }
+
+    .config-bar button {
+      cursor: pointer;
+      padding: 5px 12px;
+    }
+
+    .layout {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: 360px minmax(0, 1fr);
+    }
+
+    @media (max-width: 960px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      border: 1px solid #d0d0d0;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .panel-header {
+      background: #f6f6f6;
+      border-bottom: 1px solid #d0d0d0;
+      padding: 10px 12px;
+    }
+
+    .panel-header h2,
+    .panel-header h3 {
+      margin: 0;
+    }
+
+    .panel-body {
+      padding: 12px;
+    }
+
+    .status-grid {
+      display: grid;
+      gap: 8px 12px;
+      grid-template-columns: max-content minmax(0, 1fr);
+      margin: 0;
+    }
+
+    .status-grid dt {
+      font-weight: 700;
+    }
+
+    .status-grid dd {
+      margin: 0;
+      overflow-wrap: anywhere;
+    }
+
+    iframe {
+      border: none;
+      display: block;
+      height: 420px;
+      width: 100%;
+    }
+
+    pre {
+      background: #f7f7f7;
+      border: 1px solid #d0d0d0;
+      margin: 0;
+      max-height: 280px;
+      overflow: auto;
+      padding: 8px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .button-row button {
+      cursor: pointer;
+      padding: 6px 12px;
+    }
+  </style>
+</head>
+<body>
+  <p><a href="../index.html">[Home]</a></p>
+
+  <h1>Iframe Media Prompt Repro</h1>
+  <p>
+    Dedicated synthetic repro for the Claude-style camera prompt issue. The top-level page inserts a
+    cross-origin iframe, grants it <code>camera; microphone</code> via iframe permissions policy,
+    then asks the child frame to run <code>enumerateDevices()</code> followed by
+    <code>getUserMedia({ video: true })</code>.
+  </p>
+  <p>
+    <strong>Baseline expectation:</strong> a native browser permission prompt becomes visible and
+    <code>getUserMedia</code> can resolve after allowing it.
+    <strong>Hotfix expectation:</strong> if iframe media overrides are enabled, no prompt appears,
+    <code>enumerateDevices()</code> returns an empty array, and <code>getUserMedia</code> rejects.
+  </p>
+
+  <div class="config-bar">
+    <label for="child-url">Cross-origin iframe URL</label>
+    <input id="child-url" type="text">
+    <label><input id="autorun" type="checkbox"> autorun</label>
+    <button id="reload-frame" type="button">Reload iframe</button>
+    <button id="trigger-run" type="button">Trigger iframe media sequence</button>
+  </div>
+
+  <div class="layout">
+    <section class="panel">
+      <div class="panel-header">
+        <h2>Status</h2>
+      </div>
+      <div class="panel-body">
+        <dl class="status-grid">
+          <dt>Parent origin</dt>
+          <dd id="parent-origin">pending</dd>
+          <dt>Child origin</dt>
+          <dd id="child-origin">pending</dd>
+          <dt>Relationship</dt>
+          <dd id="relationship">pending</dd>
+          <dt>Iframe status</dt>
+          <dd id="iframe-status">not-loaded</dd>
+          <dt>Handshake</dt>
+          <dd id="handshake-status">waiting</dd>
+          <dt>Run status</dt>
+          <dd id="run-status">idle</dd>
+          <dt>enumerateDevices count</dt>
+          <dd id="enumerate-count">pending</dd>
+          <dt>getUserMedia state</dt>
+          <dd id="gum-state">pending</dd>
+          <dt>getUserMedia error</dt>
+          <dd id="gum-error">none</dd>
+        </dl>
+        <div class="button-row">
+          <button id="copy-json" type="button">Copy JSON result</button>
+          <button id="clear-log" type="button">Clear log</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-header">
+        <h3>Cross-origin iframe</h3>
+      </div>
+      <iframe
+        id="media-frame"
+        allow="camera; microphone"
+        title="Iframe media prompt repro"
+      ></iframe>
+    </section>
+  </div>
+
+  <section class="panel" style="margin-top: 16px;">
+    <div class="panel-header">
+      <h3>Event log</h3>
+    </div>
+    <div class="panel-body">
+      <pre id="event-log"></pre>
+    </div>
+  </section>
+
+  <script type="module">
+    const CHILD_PATH = '/features/iframe-media-prompt-child.html';
+    const CROSS_ORIGIN_MAP = {
+      'privacy-test-pages.site': 'good.third-party.site',
+      'first-party.site': 'good.third-party.site',
+      'first-party.example': 'third-party.example',
+    };
+
+    const frame = document.getElementById('media-frame');
+    const childUrlInput = document.getElementById('child-url');
+    const autorunCheckbox = document.getElementById('autorun');
+    const eventLog = document.getElementById('event-log');
+
+    const query = new URLSearchParams(window.location.search);
+
+    const state = {
+      parentOrigin: window.location.origin,
+      childOrigin: null,
+      relationship: null,
+      iframeStatus: 'not-loaded',
+      handshake: 'waiting',
+      runStatus: 'idle',
+      enumerateDevices: null,
+      getUserMedia: null,
+      done: false,
+      events: [],
+    };
+
+    window.__iframeMediaPromptRepro = state;
+
+    function setText(id, value) {
+      document.getElementById(id).textContent = value;
+    }
+
+    function appendLog(message) {
+      const line = `[${new Date().toISOString()}] ${message}`;
+      eventLog.textContent = eventLog.textContent
+        ? `${eventLog.textContent}\n${line}`
+        : line;
+    }
+
+    function recordEvent(type, detail) {
+      const entry = {
+        type,
+        detail,
+        timestamp: new Date().toISOString(),
+      };
+      state.events.push(entry);
+      appendLog(`${type}: ${JSON.stringify(detail)}`);
+    }
+
+    function classifyRelationship(parentOrigin, childOrigin) {
+      if (parentOrigin === childOrigin) {
+        return 'same-origin';
+      }
+      return 'cross-origin';
+    }
+
+    function defaultCrossOriginUrl() {
+      const hostname = window.location.hostname;
+      const mappedHost = CROSS_ORIGIN_MAP[hostname];
+
+      if (!mappedHost) {
+        return `${window.location.origin}${CHILD_PATH}`;
+      }
+
+      return `${window.location.protocol}//${mappedHost}${window.location.port ? `:${window.location.port}` : ''}${CHILD_PATH}`;
+    }
+
+    function syncStatus() {
+      setText('parent-origin', state.parentOrigin);
+      setText('child-origin', state.childOrigin || 'pending');
+      setText('relationship', state.relationship || 'pending');
+      setText('iframe-status', state.iframeStatus);
+      setText('handshake-status', state.handshake);
+      setText('run-status', state.runStatus);
+      setText('enumerate-count', state.enumerateDevices ? String(state.enumerateDevices.count) : 'pending');
+      setText('gum-state', state.getUserMedia ? state.getUserMedia.state : 'pending');
+      setText('gum-error', state.getUserMedia ? (state.getUserMedia.error || 'none') : 'none');
+    }
+
+    function currentChildUrl() {
+      return childUrlInput.value.trim() || defaultCrossOriginUrl();
+    }
+
+    function updateUrl() {
+      const url = new URL(window.location.href);
+      const childUrl = currentChildUrl();
+
+      if (childUrl !== defaultCrossOriginUrl()) {
+        url.searchParams.set('child', childUrl);
+      } else {
+        url.searchParams.delete('child');
+      }
+
+      if (autorunCheckbox.checked) {
+        url.searchParams.set('autorun', '1');
+      } else {
+        url.searchParams.delete('autorun');
+      }
+
+      history.replaceState(null, '', url.toString());
+    }
+
+    function resetResult() {
+      state.handshake = 'waiting';
+      state.runStatus = 'idle';
+      state.enumerateDevices = null;
+      state.getUserMedia = null;
+      state.done = false;
+      syncStatus();
+    }
+
+    function loadFrame() {
+      const childUrl = new URL(currentChildUrl(), window.location.href);
+
+      childUrl.searchParams.set('parentOrigin', window.location.origin);
+
+      state.childOrigin = childUrl.origin;
+      state.relationship = classifyRelationship(window.location.origin, childUrl.origin);
+      state.iframeStatus = 'loading';
+      resetResult();
+      syncStatus();
+
+      frame.src = childUrl.toString();
+      updateUrl();
+      recordEvent('iframe-loading', {
+        src: childUrl.toString(),
+        allow: frame.getAttribute('allow'),
+      });
+    }
+
+    function beginMediaRun() {
+      if (!frame.contentWindow) {
+        recordEvent('run-ignored', { reason: 'iframe-not-ready' });
+        return;
+      }
+
+      state.runStatus = 'started';
+      syncStatus();
+      frame.contentWindow.postMessage({ type: 'begin-media-run' }, state.childOrigin);
+      recordEvent('begin-media-run', { childOrigin: state.childOrigin });
+    }
+
+    window.addEventListener('message', (event) => {
+      if (state.childOrigin && event.origin !== state.childOrigin) {
+        return;
+      }
+
+      const data = event.data || {};
+      recordEvent(data.type || 'unknown', data);
+
+      if (data.type === 'child-ready') {
+        state.iframeStatus = 'loaded';
+        state.handshake = 'ready';
+        syncStatus();
+        event.source.postMessage({ type: 'host-ack' }, event.origin);
+        if (autorunCheckbox.checked) {
+          beginMediaRun();
+        }
+        return;
+      }
+
+      if (data.type === 'child-connected') {
+        state.handshake = 'connected';
+        syncStatus();
+        return;
+      }
+
+      if (data.type === 'media-run-complete') {
+        state.runStatus = 'done';
+        state.enumerateDevices = data.enumerateDevices;
+        state.getUserMedia = data.getUserMedia;
+        state.done = true;
+        syncStatus();
+      }
+    });
+
+    document.getElementById('reload-frame').addEventListener('click', loadFrame);
+    document.getElementById('trigger-run').addEventListener('click', beginMediaRun);
+    document.getElementById('clear-log').addEventListener('click', () => {
+      eventLog.textContent = '';
+    });
+    document.getElementById('copy-json').addEventListener('click', async () => {
+      const json = JSON.stringify(state, null, 2);
+      await navigator.clipboard.writeText(json);
+      recordEvent('copied-json', { bytes: json.length });
+    });
+
+    childUrlInput.value = query.get('child') || defaultCrossOriginUrl();
+    autorunCheckbox.checked = query.get('autorun') === '1';
+    syncStatus();
+    loadFrame();
+  </script>
+</body>
+</html>

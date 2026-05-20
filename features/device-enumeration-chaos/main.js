@@ -233,20 +233,21 @@ const TECHNIQUES = [
         group: 'A',
         title: 'enumerateDevices() x10 from setInterval / 100ms',
         code: 'setInterval(() => enumerateDevices(), 100) x10',
-        run() {
-            return new Promise((resolve, reject) => {
-                let iterations = 0;
-                const errors = [];
+        async run() {
+            const pending = await new Promise((resolve) => {
+                const promises = [];
                 const id = setInterval(() => {
-                    iterations++;
-                    navigator.mediaDevices.enumerateDevices().catch((e) => errors.push(describeError(e)));
-                    if (iterations >= 10) {
+                    promises.push(navigator.mediaDevices.enumerateDevices());
+                    if (promises.length >= 10) {
                         clearInterval(id);
-                        if (errors.length) reject(new Error(errors.join(' | ')));
-                        else resolve({ iterations });
+                        resolve(promises);
                     }
                 }, 100);
             });
+            const settled = await Promise.allSettled(pending);
+            const errors = settled.filter((s) => s.status === 'rejected').map((s) => describeError(s.reason));
+            if (errors.length) throw new Error(errors.join(' | '));
+            return { iterations: settled.length };
         },
     },
     {

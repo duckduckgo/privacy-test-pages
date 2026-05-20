@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Device Enumeration Chaos</title>
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+    <p><a href="../../index.html">[Home]</a></p>
+
+    <h1>Device Enumeration Chaos</h1>
+
+    <div class="banner">
+        <h2>What is this page?</h2>
+        <p>
+            Repro tool for the Windows OS camera prompt issue tracked in
+            <a href="https://app.asana.com/1/137249556945/project/949243614371883/task/1213972428315171?focus=true">OPS-7378</a>
+            (camera prompt on signing into claude.ai / linkedin.com / youtube.com). The
+            <code>content-scope-scripts</code> <code>deviceEnumerationFix</code> only intercepts
+            <code>MediaDevices.enumerateDevices()</code>; this page also exercises every adjacent API
+            (<code>getUserMedia</code>, <code>permissions.query</code>, <code>RTCPeerConnection</code>,
+            <code>getDisplayMedia</code>, iframe contexts) so a tester can isolate exactly which call still
+            triggers the OS prompt on a build under test.
+        </p>
+        <p>
+            <strong>How to use it.</strong> On a fresh Windows install where camera permission has never been
+            granted or denied for the DuckDuckGo app, run each technique one at a time, watch for the native
+            OS camera prompt, and use the "OS prompt?" dropdown next to each row to record what you observed.
+            When done, hit <em>Download results</em> to export a JSON record.
+        </p>
+        <p>
+            Note: the <em>B group</em> calls <code>getUserMedia</code> directly and so will legitimately surface a camera/mic prompt on any browser. The question for this repro is whether
+            those calls surface the <em>native Windows OS prompt</em> in addition to or instead of the
+            in-app permission UI.
+        </p>
+    </div>
+
+    <div class="diagnostic">
+        <strong>Runtime diagnostics</strong>
+        <dl id="diagnostic-list"></dl>
+    </div>
+
+    <div class="unleash-bar">
+        <button id="unleash" type="button">Unleash chaos (run everything)</button>
+        <span id="unleash-progress" class="unleash-progress"></span>
+        <span style="flex:1"></span>
+        <label for="overall-prompt">
+            Did the OS prompt appear at any point during the run?
+            <select id="overall-prompt">
+                <option value="not-answered">not answered</option>
+                <option value="yes">Yes — at some point</option>
+                <option value="no">No prompt at any point</option>
+                <option value="in-browser-only">In-browser prompt only</option>
+                <option value="already-granted">Already granted before run</option>
+                <option value="already-denied">Already denied before run</option>
+            </select>
+        </label>
+    </div>
+
+    <div id="techniques"></div>
+
+    <div class="results-bar">
+        <button id="download" type="button">Download results JSON</button>
+        <button id="reset" type="button">Reset state</button>
+    </div>
+
+    <h2>Log</h2>
+    <pre id="log" class="log-panel"></pre>
+
+    <dialog id="confirm-dialog">
+        <h3>Unleash chaos?</h3>
+        <p>
+            This will run all device-enumeration techniques in sequence. The B group calls
+            <code>getUserMedia</code> directly, which will trigger camera/mic permission prompts.
+            Do not run this on a build where you do not want to be prompted.
+        </p>
+        <div class="dialog-actions">
+            <button id="confirm-cancel" type="button">Cancel</button>
+            <button id="confirm-go" type="button" class="danger">Run chaos</button>
+        </div>
+    </dialog>
+
+    <script src="./main.js"></script>
+</body>
+</html>

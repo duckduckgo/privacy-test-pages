@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Chaos iframe child</title>
+</head>
+<body>
+    <p>Chaos iframe child. Awaits postMessage from parent.</p>
+    <script>
+        const RUNNERS = {
+            async A1() {
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                return { count: devices.length, kinds: devices.map((d) => d.kind) };
+            },
+            async B1() {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                const tracks = stream.getTracks().map((t) => ({ kind: t.kind, label: t.label }));
+                for (const t of stream.getTracks()) t.stop();
+                return { tracks };
+            },
+        };
+
+        window.addEventListener('message', async (event) => {
+            const data = event.data || {};
+            if (data.type !== 'chaos-run') return;
+
+            const { requestId, technique } = data;
+            const runner = RUNNERS[technique];
+            const started = performance.now();
+            let response;
+            if (!runner) {
+                response = { error: 'unknown-technique' };
+            } else {
+                try {
+                    const value = await runner();
+                    response = { value };
+                } catch (err) {
+                    response = { error: err && (err.name || err.message) ? `${err.name || ''}: ${err.message || err}` : String(err) };
+                }
+            }
+            response.durationMs = Math.round(performance.now() - started);
+
+            event.source.postMessage(
+                { type: 'chaos-result', requestId, response },
+                event.origin === 'null' ? '*' : event.origin,
+            );
+        });
+
+        if (window.parent && window.parent !== window) {
+            window.parent.postMessage({ type: 'chaos-iframe-ready' }, '*');
+        }
+    </script>
+</body>
+</html>

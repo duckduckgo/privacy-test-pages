@@ -112,8 +112,8 @@ function waitForFrameReady(iframe) {
 async function makeIframeFromSrc(extraAttrs = {}) {
     const iframe = document.createElement('iframe');
     iframe.setAttribute('allow', 'camera; microphone');
-    for (const [k, v] of Object.entries(extraAttrs)) iframe.setAttribute(k, v);
     iframe.style.cssText = 'width:320px;height:80px;border:1px dashed #aaa;margin:4px';
+    for (const [k, v] of Object.entries(extraAttrs)) iframe.setAttribute(k, v);
     iframe.src = IFRAME_CHILD_URL;
     document.body.appendChild(iframe);
     await waitForFrameReady(iframe);

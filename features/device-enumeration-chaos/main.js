@@ -63,6 +63,28 @@ function delay(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+/*
+ * Promise-wraps an enumerateDevices() call scheduled via an arbitrary
+ * callback (setTimeout, requestAnimationFrame, MessageChannel, ...). The
+ * scheduled callback body is wrapped in try/catch so that a synchronous
+ * throw (e.g. navigator.mediaDevices being undefined in a non-secure
+ * context) propagates as a Promise rejection instead of escaping the
+ * Promise executor and leaving the outer Promise hanging.
+ */
+function scheduledEnumerate(schedule) {
+    return new Promise((resolve, reject) => {
+        schedule(() => {
+            try {
+                navigator.mediaDevices.enumerateDevices()
+                    .then((d) => resolve({ count: d.length }))
+                    .catch(reject);
+            } catch (e) {
+                reject(e);
+            }
+        });
+    });
+}
+
 function collectDiagnostics() {
     const md = navigator.mediaDevices;
     const enumerateFnSource = md && md.enumerateDevices ? Function.prototype.toString.call(md.enumerateDevices) : null;
@@ -218,15 +240,7 @@ const TECHNIQUES = [
         group: 'A',
         title: 'enumerateDevices() from setTimeout(0)',
         code: 'setTimeout(() => enumerateDevices(), 0)',
-        run() {
-            return new Promise((resolve, reject) => {
-                setTimeout(() => {
-                    navigator.mediaDevices.enumerateDevices()
-                        .then((d) => resolve({ count: d.length }))
-                        .catch(reject);
-                }, 0);
-            });
-        },
+        run: () => scheduledEnumerate((cb) => setTimeout(cb, 0)),
     },
     {
         id: 'A5',
@@ -234,10 +248,16 @@ const TECHNIQUES = [
         title: 'enumerateDevices() x10 from setInterval / 100ms',
         code: 'setInterval(() => enumerateDevices(), 100) x10',
         async run() {
-            const pending = await new Promise((resolve) => {
+            const pending = await new Promise((resolve, reject) => {
                 const promises = [];
                 const id = setInterval(() => {
-                    promises.push(navigator.mediaDevices.enumerateDevices());
+                    try {
+                        promises.push(navigator.mediaDevices.enumerateDevices());
+                    } catch (e) {
+                        clearInterval(id);
+                        reject(e);
+                        return;
+                    }
                     if (promises.length >= 10) {
                         clearInterval(id);
                         resolve(promises);
@@ -255,47 +275,25 @@ const TECHNIQUES = [
         group: 'A',
         title: 'enumerateDevices() from requestAnimationFrame',
         code: 'requestAnimationFrame(() => enumerateDevices())',
-        run() {
-            return new Promise((resolve, reject) => {
-                requestAnimationFrame(() => {
-                    navigator.mediaDevices.enumerateDevices()
-                        .then((d) => resolve({ count: d.length }))
-                        .catch(reject);
-                });
-            });
-        },
+        run: () => scheduledEnumerate((cb) => requestAnimationFrame(cb)),
     },
     {
         id: 'A7',
         group: 'A',
         title: 'enumerateDevices() from MessageChannel callback',
         code: 'channel.port1.onmessage = () => enumerateDevices()',
-        run() {
-            return new Promise((resolve, reject) => {
-                const channel = new MessageChannel();
-                channel.port1.onmessage = () => {
-                    navigator.mediaDevices.enumerateDevices()
-                        .then((d) => resolve({ count: d.length }))
-                        .catch(reject);
-                };
-                channel.port2.postMessage('go');
-            });
-        },
+        run: () => scheduledEnumerate((cb) => {
+            const channel = new MessageChannel();
+            channel.port1.onmessage = cb;
+            channel.port2.postMessage('go');
+        }),
     },
     {
         id: 'A8',
         group: 'A',
         title: 'enumerateDevices() from queueMicrotask',
         code: 'queueMicrotask(() => enumerateDevices())',
-        run() {
-            return new Promise((resolve, reject) => {
-                queueMicrotask(() => {
-                    navigator.mediaDevices.enumerateDevices()
-                        .then((d) => resolve({ count: d.length }))
-                        .catch(reject);
-                });
-            });
-        },
+        run: () => scheduledEnumerate((cb) => queueMicrotask(cb)),
     },
     {
         id: 'A9',
@@ -867,6 +865,29 @@ overallPromptSelect.addEventListener('change', () => {
     state.overallPromptObserved = overallPromptSelect.value;
 });
 
+function renderEnvironmentWarnings() {
+    const warnings = [];
+    if (!navigator.mediaDevices) {
+        warnings.push(
+            'navigator.mediaDevices is undefined on this page. Most techniques will fail with TypeError. '
+            + 'This usually means the page is not running in a secure context (HTTPS or localhost). '
+            + 'Try opening the page over HTTPS, or via the privacy-test-pages site rather than a plain IP.',
+        );
+    }
+    if (!window.isSecureContext) {
+        warnings.push('isSecureContext is false — media-device APIs may be unavailable or behave unexpectedly.');
+    }
+    if (!warnings.length) return;
+    const warningEl = document.getElementById('environment-warnings');
+    warningEl.hidden = false;
+    for (const text of warnings) {
+        const p = document.createElement('p');
+        p.textContent = text;
+        warningEl.appendChild(p);
+    }
+}
+
 renderDiagnostics();
+renderEnvironmentWarnings();
 renderTechniques();
 log(`Ready — ${TECHNIQUES.length} techniques loaded.`);

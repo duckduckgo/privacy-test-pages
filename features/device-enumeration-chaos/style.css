@@ -1,0 +1,264 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    color: #111;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    line-height: 1.45;
+    margin: 16px;
+    max-width: 1200px;
+}
+
+code,
+pre,
+button,
+select,
+input {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+.banner {
+    background: #fff5f5;
+    border: 1px solid #d94545;
+    border-radius: 4px;
+    padding: 12px 16px;
+    margin: 12px 0 20px;
+}
+
+.banner h2 {
+    color: #a31515;
+    margin: 0 0 8px;
+}
+
+.unleash-bar {
+    align-items: center;
+    background: #fff;
+    border: 2px solid #a31515;
+    border-radius: 4px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 16px 0;
+    padding: 12px 16px;
+}
+
+.unleash-bar button {
+    background: #a31515;
+    border: 1px solid #7a0f0f;
+    border-radius: 4px;
+    color: #fff;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 8px 18px;
+}
+
+.unleash-bar button:hover:not(:disabled) {
+    background: #c01b1b;
+}
+
+.unleash-bar button:disabled {
+    background: #888;
+    border-color: #666;
+    cursor: not-allowed;
+}
+
+.unleash-progress {
+    font-weight: 700;
+}
+
+.diagnostic {
+    background: #f6f6f6;
+    border: 1px solid #d0d0d0;
+    border-radius: 4px;
+    margin: 12px 0;
+    padding: 10px 12px;
+}
+
+.diagnostic dl {
+    display: grid;
+    gap: 4px 12px;
+    grid-template-columns: max-content minmax(0, 1fr);
+    margin: 0;
+}
+
+.diagnostic dt {
+    font-weight: 700;
+}
+
+.diagnostic dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.group {
+    border: 1px solid #d0d0d0;
+    border-radius: 4px;
+    margin: 16px 0;
+    overflow: hidden;
+}
+
+.group-header {
+    background: #f0f4ff;
+    border-bottom: 1px solid #d0d0d0;
+    padding: 10px 12px;
+}
+
+.group-header h3 {
+    margin: 0;
+}
+
+.group-header p {
+    color: #555;
+    margin: 4px 0 0;
+}
+
+.tech-row {
+    border-bottom: 1px solid #eee;
+    display: grid;
+    gap: 8px 12px;
+    grid-template-columns: 70px 1fr 280px 110px;
+    align-items: center;
+    padding: 10px 12px;
+}
+
+.tech-row:last-child {
+    border-bottom: none;
+}
+
+@media (max-width: 900px) {
+    .tech-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+.tech-meta strong {
+    display: block;
+    font-size: 14px;
+}
+
+.tech-meta code {
+    color: #555;
+    font-size: 12px;
+    word-break: break-all;
+}
+
+.tech-button {
+    background: #fff;
+    border: 1px solid #888;
+    border-radius: 4px;
+    cursor: pointer;
+    padding: 6px 10px;
+    text-align: center;
+    width: 100%;
+}
+
+.tech-button:hover:not(:disabled) {
+    background: #f0f0f0;
+}
+
+.tech-button:disabled {
+    background: #eee;
+    color: #888;
+    cursor: not-allowed;
+}
+
+.tech-status {
+    font-size: 12px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.tech-status[data-state="idle"] {
+    color: #888;
+}
+
+.tech-status[data-state="running"] {
+    color: #b58900;
+}
+
+.tech-status[data-state="ok"] {
+    color: #1a7f37;
+}
+
+.tech-status[data-state="error"] {
+    color: #a31515;
+}
+
+.tech-prompt {
+    font-size: 12px;
+    padding: 4px;
+    width: 100%;
+}
+
+.results-bar {
+    align-items: center;
+    background: #f6f6f6;
+    border: 1px solid #d0d0d0;
+    border-radius: 4px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 16px 0;
+    padding: 10px 12px;
+}
+
+.results-bar button {
+    cursor: pointer;
+    padding: 6px 12px;
+}
+
+.results-bar label {
+    align-items: center;
+    display: flex;
+    gap: 6px;
+}
+
+.log-panel {
+    background: #1e1e1e;
+    border: 1px solid #444;
+    border-radius: 4px;
+    color: #ddd;
+    font-size: 12px;
+    margin-top: 8px;
+    max-height: 360px;
+    overflow: auto;
+    padding: 10px;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+dialog::backdrop {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+dialog {
+    border: 1px solid #888;
+    border-radius: 6px;
+    max-width: 520px;
+    padding: 20px;
+}
+
+dialog h3 {
+    margin-top: 0;
+}
+
+dialog .dialog-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    margin-top: 16px;
+}
+
+dialog button {
+    cursor: pointer;
+    padding: 6px 14px;
+}
+
+dialog .danger {
+    background: #a31515;
+    border: 1px solid #7a0f0f;
+    color: #fff;
+}

@@ -34,7 +34,16 @@
             those calls surface the <em>native Windows OS prompt</em> in addition to or instead of the
             in-app permission UI.
         </p>
+        <p>
+            For the cross-origin third-party iframe scenario (the actual shape protechts.net /
+            HUMAN Security takes on linkedin.com — top-level page in one origin, fingerprinting iframe in
+            another with <code>allow="camera; microphone"</code>), use the existing
+            <a href="../iframe-media-prompt.html">Iframe Media Prompt Repro</a> page. The
+            <em>E group</em> below covers same-origin iframe variants only.
+        </p>
     </div>
+
+    <div id="environment-warnings" class="environment-warning" hidden></div>
 
     <div class="diagnostic">
         <strong>Runtime diagnostics</strong>

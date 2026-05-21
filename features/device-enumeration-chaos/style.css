@@ -68,6 +68,19 @@ input {
     font-weight: 700;
 }
 
+.environment-warning {
+    background: #fff8e1;
+    border: 2px solid #d4a300;
+    border-radius: 4px;
+    color: #5b3d00;
+    margin: 12px 0;
+    padding: 10px 14px;
+}
+
+.environment-warning p {
+    margin: 4px 0;
+}
+
 .diagnostic {
     background: #f6f6f6;
     border: 1px solid #d0d0d0;

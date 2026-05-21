@@ -50,6 +50,27 @@
         <dl id="diagnostic-list"></dl>
     </div>
 
+    <div class="instrumentation-bar">
+        <div class="instrumentation-controls">
+            <button id="instrument-toggle" type="button">Enable instrumentation</button>
+            <button id="instrument-clear" type="button">Clear log</button>
+            <button id="instrument-download" type="button">Download log JSON</button>
+            <button id="instrument-snippet" type="button">Copy DevTools snippet</button>
+        </div>
+        <p class="instrumentation-help">
+            Wraps <code>MediaDevices.prototype.enumerateDevices</code>,
+            <code>getUserMedia</code>, <code>getDisplayMedia</code> and
+            <code>Permissions.prototype.query</code> with a counter + stack
+            logger that sits <em>above</em> the C-S-S
+            <code>deviceEnumerationFix</code> proxy, so you can see every entry.
+            Use <strong>Copy DevTools snippet</strong> to paste the same
+            instrumentation into another site's DevTools (e.g.
+            <code>linkedin.com/checkpoint/...</code>) to observe what protechts /
+            reCAPTCHA / first-party scripts actually call.
+        </p>
+        <pre id="instrumentation-counts" class="instrumentation-counts"></pre>
+    </div>
+
     <div class="unleash-bar">
         <button id="unleash" type="button">Unleash chaos (run everything)</button>
         <span id="unleash-progress" class="unleash-progress"></span>

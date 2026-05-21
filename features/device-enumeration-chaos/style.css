@@ -89,6 +89,50 @@ input {
     padding: 10px 12px;
 }
 
+.instrumentation-bar {
+    background: #eef6ff;
+    border: 1px solid #5b9bd5;
+    border-radius: 4px;
+    margin: 12px 0;
+    padding: 10px 12px;
+}
+
+.instrumentation-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.instrumentation-controls button {
+    cursor: pointer;
+    padding: 6px 12px;
+}
+
+.instrumentation-controls button.active {
+    background: #1f6feb;
+    border: 1px solid #1158c7;
+    color: #fff;
+    font-weight: 700;
+}
+
+.instrumentation-help {
+    color: #234;
+    font-size: 13px;
+    margin: 8px 0 4px;
+}
+
+.instrumentation-counts {
+    background: #0e1626;
+    border-radius: 4px;
+    color: #cfe2ff;
+    font-size: 12px;
+    margin: 6px 0 0;
+    min-height: 18px;
+    overflow-x: auto;
+    padding: 8px 10px;
+    white-space: pre-wrap;
+}
+
 .diagnostic dl {
     display: grid;
     gap: 4px 12px;

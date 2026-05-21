@@ -461,6 +461,36 @@ const TECHNIQUES = [
             };
         },
     },
+    {
+        id: 'A11',
+        group: 'A',
+        title: 'enumerateDevices() x100 tight sync loop, fire-and-forget (DaveV repro)',
+        code: 'for (let i = 0; i < 100; i++) navigator.mediaDevices.enumerateDevices();',
+        async run() {
+            const unhandled = [];
+            const onUnhandled = (event) => {
+                unhandled.push(describeError(event.reason));
+                event.preventDefault();
+            };
+            window.addEventListener('unhandledrejection', onUnhandled);
+            const before = performance.now();
+            for (let i = 0; i < 100; i++) {
+                navigator.mediaDevices.enumerateDevices();
+            }
+            const syncReturnMs = Math.round(performance.now() - before);
+            await delay(2500);
+            window.removeEventListener('unhandledrejection', onUnhandled);
+            return {
+                fired: 100,
+                syncReturnMs,
+                unhandledRejectionsAfter2_5s: unhandled.length,
+                sampleUnhandled: unhandled.slice(0, 3),
+                hint: unhandled.length > 0
+                    ? 'Some calls rejected. Under the C-S-S deviceEnumerationFix the 2000ms native messaging timeout will fall back to the real enumerateDevices() — which is what triggers the OS prompt on Windows MSIX. Click this technique repeatedly to sustain the queue pressure.'
+                    : 'No unhandled rejections seen. If the OS prompt still appeared, the trigger is likely upstream of the shim or in a native-side path.',
+            };
+        },
+    },
 
     // Group B — getUserMedia probes (suspected actual trigger).
     // Each B technique stops the resulting stream immediately so the LED

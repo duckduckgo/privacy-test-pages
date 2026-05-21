@@ -215,6 +215,197 @@ function collectIceCandidates(timeoutMs) {
     });
 }
 
+/*
+ * Instrumentation — wraps MediaDevices / Permissions APIs with counting+
+ * stack-capturing proxies so a tester can observe what's being called by
+ * either the chaos catalogue or, when the snippet is pasted into another
+ * site's DevTools, any other JS in the page (anti-bot scripts, fingerprint
+ * libraries, etc.). Wrappers are installed at MediaDevices.prototype /
+ * Permissions.prototype so they intercept calls regardless of which
+ * MediaDevices instance the caller uses, AND they sit on top of the C-S-S
+ * deviceEnumerationFix proxy (if present) so the tester sees every entry.
+ */
+const INSTRUMENTABLE = [
+    { proto: () => window.MediaDevices && window.MediaDevices.prototype, methods: ['enumerateDevices', 'getUserMedia', 'getDisplayMedia'] },
+    { proto: () => window.Permissions && window.Permissions.prototype, methods: ['query'] },
+];
+
+const instrumentation = {
+    enabled: false,
+    log: [],
+    counts: {},
+    /** @type {Array<{ proto: object, method: string, original: Function }>} */
+    originals: [],
+};
+
+function safeStack() {
+    try {
+        return new Error().stack || '';
+    } catch (e) {
+        return '';
+    }
+}
+
+function safeJson(value) {
+    try {
+        return JSON.parse(JSON.stringify(value));
+    } catch (e) {
+        return String(value);
+    }
+}
+
+function instrumentApis() {
+    if (instrumentation.enabled) return;
+    instrumentation.enabled = true;
+    for (const target of INSTRUMENTABLE) {
+        const proto = target.proto();
+        if (!proto) continue;
+        for (const method of target.methods) {
+            const original = proto[method];
+            if (typeof original !== 'function') continue;
+            instrumentation.originals.push({ proto, method, original });
+            const key = `${proto.constructor.name}.${method}`;
+            instrumentation.counts[key] = 0;
+            proto[method] = function instrumentedMethod(...args) {
+                instrumentation.counts[key]++;
+                instrumentation.log.push({
+                    ts: Date.now(),
+                    api: key,
+                    args: safeJson(args),
+                    stack: safeStack(),
+                });
+                renderInstrumentationCounts();
+                return original.apply(this, args);
+            };
+        }
+    }
+    renderInstrumentationCounts();
+}
+
+function uninstrumentApis() {
+    if (!instrumentation.enabled) return;
+    for (const { proto, method, original } of instrumentation.originals) {
+        proto[method] = original;
+    }
+    instrumentation.originals = [];
+    instrumentation.enabled = false;
+    renderInstrumentationCounts();
+}
+
+function renderInstrumentationCounts() {
+    const el = document.getElementById('instrumentation-counts');
+    if (!el) return;
+    if (!instrumentation.enabled && Object.keys(instrumentation.counts).length === 0) {
+        el.textContent = '';
+        return;
+    }
+    const parts = Object.entries(instrumentation.counts)
+        .filter(([, n]) => n > 0)
+        .map(([k, n]) => `${k}=${n}`);
+    const prefix = instrumentation.enabled ? '[ON] ' : '[OFF] ';
+    el.textContent = `${prefix}${parts.join('  ')}${parts.length === 0 ? '(no calls yet)' : ''}`;
+}
+
+function clearInstrumentationLog() {
+    instrumentation.log = [];
+    for (const key of Object.keys(instrumentation.counts)) {
+        instrumentation.counts[key] = 0;
+    }
+    renderInstrumentationCounts();
+}
+
+function downloadInstrumentationLog() {
+    const payload = JSON.stringify({
+        enabled: instrumentation.enabled,
+        counts: instrumentation.counts,
+        log: instrumentation.log,
+        capturedAt: new Date().toISOString(),
+    }, null, 2);
+    const blob = new Blob([payload], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `device-enumeration-chaos-instrumentation-${Date.now()}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+}
+
+/*
+ * Self-contained DevTools snippet — same instrumentation as the toggle above,
+ * but bundled into a single string that can be pasted into another site's
+ * DevTools console. Reports counts via window.__chaosInstrumentation and
+ * window.__chaosInstrumentation.log, plus prints a live summary to console
+ * on every call.
+ */
+const DEVTOOLS_SNIPPET = `(() => {
+    if (window.__chaosInstrumentation && window.__chaosInstrumentation.installed) {
+        console.log('chaos instrumentation already installed', window.__chaosInstrumentation);
+        return window.__chaosInstrumentation;
+    }
+    const targets = [
+        { proto: window.MediaDevices && window.MediaDevices.prototype, methods: ['enumerateDevices', 'getUserMedia', 'getDisplayMedia'] },
+        { proto: window.Permissions && window.Permissions.prototype, methods: ['query'] },
+    ];
+    const state = { installed: true, counts: {}, log: [], originals: [] };
+    for (const t of targets) {
+        if (!t.proto) continue;
+        for (const m of t.methods) {
+            const original = t.proto[m];
+            if (typeof original !== 'function') continue;
+            state.originals.push({ proto: t.proto, method: m, original });
+            const key = t.proto.constructor.name + '.' + m;
+            state.counts[key] = 0;
+            t.proto[m] = function (...args) {
+                state.counts[key]++;
+                let stack = '';
+                try { stack = new Error().stack || ''; } catch (e) {}
+                let argsCopy;
+                try { argsCopy = JSON.parse(JSON.stringify(args)); } catch (e) { argsCopy = String(args); }
+                state.log.push({ ts: Date.now(), api: key, args: argsCopy, stack });
+                console.debug('[chaos]', key, argsCopy, state.counts[key]);
+                return original.apply(this, args);
+            };
+        }
+    }
+    state.uninstall = () => {
+        for (const { proto, method, original } of state.originals) proto[method] = original;
+        state.installed = false;
+        console.log('chaos instrumentation uninstalled');
+    };
+    state.summary = () => ({ counts: { ...state.counts }, logCount: state.log.length });
+    state.download = () => {
+        const json = JSON.stringify({ counts: state.counts, log: state.log, capturedAt: new Date().toISOString() }, null, 2);
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'chaos-instrumentation-' + Date.now() + '.json';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+    };
+    window.__chaosInstrumentation = state;
+    console.log('%cchaos instrumentation installed', 'background:#a31515;color:#fff;padding:2px 6px;border-radius:3px',
+        '\\nCalls log: window.__chaosInstrumentation.log',
+        '\\nLive counts: window.__chaosInstrumentation.summary()',
+        '\\nDownload JSON: window.__chaosInstrumentation.download()',
+        '\\nUninstall: window.__chaosInstrumentation.uninstall()');
+    return state;
+})();`;
+
+async function copyDevToolsSnippet() {
+    try {
+        await navigator.clipboard.writeText(DEVTOOLS_SNIPPET);
+        log('DevTools snippet copied to clipboard');
+    } catch (e) {
+        log('Clipboard write failed, snippet printed to console:', describeError(e));
+        console.log(DEVTOOLS_SNIPPET);
+    }
+}
+
 function collectDiagnostics() {
     const md = navigator.mediaDevices;
     const enumerateFnSource = md && md.enumerateDevices ? Function.prototype.toString.call(md.enumerateDevices) : null;
@@ -458,6 +649,83 @@ const TECHNIQUES = [
                 hasAudioOutput: kinds.includes('audiooutput'),
                 allLabelsEmpty: devices.every((d) => d.label === ''),
                 allDeviceIdsEmpty: devices.every((d) => d.deviceId === ''),
+            };
+        },
+    },
+    {
+        id: 'A11',
+        group: 'A',
+        title: 'enumerateDevices() x100 tight sync loop, fire-and-forget (DaveV repro)',
+        code: 'for (let i = 0; i < 100; i++) navigator.mediaDevices.enumerateDevices();',
+        async run() {
+            const unhandled = [];
+            const onUnhandled = (event) => {
+                unhandled.push(describeError(event.reason));
+                event.preventDefault();
+            };
+            window.addEventListener('unhandledrejection', onUnhandled);
+            const before = performance.now();
+            for (let i = 0; i < 100; i++) {
+                navigator.mediaDevices.enumerateDevices();
+            }
+            const syncReturnMs = Math.round(performance.now() - before);
+            await delay(2500);
+            window.removeEventListener('unhandledrejection', onUnhandled);
+            return {
+                fired: 100,
+                syncReturnMs,
+                unhandledRejectionsAfter2_5s: unhandled.length,
+                sampleUnhandled: unhandled.slice(0, 3),
+                hint: unhandled.length > 0
+                    ? 'Some calls rejected. Under the C-S-S deviceEnumerationFix the 2000ms native messaging timeout will fall back to the real enumerateDevices() — which is what triggers the OS prompt on Windows MSIX. Click this technique repeatedly to sustain the queue pressure.'
+                    : 'No unhandled rejections seen. If the OS prompt still appeared, the trigger is likely upstream of the shim or in a native-side path.',
+            };
+        },
+    },
+    {
+        id: 'A12',
+        group: 'A',
+        title: 'Sustained queue-stampede probe (50 fire-and-forget enumerateDevices() per 100ms for 3s)',
+        code: 'setInterval(() => { for (i=0; i<50; i++) enumerateDevices(); }, 100) for 3s = ~1500 calls',
+        async run() {
+            const unhandled = [];
+            const onUnhandled = (event) => {
+                unhandled.push(describeError(event.reason));
+                event.preventDefault();
+            };
+            window.addEventListener('unhandledrejection', onUnhandled);
+            const ticks = 30;
+            const perTick = 50;
+            let calls = 0;
+            const started = performance.now();
+            await new Promise((resolve) => {
+                let tick = 0;
+                const id = setInterval(() => {
+                    tick++;
+                    for (let i = 0; i < perTick; i++) {
+                        try {
+                            navigator.mediaDevices.enumerateDevices();
+                            calls++;
+                        } catch (e) {
+                            unhandled.push(describeError(e));
+                        }
+                    }
+                    if (tick >= ticks) {
+                        clearInterval(id);
+                        resolve();
+                    }
+                }, 100);
+            });
+            await delay(2500);
+            window.removeEventListener('unhandledrejection', onUnhandled);
+            return {
+                callsFired: calls,
+                durationMs: Math.round(performance.now() - started),
+                ticks,
+                perTick,
+                unhandledRejections: unhandled.length,
+                sampleUnhandled: unhandled.slice(0, 3),
+                hint: 'A sustained-rate variant of A11 that more closely matches what a real anti-bot fingerprinter might do over a probe window. Watch the OS-prompt selector and the instrumentation counter at the top of the page (enable instrumentation first to see exact call counts and stack traces).',
             };
         },
     },
@@ -1038,6 +1306,30 @@ function renderDiagnostics() {
     }
 }
 
+const instrumentToggleButton = document.getElementById('instrument-toggle');
+const instrumentClearButton = document.getElementById('instrument-clear');
+const instrumentDownloadButton = document.getElementById('instrument-download');
+const instrumentSnippetButton = document.getElementById('instrument-snippet');
+
+function updateInstrumentToggleLabel() {
+    instrumentToggleButton.textContent = instrumentation.enabled
+        ? 'Disable instrumentation'
+        : 'Enable instrumentation';
+    instrumentToggleButton.classList.toggle('active', instrumentation.enabled);
+}
+
+instrumentToggleButton.addEventListener('click', () => {
+    if (instrumentation.enabled) {
+        uninstrumentApis();
+    } else {
+        instrumentApis();
+    }
+    updateInstrumentToggleLabel();
+});
+instrumentClearButton.addEventListener('click', clearInstrumentationLog);
+instrumentDownloadButton.addEventListener('click', downloadInstrumentationLog);
+instrumentSnippetButton.addEventListener('click', copyDevToolsSnippet);
+
 unleashButton.addEventListener('click', () => {
     confirmDialog.showModal();
 });
@@ -1077,4 +1369,6 @@ function renderEnvironmentWarnings() {
 renderDiagnostics();
 renderEnvironmentWarnings();
 renderTechniques();
+updateInstrumentToggleLabel();
+renderInstrumentationCounts();
 log(`Ready — ${TECHNIQUES.length} techniques loaded.`);

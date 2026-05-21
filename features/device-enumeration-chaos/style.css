@@ -89,6 +89,88 @@ input {
     padding: 10px 12px;
 }
 
+.instrumentation-bar {
+    background: #eef6ff;
+    border: 1px solid #5b9bd5;
+    border-radius: 4px;
+    margin: 12px 0;
+    padding: 10px 12px;
+}
+
+.instrumentation-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.instrumentation-controls button {
+    cursor: pointer;
+    padding: 6px 12px;
+}
+
+.instrumentation-controls button.active {
+    background: #1f6feb;
+    border: 1px solid #1158c7;
+    color: #fff;
+    font-weight: 700;
+}
+
+.instrumentation-help {
+    color: #234;
+    font-size: 13px;
+    margin: 8px 0 4px;
+}
+
+.instrumentation-counts {
+    background: #0e1626;
+    border-radius: 4px;
+    color: #cfe2ff;
+    font-size: 12px;
+    margin: 6px 0 0;
+    min-height: 18px;
+    overflow-x: auto;
+    padding: 8px 10px;
+    white-space: pre-wrap;
+}
+
+.instrumentation-guide {
+    background: #fff;
+    border: 1px solid #b6d0ee;
+    border-radius: 4px;
+    margin-top: 10px;
+    padding: 6px 12px;
+}
+
+.instrumentation-guide summary {
+    cursor: pointer;
+    font-weight: 700;
+    padding: 4px 0;
+}
+
+.instrumentation-guide h4 {
+    margin: 14px 0 4px;
+}
+
+.instrumentation-guide pre {
+    background: #f6f6f6;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    font-size: 12px;
+    margin: 4px 0;
+    overflow-x: auto;
+    padding: 6px 8px;
+}
+
+.instrumentation-guide ul,
+.instrumentation-guide ol {
+    margin: 4px 0 8px;
+    padding-left: 22px;
+}
+
+.instrumentation-guide li {
+    margin-bottom: 4px;
+}
+
 .diagnostic dl {
     display: grid;
     gap: 4px 12px;

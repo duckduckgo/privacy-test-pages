@@ -50,6 +50,186 @@
         <dl id="diagnostic-list"></dl>
     </div>
 
+    <div class="instrumentation-bar">
+        <div class="instrumentation-controls">
+            <button id="instrument-toggle" type="button">Enable instrumentation</button>
+            <button id="instrument-clear" type="button">Clear log</button>
+            <button id="instrument-download" type="button">Download log JSON</button>
+            <button id="instrument-snippet" type="button">Copy DevTools snippet</button>
+        </div>
+        <p class="instrumentation-help">
+            Wraps <code>MediaDevices.prototype.enumerateDevices</code>,
+            <code>getUserMedia</code>, <code>getDisplayMedia</code> and
+            <code>Permissions.prototype.query</code> with a counter + stack
+            logger that sits <em>above</em> the C-S-S
+            <code>deviceEnumerationFix</code> proxy, so you can see every entry.
+            Use <strong>Copy DevTools snippet</strong> to paste the same
+            instrumentation into another site's DevTools (e.g.
+            <code>linkedin.com/checkpoint/...</code>) to observe what protechts /
+            reCAPTCHA / first-party scripts actually call.
+        </p>
+        <pre id="instrumentation-counts" class="instrumentation-counts"></pre>
+
+        <details class="instrumentation-guide">
+            <summary>How to use this on a real site (e.g. linkedin.com) — full workflow</summary>
+
+            <h4>1. Install the snippet</h4>
+            <ol>
+                <li>Click <strong>Copy DevTools snippet</strong> above.</li>
+                <li>Open the site you want to observe (e.g.
+                    <code>https://www.linkedin.com/</code>) in the Windows
+                    DDG browser. For the OPS-7378 repro, temporarily disable
+                    the <code>protechts.net</code> request-blocklist rule so
+                    the checkpoint flow actually loads.</li>
+                <li>Open DevTools &rarr; Console. Paste the snippet and press
+                    Enter. You should see a red <code>chaos instrumentation
+                    installed</code> banner.</li>
+            </ol>
+            <p>
+                <strong>Important:</strong> the snippet does not survive a
+                page refresh &mdash; refresh creates a fresh
+                <code>window</code> / <code>MediaDevices.prototype</code> and
+                the wrappers are gone. Re-paste the snippet after every
+                refresh. To catch calls that fire <em>during</em> page load
+                (which is when most fingerprinting probes run), use the
+                pause-on-first-statement trick in the next section.
+            </p>
+
+            <h4>1b. Catching very early calls (pause before page JS runs)</h4>
+            <p>
+                Anti-bot scripts typically fire their probes within the first
+                few hundred ms of page load &mdash; before you can paste the
+                snippet manually. To guarantee the wrappers are in place
+                <em>before</em> any page JavaScript runs:
+            </p>
+            <ol>
+                <li>Open DevTools <em>before</em> loading the target page.</li>
+                <li>Go to <strong>Sources</strong> &rarr;
+                    <strong>Event Listener Breakpoints</strong> (right-hand
+                    pane). Expand <em>Script</em> and tick
+                    <strong>Script First Statement</strong>.</li>
+                <li>Navigate to / refresh the target site. DevTools will
+                    pause at the very first JavaScript statement.</li>
+                <li>Switch to the <strong>Console</strong> tab and paste the
+                    chaos snippet. The wrappers are now installed.</li>
+                <li>Click <strong>Resume script execution</strong> (▶ in
+                    Sources, or F8). All subsequent JS &mdash; including the
+                    protechts / reCAPTCHA bootstrap &mdash; will run through
+                    your wrappers.</li>
+                <li>Uncheck <em>Script First Statement</em> when you are
+                    done, otherwise every page load will pause.</li>
+            </ol>
+
+            <h4>2. Trigger the behaviour you want to observe</h4>
+            <p>
+                Navigate to / interact with the page as a tester would.
+                For the camera-prompt repro on LinkedIn, simply landing
+                on the <code>checkpoint</code> flow is usually enough.
+                The Console will stream <code>[chaos] &lt;API&gt; &lt;args&gt;
+                &lt;count&gt;</code> debug lines as each wrapped API is
+                called.
+            </p>
+
+            <h4>3. Read the counters</h4>
+            <pre>window.__chaosInstrumentation.summary()
+// { counts: { 'MediaDevices.enumerateDevices': 7, ... }, logCount: 7 }</pre>
+            <p>
+                Watch the call <em>rate</em>, not just the count. A normal
+                page calls <code>enumerateDevices</code> a handful of times
+                at most; an anti-bot fingerprinter calling it hundreds of
+                times in a few seconds is the queue-stampede pattern that
+                DaveV's A11 / A12 simulates.
+            </p>
+
+            <h4>4. What to look for</h4>
+            <ul>
+                <li>
+                    <strong><code>MediaDevices.enumerateDevices</code> count
+                        climbs into the hundreds within a few seconds.</strong>
+                    Likely the queue-stampede pattern. Under the C-S-S
+                    <code>deviceEnumerationFix</code> proxy this will start
+                    timing out (2000ms) and falling through to the real
+                    <code>enumerateDevices()</code> &mdash; which is what
+                    triggers the OS prompt on Windows MSIX.
+                </li>
+                <li>
+                    <strong>Any call to <code>MediaDevices.getUserMedia</code>
+                        without a user gesture.</strong> Almost always an
+                    anti-bot probe. Check the stack &mdash; if it points
+                    into <code>client.protechts.net/.../main.min.js</code>
+                    or <code>www.gstatic.com/recaptcha/...</code> that is
+                    your prompt trigger. The Asana investigation pointed
+                    here as the primary cause on linkedin.com.
+                </li>
+                <li>
+                    <strong><code>Permissions.query({name: 'camera'})</code>
+                        or <code>'microphone'</code></strong>. Informational;
+                    does not prompt on a normal browser. Still worth
+                    recording &mdash; if you see the count climb but no
+                    <code>getUserMedia</code> calls, the trigger may be
+                    elsewhere (or in a native-side path).
+                </li>
+                <li>
+                    <strong>Stacks containing <code>protechts.net</code>,
+                        <code>li.protechts.net</code>,
+                        <code>recaptcha/enterprise</code>,
+                        <code>static.licdn.com/aero-v1</code>.</strong>
+                    These are the candidate origins identified by the HAR
+                    analysis. Stacks pointing into LinkedIn's own
+                    <code>aero-v1</code> bundles are usually fine (gated
+                    behind user gestures); stacks pointing into protechts
+                    or recaptcha are the suspect entries.
+                </li>
+                <li>
+                    <strong>Empty or anonymous stack frames</strong>
+                    (common in obfuscated PerimeterX VM code). Cross-check
+                    the call timing against the Network panel &mdash; if
+                    the call lands within a few hundred ms of a
+                    <code>collector-pxdojv695v.protechts.net</code> POST,
+                    it is almost certainly from the protechts VM.
+                </li>
+            </ul>
+
+            <h4>5. Capture for the ticket</h4>
+            <pre>window.__chaosInstrumentation.download()  // saves full log + stacks as JSON
+window.__chaosInstrumentation.uninstall() // restore originals</pre>
+            <p>
+                Attach the downloaded JSON to OPS-7378 along with the
+                exact browser version and whether the OS prompt appeared.
+            </p>
+
+            <h4>What the snippet does <em>not</em> catch</h4>
+            <ul>
+                <li>
+                    Calls that resolve their function reference once and
+                    cache it before the snippet is pasted. Refresh after
+                    pasting to mitigate.
+                </li>
+                <li>
+                    Calls from a separate JavaScript realm
+                    (cross-origin iframes such as
+                    <code>li.protechts.net/index.html</code>). The
+                    snippet wraps only the top-level <code>MediaDevices</code>
+                    and <code>Permissions</code> prototypes. Calls from
+                    inside <code>li.protechts.net</code> happen in the
+                    iframe's own realm and are not visible to the top
+                    window. To observe those, paste the snippet into the
+                    iframe's own DevTools context (DevTools &rarr;
+                    iframe selector dropdown &rarr; pick the iframe), or
+                    use the
+                    <a href="../iframe-media-prompt.html">Iframe Media
+                        Prompt Repro</a> page which controls both sides.
+                </li>
+                <li>
+                    Native-side prompts that originate without a
+                    JavaScript entry point. If counts stay at zero but
+                    the OS prompt still fires, the trigger is upstream
+                    of the JS layer.
+                </li>
+            </ul>
+        </details>
+    </div>
+
     <div class="unleash-bar">
         <button id="unleash" type="button">Unleash chaos (run everything)</button>
         <span id="unleash-progress" class="unleash-progress"></span>

@@ -85,6 +85,136 @@ function scheduledEnumerate(schedule) {
     });
 }
 
+/*
+ * Spawn a Web Worker built from a Blob URL that probes for navigator.mediaDevices
+ * inside worker scope. Per spec mediaDevices is NOT exposed in workers, but
+ * reCAPTCHA Enterprise's webworker.js literally importScripts() the full
+ * recaptcha bundle (which expects mediaDevices) — so this is worth verifying
+ * on the build under test.
+ */
+function runInWebWorker() {
+    return new Promise((resolve, reject) => {
+        const source = `
+            self.addEventListener('message', async () => {
+                const result = {
+                    selfNavigatorPresent: typeof self.navigator !== 'undefined',
+                    mediaDevicesPresent: typeof self.navigator !== 'undefined' && Boolean(self.navigator.mediaDevices),
+                    enumerateDevicesPresent: typeof self.navigator !== 'undefined'
+                        && Boolean(self.navigator.mediaDevices)
+                        && typeof self.navigator.mediaDevices.enumerateDevices === 'function',
+                    getUserMediaPresent: typeof self.navigator !== 'undefined'
+                        && Boolean(self.navigator.mediaDevices)
+                        && typeof self.navigator.mediaDevices.getUserMedia === 'function',
+                };
+                try {
+                    if (result.enumerateDevicesPresent) {
+                        const devices = await self.navigator.mediaDevices.enumerateDevices();
+                        result.enumerateDevicesCount = devices.length;
+                        result.enumerateDevicesKinds = devices.map((d) => d.kind);
+                    }
+                } catch (e) {
+                    result.enumerateDevicesError = (e && (e.name + ': ' + e.message)) || String(e);
+                }
+                try {
+                    if (result.getUserMediaPresent) {
+                        const stream = await self.navigator.mediaDevices.getUserMedia({ video: true });
+                        result.getUserMediaOk = true;
+                        for (const t of stream.getTracks()) t.stop();
+                    }
+                } catch (e) {
+                    result.getUserMediaError = (e && (e.name + ': ' + e.message)) || String(e);
+                }
+                self.postMessage(result);
+            });
+        `;
+        const blob = new Blob([source], { type: 'application/javascript' });
+        const url = URL.createObjectURL(blob);
+        let worker;
+        try {
+            worker = new Worker(url);
+        } catch (e) {
+            URL.revokeObjectURL(url);
+            reject(e);
+            return;
+        }
+        const cleanup = () => {
+            URL.revokeObjectURL(url);
+            try { worker.terminate(); } catch (e) { /* ignore */ }
+        };
+        const timer = setTimeout(() => {
+            cleanup();
+            reject(new Error('worker-response-timeout'));
+        }, IFRAME_RESPONSE_TIMEOUT_MS);
+        worker.addEventListener('message', (event) => {
+            clearTimeout(timer);
+            cleanup();
+            resolve(event.data);
+        });
+        worker.addEventListener('error', (event) => {
+            clearTimeout(timer);
+            cleanup();
+            reject(new Error(event.message || 'worker-error'));
+        });
+        worker.postMessage('go');
+    });
+}
+
+/*
+ * Full ICE-leak pattern as used by LinkedIn's first-party getIPs() in
+ * static.licdn.com/aero-v1/.../CtQciDL0.js and by countless fingerprinting
+ * libraries. Creates a peer connection with a STUN server, opens a data
+ * channel (needed to gather candidates without addTrack), creates and
+ * sets a local offer, then accumulates candidates for the given duration.
+ */
+function collectIceCandidates(timeoutMs) {
+    return new Promise((resolve, reject) => {
+        let pc;
+        try {
+            pc = new RTCPeerConnection({
+                iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
+            });
+        } catch (e) {
+            reject(e);
+            return;
+        }
+        const candidates = [];
+        pc.onicecandidate = (event) => {
+            if (event.candidate) {
+                candidates.push({
+                    type: event.candidate.type,
+                    protocol: event.candidate.protocol,
+                    address: event.candidate.address,
+                    port: event.candidate.port,
+                    candidate: event.candidate.candidate,
+                });
+            }
+        };
+        try {
+            pc.createDataChannel('chaos-icetest');
+        } catch (e) {
+            try { pc.close(); } catch (closeErr) { /* ignore */ }
+            reject(e);
+            return;
+        }
+        pc.createOffer()
+            .then((offer) => pc.setLocalDescription(offer))
+            .catch((e) => {
+                try { pc.close(); } catch (closeErr) { /* ignore */ }
+                reject(e);
+            });
+        setTimeout(() => {
+            const result = {
+                candidateCount: candidates.length,
+                types: Array.from(new Set(candidates.map((c) => c.type))),
+                addresses: Array.from(new Set(candidates.map((c) => c.address).filter(Boolean))),
+                gatheringState: pc.iceGatheringState,
+            };
+            try { pc.close(); } catch (e) { /* ignore */ }
+            resolve(result);
+        }, timeoutMs);
+    });
+}
+
 function collectDiagnostics() {
     const md = navigator.mediaDevices;
     const enumerateFnSource = md && md.enumerateDevices ? Function.prototype.toString.call(md.enumerateDevices) : null;
@@ -313,6 +443,24 @@ const TECHNIQUES = [
             }
         },
     },
+    {
+        id: 'A10',
+        group: 'A',
+        title: 'enumerateDevices() + check for videoinput/audioinput/audiooutput (reCAPTCHA pattern)',
+        code: "devices.some(d => d.kind === 'videoinput')",
+        async run() {
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            const kinds = devices.map((d) => d.kind);
+            return {
+                count: devices.length,
+                hasVideoInput: kinds.includes('videoinput'),
+                hasAudioInput: kinds.includes('audioinput'),
+                hasAudioOutput: kinds.includes('audiooutput'),
+                allLabelsEmpty: devices.every((d) => d.label === ''),
+                allDeviceIdsEmpty: devices.every((d) => d.deviceId === ''),
+            };
+        },
+    },
 
     // Group B — getUserMedia probes (suspected actual trigger).
     // Each B technique stops the resulting stream immediately so the LED
@@ -409,6 +557,15 @@ const TECHNIQUES = [
                 }
             }
             return { results: summaries };
+        },
+    },
+    {
+        id: 'B8',
+        group: 'B',
+        title: 'Web Worker probe (mediaDevices availability + enumerateDevices + getUserMedia)',
+        code: "new Worker(blob); self.navigator.mediaDevices?.enumerateDevices()",
+        async run() {
+            return runInWebWorker();
         },
     },
 
@@ -517,6 +674,15 @@ const TECHNIQUES = [
             } finally {
                 pc.close();
             }
+        },
+    },
+    {
+        id: 'D4',
+        group: 'D',
+        title: 'Full WebRTC ICE-leak pattern (LinkedIn first-party getIPs)',
+        code: "new RTCPeerConnection({iceServers}); createDataChannel(); createOffer(); setLocalDescription(); collect candidates 3s",
+        async run() {
+            return collectIceCandidates(3000);
         },
     },
 
@@ -658,14 +824,35 @@ const TECHNIQUES = [
             }
         },
     },
+
+    // Group F — Macro sequences (compositions of other techniques).
+    // The runner records each constituent in its own row alongside the macro,
+    // so the tester can see which step within the sequence triggered the prompt.
+    {
+        id: 'F0',
+        group: 'F',
+        title: 'PerimeterX-style probe sequence (C1 → C2 → B5 → B1)',
+        code: "permissions.query({name:'camera'}); permissions.query({name:'microphone'}); getUserMedia({deviceId:{exact:'nope'}}); getUserMedia({video:true})",
+        async run() {
+            const steps = ['C1', 'C2', 'B5', 'B1'];
+            const results = [];
+            for (const step of steps) {
+                const entry = await runSingle(step);
+                results.push({ id: step, ok: entry && entry.ok, error: entry && entry.error, value: entry && entry.value });
+                await delay(300);
+            }
+            return { steps: results };
+        },
+    },
 ];
 
 const GROUPS = [
     { id: 'A', title: 'A — enumerateDevices() variants', description: 'Directly probe MediaDevices.enumerateDevices() across call shapes and event-loop contexts.' },
     { id: 'B', title: 'B — getUserMedia() probes', description: 'Direct media-stream requests. These will legitimately prompt for camera/mic on any browser; the question for OPS-7378 is whether they ALSO surface the Windows OS prompt above the in-app prompt.' },
     { id: 'C', title: 'C — Permissions and supporting APIs', description: 'Permissions API + adjacent MediaDevices APIs (getSupportedConstraints, getDisplayMedia, MediaStreamTrack.getCapabilities).' },
-    { id: 'D', title: 'D — RTCPeerConnection', description: 'WebRTC paths commonly used for fingerprinting (offer/transceiver creation).' },
+    { id: 'D', title: 'D — RTCPeerConnection', description: 'WebRTC paths commonly used for fingerprinting (offer/transceiver creation, full ICE-leak pattern).' },
     { id: 'E', title: 'E — Iframe contexts (same-origin)', description: 'Same-origin iframe variants run A1+B1 inside an embedded document. A cross-origin variant already exists at features/iframe-media-prompt.html.' },
+    { id: 'F', title: 'F — Macro sequences', description: 'Compositions of other techniques. Each constituent records into its own row in the catalogue above, so the tester can see which step within the sequence triggered the prompt.' },
 ];
 
 function renderTechniques() {

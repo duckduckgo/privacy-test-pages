@@ -35,6 +35,13 @@
             in-app permission UI.
         </p>
         <p>
+            <strong>LinkedIn + Passkeys repro (F1).</strong> On linkedin.com the OS camera prompt was traced to
+            <code>enumerateDevices()</code> starting while a Passkeys WebAuthn dialog was open; the
+            <code>deviceEnumerationFix</code> shim timed out after 2s and called the real API. Technique
+            <strong>F1</strong> reproduces that sequence — <em>Passkeys / Windows Hello must be enabled</em>
+            on the test machine or the WebAuthn prompt will not appear and the repro will not match production.
+        </p>
+        <p>
             For the cross-origin third-party iframe scenario (the actual shape protechts.net /
             HUMAN Security takes on linkedin.com — top-level page in one origin, fingerprinting iframe in
             another with <code>allow="camera; microphone"</code>), use the existing

@@ -418,6 +418,7 @@ function collectDiagnostics() {
         hasLegacyGetUserMedia: typeof navigator.getUserMedia === 'function',
         hasPermissionsApi: Boolean(navigator.permissions && navigator.permissions.query),
         hasRTCPeerConnection: typeof window.RTCPeerConnection === 'function',
+        hasPublicKeyCredential: typeof window.PublicKeyCredential === 'function',
         crossOriginIsolated: Boolean(window.crossOriginIsolated),
         isSecureContext: Boolean(window.isSecureContext),
         enumerateDevicesAppearsNative: enumerateFnSource ? /\[native code\]/.test(enumerateFnSource) : null,
@@ -1112,6 +1113,53 @@ const TECHNIQUES = [
             return { steps: results };
         },
     },
+    {
+        id: 'F1',
+        group: 'F',
+        title: 'LinkedIn passkeys + enumerateDevices (deviceEnumerationFix timeout repro)',
+        note:
+            'Requires Passkeys / Windows Hello to be enabled on the test machine. '
+            + 'Fires enumerateDevices() then immediately opens the WebAuthn "Would you like to use Passkeys?" prompt. '
+            + 'If that prompt stays open for more than ~2s, the C-S-S deviceEnumerationFix shim times out and falls through to the real enumerateDevices(), '
+            + 'which can trigger the Windows OS camera prompt (the linkedin.com bug). '
+            + 'Leave the Passkeys dialog open for >2s to repro; dismiss within 2s to verify the fix.',
+        code:
+            'enumerateDevices(); credentials.get({ publicKey: { challenge: new Uint8Array(32), timeout: 60000, userVerification: "preferred" }, mediation: "optional" })',
+        async run() {
+            if (typeof PublicKeyCredential !== 'function') {
+                throw new Error('PublicKeyCredential-unavailable — enable Passkeys / WebAuthn on this browser');
+            }
+            const startedAt = performance.now();
+            const enumeratePromise = navigator.mediaDevices.enumerateDevices();
+            const credentialsPromise = navigator.credentials.get({
+                publicKey: {
+                    challenge: new Uint8Array(32),
+                    timeout: 60000,
+                    userVerification: 'preferred',
+                },
+                mediation: 'optional',
+            });
+            const [enumerateResult, credentialsResult] = await Promise.allSettled([
+                enumeratePromise,
+                credentialsPromise,
+            ]);
+            const durationMs = Math.round(performance.now() - startedAt);
+            const enumerate = enumerateResult.status === 'fulfilled'
+                ? { ok: true, count: enumerateResult.value.length, kinds: enumerateResult.value.map((d) => d.kind) }
+                : { ok: false, error: describeError(enumerateResult.reason) };
+            const credentials = credentialsResult.status === 'fulfilled'
+                ? { ok: true, type: credentialsResult.value?.type ?? null }
+                : { ok: false, error: describeError(credentialsResult.reason) };
+            return {
+                durationMs,
+                enumerate,
+                credentials,
+                hint:
+                    'Watch for the OS camera prompt while the Passkeys dialog is still open. '
+                    + 'enumerateDevices settling after ~2000ms with the Passkeys UI visible strongly suggests the shim timed out.',
+            };
+        },
+    },
 ];
 
 const GROUPS = [
@@ -1159,6 +1207,12 @@ function renderTechniques() {
             codeEl.textContent = tech.code;
             meta.appendChild(titleEl);
             meta.appendChild(codeEl);
+            if (tech.note) {
+                const noteEl = document.createElement('p');
+                noteEl.className = 'tech-note';
+                noteEl.textContent = tech.note;
+                meta.appendChild(noteEl);
+            }
 
             const status = document.createElement('div');
             status.className = 'tech-status';

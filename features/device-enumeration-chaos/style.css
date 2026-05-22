@@ -239,6 +239,13 @@ input {
     word-break: break-all;
 }
 
+.tech-note {
+    color: #5b3d00;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 13px;
+    margin: 6px 0 0;
+}
+
 .tech-button {
     background: #fff;
     border: 1px solid #888;

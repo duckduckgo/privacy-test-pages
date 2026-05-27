@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>x-safari-http(s) scheme links</title>
+</head>
+<body>
+<ul id="links"></ul>
+
+<script>
+  const host = window.location.hostname;
+  const port = window.location.port;
+  const hostPort = port ? `${host}:${port}` : host;
+
+  const links = [
+    { scheme: "x-safari-http",  file: "noloop.html", label: "http no loop" },
+    { scheme: "x-safari-https", file: "noloop.html", label: "https no loop" },
+    { scheme: "x-safari-http",  file: "loop.html",   label: "http with loop" },
+    { scheme: "x-safari-https", file: "loop.html",   label: "https with loop" },
+  ];
+
+  const ul = document.getElementById("links");
+  links.forEach(({ scheme, file, label }) => {
+    const li = document.createElement("li");
+    const a = document.createElement("a");
+    a.href = `${scheme}://${hostPort}/${file}`;
+    a.textContent = label;
+    li.appendChild(a);
+    ul.appendChild(li);
+  });
+</script>
+</body>
+</html>

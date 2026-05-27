@@ -5,15 +5,28 @@
   <meta name="viewport" content="width=device-width">
   <title>x-safari-https redirect</title>
   <script>
-    const { hostname, port, pathname, search } = window.location;
-    const hostPort = port ? `${hostname}:${port}` : hostname;
-    window.location.replace(`x-safari-https://${hostPort}${pathname}${search}`);
+    (function () {
+      const ua = navigator.userAgent;
+
+      // Safari's UA includes "Safari" but so do Chrome, Edge, Opera, etc.
+      // Real Safari has "Safari/" but NOT any of: Chrome, Chromium, CriOS,
+      // FxiOS, EdgiOS, OPR, OPiOS, Android.
+      const regex = /Safari\/\S+$/;
+      const isSafari = regex.test(ua)
+
+      if (isSafari) {
+        // Already in Safari — don't redirect, just show the page.
+        return;
+      }
+
+      const { hostname, port, pathname, search } = window.location;
+      const hostPort = port ? `${hostname}:${port}` : hostname;
+      window.location.replace(`x-safari-https://${hostPort}${pathname}${search}`);
+    })();
   </script>
 </head>
 <body>
-	<h1>Looping</h1>
-
-	In theory you should never see this page.
-	
+  <h1>Looping</h1>
+  In theory you should never see this page unless you're already in Safari.
 </body>
 </html>

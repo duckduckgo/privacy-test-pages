@@ -12,6 +12,7 @@
   const host = window.location.hostname;
   const port = window.location.port;
   const hostPort = port ? `${host}:${port}` : host;
+  const dir = window.location.pathname.replace(/\/[^/]*$/, '/');
 
   const links = [
     { scheme: "x-safari-http",  file: "noloop.html", label: "http no loop" },
@@ -24,7 +25,7 @@
   links.forEach(({ scheme, file, label }) => {
     const li = document.createElement("li");
     const a = document.createElement("a");
-    a.href = `${scheme}://${hostPort}/${file}`;
+    a.href = `${scheme}://${hostPort}${dir}${file}`;
     a.textContent = label;
     li.appendChild(a);
     ul.appendChild(li);

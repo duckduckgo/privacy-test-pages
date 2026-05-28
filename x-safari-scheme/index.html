@@ -15,10 +15,9 @@
   const dir = window.location.pathname.replace(/\/[^/]*$/, '/');
 
   const links = [
-    { scheme: "x-safari-http",  file: "noloop.html", label: "http no loop" },
-    { scheme: "x-safari-https", file: "noloop.html", label: "https no loop" },
-    { scheme: "x-safari-http",  file: "loop.html",   label: "http with loop" },
-    { scheme: "x-safari-https", file: "loop.html",   label: "https with loop" },
+    { scheme: "x-safari-https", file: "noloop.html", label: "direct link, no loop" },
+    { scheme: "x-safari-https", file: "loop.html",   label: "direct link, then loops while not safari" },
+    { scheme: "x-safari-https", file: "alwaysloop.html",   label: "direct link, then loops while in DuckDuckGo explicitly" },
   ];
 
   const ul = document.getElementById("links");

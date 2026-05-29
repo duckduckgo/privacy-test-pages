@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Windows Browser: Client Hint Frame</title>
+  <style>
+    body { font-family: Arial, sans-serif; font-size: 13px; margin: 12px; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ccc; padding: 4px 6px; text-align: left; vertical-align: top; }
+    th { background: #eee; }
+  </style>
+</head>
+<body>
+  <h1 id="title">Iframe headers</h1>
+  <table id="headers"></table>
+
+  <script src="../../features/client-hints/all-ch.js"></script>
+  <script>
+    /* global ALL_CH */
+    const context = new URLSearchParams(location.search).get('context') || 'frame';
+    document.getElementById('title').innerText = 'Iframe headers: ' + context;
+
+    function createRow (name, value) {
+        const tr = document.createElement('tr');
+        const tdName = document.createElement('td');
+        const tdValue = document.createElement('td');
+        tdName.innerText = name;
+        tdValue.innerText = value || '(missing)';
+        tr.appendChild(tdName);
+        tr.appendChild(tdValue);
+        return tr;
+    }
+
+    function renderHeaders (headers) {
+        const table = document.getElementById('headers');
+        table.innerHTML = '<tr><th>Header</th><th>Value</th></tr>';
+        ['user-agent', ...ALL_CH].forEach(header => {
+            table.appendChild(createRow(header, headers[header]));
+        });
+    }
+
+    fetch('./echo-headers?context=' + encodeURIComponent(context) + '&cache=' + Date.now())
+        .then(response => response.json())
+        .then(data => renderHeaders(data.headers));
+  </script>
+</body>
+</html>

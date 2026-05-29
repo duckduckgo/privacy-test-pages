@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Windows Browser: Client Hint Header Config</title>
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.4; margin: 24px; }
+    code, pre { background: #f3f3f3; border-radius: 4px; padding: 2px 4px; }
+    pre { overflow: auto; padding: 12px; }
+    table { border-collapse: collapse; margin: 12px 0 24px; width: 100%; }
+    th, td { border: 1px solid #ccc; padding: 6px 8px; text-align: left; vertical-align: top; }
+    th { background: #eee; }
+    iframe { border: 1px solid #999; height: 320px; width: 100%; }
+  </style>
+</head>
+<body>
+  <p><a href="../../index.html">[Home]</a></p>
+  <h1>Windows Browser: Client Hint Header Config</h1>
+
+  <p>
+    This page opts in to all known Client Hint request headers with <code>Accept-CH</code>
+    and displays what the Windows browser sends for the top-level page and for iframe fetches.
+  </p>
+
+  <h2>Remote config examples</h2>
+  <p>Use these targeted examples against <code>privacy-test-pages.site</code> or <code>*.third-party.site</code> to verify different outcomes.</p>
+  <pre>{
+  "clientBrandHint": {
+    "state": "enabled",
+    "settings": {
+      "domains": [
+        { "domain": "privacy-test-pages.site", "brand": "DuckDuckGo" },
+        { "domain": "*.third-party.site", "masqueradeAsChrome": true },
+        {
+          "domain": "privacy-test-pages.site",
+          "headers": {
+            "sec-ch-ua-platform": "\"Windows\"",
+            "sec-ch-ua-platform-version": "\"15.0.0\"",
+            "sec-ch-ua-full-version": "\"109.0.0.0\""
+          }
+        }
+      ]
+    }
+  },
+  "customUserAgent": {
+    "state": "enabled",
+    "features": {
+      "userAgentStrategies": {
+        "state": "enabled",
+        "settings": {
+          "strategies": [
+            { "domain": "*.third-party.site", "strategy": "ChromeUA" }
+          ]
+        }
+      }
+    }
+  }
+}</pre>
+
+  <h2>Top-level fetch headers</h2>
+  <table id="top-headers"></table>
+
+  <h2>Iframe headers</h2>
+  <p>The same-origin frame validates subframe handling for this origin. The cross-origin frame validates request-URL matching for iframe documents and their subresources.</p>
+  <h3>Same-origin iframe</h3>
+  <iframe src="./frame.html?context=same-origin-frame"></iframe>
+  <h3>Cross-origin iframe</h3>
+  <iframe src="https://good.third-party.site/windows-browser/client-hints/frame.html?context=cross-origin-frame"></iframe>
+
+  <script src="../../features/client-hints/all-ch.js"></script>
+  <script>
+    /* global ALL_CH */
+    function createRow (name, value) {
+        const tr = document.createElement('tr');
+        const tdName = document.createElement('td');
+        const tdValue = document.createElement('td');
+        tdName.innerText = name;
+        tdValue.innerText = value || '(missing)';
+        tr.appendChild(tdName);
+        tr.appendChild(tdValue);
+        return tr;
+    }
+
+    function renderHeaders (table, headers) {
+        table.innerHTML = '<tr><th>Header</th><th>Value</th></tr>';
+        ['user-agent', ...ALL_CH].forEach(header => {
+            table.appendChild(createRow(header, headers[header]));
+        });
+    }
+
+    fetch('./echo-headers?context=top-level&cache=' + Date.now())
+        .then(response => response.json())
+        .then(data => renderHeaders(document.getElementById('top-headers'), data.headers));
+  </script>
+</body>
+</html>

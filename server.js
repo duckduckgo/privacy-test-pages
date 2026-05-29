@@ -272,6 +272,9 @@ app.use('/features/download', downloadRoutes);
 const chRoutes = require('./features/client-hints/server/routes.js');
 app.use('/features/client-hints', chRoutes);
 
+const windowsClientHintRoutes = require('./windows-browser/client-hints/server/routes.js');
+app.use('/windows-browser/client-hints', windowsClientHintRoutes);
+
 const clearDataRoutes = require('./features/clear-data/server/routes.js');
 app.use('/features/clear-data', clearDataRoutes);
 

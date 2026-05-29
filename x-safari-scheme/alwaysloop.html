@@ -6,11 +6,7 @@
   <title>x-safari-https redirect</title>
   <script>
     (function () {
-      // Only loop in our browser
-      if (!navigator.duckduckgo) {
-        return
-      }
-
+      // This page always loops (even in Safari)
       const { hostname, port, pathname, search } = window.location;
       const hostPort = port ? `${hostname}:${port}` : hostname;
       window.location.replace(`x-safari-https://${hostPort}${pathname}${search}`);
@@ -19,6 +15,6 @@
 </head>
 <body>
   <h1>Looping</h1>
-  This page redirects to x-safari-https:// if the browser is Duckduckgo (navigator.duckduckgo != null)
+  This page always redirects to x-safari-https:// even in safari.
 </body>
 </html>

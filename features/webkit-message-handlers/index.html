@@ -122,7 +122,7 @@
     </style>
 </head>
 <body>
-    <a class="home-link" href="../../index.html">[Home]</a>
+    <a class="home-link" href="../../index.html">[Privacy Test Pages Home]</a>
 
     <h1>🪟 WebKit Message Handlers Visibility</h1>
     <p class="subtitle">
@@ -133,7 +133,6 @@
     <div class="panel" id="readout">
         <div class="status-row"><span class="status-label">Experiment status:</span><span class="status-val" id="statusVal">…</span></div>
         <div class="row"><b>window.webkit.messageHandlers</b><span class="val" id="mhVal">…</span></div>
-        <div class="row"><b>'messageHandlers' in window.webkit</b><span class="val" id="mhIn">…</span></div>
     </div>
 
     <button id="notifyBtn" class="btn" type="button">
@@ -231,7 +230,6 @@
             statusEl.className = 'status-val ' + statusCls;
 
             setVal('mhVal', mhVal, mhCls);
-            setVal('mhIn', String(mhIn), mhIn ? 'good' : 'hidden');
         }
         refreshReadout();
         setInterval(refreshReadout, 1500);
@@ -253,11 +251,14 @@
                 }
                 const perm = await Notification.requestPermission();
                 if (perm !== 'granted') {
-                    result.textContent =
-                        'Permission: ' + perm + ' — ' +
-                        (perm === 'denied'
-                            ? 'messaging transport is broken 😱 (or you clicked Deny / have permissions set to "Never allow" notifications, you sly duck 🦆 😉).'
-                            : 'no banner this time.');
+                    if (perm === 'denied') {
+                        result.innerHTML =
+                            'Permission: denied — messaging transport is broken 😱 ' +
+                            '(OR you clicked <b>Deny</b> or have permissions set to ' +
+                            '<b>Never allow</b> notifications, you sly duck 🦆 😉).';
+                    } else {
+                        result.textContent = 'Permission: ' + perm + ' — no banner this time.';
+                    }
                     return;
                 }
                 new Notification(pick(compliments), { body: pick(fortunes) });

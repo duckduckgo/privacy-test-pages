@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>WebKit Message Handlers Visibility (Apple)</title>
+    <style>
+        :root { color-scheme: light dark; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, system-ui, "Segoe UI", sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px 40px;
+            box-sizing: border-box;
+            background: linear-gradient(135deg, #fef9f0 0%, #f0fbff 100%);
+            color: #2a2a2a;
+        }
+        @media (prefers-color-scheme: dark) {
+            body { background: linear-gradient(135deg, #1a1820 0%, #1a2230 100%); color: #eaeaea; }
+        }
+        .home-link {
+            position: absolute; top: 16px; left: 16px; font-size: 14px;
+        }
+        h1 { text-align: center; margin: 0 0 8px; font-size: 1.8rem; }
+        .subtitle {
+            text-align: center; opacity: 0.75; max-width: 640px;
+            margin: 0 0 28px; line-height: 1.5;
+        }
+        .subtitle code { background: rgba(0,0,0,0.06); padding: 1px 6px; border-radius: 4px; }
+        @media (prefers-color-scheme: dark) {
+            .subtitle code { background: rgba(255,255,255,0.08); }
+        }
+        .panel {
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin: 12px 0 24px;
+            font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+            font-size: 13px;
+            line-height: 1.7;
+            min-width: 360px;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.04);
+        }
+        @media (prefers-color-scheme: dark) {
+            .panel { background: rgba(40, 40, 50, 0.7); }
+        }
+        .row { display: flex; justify-content: space-between; gap: 16px; }
+        .row .val { font-weight: 600; }
+        .val.good { color: #1f8c3a; }
+        .val.bad { color: #c0392b; }
+        .val.hidden { color: #a07a30; }
+        .btn {
+            font-size: 1.4rem;
+            font-weight: 700;
+            padding: 22px 44px;
+            margin: 8px 0 16px;
+            border-radius: 999px;
+            border: none;
+            background: linear-gradient(135deg, #fde68a, #fb923c);
+            color: #4a2010;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(251, 146, 60, 0.4);
+            transition: transform 0.18s ease, box-shadow 0.18s ease;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        .btn:hover { transform: translateY(-2px) scale(1.02); }
+        .btn:active { transform: scale(0.95); box-shadow: 0 2px 8px rgba(251, 146, 60, 0.3); }
+        .btn.pop { animation: pop 0.45s ease; }
+        @keyframes pop {
+            0%, 100% { transform: scale(1) rotate(0); }
+            40% { transform: scale(1.09) rotate(-2deg); }
+            70% { transform: scale(0.96) rotate(1.2deg); }
+        }
+        .btn.print {
+            font-size: 1rem;
+            padding: 14px 26px;
+            background: linear-gradient(135deg, #c3dafe, #7c9eff);
+            color: #1a2570;
+            box-shadow: 0 4px 14px rgba(124, 158, 255, 0.4);
+        }
+        .result {
+            min-height: 28px;
+            text-align: center;
+            font-size: 1rem;
+            font-weight: 500;
+            margin: 4px 0 24px;
+        }
+        .platform-note {
+            font-size: 13px; text-align: center; opacity: 0.65;
+            max-width: 600px; margin: 6px 0 18px; line-height: 1.5;
+        }
+        .platform-note code { background: rgba(0,0,0,0.06); padding: 1px 6px; border-radius: 4px; }
+        @media (prefers-color-scheme: dark) {
+            .platform-note code { background: rgba(255,255,255,0.08); }
+        }
+        .hint {
+            font-size: 12px; opacity: 0.55; text-align: center; max-width: 600px;
+            margin-top: 28px; line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <a class="home-link" href="../../index.html">[Home]</a>
+
+    <h1>🪟 WebKit Message Handlers Visibility</h1>
+    <p class="subtitle">
+        Tests whether site JS can see <code>window.webkit.messageHandlers</code>
+        and whether DDG's own page-world messaging still works.
+        Used to validate the <code>appleNullifyMessageHandlersExperiment</code> on iOS and macOS.
+    </p>
+
+    <div class="panel" id="readout">
+        <div class="row"><b>'webkit' in window</b><span class="val" id="webkitIn">…</span></div>
+        <div class="row"><b>typeof window.webkit</b><span class="val" id="webkitType">…</span></div>
+        <div class="row"><b>window.webkit.messageHandlers</b><span class="val" id="mhVal">…</span></div>
+        <div class="row"><b>'messageHandlers' in window.webkit</b><span class="val" id="mhIn">…</span></div>
+    </div>
+
+    <button id="notifyBtn" class="btn" type="button">
+        🔔 Send me a notification
+    </button>
+
+    <div class="result" id="result">&nbsp;</div>
+
+    <p class="platform-note">
+        <b>macOS:</b> the button calls <code>Notification.requestPermission()</code> then
+        <code>new Notification(...)</code>, which routes through DDG's page-world transport.
+        If a banner appears in the notification center, the transport is alive.
+        If permission silently returns <code>"denied"</code> with no banner, the transport may have been broken by the nullify.
+    </p>
+
+    <button id="printBtn" class="btn print" type="button">
+        🖨️ Send a print message (iOS)
+    </button>
+
+    <p class="platform-note">
+        <b>iOS:</b> <code>window.print()</code> goes through DDG's <code>print</code>
+        C-S-S feature, which calls <code>notify('print', {})</code> through the same transport.
+        If the print dialog appears, the transport is alive on iOS too. (macOS print stays native and is unaffected.)
+    </p>
+
+    <p class="hint">
+        The readout above auto-refreshes every ~1.5s.
+        <b>Treatment cohort:</b> <code>messageHandlers</code> reads as <code>undefined</code>.
+        <b>Control cohort / no experiment:</b> <code>messageHandlers</code> reads as a <code>UserMessageHandlersNamespace</code>.
+    </p>
+
+    <script>
+        // eslint-disable-next-line @html-eslint/use-baseline -- intentional fun copy
+        const fortunes = [
+            "Your browser is being beautifully private right now.",
+            "An unexpected window of opportunity is opening. (Possibly a window.webkit one.)",
+            "The mountain knows your name. The notification did too.",
+            "Today's lucky number is 200 OK.",
+            "Permission granted. So is the universe's.",
+            "You're doing great. Your privacy config is too.",
+            "May your TLS handshakes be ever in your favor.",
+            "Somewhere, a cookie sighs. It's fine.",
+            "This notification was sent by a duck. Quack.",
+            "Reminder: Object.prototype.toString.call(yourDay) === '[object Good]'",
+            "The handler is gone, but the love remains."
+        ];
+        const compliments = [
+            "Stellar tap.",
+            "Beautifully clicked.",
+            "Exquisite button-press technique.",
+            "A masterclass in interaction.",
+            "Buttons everywhere envy this one.",
+            "10/10, would press again.",
+            "Could not have been clicked better."
+        ];
+        function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+        function setVal(id, text, cls) {
+            const el = document.getElementById(id);
+            el.textContent = text;
+            el.className = 'val ' + (cls || '');
+        }
+
+        function refreshReadout() {
+            const webkitIn = ('webkit' in window);
+            setVal('webkitIn', String(webkitIn), webkitIn ? '' : 'hidden');
+
+            const webkitType = typeof window.webkit;
+            setVal('webkitType', webkitType, webkitType === 'object' ? '' : 'hidden');
+
+            let mhVal, mhIn, mhCls;
+            try {
+                const raw = window.webkit && window.webkit.messageHandlers;
+                if (raw === undefined) {
+                    mhVal = 'undefined  ← experiment active';
+                    mhCls = 'hidden';
+                } else if (raw === null) {
+                    mhVal = 'null';
+                    mhCls = 'hidden';
+                } else {
+                    const ctor = raw.constructor && raw.constructor.name;
+                    mhVal = ctor ? ctor : String(raw);
+                    mhCls = 'good';
+                }
+                mhIn = window.webkit ? ('messageHandlers' in window.webkit) : false;
+            } catch (e) {
+                mhVal = '(threw: ' + e.message + ')';
+                mhCls = 'bad';
+                mhIn = false;
+            }
+            setVal('mhVal', mhVal, mhCls);
+            setVal('mhIn', String(mhIn), mhIn ? 'good' : 'hidden');
+        }
+        refreshReadout();
+        setInterval(refreshReadout, 1500);
+
+        const notifyBtn = document.getElementById('notifyBtn');
+        const result = document.getElementById('result');
+        function popButton(btn) {
+            btn.classList.remove('pop');
+            // force reflow so the animation restarts on rapid clicks
+            void btn.offsetWidth;
+            btn.classList.add('pop');
+        }
+        notifyBtn.addEventListener('click', async () => {
+            popButton(notifyBtn);
+            try {
+                if (typeof Notification === 'undefined') {
+                    result.textContent = 'Notification API not defined on this build.';
+                    return;
+                }
+                const perm = await Notification.requestPermission();
+                if (perm !== 'granted') {
+                    result.textContent =
+                        'Permission: ' + perm + ' — ' +
+                        (perm === 'denied'
+                            ? 'might be intentional, might be silent transport breakage.'
+                            : 'no banner this time.');
+                    return;
+                }
+                new Notification(pick(compliments), { body: pick(fortunes) });
+                result.textContent = '🎉 ' + pick(compliments);
+            } catch (e) {
+                result.textContent = 'Error: ' + e.name + ': ' + e.message;
+            }
+        });
+
+        const printBtn = document.getElementById('printBtn');
+        printBtn.addEventListener('click', () => {
+            popButton(printBtn);
+            try {
+                window.print();
+                result.textContent = '🖨️ window.print() invoked — if a print dialog appeared, transport is alive.';
+            } catch (e) {
+                result.textContent = 'Print error: ' + e.name + ': ' + e.message;
+            }
+        });
+    </script>
+</body>
+</html>

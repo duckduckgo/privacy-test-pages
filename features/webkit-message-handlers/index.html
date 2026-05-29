@@ -53,6 +53,23 @@
         .val.good { color: #1f8c3a; }
         .val.bad { color: #c0392b; }
         .val.hidden { color: #a07a30; }
+        .status-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            align-items: center;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid rgba(0,0,0,0.08);
+        }
+        @media (prefers-color-scheme: dark) {
+            .status-row { border-bottom-color: rgba(255,255,255,0.1); }
+        }
+        .status-label { font-weight: 600; opacity: 0.7; }
+        .status-val { font-weight: 700; font-size: 14px; }
+        .status-val.experiment-on { color: #a07a30; }
+        .status-val.experiment-off { color: #1f8c3a; }
+        .status-val.unknown { color: #888; }
         .btn {
             font-size: 1.4rem;
             font-weight: 700;
@@ -111,18 +128,16 @@
     <p class="subtitle">
         Tests whether site JS can see <code>window.webkit.messageHandlers</code>
         and whether DDG's own page-world messaging still works.
-        Used to validate the <code>appleNullifyMessageHandlersExperiment</code> on iOS and macOS.
     </p>
 
     <div class="panel" id="readout">
-        <div class="row"><b>'webkit' in window</b><span class="val" id="webkitIn">…</span></div>
-        <div class="row"><b>typeof window.webkit</b><span class="val" id="webkitType">…</span></div>
+        <div class="status-row"><span class="status-label">Experiment status:</span><span class="status-val" id="statusVal">…</span></div>
         <div class="row"><b>window.webkit.messageHandlers</b><span class="val" id="mhVal">…</span></div>
         <div class="row"><b>'messageHandlers' in window.webkit</b><span class="val" id="mhIn">…</span></div>
     </div>
 
     <button id="notifyBtn" class="btn" type="button">
-        🔔 Send me a notification
+        🔔 Send me a notification (macOS)
     </button>
 
     <div class="result" id="result">&nbsp;</div>
@@ -130,8 +145,6 @@
     <p class="platform-note">
         <b>macOS:</b> the button calls <code>Notification.requestPermission()</code> then
         <code>new Notification(...)</code>, which routes through DDG's page-world transport.
-        If a banner appears in the notification center, the transport is alive.
-        If permission silently returns <code>"denied"</code> with no banner, the transport may have been broken by the nullify.
     </p>
 
     <button id="printBtn" class="btn print" type="button">
@@ -141,13 +154,6 @@
     <p class="platform-note">
         <b>iOS:</b> <code>window.print()</code> goes through DDG's <code>print</code>
         C-S-S feature, which calls <code>notify('print', {})</code> through the same transport.
-        If the print dialog appears, the transport is alive on iOS too. (macOS print stays native and is unaffected.)
-    </p>
-
-    <p class="hint">
-        The readout above auto-refreshes every ~1.5s.
-        <b>Treatment cohort:</b> <code>messageHandlers</code> reads as <code>undefined</code>.
-        <b>Control cohort / no experiment:</b> <code>messageHandlers</code> reads as a <code>UserMessageHandlersNamespace</code>.
     </p>
 
     <script>
@@ -183,17 +189,11 @@
         }
 
         function refreshReadout() {
-            const webkitIn = ('webkit' in window);
-            setVal('webkitIn', String(webkitIn), webkitIn ? '' : 'hidden');
-
-            const webkitType = typeof window.webkit;
-            setVal('webkitType', webkitType, webkitType === 'object' ? '' : 'hidden');
-
-            let mhVal, mhIn, mhCls;
+            let mhVal, mhIn, mhCls, status, statusCls;
             try {
                 const raw = window.webkit && window.webkit.messageHandlers;
                 if (raw === undefined) {
-                    mhVal = 'undefined  ← experiment active';
+                    mhVal = 'undefined';
                     mhCls = 'hidden';
                 } else if (raw === null) {
                     mhVal = 'null';
@@ -209,6 +209,27 @@
                 mhCls = 'bad';
                 mhIn = false;
             }
+
+            // Status: experiment is active when site JS sees `messageHandlers` as
+            // undefined while it's still in the prototype chain (the prototype-side
+            // getter installed by apiManipulation returns undefined for the slot).
+            if (!('webkit' in window)) {
+                status = '🤷 Not on an Apple WKWebView build';
+                statusCls = 'unknown';
+            } else if (mhVal === 'undefined' && mhIn) {
+                status = '🟡 Experiment active (treatment cohort)';
+                statusCls = 'experiment-on';
+            } else if (mhCls === 'good') {
+                status = '🟢 No experiment (control / not enrolled)';
+                statusCls = 'experiment-off';
+            } else {
+                status = '🤔 Unexpected state — check raw values below';
+                statusCls = 'unknown';
+            }
+            const statusEl = document.getElementById('statusVal');
+            statusEl.textContent = status;
+            statusEl.className = 'status-val ' + statusCls;
+
             setVal('mhVal', mhVal, mhCls);
             setVal('mhIn', String(mhIn), mhIn ? 'good' : 'hidden');
         }
@@ -235,7 +256,7 @@
                     result.textContent =
                         'Permission: ' + perm + ' — ' +
                         (perm === 'denied'
-                            ? 'might be intentional, might be silent transport breakage.'
+                            ? 'messaging transport is broken 😱 (or you clicked Deny / have permissions set to "Never allow" notifications, you sly duck 🦆 😉).'
                             : 'no banner this time.');
                     return;
                 }

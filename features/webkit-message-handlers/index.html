@@ -115,10 +115,6 @@
         @media (prefers-color-scheme: dark) {
             .platform-note code { background: rgba(255,255,255,0.08); }
         }
-        .hint {
-            font-size: 12px; opacity: 0.55; text-align: center; max-width: 600px;
-            margin-top: 28px; line-height: 1.5;
-        }
     </style>
 </head>
 <body>
@@ -261,8 +257,9 @@
                     }
                     return;
                 }
-                new Notification(pick(compliments), { body: pick(fortunes) });
-                result.textContent = '🎉 ' + pick(compliments);
+                const compliment = pick(compliments);
+                new Notification(compliment, { body: pick(fortunes) });
+                result.textContent = '🎉 ' + compliment;
             } catch (e) {
                 result.textContent = 'Error: ' + e.name + ': ' + e.message;
             }

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Test: window.print() inside iframes</title>
+  <style>
+      body { font-family: sans-serif; margin: 16px; max-width: 720px; }
+      section { border: 1px solid #ccc; border-radius: 6px; padding: 12px; margin: 16px 0; }
+      h2 { margin-top: 0; font-size: 16px; }
+      iframe { width: 100%; height: 90px; border: 1px solid #999; }
+      button { padding: 8px 12px; }
+      code { background: #f2f2f2; padding: 1px 4px; border-radius: 3px; }
+      #log { white-space: pre-wrap; background: #111; color: #0f0; padding: 8px; border-radius: 4px; min-height: 40px; font-size: 12px; }
+  </style>
+</head>
+<body>
+<p><a href="../../index.html">[Home]</a> &middot; <a href="index.html">[Print tests]</a></p>
+
+<h1>window.print() inside iframes</h1>
+
+<p>
+  Verifies that <code>window.print()</code> opens the print dialog even when it is
+  called from inside an iframe (including a cross-origin iframe).
+</p>
+<p>
+  <strong>Expected behaviour:</strong> clicking any of the three buttons below opens the
+  browser/app print dialog (or print preview).
+</p>
+<p>
+  <strong>Bug behaviour (before fix):</strong> on Android the two iframe buttons did nothing —
+  the top-frame button worked, but <code>window.print()</code> from within an iframe was
+  silently ignored. See
+  <a href="https://issues.chromium.org/issues/40342444">crbug.com/40342444</a>.
+</p>
+
+<section>
+  <h2>1. Top frame</h2>
+  <p>Calling <code>window.print()</code> from the main document. This worked before and after the fix.</p>
+  <button id="print-top" type="button">Call window.print() from the top frame</button>
+</section>
+
+<section>
+  <h2>2. Same-origin iframe</h2>
+  <p>The iframe below is served from the same origin as this page.</p>
+  <iframe id="iframe-same" title="Same-origin print iframe"></iframe>
+</section>
+
+<section>
+  <h2>3. Cross-origin iframe</h2>
+  <p>
+    The iframe below is served from a different origin
+    (<code id="cross-origin-host"></code>) to reproduce the real-world case.
+  </p>
+  <iframe id="iframe-cross" title="Cross-origin print iframe"></iframe>
+</section>
+
+<h2>Log</h2>
+<div id="log">Waiting for a print attempt…</div>
+
+<script>
+   const SAME_ORIGIN_CHILD = "iframe-child.html";
+
+   // Map the live first-party host to a genuinely cross-origin host. Locally there is no
+   // cross-origin alias, so fall back to the same origin (the same-origin test still applies).
+   const CROSS_ORIGIN_MAP = {
+       "privacy-test-pages.site": "good.third-party.site",
+       "first-party.site": "good.third-party.site",
+   };
+
+   function crossOriginChildUrl() {
+       const { protocol, hostname, port, pathname } = location;
+       const dir = pathname.substring(0, pathname.lastIndexOf("/") + 1);
+       for (const [parentHost, crossHost] of Object.entries(CROSS_ORIGIN_MAP)) {
+           if (hostname === parentHost || hostname.endsWith("." + parentHost)) {
+               return `${protocol}//${crossHost}${port ? ":" + port : ""}${dir}${SAME_ORIGIN_CHILD}`;
+           }
+       }
+       return SAME_ORIGIN_CHILD;
+   }
+
+   const crossUrl = crossOriginChildUrl();
+   document.getElementById("iframe-same").src = SAME_ORIGIN_CHILD;
+   document.getElementById("iframe-cross").src = crossUrl;
+   document.getElementById("cross-origin-host").textContent =
+       crossUrl === SAME_ORIGIN_CHILD ? "same origin (no cross-origin alias locally)" : new URL(crossUrl, location.href).origin;
+
+   const logEl = document.getElementById("log");
+   function log(msg) {
+       const ts = new Date().toISOString().substring(11, 19);
+       logEl.textContent = `[${ts}] ${msg}\n` + logEl.textContent;
+   }
+
+   document.getElementById("print-top").addEventListener("click", () => {
+       log("Top frame requested print()");
+       window.print();
+   });
+
+   window.addEventListener("message", (event) => {
+       if (event.data && event.data.type === "print-attempt") {
+           log(`iframe requested print() — origin: ${event.data.origin}`);
+       }
+   });
+</script>
+
+</body>
+</html>

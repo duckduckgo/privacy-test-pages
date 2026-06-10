@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Print iframe child</title>
+  <style>
+      body { font-family: sans-serif; margin: 8px; }
+      .origin { font-size: 12px; color: #555; word-break: break-all; }
+      button { padding: 8px 12px; }
+  </style>
+</head>
+<body>
+<p class="origin">Frame origin: <code id="origin"></code></p>
+<button id="print-btn" type="button">Call window.print() from this iframe</button>
+
+<script>
+   document.getElementById("origin").textContent = window.origin;
+
+   document.getElementById("print-btn").addEventListener("click", () => {
+       // Tell the parent we are about to call print, so the parent page can log the attempt.
+       try {
+           window.parent.postMessage({ type: "print-attempt", origin: window.origin }, "*");
+       } catch (e) {
+           // Cross-origin parents still receive the message; ignore any errors here.
+       }
+       window.print();
+   });
+
+   // Optional auto-print on load (?autoprint=1) to mirror the existing iframe.html behaviour.
+   if (new URLSearchParams(location.search).get("autoprint") === "1") {
+       window.addEventListener("load", () => window.print());
+   }
+</script>
+
+</body>
+</html>

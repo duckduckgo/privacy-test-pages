@@ -1,0 +1,12 @@
+BEGIN:VCARD
+VERSION:3.0
+N:Appleseed;Johnny;Q.;;
+FN:Johnny Q. Appleseed
+ORG:Privacy Test Pages;Engineering
+TITLE:Privacy Engineer
+TEL;TYPE=CELL,VOICE:+1-555-867-5309
+TEL;TYPE=WORK,VOICE:+1-555-123-4567
+EMAIL;TYPE=INTERNET,WORK:johnny.appleseed@example.com
+ADR;TYPE=WORK:;;123 Main Street;Anytown;NY;10001;USA
+URL:https://privacy-test-pages.site
+END:VCARD

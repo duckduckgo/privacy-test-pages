@@ -42,6 +42,31 @@
   <li><a href="calendar-unrecognized-timezone.ics">Unrecognized time zone</a>
 </ul>
 
+<p>Download vCard (.vcf) — happy paths</p>
+<ul>
+  <li><a href="contact-full.vcf">Full contact (all common fields)</a>
+  <li><a href="contact-minimal.vcf">Name only</a>
+  <li><a href="contact-photo.vcf">Embedded photo (base64 PNG)</a>
+  <li><a href="contact-note.vcf">With a NOTE field</a>
+  <li><a href="contact-unicode.vcf">Unicode name (山田太郎)</a>
+  <li><a href="contact-full.vcard">Full contact (.vcard extension)</a>
+</ul>
+
+<p>Download vCard (.vcf) — no-name contacts (single field)</p>
+<ul>
+  <li><a href="contact-url-only.vcf">URL only</a>
+  <li><a href="contact-photo-only.vcf">Photo only</a>
+  <li><a href="contact-birthday-only.vcf">Birthday only</a>
+</ul>
+
+<p>Download vCard (.vcf) — fallback paths</p>
+<ul>
+  <li><a href="contact-multiple.vcf">Multiple contacts (only first imported)</a>
+  <li><a href="contact-empty.vcf">Empty (no usable fields)</a>
+  <li><a href="contact-malformed.vcf">Malformed (not a vCard)</a>
+  <li><a id="vcard-routed-by-extension" href="#">Non-standard MIME type, routed by extension</a>
+</ul>
+
 <p>Dynamic download (data URL)</p>
 <ul>
   <li><a href="download-csv.html">Programmatic CSV download from anchor click</a>
@@ -82,6 +107,36 @@
    const blob = new Blob(["Hello world!"], {type: "application/octet-stream"});
    const link = document.getElementById("blobDownloadLink");
    link.href = window.URL.createObjectURL(blob);
+</script>
+
+<script>
+   // "Routed by extension" vCard edge case. Deliver a valid contact with a content
+   // type the app doesn't recognise as a contact (application/x-vcard) but a .vcf
+   // filename, so it has to fall back to routing by file extension. Built as a blob
+   // with an explicit MIME type so the content type is fixed no matter how the site
+   // is served (a real .vcf file is sent as text/vcard, which the app *does* map to
+   // a contact — defeating the case). Wrapped in an IIFE to keep its locals out of
+   // the shared global scope used by the other download scripts above.
+   (function () {
+       const routedLink = document.getElementById('vcard-routed-by-extension');
+       if (!routedLink) { return; }
+       const vcard = [
+           'BEGIN:VCARD',
+           'VERSION:3.0',
+           'N:Extension;Routed By;;;',
+           'FN:Routed By Extension',
+           'ORG:Privacy Test Pages',
+           'TEL;TYPE=CELL:+1-555-0142',
+           'EMAIL:routed@example.com',
+           'URL:https://privacy-test-pages.site/features/download/',
+           'NOTE:Delivered as application/x-vcard with a .vcf filename - routed by extension.',
+           'END:VCARD',
+           ''
+       ].join('\r\n');
+       const routedBlob = new Blob([vcard], { type: 'application/x-vcard' });
+       routedLink.href = URL.createObjectURL(routedBlob);
+       routedLink.setAttribute('download', 'routed-by-extension.vcf');
+   })();
 </script>
 
 </body>

@@ -1,0 +1,8 @@
+BEGIN:VCARD
+VERSION:3.0
+N:山田;太郎;;;
+FN:山田太郎
+ORG:サンプル株式会社
+TEL;TYPE=CELL:+81-90-1234-5678
+EMAIL;TYPE=INTERNET:taro.yamada@example.jp
+END:VCARD

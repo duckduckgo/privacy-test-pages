@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>B · stale-frame repro</title>
+<script>
+  // Captured at the very first script execution of this document, so it is unique
+  // per load. If the URL/log says page A but this value matches a previous B load,
+  // the surface is showing a stale (uncommitted) frame.
+  window.LOAD_TS = new Date();
+  window.LOAD_PERF = (window.performance && performance.now) ? performance.now() : 0;
+  // Page identity. a.html only differs in these three values + <title>.
+  window.PAGE = { name: 'B', other: 'a.html', color: '#1faa4b' };
+
+  // Parse flags as early as possible so ?busy can block before first paint.
+  (function () {
+    var p = new URLSearchParams(location.search);
+    window.FLAGS = {
+      heavy: p.get('heavy') === '1',
+      busy: Math.max(0, parseInt(p.get('busy') || '0', 10) || 0),
+    };
+  })();
+</script>
+<style>
+  :root { color-scheme: light dark; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    color: #fff;
+    /* background colour is set from PAGE.color at runtime */
+    background: #444;
+  }
+  .status {
+    flex: 0 0 auto;
+    padding: 10px 12px;
+    font-size: 13px;
+    line-height: 1.5;
+    background: rgba(0, 0, 0, 0.45);
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .status b { font-weight: 700; }
+  .hero {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 16px;
+    gap: 8px;
+  }
+  .label {
+    font-size: clamp(96px, 38vw, 360px);
+    font-weight: 900;
+    line-height: 0.9;
+    text-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+  }
+  .ts {
+    font-size: clamp(20px, 6vw, 56px);
+    font-weight: 800;
+    background: rgba(0, 0, 0, 0.55);
+    padding: 8px 14px;
+    border-radius: 10px;
+    letter-spacing: 0.5px;
+  }
+  .ts small { display: block; font-size: 0.45em; font-weight: 600; opacity: 0.8; }
+  .path { font-size: clamp(14px, 4vw, 24px); opacity: 0.9; }
+  .nav {
+    flex: 0 0 auto;
+    display: block;
+    text-align: center;
+    text-decoration: none;
+    color: #fff;
+    font-size: clamp(20px, 7vw, 40px);
+    font-weight: 800;
+    padding: 28px 16px;
+    background: rgba(0, 0, 0, 0.65);
+    border-top: 4px solid rgba(255, 255, 255, 0.5);
+  }
+  .nav:active { background: rgba(0, 0, 0, 0.85); }
+  #heavy { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 4px; }
+  #heavy .cell {
+    height: 120px;
+    will-change: transform;
+    transform: translateZ(0);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  }
+  #heavy iframe { width: 100%; height: 160px; border: 0; }
+  #heavy img { width: 100%; height: 120px; object-fit: cover; border-radius: 8px; }
+</style>
+</head>
+<body>
+  <div class="status" id="status">booting…</div>
+
+  <div class="hero">
+    <div class="label" id="label">?</div>
+    <div class="ts" id="ts"><small>build / load timestamp</small><span id="tsval">—</span></div>
+    <div class="path" id="path">pathname: —</div>
+  </div>
+
+  <div id="heavy" hidden></div>
+
+  <a class="nav" id="nav" data-target="a.html" href="a.html">tap to go to the other page →</a>
+
+  <script>
+    (function () {
+      var PAGE = window.PAGE;
+      var FLAGS = window.FLAGS;
+      var LOAD_TS = window.LOAD_TS;
+      var tag = '[' + PAGE.name + ']';
+
+      document.body.style.background = PAGE.color;
+      document.getElementById('label').textContent = PAGE.name;
+      document.getElementById('path').textContent = 'pathname: ' + location.pathname + (location.search || '');
+
+      function fmt(d) {
+        function pad(n, w) { n = String(n); while (n.length < w) n = '0' + n; return n; }
+        return pad(d.getHours(), 2) + ':' + pad(d.getMinutes(), 2) + ':' + pad(d.getSeconds(), 2) +
+          '.' + pad(d.getMilliseconds(), 3);
+      }
+      document.getElementById('tsval').textContent = fmt(LOAD_TS);
+
+      // ---- Optional compositing pressure: large DOM + cross-origin (data:) iframes + big images.
+      if (FLAGS.heavy) {
+        var heavy = document.getElementById('heavy');
+        heavy.hidden = false;
+        var frag = document.createDocumentFragment();
+        for (var i = 0; i < 600; i++) {
+          var c = document.createElement('div');
+          c.className = 'cell';
+          var h = (i * 37) % 360;
+          c.style.background = 'linear-gradient(135deg, hsl(' + h + ',80%,55%), hsl(' + ((h + 60) % 360) + ',80%,45%))';
+          frag.appendChild(c);
+        }
+        // A few big images (large SVG textures) to grow GPU memory / texture upload.
+        for (var k = 0; k < 4; k++) {
+          var img = new Image();
+          var hue = k * 80;
+          var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="2000" height="2000">' +
+            '<rect width="2000" height="2000" fill="hsl(' + hue + ',70%,40%)"/>' +
+            '<circle cx="1000" cy="1000" r="900" fill="hsl(' + ((hue + 120) % 360) + ',70%,55%)"/></svg>';
+          img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+          frag.appendChild(img);
+        }
+        // Several cross-origin iframes. data: URLs get an opaque origin, so each frame
+        // is cross-origin to this document — extra surfaces/compositing layers.
+        for (var j = 0; j < 6; j++) {
+          var f = document.createElement('iframe');
+          var hue2 = j * 53;
+          var doc = '<!doctype html><meta name="viewport" content="width=device-width">' +
+            '<body style="margin:0;height:100vh;display:flex;align-items:center;justify-content:center;' +
+            'font:700 28px monospace;color:#fff;background:hsl(' + hue2 + ',70%,40%)">frame ' + j +
+            ' @' + Date.now() + '</body>';
+          f.src = 'data:text/html;charset=utf-8,' + encodeURIComponent(doc);
+          frag.appendChild(f);
+        }
+        heavy.appendChild(frag);
+      }
+
+      // ---- Optional main-thread block during load, delaying the first committable frame.
+      if (FLAGS.busy > 0) {
+        console.log(tag, 'busy-wait start', FLAGS.busy + 'ms');
+        var end = Date.now() + FLAGS.busy;
+        while (Date.now() < end) { /* spin */ }
+        console.log(tag, 'busy-wait end');
+      }
+
+      // ---- Carry query flags across the A<->B link (mimics tapping article / logo).
+      var nav = document.getElementById('nav');
+      nav.href = nav.getAttribute('data-target') + (location.search || '');
+
+      // ---- Live instrumentation: readyState, visibilityState, rAF counter, FCP.
+      var rafCount = 0;
+      var fcp = null;
+      var statusEl = document.getElementById('status');
+
+      function render() {
+        statusEl.textContent =
+          tag + ' pathname=' + location.pathname + (location.search || '') + '\n' +
+          'load ts=' + fmt(LOAD_TS) + '   readyState=' + document.readyState +
+          '   visibility=' + document.visibilityState + '\n' +
+          'rAF frames=' + rafCount + '   FCP=' + (fcp == null ? 'pending' : fcp.toFixed(1) + 'ms') +
+          (FLAGS.heavy ? '   heavy=1' : '') + (FLAGS.busy ? '   busy=' + FLAGS.busy + 'ms' : '');
+      }
+
+      function tick() { rafCount++; render(); requestAnimationFrame(tick); }
+      requestAnimationFrame(tick);
+
+      try {
+        new PerformanceObserver(function (list) {
+          list.getEntries().forEach(function (e) {
+            if (e.name === 'first-contentful-paint') {
+              fcp = e.startTime;
+              console.log(tag, 'first-contentful-paint', fcp.toFixed(1) + 'ms', 'loadTs=' + fmt(LOAD_TS));
+              render();
+            }
+          });
+        }).observe({ type: 'paint', buffered: true });
+      } catch (err) {
+        console.log(tag, 'PerformanceObserver paint unsupported', String(err));
+      }
+
+      function logState(ev) {
+        console.log(tag, ev, 'readyState=' + document.readyState,
+          'visibility=' + document.visibilityState, 'loadTs=' + fmt(LOAD_TS));
+        render();
+      }
+      document.addEventListener('readystatechange', function () { logState('readystatechange'); });
+      document.addEventListener('visibilitychange', function () { logState('visibilitychange'); });
+      window.addEventListener('DOMContentLoaded', function () { logState('DOMContentLoaded'); });
+      window.addEventListener('load', function () { logState('load'); });
+      window.addEventListener('pageshow', function (e) { logState('pageshow persisted=' + e.persisted); });
+
+      logState('script-eval');
+      render();
+    })();
+  </script>
+</body>
+</html>

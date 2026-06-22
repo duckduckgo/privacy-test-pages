@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>WebView stale-frame after in-tab navigation</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0 auto;
+    padding: 16px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    line-height: 1.5;
+    color: #111;
+    background: #f4f4f5;
+    max-width: 760px;
+  }
+  h1 { font-size: 22px; }
+  h2 { font-size: 16px; margin-top: 28px; }
+  p, li { font-size: 14px; }
+  code { background: #e4e4e7; padding: 1px 5px; border-radius: 4px; }
+  fieldset { border: 1px solid #d4d4d8; border-radius: 8px; margin: 16px 0; }
+  legend { font-weight: 700; padding: 0 6px; }
+  label { display: block; margin: 8px 0; }
+  input[type="number"] { width: 90px; }
+  .start { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 12px; }
+  .start a {
+    flex: 1 1 160px;
+    text-align: center;
+    text-decoration: none;
+    color: #fff;
+    font-weight: 800;
+    font-size: 20px;
+    padding: 18px;
+    border-radius: 10px;
+  }
+  .start a.a { background: #d7261e; }
+  .start a.b { background: #1faa4b; }
+  .url { word-break: break-all; background: #fff; border: 1px solid #d4d4d8; border-radius: 6px; padding: 8px; font-size: 12px; }
+</style>
+</head>
+<body>
+  <p><a href="../../index.html">[Home]</a></p>
+  <h1>Android WebView · stale frame after in-tab navigation</h1>
+  <p>
+    Two near-identical pages, <code>a.html</code> (red) and <code>b.html</code> (green). Each renders
+    instantly and shows a <strong>load timestamp that changes every load</strong>. Tap the full-width
+    bar at the bottom of each page to navigate A↔B <strong>in the same tab</strong> (the recycled
+    WebView path).
+  </p>
+  <p>
+    <strong>Expected:</strong> after a tap the visible page (colour + label + timestamp) matches the
+    new URL. <strong>Bug:</strong> on an affected Android WebView reused within one tab, the load
+    finishes (<code>onPageFinished</code> / progress 100) but no frame is committed, so the
+    <em>previous</em> page stays on screen until a re-composite. A screenshot then shows page N-1
+    while the URL says N. Opening links in a new tab (a fresh WebView per navigation) does not
+    reproduce it.
+  </p>
+
+  <fieldset>
+    <legend>Stress flags (carried across A↔B links)</legend>
+    <label><input type="checkbox" id="heavy" /> <code>heavy=1</code> — large DOM + cross-origin (data:) iframes + big images (compositing pressure)</label>
+    <label><input type="checkbox" id="busyOn" /> <code>busy=NN</code> — block the main thread on load for
+      <input type="number" id="busy" value="1500" min="0" step="100" /> ms (delays the first committable frame)</label>
+  </fieldset>
+
+  <div class="start">
+    <a class="a" id="startA" href="a.html">Start at A →</a>
+    <a class="b" id="startB" href="b.html">Start at B →</a>
+  </div>
+  <p>Resolved start URL: <span class="url" id="url">a.html</span></p>
+
+  <h2>How to reproduce by hand</h2>
+  <ol>
+    <li>Open a start link in the target WebView/browser.</li>
+    <li>Tap the bottom bar repeatedly to bounce A→B→A… in the same tab.</li>
+    <li>Watch the colour, the big letter, and the timestamp. If they lag the URL, that is the bug.</li>
+    <li>The flags above widen the stale-frame window; <code>busy</code> is usually the strongest single trigger.</li>
+  </ol>
+  <p>
+    A side-by-side recycled-vs-fresh WebView harness (Android sample) and pass/fail criteria live in
+    the workflow repo under <code>webview-stale-frame-testcase/</code>.
+  </p>
+
+  <script>
+    var heavy = document.getElementById('heavy');
+    var busyOn = document.getElementById('busyOn');
+    var busy = document.getElementById('busy');
+    var startA = document.getElementById('startA');
+    var startB = document.getElementById('startB');
+    var urlEl = document.getElementById('url');
+
+    function query() {
+      var parts = [];
+      if (heavy.checked) parts.push('heavy=1');
+      if (busyOn.checked && Number(busy.value) > 0) parts.push('busy=' + Number(busy.value));
+      return parts.length ? '?' + parts.join('&') : '';
+    }
+    function update() {
+      var q = query();
+      startA.href = 'a.html' + q;
+      startB.href = 'b.html' + q;
+      urlEl.textContent = 'a.html' + q + '   (or b.html' + q + ')';
+    }
+    [heavy, busyOn, busy].forEach(function (el) {
+      el.addEventListener('change', update);
+      el.addEventListener('input', update);
+    });
+    update();
+  </script>
+</body>
+</html>

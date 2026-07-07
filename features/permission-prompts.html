@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Permission Prompts (camera / microphone / location)</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.4;
+      margin: 16px;
+      color: #111;
+    }
+    code, pre, button {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+    h1, h2 {
+      margin-top: 20px;
+    }
+    .cards {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      max-width: 980px;
+    }
+    .card {
+      border: 1px solid #d0d0d0;
+      border-radius: 6px;
+      padding: 12px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .card.active {
+      border-color: #1a7f37;
+      box-shadow: 0 0 0 2px rgba(26, 127, 55, 0.25);
+    }
+    .card h3 {
+      margin: 0 0 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .dot {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #bbb;
+    }
+    .card.active .dot {
+      background: #1a7f37;
+      animation: pulse 1.2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.35; }
+    }
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin: 8px 0;
+    }
+    button {
+      cursor: pointer;
+      padding: 5px 10px;
+    }
+    dl {
+      display: grid;
+      grid-template-columns: max-content minmax(0, 1fr);
+      gap: 4px 10px;
+      margin: 8px 0 0;
+    }
+    dt {
+      font-weight: 600;
+    }
+    dd {
+      margin: 0;
+      overflow-wrap: anywhere;
+    }
+    .state-prompt { color: #9a6700; }
+    .state-granted { color: #1a7f37; }
+    .state-denied { color: #cf222e; }
+    video {
+      width: 100%;
+      max-height: 180px;
+      margin-top: 8px;
+      background: #000;
+      border-radius: 4px;
+      display: none;
+    }
+    .card.active video {
+      display: block;
+    }
+    .meter {
+      height: 10px;
+      margin-top: 8px;
+      background: #eee;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+    .meter > span {
+      display: block;
+      height: 100%;
+      width: 0%;
+      background: #1a7f37;
+      transition: width 0.05s linear;
+    }
+    #log {
+      border: 1px solid #d0d0d0;
+      background: #f7f7f7;
+      padding: 8px;
+      max-height: 260px;
+      overflow: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      max-width: 980px;
+    }
+    .note {
+      background: #fff8e5;
+      border: 1px solid #f0d68a;
+      border-radius: 6px;
+      padding: 10px 12px;
+      max-width: 980px;
+    }
+  </style>
+</head>
+<body>
+<p><a href="../index.html">[Home]</a></p>
+
+<h1>Permission Prompts</h1>
+<p>Manually trigger <strong>camera</strong>, <strong>microphone</strong> and <strong>location</strong> permission
+requests to exercise the per-site permission dialog (allow&nbsp;once / always&nbsp;allow / never&nbsp;allow), the
+active-in-use indicators, and the denied-permission recovery path.</p>
+
+<h2>Runtime info</h2>
+<ul>
+  <li id="secure-context"></li>
+  <li id="media-devices"></li>
+  <li id="permissions-api"></li>
+  <li id="geolocation-api"></li>
+</ul>
+
+<h2>Permissions</h2>
+<div class="cards">
+  <section class="card" id="card-location">
+    <h3><span class="dot"></span> Location</h3>
+    <div class="buttons">
+      <button data-action="check" data-name="geolocation" data-card="location">Check state</button>
+      <button id="request-location-once">Request (once)</button>
+      <button id="watch-location">Watch (keep active)</button>
+      <button id="stop-location">Stop</button>
+    </div>
+    <dl>
+      <dt>State</dt><dd data-cell="state">—</dd>
+      <dt>Last result</dt><dd data-cell="result">—</dd>
+      <dt>In use</dt><dd data-cell="active">idle</dd>
+      <dt>Coords</dt><dd data-cell="coords">—</dd>
+    </dl>
+  </section>
+
+  <section class="card" id="card-camera">
+    <h3><span class="dot"></span> Camera</h3>
+    <div class="buttons">
+      <button data-action="check" data-name="camera" data-card="camera">Check state</button>
+      <button id="request-camera">Request (start)</button>
+      <button id="stop-camera">Stop</button>
+    </div>
+    <dl>
+      <dt>State</dt><dd data-cell="state">—</dd>
+      <dt>Last result</dt><dd data-cell="result">—</dd>
+      <dt>In use</dt><dd data-cell="active">idle</dd>
+    </dl>
+    <video id="camera-preview" autoplay playsinline muted></video>
+  </section>
+
+  <section class="card" id="card-microphone">
+    <h3><span class="dot"></span> Microphone</h3>
+    <div class="buttons">
+      <button data-action="check" data-name="microphone" data-card="microphone">Check state</button>
+      <button id="request-microphone">Request (start)</button>
+      <button id="stop-microphone">Stop</button>
+    </div>
+    <dl>
+      <dt>State</dt><dd data-cell="state">—</dd>
+      <dt>Last result</dt><dd data-cell="result">—</dd>
+      <dt>In use</dt><dd data-cell="active">idle</dd>
+    </dl>
+    <div class="meter"><span id="mic-level"></span></div>
+  </section>
+</div>
+
+<h2>Combined &amp; reset</h2>
+<div class="buttons">
+  <button id="request-both">Request camera + microphone (two prompts)</button>
+  <button id="check-all">Check all states</button>
+  <button id="stop-all">Stop all</button>
+  <button id="clear-log">Clear log</button>
+</div>
+
+<div class="note">
+  <strong>How this maps to the per-site permission flow</strong>
+  <ul>
+    <li><strong>Allow once vs. always:</strong> grant, press <em>Stop</em>, then <em>Request</em> again. "Allow once"
+      should re-prompt; "Always allow" should resolve with no dialog. Watch the <em>State</em> row update live.</li>
+    <li><strong>Never allow:</strong> once set, <em>Request</em> should reject immediately with no dialog and
+      <em>Last result</em> shows <code>NotAllowedError</code>.</li>
+    <li><strong>Active-in-use animation:</strong> while a permission is live the card border turns green and the dot
+      pulses — camera shows a preview, microphone shows a live level meter, location keeps updating coords. This is
+      the state the menu indicator/animation should mirror.</li>
+    <li><strong>Denied system permission recovery:</strong> if the site permission is allowed but the OS-level
+      permission is off, <code>getUserMedia</code> rejects with <code>NotAllowedError</code> (see <em>Last result</em>
+      / log). That's the case where the app should surface a "open system settings" link.</li>
+  </ul>
+</div>
+
+<h2>Log</h2>
+<pre id="log"></pre>
+
+<script>
+  const logEl = document.getElementById('log');
+
+  const state = {
+    camera: { stream: null },
+    microphone: { stream: null, audioCtx: null, raf: null },
+    location: { watchId: null },
+  };
+
+  function log(message) {
+    logEl.textContent += `[${new Date().toISOString()}] ${message}\n`;
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  function setCell(card, cell, value) {
+    const el = document.querySelector(`#card-${card} [data-cell="${cell}"]`);
+    if (el) el.textContent = value;
+  }
+
+  function setState(card, value) {
+    const el = document.querySelector(`#card-${card} [data-cell="state"]`);
+    if (!el) return;
+    el.textContent = value;
+    el.className = '';
+    if (value === 'granted' || value === 'denied' || value === 'prompt') {
+      el.classList.add(`state-${value}`);
+    }
+  }
+
+  function setActive(card, active) {
+    document.getElementById(`card-${card}`).classList.toggle('active', active);
+    setCell(card, 'active', active ? 'in use' : 'idle');
+  }
+
+  function describeError(e) {
+    return `${e && e.name ? e.name : 'Error'}: ${e && e.message ? e.message : String(e)}`;
+  }
+
+  function handleMediaError(card, e) {
+    setCell(card, 'result', describeError(e));
+    if (e && e.name === 'NotAllowedError') {
+      log(`${card}: NotAllowedError — site permission blocked OR OS-level permission is off (recovery-link case)`);
+    } else {
+      log(`${card}: ${describeError(e)}`);
+    }
+  }
+
+  function updateRuntimeInfo() {
+    document.getElementById('secure-context').textContent = `isSecureContext: ${window.isSecureContext}`;
+    const hasGum = Boolean(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+    document.getElementById('media-devices').textContent =
+      `mediaDevices.getUserMedia: ${hasGum}${hasGum ? '' : ' (camera/microphone need HTTPS or localhost)'}`;
+    document.getElementById('permissions-api').textContent =
+      `navigator.permissions.query: ${Boolean(navigator.permissions && navigator.permissions.query)}`;
+    document.getElementById('geolocation-api').textContent =
+      `navigator.geolocation: ${Boolean(navigator.geolocation)}`;
+  }
+
+  // --- Permissions API state (does not trigger a prompt) ---
+  async function checkState(name, card) {
+    if (!navigator.permissions || !navigator.permissions.query) {
+      setState(card, 'Permissions API unavailable');
+      return;
+    }
+    try {
+      const status = await navigator.permissions.query({ name });
+      setState(card, status.state);
+      log(`query ${name}: ${status.state}`);
+      status.onchange = () => {
+        setState(card, status.state);
+        log(`state change ${name}: ${status.state}`);
+      };
+    } catch (e) {
+      // Firefox, for example, throws TypeError for camera/microphone queries.
+      setState(card, `query not supported (${e.name || 'error'})`);
+      log(`query ${name} error: ${describeError(e)}`);
+    }
+  }
+
+  // --- Camera ---
+  async function requestCamera() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      setCell('camera', 'result', 'getUserMedia unavailable (needs HTTPS/localhost)');
+      log('camera: getUserMedia unavailable');
+      return;
+    }
+    setCell('camera', 'result', 'requesting…');
+    log('camera: requesting getUserMedia({ video: true })');
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      stopCamera();
+      state.camera.stream = stream;
+      document.getElementById('camera-preview').srcObject = stream;
+      setActive('camera', true);
+      setCell('camera', 'result', 'granted — streaming');
+      log('camera: granted');
+    } catch (e) {
+      handleMediaError('camera', e);
+    }
+    checkState('camera', 'camera');
+  }
+
+  function stopCamera() {
+    if (!state.camera.stream) return;
+    state.camera.stream.getTracks().forEach((t) => t.stop());
+    state.camera.stream = null;
+    document.getElementById('camera-preview').srcObject = null;
+    setActive('camera', false);
+    log('camera: stopped');
+  }
+
+  // --- Microphone (with live level meter) ---
+  async function requestMicrophone() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      setCell('microphone', 'result', 'getUserMedia unavailable (needs HTTPS/localhost)');
+      log('microphone: getUserMedia unavailable');
+      return;
+    }
+    setCell('microphone', 'result', 'requesting…');
+    log('microphone: requesting getUserMedia({ audio: true })');
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stopMicrophone();
+      state.microphone.stream = stream;
+      setActive('microphone', true);
+      setCell('microphone', 'result', 'granted — capturing');
+      startMeter(stream);
+      log('microphone: granted');
+    } catch (e) {
+      handleMediaError('microphone', e);
+    }
+    checkState('microphone', 'microphone');
+  }
+
+  function startMeter(stream) {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return;
+    const ctx = new AudioCtx();
+    state.microphone.audioCtx = ctx;
+    const source = ctx.createMediaStreamSource(stream);
+    const analyser = ctx.createAnalyser();
+    analyser.fftSize = 512;
+    source.connect(analyser);
+    const data = new Uint8Array(analyser.fftSize);
+    const bar = document.getElementById('mic-level');
+    function tick() {
+      analyser.getByteTimeDomainData(data);
+      let sum = 0;
+      for (let i = 0; i < data.length; i++) {
+        const v = (data[i] - 128) / 128;
+        sum += v * v;
+      }
+      const rms = Math.sqrt(sum / data.length);
+      bar.style.width = `${Math.min(100, Math.round(rms * 180))}%`;
+      state.microphone.raf = requestAnimationFrame(tick);
+    }
+    tick();
+  }
+
+  function stopMicrophone() {
+    if (state.microphone.raf) {
+      cancelAnimationFrame(state.microphone.raf);
+      state.microphone.raf = null;
+    }
+    if (state.microphone.audioCtx) {
+      state.microphone.audioCtx.close();
+      state.microphone.audioCtx = null;
+    }
+    if (!state.microphone.stream) return;
+    state.microphone.stream.getTracks().forEach((t) => t.stop());
+    state.microphone.stream = null;
+    document.getElementById('mic-level').style.width = '0%';
+    setActive('microphone', false);
+    log('microphone: stopped');
+  }
+
+  // --- Location ---
+  function onPosition(position) {
+    setCell('location', 'result', 'granted');
+    setCell('location', 'coords', `lat ${position.coords.latitude}, lon ${position.coords.longitude}`);
+    log(`location: lat ${position.coords.latitude} lon ${position.coords.longitude}`);
+    checkState('geolocation', 'location');
+  }
+
+  function onPositionError(err) {
+    setCell('location', 'result', `error (${err.code}): ${err.message}`);
+    if (err.code === err.PERMISSION_DENIED) {
+      log('location: PERMISSION_DENIED — site permission blocked OR OS-level location is off (recovery-link case)');
+    } else {
+      log(`location: error (${err.code}) ${err.message}`);
+    }
+    checkState('geolocation', 'location');
+  }
+
+  function requestLocationOnce() {
+    if (!navigator.geolocation) {
+      setCell('location', 'result', 'geolocation unavailable');
+      return;
+    }
+    setCell('location', 'result', 'requesting…');
+    log('location: requesting getCurrentPosition()');
+    navigator.geolocation.getCurrentPosition(onPosition, onPositionError);
+  }
+
+  function watchLocation() {
+    if (!navigator.geolocation) {
+      setCell('location', 'result', 'geolocation unavailable');
+      return;
+    }
+    stopLocation();
+    log('location: starting watchPosition()');
+    state.location.watchId = navigator.geolocation.watchPosition(onPosition, onPositionError);
+    setActive('location', true);
+  }
+
+  function stopLocation() {
+    if (state.location.watchId === null) return;
+    navigator.geolocation.clearWatch(state.location.watchId);
+    state.location.watchId = null;
+    setActive('location', false);
+    log('location: stopped watching');
+  }
+
+  // --- Combined + reset ---
+  async function requestBoth() {
+    // Sequential requests fire two independent prompts — matching the per-type,
+    // per-site permission model (camera and microphone are stored separately).
+    await requestCamera();
+    await requestMicrophone();
+  }
+
+  function stopAll() {
+    stopCamera();
+    stopMicrophone();
+    stopLocation();
+  }
+
+  function checkAllStates() {
+    checkState('geolocation', 'location');
+    checkState('camera', 'camera');
+    checkState('microphone', 'microphone');
+  }
+
+  // --- Wiring ---
+  document.querySelectorAll('button[data-action="check"]').forEach((button) => {
+    button.addEventListener('click', () => checkState(button.dataset.name, button.dataset.card));
+  });
+  document.getElementById('request-location-once').addEventListener('click', requestLocationOnce);
+  document.getElementById('watch-location').addEventListener('click', watchLocation);
+  document.getElementById('stop-location').addEventListener('click', stopLocation);
+  document.getElementById('request-camera').addEventListener('click', requestCamera);
+  document.getElementById('stop-camera').addEventListener('click', stopCamera);
+  document.getElementById('request-microphone').addEventListener('click', requestMicrophone);
+  document.getElementById('stop-microphone').addEventListener('click', stopMicrophone);
+  document.getElementById('request-both').addEventListener('click', requestBoth);
+  document.getElementById('check-all').addEventListener('click', checkAllStates);
+  document.getElementById('stop-all').addEventListener('click', stopAll);
+  document.getElementById('clear-log').addEventListener('click', () => {
+    logEl.textContent = '';
+  });
+
+  updateRuntimeInfo();
+  checkAllStates();
+</script>
+</body>
+</html>

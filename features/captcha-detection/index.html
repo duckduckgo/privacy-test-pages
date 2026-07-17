@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAPTCHA Detection Reference</title>
+    <style>
+        body { font-family: -apple-system, system-ui, sans-serif; line-height: 1.5; margin: 0 auto; max-width: 960px; padding: 1rem; }
+        h1 { margin-bottom: 0.25rem; }
+        h2 { border-bottom: 1px solid #ddd; padding-bottom: 0.25rem; margin-top: 2rem; }
+        code { background: #f2f2f2; padding: 0 0.25rem; border-radius: 3px; font-size: 0.9em; }
+        table { border-collapse: collapse; width: 100%; margin: 0.5rem 0; }
+        th, td { border: 1px solid #ddd; padding: 0.4rem 0.5rem; text-align: left; vertical-align: top; font-size: 0.9rem; }
+        th { background: #f7f7f7; }
+        .intro { background: #f0f6ff; border: 1px solid #b8d4f0; padding: 0.75rem 1rem; border-radius: 6px; }
+        .widget { border: 1px dashed #bbb; padding: 1rem; margin: 0.75rem 0; border-radius: 6px; }
+        .widget h3 { margin-top: 0; }
+        .badge { display: inline-block; background: #e6e0ff; color: #4b2fa0; border-radius: 3px; padding: 0 0.35rem; font-size: 0.75rem; margin-left: 0.25rem; }
+        .op { color: #666; font-style: italic; }
+        .note { color: #666; font-size: 0.85rem; }
+        .err { color: #a00; }
+    </style>
+</head>
+<body>
+    <h1>CAPTCHA Detection Reference</h1>
+    <p class="note">A manual reference for the <code>web-detection</code> feature's <code>captcha</code> detectors.
+        Not an automated test — a scratchpad for building and validating detectors by hand.</p>
+
+    <div class="intro">
+        <strong>What this is for.</strong> When adding or debugging a captcha detector, load a page that shows a real
+        widget, then inspect the DOM against the selectors in the table below. The table is loaded live from the shipped
+        config, so it always reflects what the detector actually matches on.
+    </div>
+
+    <h2>Live widgets (public test keys)</h2>
+    <p class="note">These load third-party scripts and need network access; some may be blocked in restricted
+        environments, and widgets may report key/domain errors on <code>localhost</code> — the container markup still
+        renders, which is what detection keys on.</p>
+
+    <div class="widget">
+        <h3>Google reCAPTCHA v2</h3>
+        <div class="g-recaptcha" data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"></div>
+    </div>
+
+    <div class="widget">
+        <h3>hCaptcha</h3>
+        <div class="h-captcha" data-sitekey="10000000-ffff-ffff-ffff-000000000001"></div>
+    </div>
+
+    <div class="widget">
+        <h3>Cloudflare Turnstile — always passes</h3>
+        <div class="cf-turnstile" data-sitekey="1x00000000000000000000AA"></div>
+    </div>
+
+    <div class="widget">
+        <h3>Cloudflare Turnstile — forces interactive challenge</h3>
+        <div class="cf-turnstile" data-sitekey="3x00000000000000000000FF"></div>
+    </div>
+
+    <div class="widget">
+        <h3>GeeTest v4 (slide)</h3>
+        <iframe title="GeeTest v4 slide demo" src="https://gt4.geetest.com/demov4/slide-float-en.html"
+            style="width: 100%; height: 320px; border: 0;"></iframe>
+    </div>
+
+    <h2>Detector definitions</h2>
+    <p class="note">Loaded live from
+        <a id="src-link" href="https://github.com/duckduckgo/privacy-configuration/blob/main/features/web-detection.json">features/web-detection.json</a>
+        (<code>settings.detectors.captcha</code>, <code>main</code> branch). Element detectors match if <em>any</em>
+        selector matches; the real detector also applies the <code>visibility</code> mode (eg <code>content</code> =
+        layout-free content-presence check).</p>
+    <table>
+        <thead>
+            <tr><th>Detector</th><th>Match conditions</th><th>Where to test manually</th></tr>
+        </thead>
+        <tbody id="ref-table">
+            <tr><td colspan="3" class="note">Loading from GitHub…</td></tr>
+        </tbody>
+    </table>
+
+    <script>
+        const CONFIG_URL = 'https://raw.githubusercontent.com/duckduckgo/privacy-configuration/main/features/web-detection.json';
+
+        // Static, non-authoritative hints for manual testing (not part of the config).
+        // Values are arrays of items. A string is a domain (linked to https://<domain>).
+        // An object { label, href } is a custom link; { label } with no href is a plain note.
+        const TEST_SITES = {
+            recaptcha: ['samsung.com', 'google.com', 'thelibertydaily.com'],
+            hcaptcha: ['ebay.com', 'epicgames.com', 'royalmail.com'],
+            turnstile: ['a-z-animals.com', 'glutenfreeonashoestring.com', 'disabledholidays.com'],
+            cloudflare: ['miles-and-more.com', 'ikea.com', 'thegatewaypundit.com'],
+            datadome: ['tidal.com', 'leboncoin.fr'],
+            imperva: ['smythstoys.com', { label: '(Pardon Our Interruption)' }],
+            arkose: [{ label: 'demo.omocaptcha.com#funcap4', href: 'https://demo.omocaptcha.com/#funcap4' }, { label: 'roblox signup', href: 'https://www.roblox.com/signup' }],
+            geetest: [{ label: 'geetest.com/en/demo', href: 'https://www.geetest.com/en/demo' }],
+            awswaf: ['officeworks.com.au', 'slicktext.com', { label: '(best-effort)' }]
+        };
+
+        function renderSites (name) {
+            const items = TEST_SITES[name];
+            if (!items || !items.length) return '<span class="note">—</span>';
+            return items.map((item) => {
+                if (typeof item === 'string') {
+                    return '<a href="https://' + encodeURI(item) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(item) + '</a>';
+                }
+                if (item.href) {
+                    return '<a href="' + escapeHtml(item.href) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(item.label) + '</a>';
+                }
+                return '<span class="note">' + escapeHtml(item.label) + '</span>';
+            }).join(' · ');
+        }
+
+        function escapeHtml (str) {
+            return String(str).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        }
+
+        function asArray (value) {
+            if (value === undefined) return [];
+            return Array.isArray(value) ? value : [value];
+        }
+
+        function describeElement (el) {
+            const vis = el.visibility ? '<span class="badge">' + escapeHtml(el.visibility) + '</span>' : '';
+            return asArray(el.selector).map(s => '<code>' + escapeHtml(s) + '</code>').join('<br>') + vis;
+        }
+
+        function describeText (txt) {
+            const sels = asArray(txt.selector);
+            const where = sels.length ? sels.map(s => '<code>' + escapeHtml(s) + '</code>').join(', ') : '<code>body</code>';
+            const pats = asArray(txt.pattern).map(p => '&nbsp;&nbsp;<code>' + escapeHtml(p) + '</code>').join('<br>');
+            return '<span class="op">text</span> in ' + where + ' matching:<br>' + pats;
+        }
+
+        function describeNode (node) {
+            if (!node || typeof node !== 'object') return '';
+            for (const op of ['any', 'all', 'none']) {
+                if (Object.prototype.hasOwnProperty.call(node, op)) {
+                    const children = asArray(node[op]).map(c => '<li>' + describeNode(c) + '</li>').join('');
+                    return '<span class="op">' + op.toUpperCase() + ' of:</span><ul>' + children + '</ul>';
+                }
+            }
+            const parts = [];
+            if (node.element) parts.push(describeElement(node.element));
+            if (node.text) parts.push(describeText(node.text));
+            return parts.join('<br>');
+        }
+
+        function renderTable (captcha) {
+            const tbody = document.getElementById('ref-table');
+            const rows = Object.entries(captcha).map(([name, def]) => {
+                const match = def && def.match ? describeNode(def.match) : '<span class="note">no match block</span>';
+                const where = renderSites(name);
+                return '<tr><td>' + escapeHtml(name) + '</td><td>' + match + '</td><td>' + where + '</td></tr>';
+            });
+            tbody.innerHTML = rows.join('') || '<tr><td colspan="3" class="note">No captcha detectors found.</td></tr>';
+        }
+
+        fetch(CONFIG_URL)
+            .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+            .then(cfg => {
+                const captcha = cfg && cfg.settings && cfg.settings.detectors && cfg.settings.detectors.captcha;
+                if (!captcha) throw new Error('settings.detectors.captcha not found');
+                renderTable(captcha);
+            })
+            .catch(err => {
+                document.getElementById('ref-table').innerHTML =
+                    '<tr><td colspan="3" class="err">Could not load live config (' + escapeHtml(err.message) +
+                    '). View it directly on <a href="' + CONFIG_URL + '">GitHub</a>.</td></tr>';
+            });
+    </script>
+
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+</body>
+</html>

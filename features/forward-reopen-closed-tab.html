@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Forward re-opens a back-closed tab (opener)</title>
+</head>
+<body>
+<p><a href="../index.html">[Home]</a></p>
+
+<h1>Forward re-opens a back-closed link tab &mdash; opener</h1>
+
+<p>
+  Fixture for the iOS change that makes the <strong>forward</strong> button re-open a
+  link-opened tab that was just closed with <strong>back</strong>
+  (apple-browsers PR&nbsp;#5886). This page is the <em>opener</em> tab.
+</p>
+
+<p>
+  The opener remembers the closed child's URL in <code>reopenableClosedTabURL</code>. That
+  value is only cleared on a full-page navigation (<code>didStartProvisionalNavigation</code>),
+  which WKWebView does <strong>not</strong> fire for same-document navigations
+  (<code>history.pushState</code> / hash changes). So navigating in-page <em>after</em>
+  closing the child leaves the stash set, and forward re-opens the stale child instead of
+  doing nothing.
+</p>
+
+<h2>Steps</h2>
+<ol>
+  <li>Tap <strong>Open child in a new tab</strong> below.</li>
+  <li>On the child tab, tap the browser <strong>back</strong> button. Because the child has no
+      history of its own, back closes it and returns you here.</li>
+  <li>Back on this page, make a same-document navigation: tap
+      <strong>Navigate in-page (hash)</strong> or <strong>Navigate in-page (pushState)</strong>.
+      The "Current location" below changes &mdash; you have moved on within this tab, with no
+      real page load.</li>
+  <li>Tap the browser <strong>forward</strong> button.</li>
+</ol>
+
+<p>
+  <strong>Expected (fixed):</strong> the in-page navigation cleared the stash, so forward does
+  nothing (the forward button should be disabled).<br>
+  <strong>Buggy (current):</strong> forward re-opens the closed child tab even though you
+  navigated in-page after closing it.
+</p>
+
+<h2>Controls</h2>
+<p>
+  <a href="forward-reopen-closed-tab-child.html" target="_blank" id="open-child">Open child in a new tab</a>
+  (<code>target="_blank"</code>)
+  &nbsp;&middot;&nbsp;
+  <button type="button" id="open-child-window-open">Open child via window.open()</button>
+</p>
+
+<p>Same-document navigations (these should clear the stash, but currently don't):</p>
+<ul>
+  <li><a href="#moved" id="hash-nav">Navigate in-page (hash)</a></li>
+  <li><button type="button" id="pushstate-nav">Navigate in-page (pushState)</button></li>
+</ul>
+
+<p>Current location: <code id="location"></code></p>
+<p><button type="button" id="reset">Reset location</button></p>
+
+<hr>
+<p>
+  <small>
+    Related variant of the same bug: back-close a child here, then open a second child and
+    close <em>it</em> by a non-back path (e.g. its own <code>window.close()</code>, see
+    <a href="closeable.html">closeable.html</a>). Opening/closing the second child never
+    navigates this opener, so the first child's URL stays stashed and forward re-opens it.
+  </small>
+</p>
+
+<script>
+  const locationEl = document.getElementById('location');
+  let pushCount = 0;
+
+  const renderLocation = () => {
+    locationEl.textContent = window.location.href;
+  };
+
+  document.getElementById('open-child-window-open').addEventListener('click', () => {
+    window.open('forward-reopen-closed-tab-child.html');
+  });
+
+  document.getElementById('pushstate-nav').addEventListener('click', () => {
+    pushCount += 1;
+    window.history.pushState({ moved: pushCount }, '', `?moved=${pushCount}`);
+    renderLocation();
+  });
+
+  document.getElementById('reset').addEventListener('click', () => {
+    window.history.pushState({}, '', window.location.pathname);
+    renderLocation();
+  });
+
+  window.addEventListener('hashchange', renderLocation);
+  window.addEventListener('popstate', renderLocation);
+  renderLocation();
+</script>
+
+</body>
+</html>

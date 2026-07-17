@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Ad attribution: re-opened tab drops attribution</title>
+</head>
+<body>
+<p><a href="../index.html">[Home]</a></p>
+
+<h1>Ad attribution &mdash; forward re-open drops attribution</h1>
+
+<p>
+  Fixture for apple-browsers PR&nbsp;#5886. When a link opens a new tab and you tap
+  <strong>back</strong> to close it, the opener's <strong>forward</strong> button re-opens that
+  tab. The re-open is created with <code>inheritingAttribution: nil</code>, whereas the original
+  <code>_blank</code> child inherited the opener's ad-click attribution &mdash; so the re-opened
+  tab silently loses attribution.
+</p>
+
+<h2>Requirement</h2>
+<p>
+  This uses the ad-attribution flow, which needs the cross-domain test hosts
+  (<code>www.search-company</code>, <code>www.publisher-company</code>, <code>ad-company</code>)
+  to resolve. Run it against the deployed test site or the browser's UI-test host mapping
+  &mdash; <strong>not</strong> plain <code>localhost</code>, where everything is same-origin and
+  ad-click attribution is never detected.
+</p>
+
+<h2>Steps</h2>
+<ol>
+  <li>Open the search page and tap a "Shopping Tab" ad. These use the <code>/m.js</code> path,
+      so the SERP opens them in a <strong>new tab</strong>, and they produce
+      <strong>active</strong> attribution:
+    <ul>
+      <li><a href="https://www.search-company.site/#ad-id-6">SERP &rarr; tap [Ad 6] (m.js, empty ad_domain)</a></li>
+      <li><a href="https://www.search-company.site/#ad-id-8">SERP &rarr; tap [Ad 8] (m.js, SERP-provided ad_domain)</a></li>
+    </ul>
+  </li>
+  <li>On the new publisher tab, expand the <strong>Resources</strong> panel. With attribution
+      active, <code>convert.ad-company&hellip;/convert.js</code> and its <code>ping.gif</code>
+      show <strong>loaded</strong>.</li>
+  <li>Tap the browser <strong>back</strong> button: the publisher tab closes and you return to
+      the search page.</li>
+  <li>Tap the browser <strong>forward</strong> button to re-open the publisher tab.</li>
+  <li>Expand <strong>Resources</strong> again on the re-opened tab and compare.</li>
+</ol>
+
+<p>
+  <strong>Expected (fixed):</strong> attribution is preserved &mdash; <code>convert.js</code>
+  and its <code>ping.gif</code> still show <strong>loaded</strong> on the re-opened tab.<br>
+  <strong>Buggy (current):</strong> attribution is dropped &mdash; <code>convert.js</code> shows
+  <strong>blocked</strong> (and its <code>ping.gif</code> <strong>parent blocked</strong>) on
+  the re-opened tab, differing from the original.
+</p>
+
+<p>
+  Tip: also watch the ad-attribution pixels (<code>m_ad_click_active</code>,
+  <code>m_pageloads_with_ad_attribution</code>). If the tab is closed via back and does not
+  return to the search page in a single press, the ad landing added its own history entry &mdash;
+  pick an ad whose landing is a single redirect chain (Ad&nbsp;6 / Ad&nbsp;8 use 302 redirects).
+</p>
+
+</body>
+</html>

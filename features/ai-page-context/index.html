@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Duck.ai Page Context Extraction</title>
+    <style>
+        body { font-family: -apple-system, system-ui, sans-serif; line-height: 1.5; margin: 0 auto; max-width: 960px; padding: 1rem; }
+        h1 { margin-bottom: 0.25rem; }
+        h2 { border-bottom: 1px solid #ddd; padding-bottom: 0.25rem; margin-top: 2rem; }
+        code { background: #f2f2f2; padding: 0 0.25rem; border-radius: 3px; font-size: 0.9em; }
+        table { border-collapse: collapse; width: 100%; margin: 0.5rem 0; }
+        th, td { border: 1px solid #ddd; padding: 0.4rem 0.5rem; text-align: left; vertical-align: top; font-size: 0.9rem; }
+        th { background: #f7f7f7; }
+        .note { color: #666; font-size: 0.85rem; }
+        .served { font-family: ui-monospace, monospace; }
+        .ok { color: #087443; }
+        .bad { color: #a00; }
+        .pending { color: #999; }
+    </style>
+</head>
+<body>
+    <p><a href="../../index.html">[Home]</a></p>
+
+    <h1>Duck.ai Page Context Extraction</h1>
+    <p class="note">Manual test bench for duck.ai page context</p>
+
+    <h2>Should be blocked</h2>
+    <p class="note">One representative fixture per blocklist category. Each is served with a <code>Content-Type</code>
+        that matches a category, so page-context attachment should be prevented.</p>
+    <table>
+        <thead>
+            <tr>
+                <th>Fixture</th>
+                <th>Expected Content-Type</th>
+                <th>Category</th>
+                <th>Served Content-Type</th>
+                <th>Computed verdict</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><a href="fixtures/sample.pdf">PDF</a></td>
+                <td><code>application/pdf</code></td>
+                <td>pdf</td>
+                <td class="served" data-ct-url="fixtures/sample.pdf"><span class="pending">checking…</span></td>
+                <td class="verdict" data-expect="blocked"></td>
+            </tr>
+            <tr>
+                <td><a href="fixtures/sample.png">Image (PNG)</a></td>
+                <td><code>image/png</code></td>
+                <td>image</td>
+                <td class="served" data-ct-url="fixtures/sample.png"><span class="pending">checking…</span></td>
+                <td class="verdict" data-expect="blocked"></td>
+            </tr>
+            <tr>
+                <td><a href="fixtures/sample.svg">Image (SVG)</a></td>
+                <td><code>image/svg+xml</code></td>
+                <td>image</td>
+                <td class="served" data-ct-url="fixtures/sample.svg"><span class="pending">checking…</span></td>
+                <td class="verdict" data-expect="blocked"></td>
+            </tr>
+            <tr>
+                <td><a href="fixtures/sample.mp4">Video (MP4)</a></td>
+                <td><code>video/mp4</code></td>
+                <td>video</td>
+                <td class="served" data-ct-url="fixtures/sample.mp4"><span class="pending">checking…</span></td>
+                <td class="verdict" data-expect="blocked"></td>
+            </tr>
+            <tr>
+                <td><a href="fixtures/sample.wav">Audio (WAV)</a></td>
+                <td><code>audio/wav</code></td>
+                <td>audio</td>
+                <td class="served" data-ct-url="fixtures/sample.wav"><span class="pending">checking…</span></td>
+                <td class="verdict" data-expect="blocked"></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>Should be attachable</h2>
+    <p class="note">Control content that matches no blocklist category.</p>
+    <table>
+        <thead>
+            <tr>
+                <th>Fixture</th>
+                <th>Expected Content-Type</th>
+                <th>Category</th>
+                <th>Served Content-Type</th>
+                <th>Computed verdict</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><a href="attachable-article.html">Regular text article</a></td>
+                <td><code>text/html</code></td>
+                <td>—</td>
+                <td class="served" data-ct-url="attachable-article.html"><span class="pending">checking…</span></td>
+                <td class="verdict" data-expect="attachable"></td>
+            </tr>
+        </tbody>
+    </table>
+    <p class="note">This index page is itself served as <code>text/html</code>, so it is also attachable.</p>
+
+    <script>
+        // Mirror of the iOS aiPageContextBlocklist content-type rules, used to compute the
+        // expected verdict from the *actually served* Content-Type. This only models the
+        // content-type path (the reliable one these fixtures exercise), not the extension fallback.
+        const BLOCKLIST = {
+            pdf: { contentTypes: ['application/pdf'] },
+            image: { contentTypePrefixes: ['image/'] },
+            video: { contentTypePrefixes: ['video/'] },
+            audio: { contentTypePrefixes: ['audio/'] }
+        };
+
+        function categoryForContentType (contentType) {
+            // Strip any "; charset=..." parameter and normalise case, matching the app's compare.
+            const ct = (contentType || '').split(';')[0].trim().toLowerCase();
+            if (!ct) return null;
+            for (const [name, rule] of Object.entries(BLOCKLIST)) {
+                if (rule.contentTypes && rule.contentTypes.some((t) => t.toLowerCase() === ct)) return name;
+                if (rule.contentTypePrefixes && rule.contentTypePrefixes.some((p) => ct.startsWith(p.toLowerCase()))) return name;
+            }
+            return null;
+        }
+
+        async function servedContentType (url) {
+            // HEAD avoids downloading fixture bodies; fall back to GET if HEAD is unsupported.
+            try {
+                const head = await fetch(url, { method: 'HEAD' });
+                if (head.ok) return head.headers.get('content-type');
+            } catch (e) { /* fall through to GET */ }
+            const get = await fetch(url);
+            return get.headers.get('content-type');
+        }
+
+        async function check (row) {
+            const url = row.dataset.ctUrl;
+            const verdictCell = row.parentElement.querySelector('.verdict');
+            let contentType;
+            try {
+                contentType = await servedContentType(url);
+            } catch (e) {
+                row.textContent = 'fetch failed';
+                row.classList.add('bad');
+                return;
+            }
+            row.textContent = contentType || '(none)';
+
+            const category = categoryForContentType(contentType);
+            const actualVerdict = category ? 'blocked' : 'attachable';
+            const expected = verdictCell.dataset.expect;
+            const label = category ? `blocked [${category}]` : 'attachable';
+            const matches = actualVerdict === expected;
+            verdictCell.innerHTML = `<span class="${matches ? 'ok' : 'bad'}">${matches ? '✓' : '✗'} ${label}</span>`;
+        }
+
+        document.querySelectorAll('.served[data-ct-url]').forEach((row) => { check(row); });
+    </script>
+</body>
+</html>

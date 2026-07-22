@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="200" viewBox="0 0 320 200">
+  <rect width="320" height="200" fill="#0066cc"/>
+  <rect x="8" y="8" width="304" height="184" fill="none" stroke="#ffffff" stroke-width="3"/>
+  <text x="160" y="92" fill="#ffffff" font-family="-apple-system, system-ui, sans-serif" font-size="14" text-anchor="middle">AI Page Context test fixture</text>
+  <text x="160" y="114" fill="#ffffff" font-family="-apple-system, system-ui, sans-serif" font-size="14" text-anchor="middle">image/svg+xml  →  blocked [image]</text>
+</svg>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attachable Article — AI Page Context</title>
+    <style>
+        body { font-family: -apple-system, system-ui, sans-serif; line-height: 1.6; margin: 0 auto; max-width: 720px; padding: 1rem; }
+        h1 { margin-bottom: 0.25rem; }
+        .note { color: #666; font-size: 0.85rem; }
+        code { background: #f2f2f2; padding: 0 0.25rem; border-radius: 3px; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <p><a href="./index.html">[AI Page Context]</a> · <a href="../../index.html">[Home]</a></p>
+
+    <h1>A regular text article</h1>
+    <p class="note">Control page. Served as <code>text/html</code>, which matches no blocklist category, so the
+        Duck.ai contextual chat should treat this page as <strong>attachable</strong> and extract its context.</p>
+
+    <p>This page exists so the AI page context feature has something it is <em>expected</em> to attach. It is an
+        ordinary HTML document with several paragraphs of readable prose, a heading structure, and a list — the kind
+        of content a page-context extractor is meant to summarise. If the browser refuses to attach this page, the
+        blocklist is being applied too aggressively (or the whole feature has failed open in the wrong direction).</p>
+
+    <h2>What the reader should be able to ask about</h2>
+    <p>The privacy test pages are a collection of static and server-rendered pages used to exercise browser privacy
+        and security behaviours by hand. They cover tracker blocking, fingerprinting, storage partitioning, download
+        handling, and a growing set of browser-feature probes. This particular article is deliberately mundane so that
+        a context summary of it is easy to eyeball for correctness.</p>
+
+    <h2>Key points</h2>
+    <ul>
+        <li>This document's response <code>Content-Type</code> is <code>text/html</code>.</li>
+        <li>No blocked content-type category matches <code>text/html</code>.</li>
+        <li>Therefore the attachability verdict should be <em>attachable</em>.</li>
+        <li>Opening Duck.ai from this page should offer the page as context and summarise the text above.</li>
+    </ul>
+
+    <p>If you need a page that should be <strong>blocked</strong> instead, go back to the index and open one of the
+        media or PDF fixtures.</p>
+</body>
+</html>

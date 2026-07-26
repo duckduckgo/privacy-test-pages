@@ -3,16 +3,44 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bottom Fixed Bar</title>
+  <title>Fixed Top and Bottom Elements</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      min-height: 200vh; /* just to show scrolling */
+      line-height: 1.5;
+      min-height: 200vh;
     }
-    
+
+    .fixed-bar {
+      position: fixed;
+      left: 0;
+      width: 100%;
+      height: 60px;
+      background: cyan;
+      color: black;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .top-bar {
+      top: 0;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    }
+
+    .bottom-bar {
+      bottom: 0;
+      box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.2);
+    }
+
     .content {
-      padding: 80px 20px 20px;
+      padding: 80px 20px;
       max-width: 800px;
       margin: 0 auto;
     }
@@ -23,29 +51,17 @@
       background: #f3f4f6;
       border-radius: 8px;
     }
-
-    .bottom-bar {
-      position: fixed;
-      left: 0;
-      bottom: 0;
-      width: 100%;
-      height: 60px;
-      background: cyan;
-      color: black;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 -2px 8px rgba(0,0,0,0.2);
-    }
   </style>
 </head>
 <body>
-
+  <div class="fixed-bar top-bar">
+    Fixed top bar
+  </div>
 
   <div class="content">
     <div class="section">
-    <h1>Page Content</h1>
-    <p>Scroll down — the bar stays pinned to the bottom of the screen.</p>
+      <h1>Page Content</h1>
+      <p>Scroll down — both bars stay fixed to the top and bottom of the screen.</p>
     </div>
 
     <div class="section">
@@ -74,7 +90,7 @@
     </div>
   </div>
 
-  <div class="bottom-bar">
+  <div class="fixed-bar bottom-bar">
     Fixed bottom bar
   </div>
 </body>

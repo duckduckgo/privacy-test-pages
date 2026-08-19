@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <meta name="referrer" content="unsafe-url">
+  <title>Privacy Test Pages - Opt-out forwarding</title>
+</head>
+<body>
+
+<h1>Opt-out forwarding</h1>
+
+<p>This page forwards a data removal request to the address given after the <code>#</code> in its
+own address, adding the query parameters it was called with. It holds no data of its own and it
+knows nothing about any particular site.</p>
+
+<p id="status">Nothing to forward. Call this page with a destination after the <code>#</code>.</p>
+
+<script>
+(() => {
+    const encodedTarget = location.hash.slice(1);
+
+    if (!encodedTarget) {
+        return;
+    }
+
+    const status = document.getElementById('status');
+    let destination;
+
+    try {
+        destination = new URL(decodeURIComponent(encodedTarget));
+    } catch {
+        status.textContent = 'That destination is not a URL.';
+        return;
+    }
+
+    if (destination.protocol !== 'https:' || !destination.pathname.split('/').includes('opt-out')) {
+        status.textContent = 'Destination must use HTTPS and contain /opt-out.';
+        return;
+    }
+
+    new URLSearchParams(location.search).forEach((value, key) => {
+        destination.searchParams.set(key, value);
+    });
+    status.textContent = 'Forwarding.';
+    location.replace(destination.toString());
+})();
+</script>
+
+</body>
+</html>

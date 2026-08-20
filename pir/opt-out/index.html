@@ -15,6 +15,7 @@ own address, adding the query parameters it was called with. It holds no data of
 knows nothing about any particular site.</p>
 
 <p id="status">Nothing to forward. Call this page with a destination after the <code>#</code>.</p>
+<a id="forward" hidden>Continue</a>
 
 <script>
 (() => {
@@ -25,6 +26,7 @@ knows nothing about any particular site.</p>
     }
 
     const status = document.getElementById('status');
+    const forward = document.getElementById('forward');
     let destination;
 
     try {
@@ -42,8 +44,9 @@ knows nothing about any particular site.</p>
     new URLSearchParams(location.search).forEach((value, key) => {
         destination.searchParams.set(key, value);
     });
-    status.textContent = 'Forwarding.';
-    location.replace(destination.toString());
+    forward.href = destination.toString();
+    forward.hidden = false;
+    status.textContent = 'Ready.';
 })();
 </script>
 

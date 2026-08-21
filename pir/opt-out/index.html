@@ -10,23 +10,18 @@
 
 <h1>Opt-out forwarding</h1>
 
-<p>This page forwards a data removal request to the address given after the <code>#</code> in its
-own address, adding the query parameters it was called with. It holds no data of its own and it
-knows nothing about any particular site.</p>
-
-<p id="status">Nothing to forward. Call this page with a destination after the <code>#</code>.</p>
-<a id="forward" hidden>Continue</a>
+<p id="status">Nothing to forward. Call this page with a destination in the <code>to</code> parameter.</p>
 
 <script>
 (() => {
-    const encodedTarget = location.hash.slice(1);
+    const searchParams = new URLSearchParams(location.search);
+    const encodedTarget = searchParams.get('to');
 
     if (!encodedTarget) {
         return;
     }
 
     const status = document.getElementById('status');
-    const forward = document.getElementById('forward');
     let destination;
 
     try {
@@ -41,11 +36,18 @@ knows nothing about any particular site.</p>
         return;
     }
 
-    new URLSearchParams(location.search).forEach((value, key) => {
+    searchParams.forEach((value, key) => {
+        if (key === 'to') {
+            return;
+        }
         destination.searchParams.set(key, value);
     });
+
+    const forward = document.createElement('a');
+    forward.id = 'forward';
     forward.href = destination.toString();
-    forward.hidden = false;
+    forward.textContent = 'Continue';
+    status.after(forward);
     status.textContent = 'Ready.';
 })();
 </script>

@@ -101,12 +101,18 @@
         <button id="btn-login-reload" onclick="reloadWithLoginState()">Reload with this state</button>
     </div>
     <p class="note">
-        The detector resolves login state <strong>once</strong>, retrying at 500/1000/1500/2000ms, and
-        latches the first non-unknown result — later DOM changes are ignored. Changing the dropdown after
-        it has resolved will not affect the events that follow, so use <em>Reload with this state</em> for
-        a deterministic run. <code>?loginState=&lt;state&gt;</code> sets it at load;
+        The detector resolves login state <strong>once</strong>: it re-checks at 0, 500, 1500, 3000 and
+        5000ms after the player root is found, latching the first non-unknown result and keeping whatever
+        the last attempt saw — later DOM changes are ignored. Changing the dropdown after it has resolved
+        will not affect the events that follow, so use <em>Reload with this state</em> for a deterministic
+        run. <code>?loginState=&lt;state&gt;</code> sets it at load;
         <code>?loginStateDelayMs=&lt;ms&gt;</code> inserts the indicator late, so the detector reports
         <code>unknown</code> first and the real value afterwards — one page, one event type, two payloads.
+        For example <code>?loginState=premium&amp;loginStateDelayMs=3000</code> holds the payload at
+        <code>unknown</code> for three seconds and then flips it to <code>premium</code> on the next
+        re-check: fire a detection before and after to capture both. Keep the delay under 5000ms — the
+        last re-check latches whatever is on the page at that point, and an indicator arriving afterwards
+        is never seen.
     </p>
 
     <h3>Mock YouTube Player</h3>

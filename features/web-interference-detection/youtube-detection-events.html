@@ -49,6 +49,20 @@
         .status.active { background: #e8f5e9; }
         .status.inactive { background: #fafafa; color: #999; }
         h3 { margin: 20px 0 8px; }
+        label { align-self: center; }
+        select {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background: #f8f8f8;
+        }
+        .note { font-size: 13px; color: #666; margin: 8px 0; }
+        /* Top-right of #player-container, mirroring where YouTube's own account controls sit. */
+        #login-state-indicators {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+        }
     </style>
 </head>
 <body>
@@ -70,6 +84,37 @@
         <button id="btn-clear" onclick="clearAll()">Clear All</button>
     </div>
 
+    <h3>Simulate Login State</h3>
+    <p class="note">
+        Every <code>youtube_</code> event carries a <code>loginState</code> payload. The detector reads it
+        from the DOM, checking three selectors in priority order — premium logo, then avatar button, then
+        sign-in button — and reports <code>unknown</code> when none is present.
+    </p>
+    <div class="controls">
+        <label for="login-state">Login state</label>
+        <select id="login-state" onchange="onLoginStateChange()">
+            <option value="unknown">unknown (no indicator)</option>
+            <option value="logged-out">logged-out (sign-in button)</option>
+            <option value="logged-in">logged-in (avatar button)</option>
+            <option value="premium">premium (premium logo)</option>
+        </select>
+        <button id="btn-login-reload" onclick="reloadWithLoginState()">Reload with this state</button>
+    </div>
+    <p class="note">
+        The detector resolves login state <strong>once</strong>: it re-checks at 0, 500, 1500, 3000 and
+        5000ms after the player root is found, latching the first non-unknown result and keeping whatever
+        the last attempt saw — later DOM changes are ignored. Changing the dropdown after it has resolved
+        will not affect the events that follow, so use <em>Reload with this state</em> for a deterministic
+        run. <code>?loginState=&lt;state&gt;</code> sets it at load;
+        <code>?loginStateDelayMs=&lt;ms&gt;</code> inserts the indicator late, so the detector reports
+        <code>unknown</code> first and the real value afterwards — one page, one event type, two payloads.
+        For example <code>?loginState=premium&amp;loginStateDelayMs=3000</code> holds the payload at
+        <code>unknown</code> for three seconds and then flips it to <code>premium</code> on the next
+        re-check: fire a detection before and after to capture both. Keep the delay under 5000ms — the
+        last re-check latches whatever is on the page at that point, and an indicator arriving afterwards
+        is never seen.
+    </p>
+
     <h3>Mock YouTube Player</h3>
     <div id="player-container">
         <div id="movie_player" class="html5-video-player">
@@ -81,6 +126,7 @@
         <div id="mock-adblocker-dialog" role="dialog" aria-modal="true" style="display: none;">
             <div class="yt-core-attributed-string" role="text">Ad blockers are not allowed on YouTube</div>
         </div>
+        <div id="login-state-indicators"></div>
     </div>
 
     <h3>Event Log</h3>
@@ -123,6 +169,67 @@
             log('Cleared all mock detections');
         }
 
+        // Login state is detected by element *presence* (a bare querySelector), not visibility — unlike
+        // the ad-blocker and playability mocks above, which the detector checks for visibility and which
+        // therefore toggle `display`. These indicators must be added and removed: a hidden element still
+        // matches querySelector, so toggling `display` here would always read as logged-in.
+        const LOGIN_INDICATORS = {
+            'logged-out': () => {
+                const a = document.createElement('a');
+                a.href = 'https://accounts.google.com/ServiceLogin';
+                a.textContent = 'Sign in';
+                return a;
+            },
+            'logged-in': () => {
+                const div = document.createElement('div');
+                div.id = 'avatar-btn';
+                div.textContent = 'Avatar';
+                return div;
+            },
+            premium: () => {
+                const wrapper = document.createElement('ytd-topbar-logo-renderer');
+                const link = document.createElement('a');
+                link.title = 'YouTube Premium';
+                link.textContent = 'Premium';
+                wrapper.appendChild(link);
+                return wrapper;
+            },
+        };
+
+        function renderLoginState(state) {
+            const host = document.getElementById('login-state-indicators');
+            host.replaceChildren();
+            const build = LOGIN_INDICATORS[state];
+            if (build) host.appendChild(build());
+        }
+
+        function onLoginStateChange() {
+            const state = document.getElementById('login-state').value;
+            renderLoginState(state);
+            log(`Login state indicator set to <span class="event-type">${state}</span>`);
+        }
+
+        function reloadWithLoginState() {
+            const params = new URLSearchParams(window.location.search);
+            params.set('loginState', document.getElementById('login-state').value);
+            window.location.search = params.toString();
+        }
+
+        function applyInitialLoginState() {
+            const params = new URLSearchParams(window.location.search);
+            let initial = params.get('loginState') || 'unknown';
+            if (initial !== 'unknown' && !(initial in LOGIN_INDICATORS)) initial = 'unknown';
+            document.getElementById('login-state').value = initial;
+
+            const delay = parseInt(params.get('loginStateDelayMs') || '0', 10);
+            if (delay > 0) {
+                log(`Login state <span class="event-type">${initial}</span> will appear after ${delay}ms`);
+                setTimeout(() => renderLoginState(initial), delay);
+            } else {
+                renderLoginState(initial);
+            }
+        }
+
         // Monitor detector initialization
         let checkCount = 0;
         const initCheck = setInterval(() => {
@@ -136,6 +243,7 @@
 
         log('Page loaded. Toggle detections above and watch for <span class="event-type">webEvent</span> messages in native debug tooling.');
         log('Expected event types: <span class="event-type">youtube_adBlocker</span>, <span class="event-type">youtube_playabilityError</span>');
+        applyInitialLoginState();
         statusEl.textContent = 'Detector status: page ready (detector runs via C-S-S injection)';
         statusEl.className = 'status active';
     </script>

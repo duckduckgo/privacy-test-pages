@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>detectorPerf — heavy page</title>
+    <style>
+        body { font-family: -apple-system, system-ui, sans-serif; line-height: 1.5; margin: 0; padding: 24px; }
+        header { position: sticky; top: 0; background: #fff; border-bottom: 1px solid #ddd; padding-bottom: 12px; margin-bottom: 16px; }
+        h1 { font-size: 20px; margin: 0 0 4px; }
+        .meta { color: #555; font-size: 13px; }
+        .controls { margin: 12px 0; display: flex; gap: 8px; flex-wrap: wrap; }
+        button { padding: 8px 14px; font-size: 14px; cursor: pointer; }
+        #frames { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 6px; margin-top: 12px; }
+        iframe { width: 100%; height: 90px; border: 1px solid #ccc; }
+        .filler p { margin: 6px 0; color: #333; }
+        .adwall { border: 2px solid #c00; background: #fff4f4; padding: 16px; margin: 16px 0; font-weight: 600; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>detectorPerf — heavy page</h1>
+        <div class="meta" id="meta">building DOM…</div>
+    </header>
+
+    <div class="controls">
+        <button id="add-frames">Add 25 iframes (per-frame measurement)</button>
+        <button id="add-text">Add 5000 more paragraphs</button>
+        <button id="show-adwall">Show adwall text (triggers a match)</button>
+    </div>
+
+    <p class="meta">
+        Detector scans on this page are timed by the <code>detectorPerf</code>
+        C-S-S feature. Threshold-crossing events fire as they occur; a run
+        crossing the highest configured edge fires an immediate severe event.
+        On debug builds the overlay (bottom right) shows live per-detector
+        stats. Grow the DOM with the buttons until scans get slow.
+    </p>
+    <p class="meta">
+        URL parameters for scripted setups:
+        <code>?paragraphs=N&amp;iframes=N&amp;framesrc=real&amp;adwall=1&amp;next=&lt;url&gt;&amp;nextdelay=&lt;ms&gt;</code>
+    </p>
+
+    <div id="adwall-slot"></div>
+    <div id="frames"></div>
+    <div class="filler" id="filler"></div>
+
+    <script src="./overlay.js"></script>
+    <script>
+        const filler = document.getElementById('filler');
+        const frames = document.getElementById('frames');
+        const meta = document.getElementById('meta');
+
+        // Near-miss phrases: each shares a prefix with the real adwall
+        // patterns so the matcher does full work on every node without
+        // ever matching. A filler that actually matched would let the
+        // detector short-circuit and stop being representative.
+        const NEAR_MISS = [
+            'ad blocking preferences were detected for this account',
+            'please adjust your advertising settings to continue reading',
+            'you are using an ad supported plan on this device',
+            'turn on notifications for your ad free subscription',
+            'your ad experience is on and cannot be changed here',
+        ];
+
+        function addParagraphs(count) {
+            const fragment = document.createDocumentFragment();
+            for (let i = 0; i < count; i++) {
+                const p = document.createElement('p');
+                p.textContent = `${NEAR_MISS[i % NEAR_MISS.length]} (row ${i})`;
+                fragment.appendChild(p);
+            }
+            filler.appendChild(fragment);
+            report();
+        }
+
+        function addFrames(count, useRealSrc) {
+            for (let i = 0; i < count; i++) {
+                const frame = document.createElement('iframe');
+                if (useRealSrc) {
+                    // Real same-origin document: gets its own full C-S-S
+                    // injection on every platform, unlike about:blank.
+                    frame.src = `frame-child.html?paragraphs=600&frame=${i}`;
+                    frames.appendChild(frame);
+                    continue;
+                }
+                // Same-origin about:blank frames still get injected, so each
+                // one accumulates its own detectorPerf counters.
+                frame.src = 'about:blank';
+                frame.addEventListener('load', () => {
+                    try {
+                        const doc = frame.contentDocument;
+                        if (!doc) return;
+                        doc.body.style.font = '12px sans-serif';
+                        for (let j = 0; j < 400; j++) {
+                            const p = doc.createElement('p');
+                            p.textContent = NEAR_MISS[j % NEAR_MISS.length];
+                            doc.body.appendChild(p);
+                        }
+                    } catch {
+                        // cross-origin frame: nothing to populate
+                    }
+                });
+                frames.appendChild(frame);
+            }
+            report();
+        }
+
+        function report() {
+            meta.textContent = `${document.querySelectorAll('p').length} paragraphs in top frame, ${frames.children.length} iframes, ${document.querySelectorAll('*').length} elements`;
+        }
+
+        function showAdwall() {
+            document.getElementById('adwall-slot').innerHTML =
+                '<div class="adwall">Ad blocker detected. Please disable your ad blocker to continue.</div>';
+        }
+
+        document.getElementById('add-frames').addEventListener('click', () => addFrames(25));
+        document.getElementById('add-text').addEventListener('click', () => addParagraphs(5000));
+        document.getElementById('show-adwall').addEventListener('click', showAdwall);
+
+        // URL-drivable page state, so scripted setups can build the DOM
+        // without clicking buttons: ?paragraphs=N&iframes=N&adwall=1
+        const params = new URLSearchParams(location.search);
+        addParagraphs(Number(params.get('paragraphs')) || 8000);
+        const frameCount = Number(params.get('iframes')) || 0;
+        if (frameCount > 0) addFrames(frameCount, params.get('framesrc') === 'real');
+        if (params.get('adwall') === '1') showAdwall();
+
+        // Self-driven same-tab navigation for dedup-reset testing:
+        // ?next=<encoded URL>&nextdelay=<ms> navigates this tab after the
+        // delay, producing a real page transition between measurements.
+        const next = params.get('next');
+        if (next) {
+            const delay = Number(params.get('nextdelay')) || 8000;
+            setTimeout(() => {
+                location.href = next;
+            }, delay);
+        }
+    </script>
+</body>
+</html>

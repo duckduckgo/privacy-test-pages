@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>detectorPerf — cross-origin frames</title>
+    <style>
+        body { font-family: -apple-system, system-ui, sans-serif; line-height: 1.5; margin: 0; padding: 24px; }
+        h1 { font-size: 20px; margin: 0 0 4px; }
+        .meta { color: #555; font-size: 13px; }
+        .frame-grid { display: grid; grid-template-columns: 1fr; gap: 16px; margin-top: 16px; }
+        .frame-slot h2 { font-size: 14px; margin: 0 0 6px; }
+        iframe { width: 100%; height: 260px; border: 1px solid #ccc; }
+        code { background: #f2f2f2; padding: 0 0.25rem; border-radius: 3px; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <h1>detectorPerf — cross-origin frames</h1>
+    <p class="meta">
+        Each frame below is a separate document with its own C-S-S injection and
+        its own <code>detectorPerf</code> accumulators. On debug builds every
+        frame renders its own live stats overlay, and the top page renders one
+        for the top frame — per-frame measurement is visible side by side
+        across real origin boundaries.
+    </p>
+    <p class="meta">
+        The third-party frames use the shared test domains
+        (<code>good.third-party.site</code> is not on the blocklist,
+        <code>broken.third-party.site</code> is on it with action "ignore"),
+        which resolve to this same site in production. They only load once the
+        page is served from <code>privacy-test-pages.site</code> — when running
+        locally, only the same-origin frame works.
+    </p>
+
+    <div class="frame-grid">
+        <div class="frame-slot">
+            <h2>Same-origin frame</h2>
+            <iframe src="./frame-child.html?paragraphs=800" title="same-origin frame"></iframe>
+        </div>
+        <div class="frame-slot">
+            <h2>Cross-origin frame — <code>good.third-party.site</code> (not blocked)</h2>
+            <iframe src="https://good.third-party.site/features/detector-perf/frame-child.html?paragraphs=800"
+                title="good third party frame"></iframe>
+        </div>
+        <div class="frame-slot">
+            <h2>Cross-origin frame — <code>broken.third-party.site</code> (blocklisted, action "ignore")</h2>
+            <iframe src="https://broken.third-party.site/features/detector-perf/frame-child.html?paragraphs=800"
+                title="broken third party frame"></iframe>
+        </div>
+    </div>
+
+    <script src="./overlay.js"></script>
+</body>
+</html>

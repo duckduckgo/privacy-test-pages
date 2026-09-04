@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>detectorPerf — typical page</title>
+    <style>
+        body { font-family: Georgia, serif; line-height: 1.6; margin: 0; color: #222; }
+        .howto { font-family: -apple-system, system-ui, sans-serif; background: #f0f6ff; border: 1px solid #b8d4f0; padding: 10px 16px; font-size: 13px; }
+        code { background: #f2f2f2; padding: 0 0.25rem; border-radius: 3px; font-size: 0.9em; }
+        nav { background: #1a1a2e; color: #fff; padding: 12px 24px; font-family: -apple-system, system-ui, sans-serif; display: flex; gap: 20px; align-items: center; }
+        nav a { color: #cdd5ff; text-decoration: none; font-size: 14px; }
+        nav .brand { font-weight: 700; font-size: 16px; color: #fff; }
+        .layout { display: grid; grid-template-columns: minmax(0, 2fr) minmax(200px, 1fr); gap: 32px; max-width: 1100px; margin: 0 auto; padding: 24px; }
+        article h1 { font-size: 28px; line-height: 1.25; }
+        .byline { color: #777; font-size: 14px; font-family: -apple-system, system-ui, sans-serif; }
+        figure { margin: 20px 0; }
+        figure svg { width: 100%; height: auto; background: #e8ecf1; border-radius: 4px; }
+        figcaption { color: #888; font-size: 13px; margin-top: 4px; }
+        aside { font-family: -apple-system, system-ui, sans-serif; font-size: 14px; }
+        aside .widget { border: 1px solid #e2e2e2; border-radius: 6px; padding: 12px 16px; margin-bottom: 16px; }
+        aside h3 { margin: 0 0 8px; font-size: 15px; }
+        aside li { margin: 6px 0; }
+        table { border-collapse: collapse; width: 100%; font-size: 14px; margin: 16px 0; }
+        td, th { border: 1px solid #ddd; padding: 6px 10px; text-align: left; }
+        .comments { border-top: 2px solid #eee; margin-top: 32px; padding-top: 16px; }
+        .comment { border-bottom: 1px solid #f0f0f0; padding: 10px 0; font-size: 15px; }
+        .comment .who { font-weight: 700; font-size: 13px; font-family: -apple-system, system-ui, sans-serif; color: #555; }
+        footer { background: #1a1a2e; color: #aab; padding: 24px; margin-top: 40px; font-size: 13px; font-family: -apple-system, system-ui, sans-serif; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="howto">
+        <strong>detectorPerf baseline page.</strong> This simulates a typical real-world article page
+        (~1,700 DOM elements — around the median for real websites). Compare the overlay timings here against
+        <a href="heavy-page.html">heavy-page.html</a> to see how detector cost scales with page size.
+        No URL parameters; just load and watch the overlay (debug builds only).
+    </div>
+
+    <nav>
+        <span class="brand">The Daily Ledger</span>
+        <a href="#">Home</a><a href="#">World</a><a href="#">Business</a>
+        <a href="#">Technology</a><a href="#">Science</a><a href="#">Opinion</a>
+    </nav>
+
+    <div class="layout">
+        <article id="article">
+            <h1>Municipal Composting Program Expands to Twelve New Districts After Pilot Success</h1>
+            <p class="byline">By A. Reporter · September 4, 2026 · 8 min read</p>
+            <figure>
+                <svg viewBox="0 0 640 300" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="640" height="300" fill="#dfe6ee"/>
+                    <circle cx="180" cy="150" r="70" fill="#b8c6d8"/>
+                    <rect x="320" y="90" width="240" height="120" rx="8" fill="#c8d4e2"/>
+                </svg>
+                <figcaption>Collection bins at the pilot site. (Staff illustration)</figcaption>
+            </figure>
+            <div id="article-body"></div>
+
+            <h2>Program growth by year</h2>
+            <table>
+                <thead><tr><th>Year</th><th>Districts</th><th>Tons diverted</th><th>Participation</th></tr></thead>
+                <tbody id="stats-table"></tbody>
+            </table>
+
+            <div class="comments" id="comments">
+                <h2>Comments</h2>
+            </div>
+        </article>
+
+        <aside>
+            <div class="widget">
+                <h3>Most read</h3>
+                <ol id="most-read"></ol>
+            </div>
+            <div class="widget">
+                <h3>Related coverage</h3>
+                <ul id="related"></ul>
+            </div>
+            <div class="widget">
+                <h3>Newsletter</h3>
+                <p>Get the morning briefing in your inbox.</p>
+                <input type="email" placeholder="you@example.com" style="width: 100%; box-sizing: border-box; padding: 6px;">
+                <button style="margin-top: 8px; padding: 6px 14px;">Sign up</button>
+            </div>
+        </aside>
+    </div>
+
+    <footer>
+        <div id="footer-nav" style="display: flex; gap: 40px; justify-content: center; text-align: left; margin-bottom: 16px;"></div>
+        © 2026 The Daily Ledger &nbsp;·&nbsp; About &nbsp;·&nbsp; Contact &nbsp;·&nbsp; Privacy &nbsp;·&nbsp; Terms
+    </footer>
+
+    <script src="./overlay.js"></script>
+    <script>
+        // Ordinary prose — no adwall-adjacent phrasing. This page should
+        // never trigger a detector match; it exists to show baseline cost.
+        const SENTENCES = [
+            'City officials confirmed the expansion at a press briefing on Tuesday morning.',
+            'The pilot program collected more than four hundred tons of organic waste in its first year.',
+            'Residents in participating districts receive a countertop bin and weekly curbside pickup.',
+            'Early surveys suggest participation rates well above initial projections.',
+            'The finished compost is distributed to community gardens and municipal landscaping projects.',
+            'Funding comes from a combination of state grants and the existing sanitation budget.',
+            'Neighboring counties have sent delegations to study the collection logistics.',
+            'A second processing facility is scheduled to open early next year.',
+            'Critics point to the cost of route changes, though officials say efficiencies offset most of it.',
+            'The program also runs school workshops on waste reduction and soil health.',
+        ];
+
+        // Paragraphs use inline markup (spans, links, emphasis) like real
+        // CMS output, so element counts and text-node shape are realistic.
+        const body = document.getElementById('article-body');
+        for (let i = 0; i < 80; i++) {
+            const p = document.createElement('p');
+            for (let s = 0; s < 3; s++) {
+                const span = document.createElement(s === 1 ? 'em' : 'span');
+                span.textContent = SENTENCES[(i + s * 3) % SENTENCES.length] + ' ';
+                p.appendChild(span);
+            }
+            const a = document.createElement('a');
+            a.href = '#';
+            a.textContent = 'Read more.';
+            p.appendChild(a);
+            body.appendChild(p);
+            if (i > 0 && i % 20 === 0) {
+                const h2 = document.createElement('h2');
+                h2.textContent = ['How the pilot worked', 'What changes for residents', 'The road ahead'][(i / 20) - 1] || 'Further reading';
+                body.appendChild(h2);
+            }
+        }
+
+        const stats = document.getElementById('stats-table');
+        for (let year = 2022; year <= 2026; year++) {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td>${year}</td><td>${(year - 2021) * 3}</td><td>${(year - 2021) * 410}</td><td>${38 + (year - 2022) * 9}%</td>`;
+            stats.appendChild(tr);
+        }
+
+        const comments = document.getElementById('comments');
+        for (let i = 0; i < 150; i++) {
+            const div = document.createElement('div');
+            div.className = 'comment';
+            div.innerHTML = `<div class="who">reader_${100 + i} <span style="font-weight: 400; color: #999;">· ${(i % 23) + 1}h ago</span></div><div>${SENTENCES[(i * 2) % SENTENCES.length]} ${SENTENCES[(i * 2 + 5) % SENTENCES.length]}</div><div style="font-size: 12px; color: #888;"><a href="#">Reply</a> · <a href="#">Like</a> (${i % 40})</div>`;
+            comments.appendChild(div);
+        }
+
+        const mostRead = document.getElementById('most-read');
+        const related = document.getElementById('related');
+        for (let i = 0; i < 16; i++) {
+            const li = document.createElement('li');
+            li.innerHTML = `<a href="#">${SENTENCES[i % SENTENCES.length].slice(0, 60)}…</a>`;
+            (i < 8 ? mostRead : related).appendChild(li);
+        }
+
+        // Mega-footer nav: real pages carry a lot of boilerplate chrome.
+        const footerNav = document.getElementById('footer-nav');
+        const SECTIONS = ['News', 'Sections', 'Company', 'Support', 'Follow'];
+        for (const section of SECTIONS) {
+            const col = document.createElement('div');
+            const h = document.createElement('div');
+            h.textContent = section;
+            h.style.cssText = 'font-weight: 700; color: #fff; margin-bottom: 6px;';
+            col.appendChild(h);
+            const ul = document.createElement('ul');
+            ul.style.cssText = 'list-style: none; margin: 0; padding: 0;';
+            for (let i = 0; i < 10; i++) {
+                const li = document.createElement('li');
+                const a = document.createElement('a');
+                a.href = '#';
+                a.textContent = `${section} link ${i + 1}`;
+                a.style.color = '#aab';
+                li.appendChild(a);
+                ul.appendChild(li);
+            }
+            col.appendChild(ul);
+            footerNav.appendChild(col);
+        }
+    </script>
+</body>
+</html>

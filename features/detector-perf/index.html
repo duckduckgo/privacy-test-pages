@@ -27,6 +27,11 @@
 
     <ul>
         <li>
+            <a href="./typical-page.html">Typical page</a> — realistic article-style page
+            (~1,700 DOM elements, around the median for real websites) with no adwall-adjacent content.
+            Use it as the baseline: normal detector cost, no matches, no severe events expected.
+        </li>
+        <li>
             <a href="./heavy-page.html">Heavy page</a> — DOM stress page with URL-drivable load
             (<code>?paragraphs=N&amp;iframes=N&amp;framesrc=real&amp;adwall=1&amp;next=…</code>).
             Grow the DOM until detector scans get slow and watch timings climb toward the configured

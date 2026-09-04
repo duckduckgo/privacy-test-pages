@@ -7,14 +7,17 @@
     <style>
         body { font-family: -apple-system, system-ui, sans-serif; font-size: 12px; margin: 0; padding: 8px; }
         .origin { font-weight: 600; background: #eef; padding: 4px 6px; border-radius: 4px; display: inline-block; }
+        .note { color: #777; font-size: 11px; margin: 4px 0; }
         p { margin: 4px 0; color: #333; }
     </style>
 </head>
 <body>
     <div class="origin" id="origin"></div>
+    <p class="note">No overlay here: detectors are top-frame-only by default and no config opts them into
+        subframes, so nothing is ever measured in this frame. Its DOM still adds to the C-S-S injection
+        footprint of the parent page.</p>
     <div id="filler"></div>
 
-    <script src="./overlay.js"></script>
     <script>
         document.getElementById('origin').textContent = `frame origin: ${location.origin}`;
 

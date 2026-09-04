@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>detectorPerf test pages</title>
+    <style>
+        body { font-family: -apple-system, system-ui, sans-serif; line-height: 1.5; margin: 0 auto; max-width: 960px; padding: 1rem; }
+        h1 { margin-bottom: 0.25rem; }
+        code { background: #f2f2f2; padding: 0 0.25rem; border-radius: 3px; font-size: 0.9em; }
+        .intro { background: #f0f6ff; border: 1px solid #b8d4f0; padding: 0.75rem 1rem; border-radius: 6px; }
+        .note { color: #666; font-size: 0.85rem; }
+        li { margin: 0.5rem 0; }
+    </style>
+</head>
+<body>
+    <h1>detectorPerf test pages</h1>
+    <p class="note">Manual test pages for the <code>detectorPerf</code> C-S-S feature, which measures on-device
+        detector execution time and reports threshold-crossing counts through EventHub telemetry.</p>
+
+    <div class="intro">
+        <strong>Seeing results.</strong> On <em>debug builds</em>, every page here renders a live overlay
+        (bottom right) fed by the feature's debug-only <code>detectorPerfDebugStats</code> broadcast: exact
+        per-detector runs / total / worst timings, severe crossings, and the last recorded run. Production
+        builds broadcast nothing — there the results channels are pixel logs and breakage-report payloads.
+    </div>
+
+    <ul>
+        <li>
+            <a href="./typical-page.html">Typical page</a> — realistic article-style page
+            (~1,700 DOM elements, around the median for real websites) with no adwall-adjacent content.
+            Use it as the baseline: normal detector cost, no matches, no severe events expected.
+        </li>
+        <li>
+            <a href="./heavy-page.html">Heavy page</a> — DOM stress page with URL-drivable load
+            (<code>?paragraphs=N&amp;iframes=N&amp;framesrc=real&amp;adwall=1&amp;next=…</code>).
+            Grow the DOM until detector scans get slow and watch timings climb toward the configured
+            threshold edges; a run crossing the highest edge fires the immediate severe event.
+        </li>
+    </ul>
+
+    <p class="note">Per-frame measurement note: detectors are top-frame-only by default
+        (<code>runConditions</code> default to <code>context: { top: true }</code>) and no current config
+        opts any detector into subframes, so frame-level timings cannot be observed today. If a config
+        ever enables frame detectors, a dedicated cross-origin frames page would be worth adding back
+        (one existed briefly; removed as untestable).</p>
+
+    <p class="note">Threshold edges come from remote config (<code>detectorPerf</code> feature settings).
+        For manual threshold experiments, point the platform's config override at a test config with
+        lowered edges — a near-zero severe edge makes every scan cross it deterministically.</p>
+</body>
+</html>

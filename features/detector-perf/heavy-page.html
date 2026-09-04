@@ -6,14 +6,22 @@
     <title>detectorPerf — heavy page</title>
     <style>
         body { font-family: -apple-system, system-ui, sans-serif; line-height: 1.5; margin: 0; padding: 24px; }
-        header { position: sticky; top: 0; background: #fff; border-bottom: 1px solid #ddd; padding-bottom: 12px; margin-bottom: 16px; }
+        header { border-bottom: 1px solid #ddd; padding-bottom: 12px; margin-bottom: 16px; }
         h1 { font-size: 20px; margin: 0 0 4px; }
+        h2 { font-size: 14px; margin: 20px 0 6px; }
         .meta { color: #555; font-size: 13px; }
+        .howto { background: #f0f6ff; border: 1px solid #b8d4f0; padding: 12px 16px; border-radius: 6px; font-size: 14px; }
+        .howto ol { margin: 8px 0 0; padding-left: 20px; }
+        .howto li { margin: 4px 0; }
+        code { background: #f2f2f2; padding: 0 0.25rem; border-radius: 3px; font-size: 0.9em; }
         .controls { margin: 12px 0; display: flex; gap: 8px; flex-wrap: wrap; }
         button { padding: 8px 14px; font-size: 14px; cursor: pointer; }
-        #frames { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 6px; margin-top: 12px; }
+        .workload { border: 1px solid #ddd; border-radius: 6px; padding: 8px 12px; margin: 8px 0; }
+        .workload .label { color: #555; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; }
+        .scrollbox { max-height: 180px; overflow: auto; margin-top: 6px; }
+        #frames { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 6px; }
         iframe { width: 100%; height: 90px; border: 1px solid #ccc; }
-        .filler p { margin: 6px 0; color: #333; }
+        .filler p { margin: 4px 0; color: #999; font-size: 12px; }
         .adwall { border: 2px solid #c00; background: #fff4f4; padding: 16px; margin: 16px 0; font-weight: 600; }
     </style>
 </head>
@@ -23,27 +31,53 @@
         <div class="meta" id="meta">building DOM…</div>
     </header>
 
+    <div class="howto">
+        <strong>How to use this page</strong>
+        <ol>
+            <li><strong>Watch the overlay</strong> (bottom right) — it shows live per-detector timings on debug
+                builds with the detectorPerf feature enabled. If it says "waiting for debug events", enable
+                Debug&nbsp;→&nbsp;Content&nbsp;Scope&nbsp;Scripts&nbsp;Debug&nbsp;State and reload.</li>
+            <li><strong>Detector scans run on load-time timers</strong> (typically 500ms / 1s / 5s after page load),
+                so page size only matters at load. To make scans slower, reload with a bigger DOM via the URL:
+                <code>?paragraphs=40000</code>. Change a junk param (e.g. <code>&amp;r=2</code>) each reload to avoid
+                tab reuse.</li>
+            <li><strong>Force an on-demand rescan without reloading</strong> by opening
+                "Report Broken Site" from the browser menu — it runs the detectors immediately.</li>
+            <li><strong>Severe events:</strong> when a single run or the combined per-page total crosses the highest
+                configured threshold edge, a SEVERE entry appears in the overlay and an immediate telemetry pixel
+                fires natively.</li>
+            <li>The buttons below grow the DOM in place — useful only before the load timers fire, or ahead of an
+                on-demand rescan.</li>
+        </ol>
+        <p class="meta" style="margin-bottom: 0;">
+            All URL parameters:
+            <code>?paragraphs=N&amp;iframes=N&amp;framesrc=real&amp;adwall=1&amp;next=&lt;url&gt;&amp;nextdelay=&lt;ms&gt;</code>
+        </p>
+    </div>
+
     <div class="controls">
         <button id="add-frames">Add 25 iframes (per-frame measurement)</button>
         <button id="add-text">Add 5000 more paragraphs</button>
         <button id="show-adwall">Show adwall text (triggers a match)</button>
     </div>
 
-    <p class="meta">
-        Detector scans on this page are timed by the <code>detectorPerf</code>
-        C-S-S feature. Threshold-crossing events fire as they occur; a run
-        crossing the highest configured edge fires an immediate severe event.
-        On debug builds the overlay (bottom right) shows live per-detector
-        stats. Grow the DOM with the buttons until scans get slow.
-    </p>
-    <p class="meta">
-        URL parameters for scripted setups:
-        <code>?paragraphs=N&amp;iframes=N&amp;framesrc=real&amp;adwall=1&amp;next=&lt;url&gt;&amp;nextdelay=&lt;ms&gt;</code>
-    </p>
-
     <div id="adwall-slot"></div>
-    <div id="frames"></div>
-    <div class="filler" id="filler"></div>
+
+    <div class="workload" id="frames-workload" hidden>
+        <div class="label">Synthetic workload — iframes (each gets its own C-S-S injection and its own counters)</div>
+        <div class="scrollbox">
+            <div id="frames"></div>
+        </div>
+    </div>
+
+    <div class="workload">
+        <div class="label">Synthetic workload — near-miss filler text. Each line shares a prefix with real adwall
+            phrases, so the text scanners do full work on every node without ever matching. It is meaningless by
+            design; more lines = slower scans.</div>
+        <div class="scrollbox">
+            <div class="filler" id="filler"></div>
+        </div>
+    </div>
 
     <script src="./overlay.js"></script>
     <script>
@@ -75,6 +109,7 @@
         }
 
         function addFrames(count, useRealSrc) {
+            document.getElementById('frames-workload').hidden = false;
             for (let i = 0; i < count; i++) {
                 const frame = document.createElement('iframe');
                 if (useRealSrc) {

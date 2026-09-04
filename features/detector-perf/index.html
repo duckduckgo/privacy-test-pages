@@ -37,12 +37,13 @@
             Grow the DOM until detector scans get slow and watch timings climb toward the configured
             threshold edges; a run crossing the highest edge fires the immediate severe event.
         </li>
-        <li>
-            <a href="./cross-origin-frames.html">Cross-origin frames</a> — per-frame measurement across
-            real origin boundaries using the shared test domains (<code>good.third-party.site</code>,
-            <code>broken.third-party.site</code>). Each frame shows its own overlay.
-        </li>
     </ul>
+
+    <p class="note">Per-frame measurement note: detectors are top-frame-only by default
+        (<code>runConditions</code> default to <code>context: { top: true }</code>) and no current config
+        opts any detector into subframes, so frame-level timings cannot be observed today. If a config
+        ever enables frame detectors, a dedicated cross-origin frames page would be worth adding back
+        (one existed briefly; removed as untestable).</p>
 
     <p class="note">Threshold edges come from remote config (<code>detectorPerf</code> feature settings).
         For manual threshold experiments, point the platform's config override at a test config with

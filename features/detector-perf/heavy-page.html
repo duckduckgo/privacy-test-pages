@@ -48,6 +48,8 @@
                 fires natively.</li>
             <li>The buttons below grow the DOM in place — useful only before the load timers fire, or ahead of an
                 on-demand rescan.</li>
+            <li><strong>Matched detectors retire:</strong> auto scans skip a detector after its first match
+                (first-success), so a matched detector's runs column stops counting while the others keep going.</li>
         </ol>
         <p class="meta" style="margin-bottom: 0;">
             All URL parameters:
@@ -146,8 +148,14 @@
         }
 
         function showAdwall() {
-            document.getElementById('adwall-slot').innerHTML =
-                '<div class="adwall">Ad blocker detected. Please disable your ad blocker to continue.</div>';
+            // Assembled at runtime: inline <script> source is part of
+            // body.textContent, which the text matcher scans — a literal
+            // phrase here would make the page match itself on load.
+            const msg = ['Ad blocker', 'detected. Please disable your ad', 'blocker to continue.'].join(' ');
+            const div = document.createElement('div');
+            div.className = 'adwall';
+            div.textContent = msg;
+            document.getElementById('adwall-slot').replaceChildren(div);
         }
 
         document.getElementById('add-frames').addEventListener('click', () => addFrames(25));

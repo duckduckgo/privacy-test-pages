@@ -73,6 +73,7 @@ and the returned state can be incorrect or unchanged after granting or denying.<
   <li>Check Runtime info for Permissions API presence and query function.</li>
   <li>Click Query all and confirm camera and microphone are returned with override names.</li>
   <li>Use Request camera and Request microphone, allow or deny, then re-query to confirm state updates.</li>
+  <li>Use Request camera and microphone to request both permissions at once. Allow or deny access, check both permission states, then use Stop media streams to stop capture.</li>
   <li>Use Query (custom) with an invalid name and confirm a TypeError is returned.</li>
   <li>Click the "Query, request, and wait" buttons, and ensure that the message changes to "Success: granted/denied" after you are prompted.</li>
 </ol>
@@ -161,9 +162,11 @@ remote config for this build. The native messaging path is only used for permiss
 </table>
 
 <h2>Request permission</h2>
+<p>Request camera and microphone uses a single <code>getUserMedia({ video: true, audio: true })</code> call to request both permissions at once.</p>
 <div class="buttons">
   <button id="request-camera">Request camera</button>
   <button id="request-microphone">Request microphone</button>
+  <button id="request-camera-and-microphone">Request camera and microphone</button>
   <button id="request-geolocation">Request geolocation</button>
   <button id="request-notifications">Request notifications</button>
   <button id="stop-media">Stop media streams</button>
@@ -266,7 +269,7 @@ to "Success: granted/denied".</p>
     }
   }
 
-  async function requestMedia(constraints, label, permissionName) {
+  async function requestMedia(constraints, label, ...permissionNames) {
     if (!navigator.mediaDevices || typeof navigator.mediaDevices.getUserMedia !== 'function') {
       logLine(`${label}: getUserMedia not available`);
       return;
@@ -279,7 +282,7 @@ to "Success: granted/denied".</p>
       const error = e && e.message ? e.message : String(e);
       logLine(`${label}: error ${error}`);
     }
-    await queryPermission(permissionName);
+    await Promise.all(permissionNames.map((name) => queryPermission(name)));
   }
 
   function stopMediaStreams() {
@@ -345,6 +348,9 @@ to "Success: granted/denied".</p>
   });
   document.getElementById('request-microphone').addEventListener('click', () => {
     requestMedia({ video: false, audio: true }, 'Microphone', 'microphone');
+  });
+  document.getElementById('request-camera-and-microphone').addEventListener('click', () => {
+    requestMedia({ video: true, audio: true }, 'Camera and microphone', 'camera', 'microphone');
   });
   document.getElementById('request-geolocation').addEventListener('click', requestGeolocation);
   document.getElementById('request-notifications').addEventListener('click', requestNotifications);

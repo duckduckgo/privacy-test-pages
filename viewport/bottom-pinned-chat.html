@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Bottom pinned chat input</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      * { box-sizing: border-box; }
+      body { margin: 0; line-height: 1.5; }
+      main {
+        max-width: 720px;
+        margin: auto;
+        padding: 16px 16px calc(160px + env(safe-area-inset-bottom, 0px));
+      }
+      h1 { font-size: 24px; }
+      pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+      #messages { list-style: none; padding: 0; }
+      #messages li {
+        width: fit-content;
+        max-width: 90%;
+        margin: 16px 0;
+        padding: 12px 16px;
+        border-radius: 12px;
+        background: #e4e7eb;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+      }
+      #messages li.sent { margin-left: auto; background: #dceaff; }
+      #composer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 12px max(16px, env(safe-area-inset-right, 0px))
+          calc(12px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+        background: white;
+        border-top: 2px solid #3969c5;
+      }
+      #composer label { display: block; margin-bottom: 4px; }
+      .entry { display: flex; gap: 8px; }
+      textarea, button { font: inherit; font-size: 16px; }
+      textarea { flex: 1; min-width: 0; padding: 8px; resize: none; }
+      button { padding: 8px 16px; }
+    </style>
+    <script src="bottom-pinned-chat.js" defer></script>
+  </head>
+  <body>
+    <main>
+      <p><a href="../">[Home]</a> ↣ <a href="./">[Viewport Test Cases]</a></p>
+      <h1>Bottom pinned chat input</h1>
+      <p>On a phone, tap the message field to open the keyboard. Type, add new lines,
+        send messages, scroll the conversation, rotate the device, then dismiss and reopen the keyboard.
+        Check whether the input and Send button remain visible and usable, and whether the input
+        returns to the bottom after the keyboard closes.</p>
+      <p>The composer uses <code>position: fixed; bottom: 0</code> with safe-area padding.
+        No JavaScript adjusts its position for the keyboard. Messages stay on this page and are cleared on reload.</p>
+      <details>
+        <summary>Live viewport measurements (CSS pixels)</summary>
+        <pre id="measurements"></pre>
+      </details>
+      <h2>Conversation</h2>
+      <ol id="messages" aria-label="Conversation" aria-live="polite"></ol>
+      <noscript>Enable JavaScript to populate the conversation, send messages, and show measurements.</noscript>
+    </main>
+    <form id="composer">
+      <label for="message">Message</label>
+      <div class="entry">
+        <textarea id="message" name="message" rows="2" placeholder="Type a message…" required></textarea>
+        <button type="submit">Send</button>
+      </div>
+    </form>
+  </body>
+</html>

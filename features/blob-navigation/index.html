@@ -144,6 +144,22 @@
     <button id="test-application-xhtml">application/xhtml+xml blob</button>
     <div id="content-type-container"></div>
   </div>
+  
+  <!-- Test 6: Hidden iframe with blob URL while another frame navigates -->
+  <div class="test-section">
+    <h2>Test 6: Hidden Blob Iframe + Concurrent Frame Navigation</h2>
+    <p class="test-description">
+      Appends a hidden iframe whose <code>src</code> is an HTML blob URL, then, in the same task, submits a form
+      into a second hidden iframe. The parent then reads a value from the blob iframe's document.
+      This mirrors device-fingerprinting scripts used in some checkout flows.
+      <br>
+      <strong>Pass:</strong> this page stays put and shows PASS below.
+      <strong>Fail:</strong> the whole tab navigates to a <code>blob:</code> URL, or the result times out.
+    </p>
+    <button id="test-hidden-iframe-concurrent">Run Hidden Iframe Test</button>
+    <div id="hidden-iframe-result" class="result" style="display:none;"></div>
+    <div id="hidden-iframe-container"></div>
+  </div>
 
   <script>
     // Helper function to create a blob URL with HTML content
@@ -412,6 +428,82 @@
       const iframe = document.createElement('iframe');
       iframe.src = blobURL;
       container.appendChild(iframe);
+    });
+    
+    // Test 6: Hidden blob iframe + concurrent frame navigation
+    document.getElementById('test-hidden-iframe-concurrent').addEventListener('click', function() {
+      const resultDiv = document.getElementById('hidden-iframe-result');
+      const container = document.getElementById('hidden-iframe-container');
+      container.innerHTML = '';
+      resultDiv.style.display = 'block';
+      resultDiv.className = 'result';
+      resultDiv.textContent = 'Running...';
+
+      function finish(passed, message) {
+        resultDiv.className = 'result ' + (passed ? 'success' : 'fail');
+        resultDiv.textContent = (passed ? 'PASS: ' : 'FAIL: ') + message;
+      }
+
+      // If this document is ever loaded as the top-level page, the browser navigated the
+      // whole tab instead of the hidden iframe; make that failure visible.
+      const blobHtml = `<!DOCTYPE html>
+<html><body>
+<input type="hidden" id="blob-iframe-value" value="">
+<script>
+  document.getElementById('blob-iframe-value').value = 'loaded';
+  if (window.top === window) {
+    document.body.innerHTML = '<h1 style="color:#721c24;font-family:sans-serif">FAIL</h1>' +
+      '<p style="font-family:sans-serif">This blob document was meant to load in a hidden iframe, ' +
+      'but the browser navigated the whole tab to it.</p>';
+  }
+<\/script>
+</body></html>`;
+
+      // 1. Hidden iframe pointed at a blob URL.
+      const blobFrame = document.createElement('iframe');
+      blobFrame.style.display = 'none';
+      blobFrame.src = createBlobURL(blobHtml);
+
+      // 2. Second hidden iframe used as a form target.
+      const sinkFrame = document.createElement('iframe');
+      sinkFrame.style.display = 'none';
+      sinkFrame.name = 'blob-test-sink-frame';
+
+      const timeout = setTimeout(function() {
+        finish(false, 'timed out waiting for the blob iframe to load.');
+      }, 5000);
+
+      blobFrame.addEventListener('load', function() {
+        clearTimeout(timeout);
+        let value = null;
+        try {
+          const input = blobFrame.contentDocument && blobFrame.contentDocument.getElementById('blob-iframe-value');
+          value = input ? input.value : null;
+        } catch (e) {
+          value = null;
+        }
+        if (value === 'loaded') {
+          finish(true, 'blob iframe loaded in place and its document is readable.');
+        } else {
+          finish(false, 'blob iframe fired load but its content is missing (' + String(value) + ').');
+        }
+      });
+
+      container.appendChild(blobFrame);
+      container.appendChild(sinkFrame);
+
+      // 3. In the same task, navigate the other frame via a form submission.
+      const form = document.createElement('form');
+      form.method = 'get';
+      form.action = window.location.pathname;
+      form.target = 'blob-test-sink-frame';
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'sink';
+      input.value = '1';
+      form.appendChild(input);
+      container.appendChild(form);
+      form.submit();
     });
   </script>
 </body>

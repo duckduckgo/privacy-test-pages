@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Incrementing Cookie Counter</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 2rem;
+    }
+
+    #counter {
+      font-size: 6rem;
+      font-weight: bold;
+      overflow-wrap: anywhere;
+    }
+  </style>
+</head>
+<body>
+  <p><a href="./index.html">[Home]</a></p>
+  <h1>Incrementing Cookie Counter</h1>
+  <p>This cookie counter increases each time you load, refresh, or return to this page.</p>
+  <p id="counter" aria-live="polite"></p>
+  <noscript>Enable JavaScript to increment the cookie counter.</noscript>
+
+  <script>
+    window.addEventListener('pageshow', () => {
+        const cookie = document.cookie.split(';').map(value => value.trim())
+            .find(value => value.startsWith('inc-cookie='));
+        const value = cookie ? cookie.slice('inc-cookie='.length) : '';
+        const counter = (/^\d+$/.test(value) ? BigInt(value) : 0n) + 1n;
+
+        document.cookie = `inc-cookie=${counter}; Path=/; Max-Age=31536000; SameSite=Lax`;
+        document.querySelector('#counter').textContent = counter.toString();
+    });
+  </script>
+</body>
+</html>

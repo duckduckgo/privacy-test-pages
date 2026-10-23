@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Fullscreen API</title>
+  <!-- Fix reference: https://github.com/duckduckgo/apple-browsers/pull/7648 -->
+  <style>
+    body { font-family: -apple-system, system-ui, sans-serif; max-width: 800px; margin: 0 auto; padding: 16px; }
+    .test { margin: 16px 0; padding: 12px; border: 1px solid #ddd; border-radius: 4px; }
+    .test h3 { margin-top: 0; }
+    .result { font-weight: bold; padding: 4px 8px; border-radius: 3px; display: inline-block; }
+    .pass { color: #1a7f37; background: #dafbe1; }
+    .fail { color: #cf222e; background: #ffebe9; }
+    .pending { color: #656d76; background: #eee; }
+    table { border-collapse: collapse; font-size: 14px; width: 100%; }
+    td, th { border: 1px solid #ddd; padding: 4px 8px; text-align: left; vertical-align: top; overflow-wrap: anywhere; }
+    #surface td:last-child { white-space: nowrap; }
+    code { word-break: break-all; }
+    button { margin: 8px 8px 8px 0; padding: 8px 16px; font-size: 14px; }
+    .target { background: #ffd34d; padding: 16px; border-radius: 4px; }
+    .player { position: relative; background: #000; }
+    .player video { display: block; width: 100%; }
+    .player:fullscreen { display: flex; align-items: center; }
+    .player .overlay { position: absolute; left: 0; right: 0; bottom: 12px; text-align: center; color: #fff; font-size: 18px; text-shadow: 0 0 4px #000; }
+    .log { font-family: ui-monospace, monospace; font-size: 13px; white-space: pre-wrap; background: #f6f8fa; padding: 8px; min-height: 1.5em; }
+  </style>
+</head>
+<body>
+<p><a href="../index.html">[Home]</a></p>
+
+<h1>Fullscreen API</h1>
+<p>Checks which parts of the <a href="https://fullscreen.spec.whatwg.org/">Fullscreen API</a> the browser exposes,
+and that entering and exiting fullscreen work. A browser should expose either the whole API or none of it.
+A partial API (for example <code>document.fullscreenEnabled</code> without <code>document.exitFullscreen</code>)
+breaks sites that feature-detect fullscreen and then call the rest of the API.</p>
+
+<h2>Expected results</h2>
+<table>
+  <tr><th>Browser</th><th>API exposed</th></tr>
+  <tr><td>Safari / DuckDuckGo on iPhone, mobile site</td><td>No (only <code>video.webkitEnterFullscreen()</code>)</td></tr>
+  <tr><td>DuckDuckGo on iPhone, desktop site</td><td>Yes</td></tr>
+  <tr><td>Safari / DuckDuckGo on iPad</td><td>Yes</td></tr>
+  <tr><td>Desktop browsers</td><td>Yes</td></tr>
+</table>
+<p>Every browser should pass tests 1 and 2. Tests 3–5 only apply when the API is exposed.</p>
+
+<div class="test">
+  <h3>1. API surface</h3>
+  <table id="surface"></table>
+  <p><span class="result pending" id="result-surface">Pending</span></p>
+</div>
+
+<div class="test">
+  <h3>2. Feature-detect then exit</h3>
+  <p>Common site pattern: if <code>document.fullscreenEnabled</code> is true, call <code>document.exitFullscreen()</code>
+  while not in fullscreen. This must not throw synchronously; a rejected promise is fine.</p>
+  <p><span class="result pending" id="result-detect-exit">Pending</span></p>
+  <div class="log" id="log-detect-exit"></div>
+</div>
+
+<div class="test">
+  <h3>3. Element fullscreen</h3>
+  <p>Enter fullscreen, then use the in-page exit button. Expected: the yellow box fills the screen,
+  <code>fullscreenElement</code> becomes <code>element-target</code>, then <code>null</code> after exit, and the page lays out normally afterwards.</p>
+  <div class="target" id="element-target">
+    Fullscreen target
+    <div>
+      <button id="element-enter">Enter fullscreen</button>
+      <button id="element-exit">Exit fullscreen</button>
+    </div>
+  </div>
+  <div class="log" id="log-element"></div>
+</div>
+
+<div class="test">
+  <h3>4. Video player container fullscreen</h3>
+  <p>Requests fullscreen on the player container, like YouTube does. Expected: the white caption overlay stays visible in fullscreen.
+  If only the bare video goes fullscreen, the caption is lost.</p>
+  <div class="player" id="player">
+    <video id="player-video" src="./ai-page-context/fixtures/sample.mp4" muted loop playsinline controls></video>
+    <div class="overlay">Caption overlay</div>
+  </div>
+  <button id="player-enter">Fullscreen player</button>
+  <div class="log" id="log-player"></div>
+</div>
+
+<div class="test">
+  <h3>5. Native video fullscreen</h3>
+  <p>Calls <code>video.webkitEnterFullscreen()</code> where available (all iOS browsers). Expected: the system video player opens.</p>
+  <button id="video-enter">Native video fullscreen</button>
+  <div class="log" id="log-video"></div>
+</div>
+
+<h2>User agent</h2>
+<p><code id="ua"></code></p>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+  const log = (id, message) => {
+      $(id).textContent += `${message}\n`;
+  };
+  const setResult = (id, pass, text) => {
+      const el = $(id);
+      el.className = `result ${pass ? 'pass' : 'fail'}`;
+      el.textContent = text;
+  };
+
+  $('ua').textContent = navigator.userAgent;
+
+  // 1. API surface
+  const surface = {
+      'document.fullscreenEnabled': document.fullscreenEnabled,
+      'document.webkitFullscreenEnabled': document.webkitFullscreenEnabled,
+      'typeof Element.prototype.requestFullscreen': typeof Element.prototype.requestFullscreen,
+      'HTMLElement.prototype has own requestFullscreen (injected shim)': Object.prototype.hasOwnProperty.call(HTMLElement.prototype, 'requestFullscreen'),
+      'typeof document.exitFullscreen': typeof document.exitFullscreen,
+      "'fullscreenElement' in document": 'fullscreenElement' in document,
+      'typeof HTMLVideoElement.prototype.webkitEnterFullscreen': typeof HTMLVideoElement.prototype.webkitEnterFullscreen
+  };
+  for (const [name, value] of Object.entries(surface)) {
+      const row = document.createElement('tr');
+      const nameCell = document.createElement('td');
+      const valueCell = document.createElement('td');
+      nameCell.textContent = name;
+      valueCell.textContent = String(value);
+      row.append(nameCell, valueCell);
+      $('surface').append(row);
+  }
+
+  const enabled = document.fullscreenEnabled === true;
+  const complete = typeof HTMLElement.prototype.requestFullscreen === 'function' &&
+      typeof document.exitFullscreen === 'function' &&
+      'fullscreenElement' in document;
+  const absent = document.fullscreenEnabled === undefined &&
+      typeof HTMLElement.prototype.requestFullscreen !== 'function' &&
+      typeof document.exitFullscreen !== 'function';
+  if (enabled && complete) {
+      setResult('result-surface', true, 'Pass: full API exposed');
+  } else if (absent) {
+      setResult('result-surface', true, 'Pass: API not exposed');
+  } else {
+      setResult('result-surface', false, 'Fail: partial API exposed');
+  }
+
+  // 2. Feature-detect then exit
+  if (!document.fullscreenEnabled) {
+      setResult('result-detect-exit', true, 'Pass: fullscreen not advertised, site skips the API');
+  } else {
+      try {
+          const returned = document.exitFullscreen();
+          if (returned && typeof returned.then === 'function') {
+              returned.then(
+                  () => log('log-detect-exit', 'exitFullscreen() resolved'),
+                  (e) => log('log-detect-exit', `exitFullscreen() rejected: ${e}`)
+              );
+              setResult('result-detect-exit', true, 'Pass: exitFullscreen() returned a promise');
+          } else {
+              setResult('result-detect-exit', false, `Fail: exitFullscreen() returned ${returned}, not a promise`);
+          }
+      } catch (e) {
+          setResult('result-detect-exit', false, 'Fail: exitFullscreen() threw');
+          log('log-detect-exit', String(e));
+      }
+  }
+
+  // 3–5. Interactive tests
+  let activeLogId = 'log-element';
+  const request = (element, logId) => {
+      activeLogId = logId;
+      if (typeof element.requestFullscreen !== 'function') {
+          log(logId, 'requestFullscreen() is not available');
+          return;
+      }
+      const returned = element.requestFullscreen();
+      if (returned && typeof returned.then === 'function') {
+          returned.then(
+              () => log(logId, 'requestFullscreen() resolved'),
+              (e) => log(logId, `requestFullscreen() rejected: ${e}`)
+          );
+      } else {
+          log(logId, `requestFullscreen() returned ${returned}, not a promise`);
+      }
+  };
+
+  $('element-enter').addEventListener('click', () => request($('element-target'), 'log-element'));
+  $('element-exit').addEventListener('click', () => {
+      activeLogId = 'log-element';
+      if (typeof document.exitFullscreen !== 'function') {
+          log('log-element', 'exitFullscreen() is not available');
+          return;
+      }
+      document.exitFullscreen().then(
+          () => log('log-element', 'exitFullscreen() resolved'),
+          (e) => log('log-element', `exitFullscreen() rejected: ${e}`)
+      );
+  });
+
+  $('player-enter').addEventListener('click', () => {
+      $('player-video').play().catch(() => {});
+      request($('player'), 'log-player');
+  });
+
+  $('video-enter').addEventListener('click', () => {
+      const video = $('player-video');
+      if (typeof video.webkitEnterFullscreen !== 'function') {
+          log('log-video', 'webkitEnterFullscreen() is not available');
+          return;
+      }
+      video.play().catch(() => {});
+      video.webkitEnterFullscreen();
+      log('log-video', 'webkitEnterFullscreen() called');
+  });
+
+  document.addEventListener('fullscreenchange', () => {
+      const id = document.fullscreenElement ? document.fullscreenElement.id : null;
+      log(activeLogId, `fullscreenchange: fullscreenElement=${id}`);
+  });
+  document.addEventListener('fullscreenerror', (e) => {
+      log(activeLogId, `fullscreenerror on ${e.target.id || e.target.nodeName}`);
+  });
+</script>
+</body>
+</html>

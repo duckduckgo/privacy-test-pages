@@ -21,7 +21,10 @@ export default [
         },
         language: "html/html",
         rules: {
-            ...htmlRulesToDisable
+            ...htmlRulesToDisable,
+            // Duplicate ids break `<label for>` associations and make elements
+            // unreachable via `#id` selectors used by our test automation.
+            "html/no-duplicate-id": "error"
         }
     },
     {

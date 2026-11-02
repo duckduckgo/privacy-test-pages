@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<!--
+  bot-challenge
+
+  Bot-challenge interstitial with a spinner and a request reference, served with status 403.
+
+  Load it at: bot-challenge.html?status=403
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<title>Just a moment...</title>
+<style>body{font-family:system-ui,sans-serif;margin:0;padding:15vh 24px}#challenge-spinner{width:32px;height:32px;border:4px solid #ccc;border-top-color:#555;border-radius:50%;animation:s 1s linear infinite;margin:16px 0}@keyframes s{to{transform:rotate(360deg)}}.ray_id{color:#777;font-size:13px;margin-top:40px}</style>
+<script src="overlay.js" async></script>
+</head>
+<body>
+<h1>example.com</h1>
+<h2>Checking that this visit is from a person.</h2>
+<div id="challenge-spinner" role="img" aria-label="Checking"><span style="position:absolute;left:-9999px">Checking</span></div>
+<p>The site opens when the check is done.</p>
+<div class="ray_id">Reference: <code>8d2f0a1b3c4e5f60</code></div>
+</body>
+</html>

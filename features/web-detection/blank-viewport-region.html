@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<!--
+  blank-viewport-region
+
+  A 60px header with navigation text renders, but the app container below it stays empty and fills
+  the viewport (its bundle returns 500).
+
+  Load it at: blank-viewport-region.html
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<title>Trailhead Supply: shop</title>
+<style>body{margin:0;font-family:system-ui,sans-serif;background:#fff}.top{height:60px;box-sizing:border-box;padding:18px 24px;background:#23384d;color:#fff}.top a{color:#cfe;margin-left:18px;text-decoration:none}#app{min-height:100vh}</style>
+<script src="overlay.js" async></script>
+</head>
+<body>
+<header class="top">Trailhead Supply <a href="#">Shop</a><a href="#">Journal</a><a href="#">Help</a></header>
+<div id="app"></div>
+<script src="_status?code=500&amp;type=js&amp;f=app"></script>
+</body>
+</html>

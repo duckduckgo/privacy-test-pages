@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<!--
+  spinner-forever
+
+  App spinner that never resolves: its data request never answers and a second request returns
+  502.
+
+  Load it at: spinner-forever.html
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<title>Dashboard</title>
+<style>body{margin:0;font-family:system-ui,sans-serif}#app{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center}.spin{width:40px;height:40px;border:4px solid #ddd;border-top-color:#2a5d84;border-radius:50%;animation:s 1s linear infinite}@keyframes s{to{transform:rotate(360deg)}}</style>
+<script src="overlay.js" async></script>
+</head>
+<body>
+<div id="app"><div class="spin" aria-hidden="true"></div><p id="status">Loading your dashboard</p></div>
+<script>
+fetch('_status?code=502&type=json&f=summary').then(function (r) { return r.text(); }).catch(function () {});
+var xhr = new XMLHttpRequest(); xhr.open('GET', '_hang?f=dashboard-data'); xhr.send();
+setTimeout(function () {
+    var p = document.createElement('p'); p.textContent = 'This is taking longer than usual.'; document.getElementById('app').appendChild(p);
+}, 2000);
+</script>
+</body>
+</html>

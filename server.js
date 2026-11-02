@@ -119,6 +119,10 @@ async function adClickFlow () {
 }
 adClickFlow();
 
+// Mounted before the static files: a page requested with `?status=` or `?delay=` is served by the router
+const webDetectionRoutes = require('./features/web-detection/server/routes.js');
+app.use('/features/web-detection', webDetectionRoutes);
+
 // serve all static files
 app.use(express.static('.', {
     setHeaders: (res, path) => {

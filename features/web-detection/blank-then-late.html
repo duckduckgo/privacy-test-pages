@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<!--
+  blank-then-late
+
+  Empty #app for 12s, then the article is rendered by script.
+
+  Load it at: blank-then-late.html
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<title>Trail journal</title>
+<style>
+body { margin: 0; font: 17px/1.6 Georgia, 'Times New Roman', serif; color: #222; background: #fff; }
+main { max-width: 720px; margin: 0 auto; padding: 24px 16px 64px; }
+h1, h2, h3 { font-family: system-ui, sans-serif; line-height: 1.25; }
+.banner { font: 13px/1.4 system-ui, sans-serif; background: #eef1f8; border-bottom: 1px solid #cdd3e0; padding: 6px 16px; color: #334; }
+.byline { color: #666; font-size: 14px; font-family: system-ui, sans-serif; }
+figure { margin: 24px 0; }
+figure img { display: block; max-width: 100%; background: #e6e6e6; }
+figcaption { font-size: 14px; color: #666; font-family: system-ui, sans-serif; }
+#app { min-height: 100vh; }</style>
+<script src="overlay.js" async></script>
+</head>
+<body>
+<div id="app"></div>
+<script>
+setTimeout(function () {
+    document.getElementById('app').innerHTML = "<main>\n<article>\n<h1>Packing light for a week on foot</h1>\n<p class=\"byline\">Weekend notes, filed in the spring edition</p>\n<p>Packing light for a week of walking comes down to a few rules. Choose clothes that dry overnight, carry one warm layer rather than two thin ones, and leave the second pair of shoes at home unless the route crosses rivers. A small first aid kit, a paper map of the area, and a refillable bottle cover most surprises. Everything else can usually be bought in the next village along the way.</p>\n<p>A good stock is the quiet foundation of winter cooking. Roast the bones and vegetables until they are deeply browned, then cover them with cold water and bring the pot up slowly. Skim the surface during the first half hour and never let it boil hard, or the liquid will turn cloudy and greasy. Four hours later, strain it through a fine sieve, cool it quickly, and freeze it in portions for soups and sauces.</p>\n<figure><img src=\"_ok?type=svg&amp;w=480&amp;h=320&amp;n=b\" width=\"480\" height=\"320\" alt=\"The view from the sleeper carriage\"><figcaption>The view from the sleeper carriage</figcaption></figure>\n<p>Bread dough tells you when it is ready if you know what to look for. After the first rise it should have roughly doubled, feel airy under the hand, and spring back slowly when pressed with a floured finger. If the dent fills in at once, give it more time; if it does not recover at all, it has risen too far, and the loaf will spread flat in the oven. Shape it gently and let the second rise be shorter.</p>\n<p>Lentils are the most forgiving pulse in the cupboard. Unlike beans they need no soaking, and the small green and brown kinds hold their shape after half an hour of gentle simmering. Cook them with a bay leaf and a halved onion, season only at the end, and dress them while still warm with olive oil, lemon, and plenty of chopped parsley. They keep for several days in the fridge and improve with time.</p>\n<p>Before a long ride, spend five minutes on the bike rather than an hour fixing it at the roadside. Check the tyre pressure, squeeze both brake levers hard, spin each wheel to see that it runs true, and look along the chain for stiff links. A drop of oil on the chain and a wipe with a rag afterwards will keep the drivetrain quiet, and the gears will shift cleanly for weeks.</p>\n<p>Climbing is mostly about rhythm. Shift into an easier gear before the slope bites, stay seated for as long as you can, and breathe steadily rather than in gasps. Standing on the pedals feels faster but burns energy quickly, so save it for short, steep ramps. On a long climb, pick a landmark a few hundred metres ahead, ride to it, then pick the next one. The summit arrives sooner than you expect.</p>\n<p>A dripping tap is almost always a worn washer or cartridge, and replacing it takes less time than finding the right part. Turn off the water at the isolation valve under the sink, open the tap to drain the pipe, and remove the handle. Take the old washer to the hardware shop so you can match its size exactly. Reassemble everything in reverse order and tighten by hand before a final quarter turn.</p>\n<p>Painting a room goes faster when most of the effort is spent before the first coat. Fill the cracks, sand the patches smooth, wash the walls with sugar soap, and tape the edges carefully. Cut in around the ceiling and skirting with a brush, then roll the open areas in overlapping vertical strokes while the edges are still wet. Two thin coats always look better than one thick one.</p>\n</article>\n\n</main>";
+}, 12000);
+</script>
+</body>
+</html>

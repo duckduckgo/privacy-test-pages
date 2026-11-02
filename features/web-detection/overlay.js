@@ -11,6 +11,12 @@
  *
  * C-S-S dispatches both events only when the platform sets its debug flag.
  *
+ * - Debug: the tab's debug flag, read and changed through the `ddgExtensionDebugRequest` event, with
+ *   detail `JSON.stringify({ action })` for `get`, `enable` or `disable`. The extension answers with
+ *   `ddgExtensionDebugResponse`, detail `JSON.stringify({ available, enabled, devtools })`; developer
+ *   builds act on `enable` and `disable` and reload the tab, release builds answer
+ *   `{ available: false }`. Other browsers set the flag in their own debug settings.
+ *
  * The panel lives in a closed shadow root on a host outside <body>, so detectors that read the
  * page's text do not see it. Closed, it is a transparent square that shows only under the pointer,
  * so the page's first paint is its own; opening it paints text and covers part of the viewport. The
@@ -52,6 +58,9 @@
 <div class="panel">
   <button class="toggle" type="button"></button>
   <div class="body">
+    <h2>Debug</h2>
+    <pre class="debug-out muted">Asking the browser…</pre>
+    <div class="row"><button class="debug-toggle" type="button" hidden></button></div>
     <section class="measures">
       <h2>Page measures</h2>
       <pre class="measures-out"></pre>
@@ -74,6 +83,8 @@
     const reportOut = root.querySelector('.report-out');
     const collectButton = root.querySelector('.collect');
     const copyButton = root.querySelector('.copy');
+    const debugOut = root.querySelector('.debug-out');
+    const debugButton = root.querySelector('.debug-toggle');
     if (!showMeasures) root.querySelector('.measures').remove();
 
     const events = [];
@@ -252,6 +263,67 @@
         setTimeout(() => { copyButton.textContent = 'Copy JSON'; }, 1500);
     });
 
+    // Debug flag
+
+    const DEBUG_ANSWER_TIMEOUT_MS = 2000;
+    let debugTimer = null;
+    let debugAnswered = false;
+    let reloading = false;
+
+    function showDebug (text, action) {
+        debugOut.classList.remove('muted');
+        debugOut.textContent = text;
+        debugButton.hidden = !action;
+        if (action) {
+            debugButton.dataset.action = action;
+            debugButton.textContent = action === 'enable' ? 'Turn on debug for this tab' : 'Turn off debug for this tab';
+        }
+    }
+
+    function askDebug (action) {
+        clearTimeout(debugTimer);
+        debugTimer = setTimeout(() => {
+            if (!debugAnswered) showDebug('No answer from the browser: turn on the content-scope-scripts debug flag in the browser.');
+        }, DEBUG_ANSWER_TIMEOUT_MS);
+        window.dispatchEvent(new CustomEvent('ddgExtensionDebugRequest', { detail: JSON.stringify({ action }) }));
+    }
+
+    window.addEventListener('ddgExtensionDebugResponse', (event) => {
+        let state;
+        try {
+            state = JSON.parse(event.detail);
+        } catch {
+            return;
+        }
+        debugAnswered = true;
+        clearTimeout(debugTimer);
+        if (reloading) return;
+        if (!state.available) {
+            showDebug("This build turns debug on only from the extension's devtools page: open it for this tab, then reload.");
+        } else if (state.devtools) {
+            showDebug("Debug is on: the extension's devtools page is connected to this tab.");
+        } else if (state.enabled) {
+            showDebug('Debug is on for this tab.', 'disable');
+        } else {
+            showDebug('Debug is off.', 'enable');
+        }
+    });
+
+    debugButton.addEventListener('click', () => {
+        reloading = true;
+        showDebug('Reloading…');
+        askDebug(debugButton.dataset.action);
+    });
+
+    // A debug event means the flag is on, whichever setting turned it on
+    for (const type of ['webEventDebug', 'breakageReportDebug']) {
+        window.addEventListener(type, () => {
+            if (!debugAnswered && !reloading) showDebug('Debug is on.');
+            debugAnswered = true;
+        });
+    }
+
+    askDebug('get');
     renderToggle();
     document.documentElement.appendChild(host);
 })();

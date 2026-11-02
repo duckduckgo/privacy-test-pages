@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<!--
+  healthy-spa
+
+  Healthy single-page app: #root is filled by script within 300ms, and all resources succeed.
+
+  Load it at: healthy-spa.html
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<title>Birds in the garden</title>
+<style>
+body { margin: 0; font: 17px/1.6 Georgia, 'Times New Roman', serif; color: #222; background: #fff; }
+main { max-width: 720px; margin: 0 auto; padding: 24px 16px 64px; }
+h1, h2, h3 { font-family: system-ui, sans-serif; line-height: 1.25; }
+.banner { font: 13px/1.4 system-ui, sans-serif; background: #eef1f8; border-bottom: 1px solid #cdd3e0; padding: 6px 16px; color: #334; }
+.byline { color: #666; font-size: 14px; font-family: system-ui, sans-serif; }
+figure { margin: 24px 0; }
+figure img { display: block; max-width: 100%; background: #e6e6e6; }
+figcaption { font-size: 14px; color: #666; font-family: system-ui, sans-serif; }
+</style>
+<script defer src="_ok?type=js&amp;f=main"></script>
+<script src="overlay.js" async></script>
+</head>
+<body>
+<div class="banner">Test page: healthy-spa.</div>
+<div id="root"></div>
+<script>
+setTimeout(function () {
+    document.getElementById('root').innerHTML = "<main>\n<article>\n<h1>Feeding garden birds through the winter</h1>\n<p class=\"byline\">Weekend notes, filed in the spring edition</p>\n<p>Feeding garden birds through the winter is simple, but a few habits make a difference. Clean the feeders every couple of weeks to stop disease spreading, offer fresh water as well as food, and place the feeders near cover so small birds can escape from hawks. Sunflower hearts suit most species, while a fat block draws in tits and woodpeckers on the coldest mornings.</p>\n<p>The grind matters more than the beans. Coarse grounds suit a cafetiere and a four minute steep, medium grounds suit a filter cone, and fine grounds suit an espresso machine. If a filter brew tastes sour and thin, grind a little finer; if it tastes bitter and harsh, grind a little coarser. Weigh the coffee and water for a week, and you will soon learn to make the same good cup every morning.</p>\n<figure><img src=\"_ok?type=svg&amp;w=400&amp;h=400&amp;n=d\" width=\"400\" height=\"400\" alt=\"Feeders by the hedge\"><figcaption>Feeders by the hedge</figcaption></figure>\n<p>New runners usually start too fast. A comfortable pace is one where you can hold a conversation, even if it feels slow. Alternate a few minutes of running with a minute of walking, and add a little more running each week. Rest days are part of the plan, not a break from it. After two months most people can run for half an hour without stopping, and they enjoy it far more.</p>\n<p>The light in the hour after sunrise flatters almost any subject. Shadows are long and soft, colours are warm, and the streets are quiet. Walk the same route on several mornings and notice how the scene changes with the weather. Keep the horizon level, place the main subject away from the centre of the frame, and take one more picture after you think you are finished.</p>\n<p>Knitting a first jumper is less daunting when it is broken into pieces. Swatch first, wash and dry the swatch, and measure it honestly; the yarn label is only a starting point. Knit the back, then the front, then the sleeves, and block each piece to size before sewing them together. The seams hold the shape of the garment, so take your time with them and use the same yarn.</p>\n<p>Paddling on a calm lake at dawn is one of the simplest pleasures of summer. Check the forecast for wind, wear a buoyancy aid even if you swim well, and tell someone when you plan to be back. Keep close to the shore on your first outings and practise turning and stopping before heading across open water. Herons and kingfishers are easiest to see before the boats arrive.</p>\n<figure><img src=\"_ok?type=svg&amp;w=480&amp;h=320&amp;n=b\" width=\"480\" height=\"320\" alt=\"The view from the sleeper carriage\"><figcaption>The view from the sleeper carriage</figcaption></figure>\n<p>Most houseplants die from kindness rather than neglect. Water only when the top few centimetres of compost are dry, empty the saucer afterwards, and let the plant rest through the darker months with less water and no feed. Turn the pot a quarter turn each week so the stems grow straight, and wipe the dust off broad leaves so they can make the most of the winter light.</p>\n<p>Tomatoes reward patience more than any other summer crop. Start the seeds indoors six to eight weeks before the last frost, keep the trays somewhere bright, and resist the urge to overwater. When the seedlings have two sets of true leaves, move them into deeper pots and bury the stems up to the first leaves; the buried section will sprout roots and give the plant a sturdier base for the months ahead.</p>\n<p>Hardening off is the step most new growers skip. For a week before planting out, set the young plants outside for a few hours each day, starting in dappled shade and working up to full sun. Bring them in at night while the evenings are still cold. Plants that go through this routine rarely sulk after transplanting, and they settle into the beds days sooner than those moved straight from the windowsill.</p>\n<p>Mulch does more work than it gets credit for. A layer of straw or shredded leaves keeps the soil evenly moist, smothers weed seedlings, and stops rain from splashing soil onto the lower leaves, which is how many fungal problems start. Lay it once the soil has warmed in late spring; mulching cold ground keeps it cold, and the roots will stall until the weather finally turns.</p>\n<p>The overnight train from the coast leaves a little after nine and reaches the mountains just as the sun clears the ridge. Sleeper cabins hold four bunks, and the attendant brings tea and a paper bag of biscuits before the lights go down. If you can, book a lower bunk on the left side of the carriage: the morning view across the lake is worth setting an alarm for, even on a short night.</p>\n</article>\n\n</main>";
+}, 300);
+</script>
+</body>
+</html>

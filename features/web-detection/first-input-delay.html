@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<!--
+  first-input-delay
+
+  Counts down for 3s, then blocks the main thread for 4s. A click during the block waits for it to
+  end. `freezeAt` and `freezeFor` (ms) change the timing.
+
+  Wait for the page to turn red, then click the button once.
+
+  Load it at: first-input-delay.html
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<title>First input delay</title>
+<style>
+body { font: 16px/1.5 system-ui, sans-serif; margin: 0; padding: 24px; background: #e8f5e9; }
+body.frozen { background: #ffcdd2; }
+#target { display: block; width: 100%; padding: 48px; font-size: 20px; margin: 16px 0; cursor: pointer; }
+pre { background: #fff; padding: 12px; white-space: pre-wrap; }
+</style>
+<script src="overlay.js" async></script>
+</head>
+<body>
+<p><a href="./index.html">[Web detection test pages]</a></p>
+<h1>First input delay</h1>
+<p>Don't click, tap or press a key until the page turns red. Then click the button once, straight away.</p>
+<p id="status"></p>
+<button id="target" type="button">Click me while the page is red</button>
+<pre id="log"></pre>
+
+<script>
+(function () {
+    function param(name, fallback) {
+        var value = Number(new URLSearchParams(location.search).get(name));
+        return value > 0 && value <= 60000 ? value : fallback;
+    }
+    // The main thread is blocked from FREEZE_AT_MS after navigation start, for FREEZE_FOR_MS.
+    // A click early in the block waits about FREEZE_FOR_MS for its handler.
+    var FREEZE_AT_MS = param('freezeAt', 3000);
+    var FREEZE_FOR_MS = param('freezeFor', 4000);
+
+    var statusEl = document.getElementById('status');
+    var logEl = document.getElementById('log');
+    var freezeStart = null;
+
+    function log(line) {
+        logEl.textContent += line + '\n';
+    }
+
+    var supported = typeof PerformanceObserver !== 'undefined' &&
+        (PerformanceObserver.supportedEntryTypes || []).indexOf('first-input') !== -1;
+    log('first-input entries supported: ' + supported);
+
+    if (supported) {
+        new PerformanceObserver(function (list) {
+            list.getEntries().forEach(function (e) {
+                log('first-input: ' + e.name + ' at ' + Math.round(e.startTime) + ' ms');
+                log('  input delay = ' + Math.round(e.processingStart - e.startTime) + ' ms (processingStart - startTime)');
+                log('  duration    = ' + Math.round(e.duration) + ' ms');
+                if (freezeStart === null || e.startTime < freezeStart) {
+                    log('  This input came before the block, so its delay is short. Reload and wait for red.');
+                }
+            });
+        }).observe({ type: 'first-input', buffered: true });
+    }
+
+    document.getElementById('target').addEventListener('click', function () {
+        log('click handler ran at ' + Math.round(performance.now()) + ' ms');
+    });
+
+    var countdown = setInterval(function () {
+        var left = Math.max(0, FREEZE_AT_MS - performance.now());
+        statusEl.textContent = 'Blocking for ' + FREEZE_FOR_MS / 1000 + ' s in ' + (left / 1000).toFixed(1) + ' s';
+    }, 100);
+
+    setTimeout(function () {
+        clearInterval(countdown);
+        document.body.className = 'frozen';
+        statusEl.textContent = 'Blocked: click now';
+        // Let the red paint before blocking the thread
+        requestAnimationFrame(function () {
+            setTimeout(function () {
+                freezeStart = performance.now();
+                var end = freezeStart + FREEZE_FOR_MS;
+                while (performance.now() < end) { /* spin */ }
+                document.body.className = '';
+                statusEl.textContent = 'Unblocked.';
+            }, 0);
+        });
+    }, Math.max(0, FREEZE_AT_MS - performance.now()));
+})();
+</script>
+</body>
+</html>

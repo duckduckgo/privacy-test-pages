@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Web Detection Test Pages</title>
+  <style>
+    body { font: 16px/1.5 system-ui, sans-serif; max-width: 960px; margin: 0 auto; padding: 16px; }
+    li { margin: 6px 0; }
+    code { background: #f2f2f2; padding: 0 0.25rem; border-radius: 3px; font-size: 0.9em; }
+    .control { background: #e6f4ea; color: #1e6b34; border-radius: 3px; padding: 0 0.35rem; font-size: 0.8rem; }
+    .note { background: #f0f6ff; border: 1px solid #b8d4f0; padding: 0.75rem 1rem; border-radius: 6px; }
+  </style>
+</head>
+<body>
+<p><a href="../../index.html">[Home]</a></p>
+<h1>Web Detection Test Pages</h1>
+
+<p>Each page shows one page problem, for trying web detection detectors by hand. A page marked
+<span class="control">control</span> is a healthy twin of the page it names, and no detector should
+fire on it.</p>
+
+<div class="note">
+  <p><strong>Detections panel.</strong> Every page has a square in the bottom-right corner that shows
+    under the pointer: grey until a web event arrives, green after. Click it to open the panel:</p>
+  <ul>
+    <li><strong>Page measures</strong>: what the page itself measured, such as time to first byte, load
+      end, first contentful paint, failed resources, broken images, input delay and long tasks.</li>
+    <li><strong>Web events</strong>: each web event the browser sent for the page, with its data.</li>
+    <li><strong>Breakage report</strong>: <em>Collect report data</em> shows what a breakage report
+      sent now would hold, without sending one. A breakage report sent through the browser shows here
+      too. Collecting runs the detectors that run on a breakage report, so a detector that fires an
+      event on a report sends it.</li>
+  </ul>
+  <p>Web events and report data need a build with the content-scope-scripts debug flag on. In other
+    builds the panel waits. In a developer build of the DuckDuckGo extension, the panel's
+    <strong>Debug</strong> row turns the flag on and off for the tab.
+    Add <code>?nooverlay</code> to a page to leave the panel out.</p>
+  <p>Open the panel after the detectors under test have run. The open panel paints text and covers
+    part of the viewport, which detectors of blank pages read.</p>
+  <p>The extension does not run on <code>localhost</code>. To use a local server
+    (<code>HOST=0.0.0.0 node server.js</code>), open the pages by the machine's network address.</p>
+</div>
+
+<h2>Slow or stuck loads</h2>
+<ul>
+    <li><a href="./slow-load-10s.html">slow-load-10s</a>: A render-blocking stylesheet answers after 10s: nothing paints and the load event ends at about 10s.</li>
+    <li><a href="./slow-load-5s.html">slow-load-5s</a> <span class="control">control</span>: A render-blocking stylesheet answers after 5s: nothing paints and the load event ends at about 5s.</li>
+    <li><a href="./slow-load-10s-painted.html">slow-load-10s-painted</a> <span class="control">control</span>: Text paints at once, but one image answers after 10s, so the load event ends at about 10s.</li>
+    <li><a href="./load-never-ends.html">load-never-ends</a>: First paint at about 4s, and an embedded frame that never answers keeps the load event from ending.</li>
+    <li><a href="./slow-ttfb.html?delay=9000">slow-ttfb</a>: The server takes 9s to answer the navigation request; the article then loads at once. Change <code>delay</code> (ms, up to 30000) to vary it.</li>
+</ul>
+
+<h2>Error pages</h2>
+<ul>
+    <li><a href="./soft-404.html">soft-404</a>: A &quot;404 Not Found&quot; error page served with status 200, little visible text and a large inline bootstrap.</li>
+    <li><a href="./article-mentions-not-found.html">article-mentions-not-found</a> <span class="control">control</span>: A long, healthy article that mentions &quot;page not found&quot; once in its text and once inside a script string.</li>
+    <li><a href="./status-403.html?status=403">status-403</a>: Default web server &quot;403 Forbidden&quot; page, served with status 403.</li>
+    <li><a href="./status-429.html?status=429">status-429</a>: Default web server &quot;429 Too Many Requests&quot; page, served with status 429.</li>
+    <li><a href="./status-500.html?status=500">status-500</a>: Default web server &quot;500 Internal Server Error&quot; page, served with status 500.</li>
+    <li><a href="./status-503.html?status=503">status-503</a>: Default web server &quot;503 Service Temporarily Unavailable&quot; page, served with status 503.</li>
+    <li><a href="./forbidden-200.html">forbidden-200</a>: The same &quot;403 Forbidden&quot; page, served with status 200.</li>
+    <li><a href="./bare-forbidden-403.html?status=403">bare-forbidden-403</a>: A &quot;Forbidden&quot; page without the 403 code in its text, served with status 403.</li>
+    <li><a href="./something-went-wrong.html">something-went-wrong</a>: App error state: &quot;Something went wrong&quot; with a retry button and little else.</li>
+</ul>
+
+<h2>Block pages and challenges</h2>
+<ul>
+    <li><a href="./waf-challenge.html?status=403">waf-challenge</a>: Firewall block page: one line of text and a script from a firewall resource path, served with status 403.</li>
+    <li><a href="./waf-error-status-long.html?status=403">waf-error-status-long</a>: Site-styled block page with full navigation and footer (over 2000 characters) plus the firewall script, served with status 403.</li>
+    <li><a href="./security-checkpoint.html">security-checkpoint</a>: A security checkpoint interstitial that never clears.</li>
+    <li><a href="./security-checkpoint-cleared-late.html">security-checkpoint-cleared-late</a>: A security checkpoint interstitial that clears after 9s and is replaced by the article.</li>
+    <li><a href="./bot-challenge.html?status=403">bot-challenge</a>: Bot-challenge interstitial with a spinner and a request reference, served with status 403.</li>
+</ul>
+
+<h2>Blank or empty pages</h2>
+<ul>
+    <li><a href="./app-root-empty.html">app-root-empty</a>: Single-page app shell: empty #root, its bundle 404s and nothing renders; the title is set.</li>
+    <li><a href="./blank-no-title.html">blank-no-title</a>: Completely empty document: no title, empty body.</li>
+    <li><a href="./blank-then-late.html">blank-then-late</a>: Empty #app for 12s, then the article is rendered by script.</li>
+    <li><a href="./blank-viewport-region.html">blank-viewport-region</a>: A 60px header with navigation text renders, but the app container below it stays empty and fills the viewport (its bundle returns 500).</li>
+    <li><a href="./tiny-page.html">tiny-page</a>: A document with a title and two characters of body text.</li>
+    <li><a href="./spinner-forever.html">spinner-forever</a>: App spinner that never resolves: its data request never answers and a second request returns 502.</li>
+    <li><a href="./skeleton-resolves-2s.html">skeleton-resolves-2s</a> <span class="control">control</span>: Skeleton placeholders in #app for 2s, then replaced by the article.</li>
+</ul>
+
+<h2>Broken resources</h2>
+<ul>
+    <li><a href="./missing-styles.html">missing-styles</a>: Three of four stylesheets fail (404, 404, 500); the page renders with fallback styling only.</li>
+    <li><a href="./missing-font.html">missing-font</a>: Two web fonts used by the visible text fail: one 404s, one returns bytes that do not decode.</li>
+    <li><a href="./broken-images.html">broken-images</a>: 6 of 10 content images fail (4 return a 404 HTML page, 2 return undecodable bytes), plus a broken 1x1 tracking pixel.</li>
+    <li><a href="./failed-subresources.html">failed-subresources</a>: Two scripts fail (503 and 404), a fetch returns 500, an XHR returns 404 and a beacon image 404s; the article itself renders.</li>
+    <li><a href="./blank-ad-slots.html">blank-ad-slots</a>: Article with collapsed ad slots: reserved empty boxes, empty about:blank frames, and hidden slots whose creatives fail.</li>
+    <li><a href="./comments-region-empty.html">comments-region-empty</a>: Article whose comments widget script 404s, leaving the #comments container empty.</li>
+    <li><a href="./comments-region-filled.html">comments-region-filled</a> <span class="control">control</span>: Article whose #comments container holds three comments.</li>
+</ul>
+
+<h2>Overlays and walls</h2>
+<ul>
+    <li><a href="./consent-fixed-undismissable.html">consent-fixed-undismissable</a>: Full-viewport fixed consent overlay over the article, with buttons that do nothing and no close control.</li>
+    <li><a href="./consent-inline.html">consent-inline</a> <span class="control">control</span>: The same consent text in a normal (static) footer.</li>
+    <li><a href="./accept-or-pay-fixed.html">accept-or-pay-fixed</a>: Full-viewport fixed &quot;accept tracking or subscribe for €2.99&quot; wall over the article.</li>
+    <li><a href="./accept-or-pay-inline.html">accept-or-pay-inline</a> <span class="control">control</span>: The same accept-or-pay text in a static box at the end of the article.</li>
+</ul>
+
+<h2>Unresponsive pages</h2>
+<ul>
+    <li><a href="./first-input-delay.html">first-input-delay</a>: Counts down for 3s, then blocks the main thread for 4s. A click during the block waits for it to end. <code>freezeAt</code> and <code>freezeFor</code> (ms) change the timing. <em>Wait for the page to turn red, then click the button once.</em></li>
+    <li><a href="./long-tasks-after-load.html">long-tasks-after-load</a>: After load the main thread is blocked from 2s to 6s, then by three 300ms tasks. <em>Click &quot;Show brew ratios&quot; between 2s and 6s after load.</em></li>
+</ul>
+
+<h2>Healthy pages</h2>
+<ul>
+    <li><a href="./healthy-article.html">healthy-article</a>: Healthy article: all resources succeed and it loads in well under a second.</li>
+    <li><a href="./healthy-spa.html">healthy-spa</a>: Healthy single-page app: #root is filled by script within 300ms, and all resources succeed.</li>
+</ul>
+
+<h2>Related pages</h2>
+<ul>
+    <li><a href="../captcha-detection/">CAPTCHA Detection Reference</a>: live CAPTCHA widgets and the shipped captcha detectors</li>
+    <li><a href="../detector-perf/">Detector performance</a>: detector timing overlay</li>
+    <li><a href="../web-interference-detection/">Web Interference Detection</a>: YouTube detection events</li>
+</ul>
+</body>
+</html>

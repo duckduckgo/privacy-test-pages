@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!--
+    Regression page for Android keyboard auto-dismiss on sites like gemini.google.com.
+
+    Root cause (WebView M139+): IME insets shrink the visual viewport. When the host app
+    also uses adjustResize, both mechanisms apply briefly and the visual viewport
+    collapses. Gemini-like pages clear composer focus on that resize, which hides the IME.
+
+    Android fix: duckduckgo/Android#9396 (stripWebViewImeInsets / DuckDuckGoWebView).
+    Docs: https://developer.android.com/develop/ui/views/layout/webapps/understand-window-insets
+  -->
+  <title>Test: IME visual viewport focus collapse</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      font-family: system-ui, sans-serif;
+    }
+    body {
+      margin: 0;
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+    }
+    main {
+      flex: 1;
+      padding: 16px;
+      padding-bottom: 96px;
+    }
+    .status {
+      font-family: ui-monospace, monospace;
+      font-size: 13px;
+      white-space: pre-wrap;
+      background: color-mix(in srgb, Canvas 92%, CanvasText 8%);
+      border: 1px solid color-mix(in srgb, CanvasText 20%, transparent);
+      border-radius: 8px;
+      padding: 12px;
+    }
+    .pass { color: #0a7a2f; font-weight: 600; }
+    .fail { color: #b00020; font-weight: 600; }
+    .composer {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      gap: 8px;
+      padding: 12px;
+      background: Canvas;
+      border-top: 1px solid color-mix(in srgb, CanvasText 20%, transparent);
+    }
+    .composer input {
+      flex: 1;
+      font-size: 16px;
+      padding: 12px;
+    }
+    label { display: block; margin: 8px 0; }
+    ol { padding-left: 20px; }
+    #log {
+      max-height: 220px;
+      overflow: auto;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+<p><a href="../index.html">[Home]</a></p>
+
+<main>
+  <h1>IME visual viewport focus collapse</h1>
+  <p><strong>Expected (fixed Android WebView / stripWebViewImeInsets on):</strong> tapping the composer opens the keyboard and keeps focus. <code>visualViewport.height</code> stays close to <code>innerHeight</code> (no double shrink).</p>
+  <p><strong>Bug behavior:</strong> keyboard appears briefly then dismisses because a large visual-viewport collapse clears focus (Gemini-like).</p>
+
+  <h2>Test steps</h2>
+  <ol>
+    <li>Open this page in DuckDuckGo Android (WebView ≥ M139).</li>
+    <li>Tap <em>Ask…</em> in the bottom composer.</li>
+    <li>Watch the live readout and whether the keyboard stays open.</li>
+    <li>Optional: disable <code>androidBrowserConfig.stripWebViewImeInsets</code> and retest — keyboard should dismiss itself.</li>
+  </ol>
+
+  <label>
+    <input type="checkbox" id="geminiMode" checked>
+    Gemini-like: blur focused input when visual viewport collapses (&gt;35% height drop)
+  </label>
+
+  <div id="readout" class="status">Waiting for interaction…</div>
+  <div id="verdict" class="status">Verdict: pending</div>
+  <div id="log" class="status"></div>
+</main>
+
+<form class="composer" id="composer" autocomplete="off" onsubmit="return false">
+  <input id="prompt" type="text" enterkeyhint="send" placeholder="Ask…" aria-label="Ask">
+</form>
+
+<script>
+  const prompt = document.getElementById('prompt');
+  const geminiMode = document.getElementById('geminiMode');
+  const readout = document.getElementById('readout');
+  const verdict = document.getElementById('verdict');
+  const logEl = document.getElementById('log');
+
+  const COLLAPSE_RATIO = 0.65; // fail if vv height drops below 65% of baseline while focused
+  let baselineVvHeight = null;
+  let sawFocus = false;
+  let collapsedWhileFocused = false;
+  let blurredByCollapse = false;
+  const lines = [];
+
+  function vv() {
+    return window.visualViewport || {
+      width: window.innerWidth,
+      height: window.innerHeight,
+      offsetTop: 0,
+      scale: 1,
+      addEventListener() {}
+    };
+  }
+
+  function log(msg) {
+    const t = new Date().toISOString().slice(11, 23);
+    lines.unshift(`[${t}] ${msg}`);
+    logEl.textContent = lines.slice(0, 40).join('\n');
+  }
+
+  function metrics() {
+    const v = vv();
+    return {
+      innerH: window.innerHeight,
+      vvH: Math.round(v.height),
+      vvW: Math.round(v.width),
+      offsetTop: Math.round(v.offsetTop || 0),
+      scale: Number((v.scale || 1).toFixed(3)),
+      focused: document.activeElement === prompt,
+      ratio: baselineVvHeight ? (v.height / baselineVvHeight) : null
+    };
+  }
+
+  function render() {
+    const m = metrics();
+    readout.textContent = [
+      `innerHeight: ${m.innerH}`,
+      `visualViewport.height: ${m.vvH}`,
+      `visualViewport.width: ${m.vvW}`,
+      `visualViewport.offsetTop: ${m.offsetTop}`,
+      `visualViewport.scale: ${m.scale}`,
+      `baselineVvHeight: ${baselineVvHeight ?? 'n/a'}`,
+      `vv/baseline: ${m.ratio == null ? 'n/a' : m.ratio.toFixed(3)}`,
+      `input focused: ${m.focused}`,
+      `sawFocus: ${sawFocus}`,
+      `collapsedWhileFocused: ${collapsedWhileFocused}`,
+      `blurredByCollapse: ${blurredByCollapse}`
+    ].join('\n');
+
+    if (!sawFocus) {
+      verdict.className = 'status';
+      verdict.textContent = 'Verdict: pending — tap the composer';
+      return;
+    }
+
+    // After focus, a healthy host should keep vv roughly aligned with the (already resized) layout.
+    // Collapse + blur is the failure signal matching gemini.google.com.
+    if (collapsedWhileFocused || blurredByCollapse || (!m.focused && sawFocus && !document.hasFocus?.())) {
+      // still evaluating: allow brief settle, but if we blurred due to collapse it's a fail
+    }
+
+    if (blurredByCollapse || (collapsedWhileFocused && !m.focused)) {
+      verdict.className = 'status fail';
+      verdict.textContent = 'Verdict: FAIL — visual viewport collapsed and composer lost focus (keyboard will dismiss)';
+      return;
+    }
+
+    if (m.focused && (m.ratio == null || m.ratio >= COLLAPSE_RATIO)) {
+      verdict.className = 'status pass';
+      verdict.textContent = 'Verdict: PASS — composer still focused without a collapsing visual viewport';
+      return;
+    }
+
+    if (m.focused && m.ratio != null && m.ratio < COLLAPSE_RATIO) {
+      verdict.className = 'status fail';
+      verdict.textContent = 'Verdict: FAIL — visual viewport collapsed while focused (double IME padding)';
+      return;
+    }
+
+    verdict.className = 'status';
+    verdict.textContent = 'Verdict: indeterminate — refocus the composer and watch for collapse';
+  }
+
+  function onViewportChange(reason) {
+    const m = metrics();
+    if (baselineVvHeight == null && m.vvH > 0) {
+      baselineVvHeight = m.vvH;
+    }
+
+    if (m.focused && baselineVvHeight && m.vvH / baselineVvHeight < COLLAPSE_RATIO) {
+      if (!collapsedWhileFocused) {
+        collapsedWhileFocused = true;
+        log(`${reason}: viewport collapsed while focused (${m.vvH}/${baselineVvHeight})`);
+      }
+      if (geminiMode.checked) {
+        blurredByCollapse = true;
+        prompt.blur();
+        log(`${reason}: Gemini-like blur() after collapse`);
+      }
+    }
+    render();
+  }
+
+  prompt.addEventListener('focus', () => {
+    sawFocus = true;
+    // Refresh baseline around focus so rotate/resize before interaction doesn't poison the ratio.
+    baselineVvHeight = vv().height;
+    collapsedWhileFocused = false;
+    blurredByCollapse = false;
+    log(`focus: baselineVvHeight=${baselineVvHeight}`);
+    render();
+  });
+
+  prompt.addEventListener('blur', () => {
+    log('blur');
+    render();
+  });
+
+  vv().addEventListener('resize', () => onViewportChange('vv-resize'));
+  vv().addEventListener('scroll', () => onViewportChange('vv-scroll'));
+  window.addEventListener('resize', () => onViewportChange('window-resize'));
+
+  render();
+  log('ready');
+</script>
+</body>
+</html>

@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebContent memory benchmark</title>
+    <style>
+        body { font-family: -apple-system, system-ui, sans-serif; line-height: 1.5; margin: 0 auto; max-width: 960px; padding: 1rem; }
+        h1 { font-size: 20px; margin: 0 0 4px; }
+        code { background: #f2f2f2; padding: 0 0.25rem; border-radius: 3px; font-size: 0.9em; }
+        .note { color: #555; font-size: 14px; }
+        .howto { background: #f0f6ff; border: 1px solid #b8d4f0; padding: 12px 16px; border-radius: 6px; font-size: 14px; }
+        .howto ol { margin: 8px 0 0; padding-left: 20px; }
+        .howto li { margin: 4px 0; }
+        .controls { margin: 12px 0; display: flex; gap: 8px; flex-wrap: wrap; }
+        button { padding: 8px 14px; font-size: 14px; cursor: pointer; }
+        #status { font-weight: 600; }
+        #summary { background: #f7f7f7; border: 1px solid #ddd; border-radius: 6px; padding: 12px; white-space: pre-wrap; font-size: 13px; }
+        #frames iframe { width: 24px; height: 24px; border: 1px solid #ccc; margin: 1px; }
+    </style>
+</head>
+<body>
+    <h1>WebContent memory benchmark</h1>
+    <p class="note">Adds same-origin <code>about:blank</code> iframes in batches until the browser's web content
+        process is killed, then records how many frames it reached. Browsers that inject scripts into every frame
+        pay that cost per iframe, so comparing a browser with a plain web view on the same device shows how much
+        memory the injected scripts take. The count is saved before each batch, so it survives the kill and the
+        page picks up where it left off after the tab reloads.</p>
+
+    <div class="howto">
+        <strong>How to run</strong>
+        <ol>
+            <li>Write down the device model and OS version. Don't rely on the user agent: recent iOS versions
+                report a frozen OS version.</li>
+            <li>Restart the device and close other apps.</li>
+            <li>Open this page with <code>?label=&lt;browser&gt;&amp;autostart=1</code> and keep the tab in the
+                foreground with the screen on. If the browser doesn't reload the tab after a kill, reload it
+                yourself.</li>
+            <li>Wait for <strong>Done</strong>, then copy the summary. Each kill is followed by a 65&nbsp;s
+                cooldown, so 5 runs take about 6–8 minutes.</li>
+            <li>Repeat in the baseline browser (a plain web view without injected scripts) on the same device.</li>
+        </ol>
+        <p class="note" style="margin-bottom: 0;">
+            URL parameters (defaults in brackets):
+            <code>label</code>, <code>autostart=1</code>, <code>runs</code> [5], <code>batch</code> frames per
+            step [10], <code>interval</code> ms between steps [200], <code>max</code> frames before a run counts
+            as survived [2000], <code>paragraphs</code> per frame [0], <code>mode=blank|write</code> [blank;
+            <code>write</code> fills each frame with <code>document.write</code>], <code>cooldown</code> seconds
+            after a kill [65].
+        </p>
+    </div>
+
+    <div class="controls">
+        <button id="start">Start</button>
+        <button id="stop">Stop</button>
+        <button id="reset">Reset results</button>
+    </div>
+
+    <p id="status" role="status">Idle</p>
+    <pre id="summary"></pre>
+    <div id="frames"></div>
+
+    <script>
+        (function () {
+            const STORAGE_KEY = 'webcontent-memory-benchmark';
+            const params = new URLSearchParams(location.search);
+            const statusEl = document.getElementById('status');
+            const summaryEl = document.getElementById('summary');
+            const framesEl = document.getElementById('frames');
+
+            function numberParam (name, fallback, min) {
+                const value = Number(params.get(name));
+                return params.has(name) && Number.isFinite(value) && value >= min ? value : fallback;
+            }
+
+            const urlConfig = {
+                label: params.get('label') || '',
+                mode: params.get('mode') === 'write' ? 'write' : 'blank',
+                paragraphs: numberParam('paragraphs', 0, 0),
+                batch: numberParam('batch', 10, 1),
+                interval: numberParam('interval', 200, 0),
+                max: numberParam('max', 2000, 1),
+                runs: numberParam('runs', 5, 1),
+                cooldown: numberParam('cooldown', 65, 0)
+            };
+
+            function freshState () {
+                return { config: urlConfig, running: false, runs: [], current: null, nextRunAt: 0 };
+            }
+
+            const hasSavedState = localStorage.getItem(STORAGE_KEY) !== null;
+
+            function loadState () {
+                try {
+                    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || freshState();
+                } catch {
+                    return freshState();
+                }
+            }
+
+            function saveState () {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            }
+
+            let state = loadState();
+            const config = () => state.config;
+
+            // A run that is still open on load means the page went away without a pagehide event:
+            // the web content process was killed and the tab was reloaded.
+            if (state.current) {
+                recordRun('killed');
+            }
+
+            // A normal navigation or reload fires pagehide. Discard that run instead of counting it as a kill.
+            addEventListener('pagehide', () => {
+                if (!state.current) return;
+                state.current = null;
+                state.running = false;
+                saveState();
+            });
+
+            function recordRun (outcome) {
+                const seconds = Math.round((Date.now() - state.current.startedAt) / 1000);
+                state.runs.push({ frames: state.current.frames, outcome, seconds });
+                state.current = null;
+                // The cooldown keeps kills more than 60 s apart, so the browser keeps reloading the tab
+                // instead of showing a crash page.
+                state.nextRunAt = Date.now() + (outcome === 'killed' ? config().cooldown : 5) * 1000;
+                saveState();
+            }
+
+            function makeFrame () {
+                const frame = document.createElement('iframe');
+                frame.src = 'about:blank';
+                if (config().paragraphs > 0 || config().mode === 'write') {
+                    frame.addEventListener('load', () => fillFrame(frame), { once: true });
+                }
+                return frame;
+            }
+
+            function fillFrame (frame) {
+                const doc = frame.contentDocument;
+                if (!doc) return;
+                const text = 'Benchmark filler text to give each frame some DOM and layout work.';
+                if (config().mode === 'write') {
+                    doc.open();
+                    doc.write(`<!DOCTYPE html><html><body>${`<p>${text}</p>`.repeat(config().paragraphs)}</body></html>`);
+                    doc.close();
+                    return;
+                }
+                for (let i = 0; i < config().paragraphs; i++) {
+                    const p = doc.createElement('p');
+                    p.textContent = text;
+                    doc.body.appendChild(p);
+                }
+            }
+
+            function addBatch () {
+                if (!state.current) return;
+                const target = Math.min(state.current.frames + config().batch, config().max);
+                // Save the count before creating the frames, so it survives a kill in the middle of the batch.
+                state.current.frames = target;
+                saveState();
+                while (framesEl.childElementCount < target) {
+                    framesEl.appendChild(makeFrame());
+                }
+                render();
+                if (target >= config().max) {
+                    recordRun('survived');
+                    location.reload();
+                    return;
+                }
+                setTimeout(addBatch, config().interval);
+            }
+
+            function tick () {
+                if (state.running && state.runs.length >= config().runs) {
+                    state.running = false;
+                    saveState();
+                }
+                if (!state.running) {
+                    render();
+                    return;
+                }
+                if (Date.now() < state.nextRunAt) {
+                    render();
+                    setTimeout(tick, 1000);
+                    return;
+                }
+                state.current = { frames: 0, startedAt: Date.now() };
+                saveState();
+                addBatch();
+            }
+
+            function median (values) {
+                const sorted = [...values].sort((a, b) => a - b);
+                const mid = Math.floor(sorted.length / 2);
+                return sorted.length % 2 ? sorted[mid] : Math.round((sorted[mid - 1] + sorted[mid]) / 2);
+            }
+
+            function statusText () {
+                const total = config().runs;
+                if (state.current) {
+                    return `Running: run ${state.runs.length + 1} of ${total}, ${state.current.frames} frames`;
+                }
+                if (state.running) {
+                    const wait = Math.max(0, Math.ceil((state.nextRunAt - Date.now()) / 1000));
+                    return `Cooling down: run ${state.runs.length + 1} of ${total} starts in ${wait} s`;
+                }
+                if (state.runs.length >= total) return `Done: ${state.runs.length} of ${total} runs finished`;
+                if (state.runs.length > 0) return `Stopped: ${state.runs.length} of ${total} runs finished`;
+                return 'Idle';
+            }
+
+            function render () {
+                const c = config();
+                const killed = state.runs.filter((run) => run.outcome === 'killed').map((run) => run.frames);
+                const lines = [
+                    'WebContent memory benchmark',
+                    `label: ${c.label || '(none)'}`,
+                    `user agent: ${navigator.userAgent}`,
+                    `settings: mode=${c.mode} paragraphs=${c.paragraphs} batch=${c.batch} interval=${c.interval}ms max=${c.max} cooldown=${c.cooldown}s`,
+                    ...state.runs.map((run, i) => run.outcome === 'killed'
+                        ? `run ${i + 1}: killed at ${run.frames} frames (${run.seconds} s)`
+                        : `run ${i + 1}: survived ${run.frames} frames (${run.seconds} s)`),
+                    killed.length
+                        ? `result: ${killed.length} of ${state.runs.length} runs killed, median ${median(killed)} frames`
+                        : `result: ${state.runs.length ? 'no kills' : 'no runs yet'}`
+                ];
+                summaryEl.textContent = lines.join('\n');
+                statusEl.textContent = statusText();
+            }
+
+            function start () {
+                state = freshState();
+                state.running = true;
+                saveState();
+                tick();
+            }
+
+            document.getElementById('start').addEventListener('click', start);
+            document.getElementById('stop').addEventListener('click', () => {
+                state.running = false;
+                state.current = null;
+                saveState();
+                location.reload();
+            });
+            document.getElementById('reset').addEventListener('click', () => {
+                localStorage.removeItem(STORAGE_KEY);
+                state = freshState();
+                render();
+            });
+
+            // Autostart only on a clean slate, so a stopped or finished benchmark doesn't restart on reload.
+            if (params.get('autostart') === '1' && !hasSavedState) {
+                start();
+            } else {
+                tick();
+            }
+        })();
+    </script>
+</body>
+</html>

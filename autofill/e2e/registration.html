@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Register</title>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+<!--
+  Used by automated end-to-end tests. They find elements by label text, id and button text,
+  and submit the same form more than once, so the form and its values must stay on the page after submit.
+-->
+<p><a href="../../index.html#autofill">[Home]</a></p>
+<div class="dialog">
+  <h2>Register</h2>
+  <form id="registration-form" action="/autofill/e2e/registration.html" novalidate>
+    <fieldset>
+      <label for="username">Username</label>
+      <input id="username" name="username" type="text" autocomplete="username">
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" autocomplete="new-password">
+      <button type="submit">Register</button>
+    </fieldset>
+  </form>
+  <p id="result" role="status"></p>
+</div>
+<script>
+  const registrationForm = document.getElementById('registration-form');
+  let registrationSubmissions = 0;
+  registrationForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      registrationSubmissions++;
+      document.getElementById('result').textContent = `Submitted ${registrationSubmissions} time(s)`;
+  });
+</script>
+</body>
+</html>

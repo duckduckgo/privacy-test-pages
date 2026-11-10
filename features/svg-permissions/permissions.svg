@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 360 640" preserveAspectRatio="xMidYMin meet">
+  <title>SVG document permission requests</title>
+  <foreignObject width="360" height="640">
+    <div xmlns="http://www.w3.org/1999/xhtml" style="font: 16px -apple-system, sans-serif; padding: 12px;">
+      <h1 style="font-size: 20px;">SVG document</h1>
+      <p>Served as <code>image/svg+xml</code> with an <code>&lt;svg&gt;</code> root.</p>
+      <p><code id="document-info">loading</code></p>
+      <p><button id="location" type="button">Request location</button></p>
+      <p><button id="camera" type="button">Request camera</button></p>
+      <p><button id="microphone" type="button">Request microphone</button></p>
+      <p><button id="camera-microphone" type="button">Request camera and microphone</button></p>
+      <p id="result" role="status">No request yet</p>
+    </div>
+  </foreignObject>
+  <script href="permissions.js"/>
+</svg>

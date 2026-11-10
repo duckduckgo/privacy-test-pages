@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Served as image/svg+xml, but the root element is not <svg>. XML documents ignore the viewport
+     meta tag, so the large font keeps the page readable on phones. -->
+<document>
+  <div xmlns="http://www.w3.org/1999/xhtml" style="font: 40px -apple-system, sans-serif; padding: 24px;">
+    <style>button { font: inherit; }</style>
+    <h1 style="font-size: 52px;">Arbitrary XML document</h1>
+    <p>Served as <code>image/svg+xml</code> with a <code>&lt;document&gt;</code> root.</p>
+    <p><code id="document-info">loading</code></p>
+    <p><button id="location" type="button">Request location</button></p>
+    <p><button id="camera" type="button">Request camera</button></p>
+    <p><button id="microphone" type="button">Request microphone</button></p>
+    <p><button id="camera-microphone" type="button">Request camera and microphone</button></p>
+    <p id="result" role="status">No request yet</p>
+    <script src="permissions.js"></script>
+  </div>
+</document>

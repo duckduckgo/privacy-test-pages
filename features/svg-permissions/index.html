@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Site Permissions (SVG documents)</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.5;
+    }
+    iframe {
+      width: 100%;
+      height: 420px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+<p><a href="../../">[Home]</a></p>
+
+<h1>Site Permissions (SVG documents)</h1>
+
+<p>Requests location, camera and microphone from SVG documents, to check that a browser's
+permission handling also covers documents that aren't HTML. Each document shows its content type,
+root element and origin, then the result of each request.</p>
+
+<h2>Top-level documents</h2>
+<ul>
+  <li><a href="./permissions.svg">SVG document</a>: served as <code>image/svg+xml</code> with an
+    <code>&lt;svg&gt;</code> root. Requests should behave as they do on an HTML page from the same site.</li>
+  <li><a href="./arbitrary-xml.svg">Arbitrary XML document</a>: also served as <code>image/svg+xml</code>,
+    but its root is <code>&lt;document&gt;</code>, so it isn't an SVG document. Use it to check that
+    SVG-specific handling doesn't apply to other XML.</li>
+  <li><a href="../geolocation.html">HTML baseline (Geolocation)</a> to compare with.</li>
+</ul>
+
+<h2>Same-origin SVG iframe</h2>
+<p>Embedded with <code>allow="geolocation; camera; microphone"</code>. Requests should behave as they
+do in the top-level SVG document.</p>
+<iframe src="./permissions.svg" allow="geolocation; camera; microphone" title="Same-origin SVG document"></iframe>
+
+<h2>Cross-origin SVG iframe</h2>
+<p>Origin: <code id="cross-origin">-</code>. Embedded with the same <code>allow</code> attribute.
+Compare the results with the HTML iframes on the <a href="../iframe-permissions.html">iframe identity</a> page.</p>
+<iframe id="cross-origin-frame" allow="geolocation; camera; microphone" title="Cross-origin SVG document"></iframe>
+
+<script>
+  // Load the same SVG from a different origin: the third-party test domain on the live site,
+  // and 127.0.0.1 or localhost when running locally.
+  const CROSS_ORIGIN_HOSTS = {
+    'privacy-test-pages.site': 'good.third-party.site',
+    'first-party.example': 'third-party.example',
+    localhost: '127.0.0.1',
+    '127.0.0.1': 'localhost'
+  };
+  const crossHost = Object.entries(CROSS_ORIGIN_HOSTS)
+    .find(([host]) => location.hostname === host || location.hostname.endsWith('.' + host))?.[1];
+  const crossUrl = new URL('./permissions.svg', location.href);
+  if (crossHost) {
+    crossUrl.hostname = crossHost;
+  }
+  document.getElementById('cross-origin').textContent = crossHost ? crossUrl.origin : `${crossUrl.origin} (no cross-origin host known for this site)`;
+  document.getElementById('cross-origin-frame').src = crossUrl.href;
+</script>
+</body>
+</html>

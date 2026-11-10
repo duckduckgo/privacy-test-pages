@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Typed-only URL Interception</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    .test-section {
+      background: #f5f5f5;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin: 20px 0;
+    }
+    .info-box {
+      background: #e7f3ff;
+      border-left: 4px solid #3969EF;
+      padding: 12px 16px;
+      margin: 20px 0;
+    }
+    .expect {
+      color: #666;
+      font-size: 0.9em;
+    }
+    input[type="url"] {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 8px;
+      font-size: 16px;
+    }
+    button {
+      background: #3969EF;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 15px;
+      cursor: pointer;
+      margin: 4px 4px 4px 0;
+    }
+    iframe {
+      border: 2px solid #ccc;
+      width: 100%;
+      height: 160px;
+    }
+    code {
+      background: #e9ecef;
+      padding: 2px 6px;
+      border-radius: 3px;
+      word-break: break-all;
+    }
+  </style>
+</head>
+<body>
+<p><a href="../../index.html">[Home]</a></p>
+
+<h1>Typed-only URL Interception</h1>
+
+<p>
+  Some browser features open a native screen when the user enters a specific URL in the address bar.
+  When that should only happen for URLs the user <strong>typed or pasted</strong> themselves, a web page
+  must not be able to trigger the same screen by navigating to that URL.
+</p>
+<p>
+  This page navigates to a target URL in every way a web page can. For each case, the browser should
+  load the URL as a normal web page (or block it) and <strong>should not</strong> open the native screen.
+</p>
+
+<div class="test-section">
+  <h2>Target URL</h2>
+  <form id="target-form">
+    <label for="target">URL the browser intercepts when typed:</label>
+    <input type="url" id="target" name="url" placeholder="https://duckduckgo.com/some-path" required>
+    <button type="submit">Use this URL</button>
+  </form>
+  <p class="expect">
+    You can also link to this page with <code>?url=https://…</code>. Only DuckDuckGo domains are accepted.
+  </p>
+  <p id="target-status"></p>
+</div>
+
+<div id="tests" hidden>
+  <div class="info-box">
+    <strong>Positive control (manual):</strong> type or paste <code class="target-text"></code> into the
+    address bar and press Enter. The native screen <strong>should</strong> open. If it doesn't, the results
+    below don't mean anything.
+  </div>
+
+  <div class="test-section">
+    <h2>1. Links</h2>
+    <ul>
+      <li><a class="target-link" href="#">Plain link</a></li>
+      <li><a class="target-link" href="#" target="_blank">Link with <code>target="_blank"</code></a></li>
+      <li><a class="target-link" href="#" target="_blank" rel="noopener noreferrer">Link with <code>target="_blank" rel="noopener noreferrer"</code></a></li>
+      <li><a class="target-link" href="#" download>Link with <code>download</code> attribute</a></li>
+    </ul>
+    <p class="expect">Also try long-pressing / right-clicking these and choosing "Open in new tab".</p>
+  </div>
+
+  <div class="test-section">
+    <h2>2. JavaScript navigation</h2>
+    <button data-nav="assign">location.href = url</button>
+    <button data-nav="replace">location.replace(url)</button>
+    <button data-nav="open">window.open(url)</button>
+    <button data-nav="delayed">location.href = url (after 3s, no user gesture)</button>
+  </div>
+
+  <div class="test-section">
+    <h2>3. Redirects from another page</h2>
+    <ul>
+      <li><a class="redirect-link" data-method="js" href="#">Intermediate page → JavaScript redirect</a></li>
+      <li><a class="redirect-link" data-method="meta" href="#">Intermediate page → <code>&lt;meta http-equiv="refresh"&gt;</code></a></li>
+      <li><a class="server-redirect-link" href="#">Server-side redirect (HTTP 307)</a></li>
+    </ul>
+    <p class="expect">
+      The server-side case covers a browser that matches the URL after a redirect instead of matching what the user entered.
+    </p>
+  </div>
+
+  <div class="test-section">
+    <h2>4. Forms</h2>
+    <form id="get-form" method="get">
+      <button type="submit">Submit GET form to url</button>
+    </form>
+    <form id="post-form" method="post">
+      <button type="submit">Submit POST form to url</button>
+    </form>
+  </div>
+
+  <div class="test-section">
+    <h2>5. Frames</h2>
+    <button id="load-iframe">Load url in an iframe</button>
+    <div id="iframe-container"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>6. URL variants</h2>
+    <p class="expect">
+      These are links, so none of them should open the native screen. Also <strong>type</strong> each one into the
+      address bar to check which variants the typed-URL match accepts. Decide the expected result for each variant in the spec.
+    </p>
+    <ul id="variants"></ul>
+  </div>
+
+  <div class="test-section">
+    <h2>7. Other entry points (manual)</h2>
+    <ul>
+      <li>Open the URL from a bookmark or favorite.</li>
+      <li>Select the URL from address-bar autocomplete / history suggestions.</li>
+      <li>Open the URL from another app (e.g. a link in Messages or Mail).</li>
+      <li>Navigate back and forward to a history entry for the URL.</li>
+    </ul>
+    <p class="expect">Expected behavior for these depends on the feature's spec.</p>
+  </div>
+</div>
+
+<script>
+    const ALLOWED_HOSTS = ['duckduckgo.com', 'duck.com', 'duck.ai'];
+
+    function isAllowed (url) {
+        return url.protocol === 'https:' &&
+            ALLOWED_HOSTS.some(host => url.hostname === host || url.hostname.endsWith('.' + host));
+    }
+
+    function parseTarget (value) {
+        try {
+            const url = new URL(value);
+            return isAllowed(url) ? url : null;
+        } catch {
+            return null;
+        }
+    }
+
+    function variantsOf (url) {
+        const base = url.href.replace(/\/$/, '');
+        const http = new URL(url.href);
+        http.protocol = 'http:';
+        const www = new URL(url.href);
+        www.hostname = www.hostname.startsWith('www.') ? www.hostname.slice(4) : 'www.' + www.hostname;
+        const upper = new URL(url.href);
+        upper.pathname = upper.pathname.toUpperCase();
+
+        return [
+            ['Trailing slash', base + '/'],
+            ['No trailing slash', base],
+            ['http:// instead of https://', http.href],
+            ['With / without www.', www.href],
+            ['Upper-case path', upper.href],
+            ['Extra query string', base + '?ref=test'],
+            ['Fragment', base + '#test'],
+            ['Extra path segment', base + '/extra']
+        ];
+    }
+
+    function render (url) {
+        const href = url.href;
+        document.getElementById('tests').hidden = false;
+        document.getElementById('target-status').textContent = 'Testing: ' + href;
+
+        document.querySelectorAll('.target-text').forEach(el => { el.textContent = href; });
+        document.querySelectorAll('.target-link').forEach(el => { el.href = href; });
+
+        const redirectPage = new URL('./redirect.html', location.href);
+        document.querySelectorAll('.redirect-link').forEach(el => {
+            redirectPage.search = new URLSearchParams({ to: href, method: el.dataset.method }).toString();
+            el.href = redirectPage.href;
+        });
+
+        const serverRedirect = new URL('/redirect', location.href);
+        serverRedirect.search = new URLSearchParams({ destination: href }).toString();
+        document.querySelector('.server-redirect-link').href = serverRedirect.href;
+
+        document.getElementById('get-form').action = href;
+        document.getElementById('post-form').action = href;
+
+        const list = document.getElementById('variants');
+        list.replaceChildren();
+        for (const [label, variant] of variantsOf(url)) {
+            const li = document.createElement('li');
+            const a = document.createElement('a');
+            a.href = variant;
+            a.textContent = variant;
+            li.append(label + ': ', a);
+            list.append(li);
+        }
+    }
+
+    let target = null;
+
+    document.querySelectorAll('[data-nav]').forEach(button => {
+        button.addEventListener('click', () => {
+            if (!target) return;
+            const href = target.href;
+            switch (button.dataset.nav) {
+            case 'assign': location.href = href; break;
+            case 'replace': location.replace(href); break;
+            case 'open': window.open(href); break;
+            case 'delayed': setTimeout(() => { location.href = href; }, 3000); break;
+            }
+        });
+    });
+
+    document.getElementById('load-iframe').addEventListener('click', () => {
+        if (!target) return;
+        const iframe = document.createElement('iframe');
+        iframe.src = target.href;
+        document.getElementById('iframe-container').replaceChildren(iframe);
+    });
+
+    document.getElementById('target-form').addEventListener('submit', event => {
+        event.preventDefault();
+        const value = document.getElementById('target').value;
+        const url = parseTarget(value);
+        if (!url) {
+            document.getElementById('target-status').textContent = 'Please enter an https:// URL on a DuckDuckGo domain.';
+            return;
+        }
+        const params = new URLSearchParams({ url: url.href });
+        history.replaceState(null, '', '?' + params.toString());
+        target = url;
+        render(url);
+    });
+
+    const initial = new URLSearchParams(location.search).get('url');
+    if (initial) {
+        document.getElementById('target').value = initial;
+        target = parseTarget(initial);
+        if (target) {
+            render(target);
+        } else {
+            document.getElementById('target-status').textContent = 'Please enter an https:// URL on a DuckDuckGo domain.';
+        }
+    }
+</script>
+
+</body>
+</html>

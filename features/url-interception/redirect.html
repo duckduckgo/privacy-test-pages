@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Redirecting…</title>
+</head>
+<body>
+<p><a href="./index.html">[Back to URL interception tests]</a></p>
+
+<p id="status">Redirecting…</p>
+
+<script>
+    const ALLOWED_HOSTS = ['duckduckgo.com', 'duck.com', 'duck.ai'];
+    const params = new URLSearchParams(location.search);
+    const status = document.getElementById('status');
+
+    let to = null;
+    try {
+        to = new URL(params.get('to'));
+    } catch {}
+
+    const allowed = to && to.protocol === 'https:' &&
+        ALLOWED_HOSTS.some(host => to.hostname === host || to.hostname.endsWith('.' + host));
+
+    if (!allowed) {
+        status.textContent = 'Missing or disallowed "to" parameter. Only https:// URLs on DuckDuckGo domains are accepted.';
+    } else if (params.get('method') === 'meta') {
+        status.textContent = 'Redirecting with <meta http-equiv="refresh"> to ' + to.href;
+        const meta = document.createElement('meta');
+        meta.httpEquiv = 'refresh';
+        meta.content = '1;url=' + to.href;
+        document.head.append(meta);
+    } else {
+        status.textContent = 'Redirecting with JavaScript to ' + to.href;
+        setTimeout(() => { location.href = to.href; }, 1000);
+    }
+</script>
+
+</body>
+</html>

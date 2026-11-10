@@ -239,7 +239,7 @@ app.get('/come-back', (req, res) => {
 </html>`);
 });
 
-const REDIRECT_ALLOWLIST = ['bad.third-party.site'];
+const REDIRECT_ALLOWLIST = ['bad.third-party.site', 'duckduckgo.com', 'duck.com', 'duck.ai'];
 
 app.get('/redirect', (req, res) => {
     const destination = req.query.destination;

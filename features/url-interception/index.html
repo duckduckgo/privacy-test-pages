@@ -108,7 +108,14 @@
     <button data-nav="assign">location.href = url</button>
     <button data-nav="replace">location.replace(url)</button>
     <button data-nav="open">window.open(url)</button>
-    <button data-nav="delayed">location.href = url (after 3s, no user gesture)</button>
+    <p>
+      <a id="auto-nav-link" href="#">Reload this page, then set location.href = url after 6s with no user gesture</a>
+    </p>
+    <p class="expect">
+      The automatic case starts from a fresh page load and waits longer than any browser's user-activation
+      window (5s in Chromium), so the navigation has no user gesture. Don't tap the page while it counts down.
+    </p>
+    <p id="auto-nav-status"></p>
   </div>
 
   <div class="test-section">
@@ -128,6 +135,11 @@
     <form id="get-form" method="get">
       <button type="submit">Submit GET form to url</button>
     </form>
+    <p class="expect">
+      A GET form always replaces the URL's query with its fields, so this navigates to
+      <code id="get-form-url"></code>. Type that URL in section 6 to check it still counts as a typed match;
+      otherwise this case passes for the wrong reason.
+    </p>
     <form id="post-form" method="post">
       <button type="submit">Submit POST form to url</button>
     </form>
@@ -177,25 +189,41 @@
         }
     }
 
-    function variantsOf (url) {
-        const base = url.href.replace(/\/$/, '');
-        const http = new URL(url.href);
-        http.protocol = 'http:';
-        const www = new URL(url.href);
-        www.hostname = www.hostname.startsWith('www.') ? www.hostname.slice(4) : 'www.' + www.hostname;
-        const upper = new URL(url.href);
-        upper.pathname = upper.pathname.toUpperCase();
+    // The URL a GET form with action=url navigates to. GET submission replaces the query with the
+    // serialized form fields (one hidden input per query parameter) and keeps the fragment, so a
+    // target without a query still gains an empty "?".
+    function getFormUrlOf (url) {
+        const query = new URLSearchParams(url.search).toString();
+        return url.origin + url.pathname + '?' + query + url.hash;
+    }
 
-        return [
-            ['Trailing slash', base + '/'],
-            ['No trailing slash', base],
-            ['http:// instead of https://', http.href],
-            ['With / without www.', www.href],
-            ['Upper-case path', upper.href],
-            ['Extra query string', base + '?ref=test'],
-            ['Fragment', base + '#test'],
-            ['Extra path segment', base + '/extra']
+    // Each variant changes one part of the URL (scheme, host, path, query or fragment) on a copy,
+    // so the other parts stay as the tester entered them.
+    function variantsOf (url) {
+        const variant = (label, change) => {
+            const copy = new URL(url.href);
+            change(copy);
+            return [label, copy.href];
+        };
+        const trimmedPath = url.pathname.replace(/\/+$/, '');
+
+        const variants = [
+            variant('Trailing slash', u => { u.pathname = trimmedPath + '/'; }),
+            variant('No trailing slash', u => { u.pathname = trimmedPath || '/'; }),
+            variant('http:// instead of https://', u => { u.protocol = 'http:'; }),
+            variant('With / without www.', u => {
+                u.hostname = u.hostname.startsWith('www.') ? u.hostname.slice(4) : 'www.' + u.hostname;
+            }),
+            variant('Upper-case path', u => { u.pathname = u.pathname.toUpperCase(); }),
+            variant('Extra query parameter', u => { u.searchParams.append('ref', 'test'); }),
+            variant('Fragment', u => { u.hash = 'test'; }),
+            variant('Extra path segment', u => { u.pathname = trimmedPath + '/extra'; }),
+            ['What the GET form in section 4 navigates to', getFormUrlOf(url)]
         ];
+
+        // Drop variants that end up identical to the target or to an earlier variant.
+        const seen = new Set([url.href]);
+        return variants.filter(([, href]) => !seen.has(href) && seen.add(href));
     }
 
     function render (url) {
@@ -216,8 +244,23 @@
         serverRedirect.search = new URLSearchParams({ destination: href }).toString();
         document.querySelector('.server-redirect-link').href = serverRedirect.href;
 
-        document.getElementById('get-form').action = href;
+        const getForm = document.getElementById('get-form');
+        getForm.action = url.origin + url.pathname + url.hash;
+        getForm.querySelectorAll('input[type="hidden"]').forEach(input => input.remove());
+        for (const [name, value] of url.searchParams) {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = name;
+            input.value = value;
+            getForm.prepend(input);
+        }
+        document.getElementById('get-form-url').textContent = getFormUrlOf(url);
         document.getElementById('post-form').action = href;
+
+        const autoNav = new URL(location.href);
+        autoNav.search = new URLSearchParams({ url: href, auto: '1' }).toString();
+        autoNav.hash = '';
+        document.getElementById('auto-nav-link').href = autoNav.href;
 
         const list = document.getElementById('variants');
         list.replaceChildren();
@@ -241,7 +284,6 @@
             case 'assign': location.href = href; break;
             case 'replace': location.replace(href); break;
             case 'open': window.open(href); break;
-            case 'delayed': setTimeout(() => { location.href = href; }, 3000); break;
             }
         });
     });
@@ -267,12 +309,38 @@
         render(url);
     });
 
-    const initial = new URLSearchParams(location.search).get('url');
+    // Navigates with no user gesture: runs from a fresh page load and waits past the longest
+    // user-activation window (5s in Chromium).
+    function startAutoNavigation (url) {
+        // Drop auto=1 so going back to this page doesn't start another countdown.
+        const params = new URLSearchParams({ url: url.href });
+        history.replaceState(null, '', '?' + params.toString());
+
+        const status = document.getElementById('auto-nav-status');
+        status.scrollIntoView();
+        let remaining = 6;
+        status.textContent = 'Navigating to ' + url.href + ' in ' + remaining + 's…';
+        const timer = setInterval(() => {
+            remaining -= 1;
+            if (remaining > 0) {
+                status.textContent = 'Navigating to ' + url.href + ' in ' + remaining + 's…';
+                return;
+            }
+            clearInterval(timer);
+            location.href = url.href;
+        }, 1000);
+    }
+
+    const initialParams = new URLSearchParams(location.search);
+    const initial = initialParams.get('url');
     if (initial) {
         document.getElementById('target').value = initial;
         target = parseTarget(initial);
         if (target) {
             render(target);
+            if (initialParams.get('auto') === '1') {
+                startAutoNavigation(target);
+            }
         } else {
             document.getElementById('target-status').textContent = 'Please enter an https:// URL on a DuckDuckGo domain.';
         }

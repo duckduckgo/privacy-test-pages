@@ -133,6 +133,7 @@
   <div class="test-section">
     <h2>4. Forms</h2>
     <form id="get-form" method="get">
+      <span id="get-form-fields"></span>
       <button type="submit">Submit GET form to url</button>
     </form>
     <p class="expect">
@@ -189,11 +190,18 @@
         }
     }
 
+    // A target's query parameters as GET form fields. Form submission turns every line break in a
+    // name or value into CRLF, so the expected URL is built from the same normalized pairs.
+    function getFormFieldsOf (url) {
+        const normalize = s => s.replace(/\r\n|\r|\n/g, '\r\n');
+        return [...url.searchParams].map(([name, value]) => [normalize(name), normalize(value)]);
+    }
+
     // The URL a GET form with action=url navigates to. GET submission replaces the query with the
-    // serialized form fields (one hidden input per query parameter) and keeps the fragment, so a
-    // target without a query still gains an empty "?".
+    // serialized form fields (one hidden input per query parameter, in order) and keeps the fragment,
+    // so a target without a query still gains an empty "?".
     function getFormUrlOf (url) {
-        const query = new URLSearchParams(url.search).toString();
+        const query = new URLSearchParams(getFormFieldsOf(url)).toString();
         return url.origin + url.pathname + '?' + query + url.hash;
     }
 
@@ -244,16 +252,17 @@
         serverRedirect.search = new URLSearchParams({ destination: href }).toString();
         document.querySelector('.server-redirect-link').href = serverRedirect.href;
 
-        const getForm = document.getElementById('get-form');
-        getForm.action = url.origin + url.pathname + url.hash;
-        getForm.querySelectorAll('input[type="hidden"]').forEach(input => input.remove());
-        for (const [name, value] of url.searchParams) {
+        // Field names can shadow form properties (e.g. a parameter named "action" or "prepend"),
+        // so use setAttribute on the form and keep the fields in their own container.
+        document.getElementById('get-form').setAttribute('action', url.origin + url.pathname + url.hash);
+        const fields = getFormFieldsOf(url).map(([name, value]) => {
             const input = document.createElement('input');
             input.type = 'hidden';
             input.name = name;
             input.value = value;
-            getForm.prepend(input);
-        }
+            return input;
+        });
+        document.getElementById('get-form-fields').replaceChildren(...fields);
         document.getElementById('get-form-url').textContent = getFormUrlOf(url);
         document.getElementById('post-form').action = href;
 

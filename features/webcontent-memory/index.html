@@ -44,9 +44,12 @@
             URL parameters (defaults in brackets):
             <code>label</code>, <code>autostart=1</code>, <code>runs</code> [5], <code>batch</code> frames per
             step [10], <code>interval</code> ms between steps [200], <code>max</code> frames before a run counts
-            as survived [2000], <code>paragraphs</code> per frame [0], <code>mode=blank|write</code> [blank;
-            <code>write</code> fills each frame with <code>document.write</code>], <code>cooldown</code> seconds
-            after a kill [65].
+            as survived [2000], <code>paragraphs</code> per frame [0], <code>mode=blank|write|http</code> [blank;
+            <code>write</code> fills each frame with <code>document.write</code>; <code>http</code> loads each frame
+            from a URL, so it gets the scripts a browser injects into real pages],
+            <code>frameSrc</code> URL for <code>http</code> frames [<code>frame.html</code> on this origin; use
+            <code>https://good.third-party.site/features/webcontent-memory/frame.html</code> for cross-origin
+            frames], <code>cooldown</code> seconds after a kill [65].
         </p>
     </div>
 
@@ -62,8 +65,9 @@
 
     <script>
         (function () {
-            const STORAGE_KEY = 'webcontent-memory-benchmark';
             const params = new URLSearchParams(location.search);
+            // Keyed by label, so runs with different labels in the same browser don't share results.
+            const STORAGE_KEY = `webcontent-memory-benchmark:${params.get('label') || ''}`;
             const statusEl = document.getElementById('status');
             const summaryEl = document.getElementById('summary');
             const framesEl = document.getElementById('frames');
@@ -75,7 +79,8 @@
 
             const urlConfig = {
                 label: params.get('label') || '',
-                mode: params.get('mode') === 'write' ? 'write' : 'blank',
+                mode: ['write', 'http'].includes(params.get('mode')) ? params.get('mode') : 'blank',
+                frameSrc: params.get('frameSrc') || 'frame.html',
                 paragraphs: numberParam('paragraphs', 0, 0),
                 batch: numberParam('batch', 10, 1),
                 interval: numberParam('interval', 200, 0),
@@ -131,6 +136,13 @@
 
             function makeFrame () {
                 const frame = document.createElement('iframe');
+                if (config().mode === 'http') {
+                    // A unique URL per frame, so each one is a separate load.
+                    const url = new URL(config().frameSrc, location.href);
+                    url.searchParams.set('n', framesEl.childElementCount);
+                    frame.src = url.href;
+                    return frame;
+                }
                 frame.src = 'about:blank';
                 if (config().paragraphs > 0 || config().mode === 'write') {
                     frame.addEventListener('load', () => fillFrame(frame), { once: true });
@@ -219,7 +231,7 @@
                     'WebContent memory benchmark',
                     `label: ${c.label || '(none)'}`,
                     `user agent: ${navigator.userAgent}`,
-                    `settings: mode=${c.mode} paragraphs=${c.paragraphs} batch=${c.batch} interval=${c.interval}ms max=${c.max} cooldown=${c.cooldown}s`,
+                    `settings: mode=${c.mode}${c.mode === 'http' ? ` frameSrc=${c.frameSrc}` : ''} paragraphs=${c.paragraphs} batch=${c.batch} interval=${c.interval}ms max=${c.max} cooldown=${c.cooldown}s`,
                     ...state.runs.map((run, i) => run.outcome === 'killed'
                         ? `run ${i + 1}: killed at ${run.frames} frames (${run.seconds} s)`
                         : `run ${i + 1}: survived ${run.frames} frames (${run.seconds} s)`),

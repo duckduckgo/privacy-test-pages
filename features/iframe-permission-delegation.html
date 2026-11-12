@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Camera and Microphone Delegation in Iframes</title>
+  <style>
+    body {
+      color: #111;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.4;
+      margin: 16px;
+    }
+    code, button, pre {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+    code { word-break: break-all; }
+    .panels {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: 1fr;
+      margin: 16px 0;
+    }
+    @media (min-width: 960px) {
+      .panels { grid-template-columns: 1fr 1fr; }
+    }
+    .panel {
+      border: 1px solid #d0d0d0;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .panel-header {
+      background: #f6f6f6;
+      border-bottom: 1px solid #d0d0d0;
+      padding: 8px 12px;
+    }
+    .panel-header h3 { margin: 0 0 4px; }
+    .panel-meta {
+      color: #555;
+      font-size: 0.85em;
+      margin: 2px 0;
+    }
+    .panel iframe {
+      border: none;
+      display: block;
+      height: 200px;
+      width: 100%;
+    }
+    table { border-collapse: collapse; max-width: 900px; }
+    th, td {
+      border: 1px solid #d0d0d0;
+      padding: 6px 8px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th { background: #f6f6f6; }
+    .table-wrap { overflow-x: auto; }
+
+    /* Frame roles (inside an iframe) */
+    body.frame-role { background: #eef4ff; margin: 8px; }
+    body.relay-role { margin: 0; }
+    .frame-ui, .relay-ui { display: none; }
+    body.frame-role .frame-ui, body.relay-role .relay-ui { display: block; }
+    body.frame-role .top-ui, body.relay-role .top-ui { display: none; }
+    .frame-ui .buttons { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
+    .frame-ui button { cursor: pointer; padding: 6px 12px; }
+    .frame-ui .result {
+      background: #fff;
+      border: 1px solid #d0d0d0;
+      font-size: 0.9em;
+      min-height: 1.4em;
+      padding: 6px 8px;
+    }
+    .relay-ui p { font-size: 0.85em; margin: 4px 8px; }
+    .relay-ui iframe { border: none; display: block; height: 170px; width: 100%; }
+  </style>
+</head>
+<body>
+
+<!-- Requesting frame: asks for camera and microphone and shows the result. -->
+<div class="frame-ui">
+  <p class="panel-meta">Frame origin: <code id="frame-origin"></code></p>
+  <div class="buttons">
+    <button type="button" data-video="true" data-audio="false">Camera</button>
+    <button type="button" data-video="false" data-audio="true">Microphone</button>
+    <button type="button" data-video="true" data-audio="true">Camera + Microphone</button>
+  </div>
+  <div class="result" id="frame-result">Ready</div>
+</div>
+
+<!-- Relay frame: a cross-origin frame that embeds another cross-origin frame. -->
+<div class="relay-ui">
+  <p>Relay origin: <code id="relay-origin"></code>, inner <code>allow</code>: <code id="relay-allow"></code></p>
+  <iframe id="relay-frame" title="Inner frame"></iframe>
+</div>
+
+<div class="top-ui">
+<p><a href="../index.html">[Home]</a></p>
+
+<h1>Camera and Microphone Delegation in Iframes</h1>
+<p>Checks that a camera or microphone request from a cross-origin iframe follows the iframe
+<code>allow</code> attribute. A frame the page delegated the feature to should get the browser's
+permission prompt; a frame without delegation should be denied without any prompt. The nested panels
+copy embedded ID-verification flows, where the camera runs two frames down:
+top page → provider frame (<code>allow="camera *"</code>) → vendor frame (<code>allow="camera"</code>).</p>
+<p>The frames load this same page from other origins:
+<code id="frame-origin-label"></code> and, for nested panels, <code id="inner-origin-label"></code>.
+Override them with <code>?frame=&lt;origin&gt;&amp;inner=&lt;origin&gt;</code>.</p>
+
+<h2>Panels</h2>
+<div class="panels" id="panels"></div>
+
+<h2>Test steps</h2>
+<ol>
+  <li>In each panel, tap <em>Camera</em>, <em>Microphone</em> and <em>Camera + Microphone</em>.</li>
+  <li>Compare the prompt and the result shown in the frame with the table below.</li>
+  <li>Before each panel, reset the site's camera and microphone permissions so a saved decision
+      doesn't hide the prompt.</li>
+</ol>
+
+<h2>Expected outcomes</h2>
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr><th>Panel</th><th>Prompt</th><th>Result after allowing</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1. Delegated cross-origin frame</td>
+      <td>Yes, naming the top-level site</td>
+      <td><code>success</code> with the requested tracks</td>
+    </tr>
+    <tr>
+      <td>2. Cross-origin frame without <code>allow</code></td>
+      <td>No</td>
+      <td><code>NotAllowedError</code></td>
+    </tr>
+    <tr>
+      <td>3. Nested, delegated at both levels</td>
+      <td>Yes, naming the top-level site</td>
+      <td><code>success</code> with the requested tracks</td>
+    </tr>
+    <tr>
+      <td>4. Nested, inner frame without <code>allow</code></td>
+      <td>No</td>
+      <td><code>NotAllowedError</code></td>
+    </tr>
+    <tr>
+      <td>5. Cross-origin frame without <code>allow</code> that replaces <code>Promise[Symbol.species]</code> before each request</td>
+      <td>No</td>
+      <td><code>NotAllowedError</code>. Checks that a browser's own pre-prompt checks can't be faked by page scripts.</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+<script>
+    const params = new URLSearchParams(window.location.search);
+    const role = params.get('role');
+    const pagePath = window.location.pathname;
+
+    // Default origins for the embedded frames, keyed by the top-level hostname. Loopback origins are
+    // secure contexts over HTTP, so local testing works without certificates.
+    const DEFAULT_ORIGINS = {
+        'privacy-test-pages.site': ['https://good.third-party.site', 'https://www.first-party.site'],
+        'first-party.example': ['https://third-party.example', 'https://www.search-company.example'],
+        '127.0.0.1': ['http://localhost', 'http://[::1]'],
+        localhost: ['http://127.0.0.1', 'http://[::1]']
+    };
+
+    function withPort (origin) {
+        const url = new URL(origin);
+        if (!url.port && window.location.port && url.protocol === window.location.protocol) {
+            url.port = window.location.port;
+        }
+        return url.origin;
+    }
+
+    function frameURL (origin, frameParams) {
+        const url = new URL(pagePath, origin);
+        for (const [key, value] of Object.entries(frameParams)) {
+            url.searchParams.set(key, value);
+        }
+        return url.toString();
+    }
+
+    function setUpRequestingFrame () {
+        document.body.classList.add('frame-role');
+        document.getElementById('frame-origin').textContent = window.location.origin;
+        const result = document.getElementById('frame-result');
+        const tamper = params.has('tamper');
+
+        for (const button of document.querySelectorAll('.frame-ui button')) {
+            button.addEventListener('click', async () => {
+                const constraints = {
+                    video: button.dataset.video === 'true',
+                    audio: button.dataset.audio === 'true'
+                };
+                result.textContent = 'pending';
+                if (tamper) {
+                    // Makes the next promise built by `then` resolve `true`, then restores the original.
+                    const nativeSpecies = Object.getOwnPropertyDescriptor(Promise, Symbol.species);
+                    class AlwaysTrue extends Promise {
+                        constructor (executor) {
+                            Object.defineProperty(Promise, Symbol.species, nativeSpecies);
+                            super(resolve => resolve(true));
+                            executor(() => {}, () => {});
+                        }
+                    }
+                    Object.defineProperty(Promise, Symbol.species, { configurable: true, get: () => AlwaysTrue });
+                }
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                    result.textContent = `success: video=${stream.getVideoTracks().length} audio=${stream.getAudioTracks().length}`;
+                    stream.getTracks().forEach(track => track.stop());
+                } catch (error) {
+                    result.textContent = error && error.name ? error.name : String(error);
+                }
+            });
+        }
+    }
+
+    function setUpRelayFrame () {
+        document.body.classList.add('relay-role');
+        const innerAllow = params.get('innerAllow') || '';
+        document.getElementById('relay-origin').textContent = window.location.origin;
+        document.getElementById('relay-allow').textContent = innerAllow || '(none)';
+        const frame = document.getElementById('relay-frame');
+        if (innerAllow) {
+            frame.setAttribute('allow', innerAllow);
+        }
+        frame.src = frameURL(params.get('inner'), { role: 'frame' });
+    }
+
+    function setUpTopPage () {
+        const defaults = DEFAULT_ORIGINS[window.location.hostname] || [window.location.origin, window.location.origin];
+        const frameOrigin = withPort(params.get('frame') || defaults[0]);
+        const innerOrigin = withPort(params.get('inner') || defaults[1]);
+        document.getElementById('frame-origin-label').textContent = frameOrigin;
+        document.getElementById('inner-origin-label').textContent = innerOrigin;
+
+        const delegation = 'camera; microphone';
+        const relayDelegation = 'camera *; microphone *';
+        const panels = [
+            {
+                title: '1. Delegated cross-origin frame',
+                allow: delegation,
+                src: frameURL(frameOrigin, { role: 'frame' })
+            },
+            {
+                title: '2. Cross-origin frame without allow',
+                allow: null,
+                src: frameURL(frameOrigin, { role: 'frame' })
+            },
+            {
+                title: '3. Nested, delegated at both levels',
+                allow: relayDelegation,
+                src: frameURL(frameOrigin, { role: 'relay', inner: innerOrigin, innerAllow: delegation })
+            },
+            {
+                title: '4. Nested, inner frame without allow',
+                allow: relayDelegation,
+                src: frameURL(frameOrigin, { role: 'relay', inner: innerOrigin })
+            },
+            {
+                title: '5. Cross-origin frame without allow, tampers with promises',
+                allow: null,
+                src: frameURL(frameOrigin, { role: 'frame', tamper: '1' })
+            }
+        ];
+
+        const container = document.getElementById('panels');
+        for (const panel of panels) {
+            const element = document.createElement('div');
+            element.className = 'panel';
+            const header = document.createElement('div');
+            header.className = 'panel-header';
+            const title = document.createElement('h3');
+            title.textContent = panel.title;
+            const meta = document.createElement('p');
+            meta.className = 'panel-meta';
+            meta.textContent = `allow: ${panel.allow || '(none)'}`;
+            header.append(title, meta);
+            const frame = document.createElement('iframe');
+            frame.title = panel.title;
+            if (panel.allow) {
+                frame.setAttribute('allow', panel.allow);
+            }
+            frame.src = panel.src;
+            element.append(header, frame);
+            container.append(element);
+        }
+    }
+
+    if (role === 'frame') {
+        setUpRequestingFrame();
+    } else if (role === 'relay') {
+        setUpRelayFrame();
+    } else {
+        setUpTopPage();
+    }
+</script>
+</body>
+</html>

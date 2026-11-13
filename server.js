@@ -240,11 +240,29 @@ app.get('/come-back', (req, res) => {
 });
 
 const REDIRECT_ALLOWLIST = ['bad.third-party.site'];
+// DuckDuckGo hosts and their subdomains, matching the check in features/url-interception/
+const REDIRECT_ALLOWLIST_DDG = ['duckduckgo.com', 'duck.com', 'duck.ai'];
+
+function isAllowedRedirect (destination) {
+    if (typeof destination !== 'string') {
+        return false;
+    }
+    if (REDIRECT_ALLOWLIST.find(allowHost => destination.startsWith('https://' + allowHost + '/'))) {
+        return true;
+    }
+    try {
+        const url = new URL(destination);
+        return url.protocol === 'https:' &&
+            REDIRECT_ALLOWLIST_DDG.some(host => url.hostname === host || url.hostname.endsWith('.' + host));
+    } catch {
+        return false;
+    }
+}
 
 app.get('/redirect', (req, res) => {
     const destination = req.query.destination;
 
-    if (!REDIRECT_ALLOWLIST.find(allowHost => destination.startsWith('https://' + allowHost + '/'))) {
+    if (!isAllowedRedirect(destination)) {
         res.statusCode = 403;
         res.end();
         return;

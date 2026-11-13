@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Typed-only URL Interception</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    .test-section {
+      background: #f5f5f5;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin: 20px 0;
+    }
+    .info-box {
+      background: #e7f3ff;
+      border-left: 4px solid #3969EF;
+      padding: 12px 16px;
+      margin: 20px 0;
+    }
+    .expect {
+      color: #666;
+      font-size: 0.9em;
+    }
+    input[type="url"] {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 8px;
+      font-size: 16px;
+    }
+    button {
+      background: #3969EF;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 15px;
+      cursor: pointer;
+      margin: 4px 4px 4px 0;
+    }
+    iframe {
+      border: 2px solid #ccc;
+      width: 100%;
+      height: 160px;
+    }
+    code {
+      background: #e9ecef;
+      padding: 2px 6px;
+      border-radius: 3px;
+      word-break: break-all;
+    }
+  </style>
+</head>
+<body>
+<p><a href="../../index.html">[Home]</a></p>
+
+<h1>Typed-only URL Interception</h1>
+
+<p>
+  Some browser features open a native screen when the user enters a specific URL in the address bar.
+  When that should only happen for URLs the user <strong>typed or pasted</strong> themselves, a web page
+  must not be able to trigger the same screen by navigating to that URL.
+</p>
+<p>
+  This page navigates to a target URL in every way a web page can. For each case, the browser should
+  load the URL as a normal web page (or block it) and <strong>should not</strong> open the native screen.
+</p>
+
+<div class="test-section">
+  <h2>Target URL</h2>
+  <form id="target-form">
+    <label for="target">URL the browser intercepts when typed:</label>
+    <input type="url" id="target" name="url" placeholder="https://duckduckgo.com/some-path" required>
+    <button type="submit">Use this URL</button>
+  </form>
+  <p class="expect">
+    You can also link to this page with <code>?url=https://…</code>. Only DuckDuckGo domains are accepted.
+  </p>
+  <p id="target-status"></p>
+</div>
+
+<div id="tests" hidden>
+  <div class="info-box">
+    <strong>Positive control (manual):</strong> type or paste <code class="target-text"></code> into the
+    address bar and press Enter. The native screen <strong>should</strong> open. If it doesn't, the results
+    below don't mean anything.
+  </div>
+
+  <div class="test-section">
+    <h2>1. Links</h2>
+    <ul>
+      <li><a class="target-link" href="#">Plain link</a></li>
+      <li><a class="target-link" href="#" target="_blank">Link with <code>target="_blank"</code></a></li>
+      <li><a class="target-link" href="#" target="_blank" rel="noopener noreferrer">Link with <code>target="_blank" rel="noopener noreferrer"</code></a></li>
+      <li><a class="target-link" href="#" download>Link with <code>download</code> attribute</a></li>
+    </ul>
+    <p class="expect">Also try long-pressing / right-clicking these and choosing "Open in new tab".</p>
+  </div>
+
+  <div class="test-section">
+    <h2>2. JavaScript navigation</h2>
+    <button data-nav="assign">location.href = url</button>
+    <button data-nav="replace">location.replace(url)</button>
+    <button data-nav="open">window.open(url)</button>
+    <p>
+      <a id="auto-nav-link" href="#">Reload this page, then set location.href = url after 6s with no user gesture</a>
+    </p>
+    <p class="expect">
+      The automatic case starts from a fresh page load and waits longer than any browser's user-activation
+      window (5s in Chromium), so the navigation has no user gesture. Don't tap the page while it counts down.
+    </p>
+    <p id="auto-nav-status"></p>
+  </div>
+
+  <div class="test-section">
+    <h2>3. Redirects from another page</h2>
+    <p class="expect">
+      Each link opens an intermediate page that redirects to url. The server-side case covers a browser that
+      matches the URL after a redirect instead of matching what the user entered.
+    </p>
+    <div id="redirect-groups"></div>
+    <template id="redirect-group">
+      <h3></h3>
+      <ul>
+        <li><a data-redirect="js" href="#">Intermediate page → JavaScript redirect</a></li>
+        <li><a data-redirect="meta" href="#">Intermediate page → <code>&lt;meta http-equiv="refresh"&gt;</code></a></li>
+        <li><a data-redirect="server" href="#">Server-side redirect (HTTP 307)</a></li>
+      </ul>
+    </template>
+    <p id="third-party-unavailable" class="expect" hidden>
+      Redirects from a third-party site use the test domain <code>good.third-party.site</code>, so they only
+      appear when this page is opened on <a href="https://privacy-test-pages.site/features/url-interception/">privacy-test-pages.site</a>.
+    </p>
+  </div>
+
+  <div class="test-section">
+    <h2>4. Forms</h2>
+    <form id="get-form" method="get">
+      <span id="get-form-fields"></span>
+      <button type="submit">Submit GET form to url</button>
+    </form>
+    <p class="expect">
+      A GET form always replaces the URL's query with its fields, so this navigates to
+      <code id="get-form-url"></code>. Type that URL in section 6 to check it still counts as a typed match;
+      otherwise this case passes for the wrong reason.
+    </p>
+    <form id="post-form" method="post">
+      <button type="submit">Submit POST form to url</button>
+    </form>
+  </div>
+
+  <div class="test-section">
+    <h2>5. Frames</h2>
+    <button id="load-iframe">Load url in an iframe</button>
+    <div id="iframe-container"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>6. URL variants</h2>
+    <p class="expect">
+      These are links, so none of them should open the native screen. Also <strong>type</strong> each one into the
+      address bar to check which variants the typed-URL match accepts. Decide the expected result for each variant in the spec.
+    </p>
+    <ul id="variants"></ul>
+  </div>
+
+  <div class="test-section">
+    <h2>7. Other entry points (manual)</h2>
+    <ul>
+      <li>Open the URL from a bookmark or favorite.</li>
+      <li>Select the URL from address-bar autocomplete / history suggestions.</li>
+      <li>Open the URL from another app (e.g. a link in Messages or Mail).</li>
+      <li>Navigate back and forward to a history entry for the URL.</li>
+    </ul>
+    <p class="expect">Expected behavior for these depends on the feature's spec.</p>
+  </div>
+</div>
+
+<script>
+    const ALLOWED_HOSTS = ['duckduckgo.com', 'duck.com', 'duck.ai'];
+
+    function isAllowed (url) {
+        return url.protocol === 'https:' &&
+            ALLOWED_HOSTS.some(host => url.hostname === host || url.hostname.endsWith('.' + host));
+    }
+
+    // Origins that host the intermediate redirect pages. A redirect from another site is the case a
+    // typed-only rule must cover, so on the hosted test pages the redirects also come from a third-party
+    // test domain (see README "Test domains"). That domain doesn't exist locally, so only same-site
+    // redirects are available there.
+    const THIRD_PARTY_ORIGIN = 'https://good.third-party.site';
+    const HOSTED_FIRST_PARTY = ['privacy-test-pages.site', 'www.first-party.site'];
+
+    function redirectOrigins () {
+        const origins = [['Redirect from the same site', location.origin]];
+        if (HOSTED_FIRST_PARTY.includes(location.hostname)) {
+            origins.push(['Redirect from a third-party site (good.third-party.site)', THIRD_PARTY_ORIGIN]);
+        }
+        return origins;
+    }
+
+    function parseTarget (value) {
+        try {
+            const url = new URL(value);
+            return isAllowed(url) ? url : null;
+        } catch {
+            return null;
+        }
+    }
+
+    // A target's query parameters as GET form fields. Form submission turns every line break in a
+    // name or value into CRLF, so the expected URL is built from the same normalized pairs.
+    function getFormFieldsOf (url) {
+        const normalize = s => s.replace(/\r\n|\r|\n/g, '\r\n');
+        return [...url.searchParams].map(([name, value]) => [normalize(name), normalize(value)]);
+    }
+
+    // The URL a GET form with action=url navigates to. GET submission replaces the query with the
+    // serialized form fields (one hidden input per query parameter, in order) and keeps the fragment,
+    // so a target without a query still gains an empty "?".
+    function getFormUrlOf (url) {
+        const query = new URLSearchParams(getFormFieldsOf(url)).toString();
+        return url.origin + url.pathname + '?' + query + url.hash;
+    }
+
+    // Each variant changes one part of the URL (scheme, host, path, query or fragment) on a copy,
+    // so the other parts stay as the tester entered them.
+    function variantsOf (url) {
+        const variant = (label, change) => {
+            const copy = new URL(url.href);
+            change(copy);
+            return [label, copy.href];
+        };
+        const trimmedPath = url.pathname.replace(/\/+$/, '');
+
+        const variants = [
+            variant('Trailing slash', u => { u.pathname = trimmedPath + '/'; }),
+            variant('No trailing slash', u => { u.pathname = trimmedPath || '/'; }),
+            variant('http:// instead of https://', u => { u.protocol = 'http:'; }),
+            variant('With / without www.', u => {
+                u.hostname = u.hostname.startsWith('www.') ? u.hostname.slice(4) : 'www.' + u.hostname;
+            }),
+            variant('Upper-case path', u => { u.pathname = u.pathname.toUpperCase(); }),
+            variant('Extra query parameter', u => { u.searchParams.append('ref', 'test'); }),
+            variant('Fragment', u => { u.hash = 'test'; }),
+            variant('Extra path segment', u => { u.pathname = trimmedPath + '/extra'; }),
+            ['What the GET form in section 4 navigates to', getFormUrlOf(url)]
+        ];
+
+        // Drop variants that end up identical to the target or to an earlier variant.
+        const seen = new Set([url.href]);
+        return variants.filter(([, href]) => !seen.has(href) && seen.add(href));
+    }
+
+    function render (url) {
+        const href = url.href;
+        document.getElementById('tests').hidden = false;
+        document.getElementById('target-status').textContent = 'Testing: ' + href;
+
+        document.querySelectorAll('.target-text').forEach(el => { el.textContent = href; });
+        document.querySelectorAll('.target-link').forEach(el => { el.href = href; });
+
+        const template = document.getElementById('redirect-group');
+        const origins = redirectOrigins();
+        const groups = origins.map(([title, origin]) => {
+            const group = template.content.cloneNode(true);
+            group.querySelector('h3').textContent = title;
+            group.querySelectorAll('[data-redirect]').forEach(el => {
+                const method = el.dataset.redirect;
+                const hop = method === 'server'
+                    ? new URL('/redirect', origin)
+                    : new URL(location.pathname.replace(/[^/]*$/, 'redirect.html'), origin);
+                hop.search = method === 'server'
+                    ? new URLSearchParams({ destination: href }).toString()
+                    : new URLSearchParams({ to: href, method }).toString();
+                el.href = hop.href;
+            });
+            return group;
+        });
+        document.getElementById('redirect-groups').replaceChildren(...groups);
+        document.getElementById('third-party-unavailable').hidden = origins.length > 1;
+
+        // Field names can shadow form properties (e.g. a parameter named "action" or "prepend"),
+        // so use setAttribute on the form and keep the fields in their own container.
+        document.getElementById('get-form').setAttribute('action', url.origin + url.pathname + url.hash);
+        const fields = getFormFieldsOf(url).map(([name, value]) => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = name;
+            input.value = value;
+            return input;
+        });
+        document.getElementById('get-form-fields').replaceChildren(...fields);
+        document.getElementById('get-form-url').textContent = getFormUrlOf(url);
+        document.getElementById('post-form').action = href;
+
+        const autoNav = new URL(location.href);
+        autoNav.search = new URLSearchParams({ url: href, auto: '1' }).toString();
+        autoNav.hash = '';
+        document.getElementById('auto-nav-link').href = autoNav.href;
+
+        const list = document.getElementById('variants');
+        list.replaceChildren();
+        for (const [label, variant] of variantsOf(url)) {
+            const li = document.createElement('li');
+            const a = document.createElement('a');
+            a.href = variant;
+            a.textContent = variant;
+            li.append(label + ': ', a);
+            list.append(li);
+        }
+    }
+
+    let target = null;
+
+    document.querySelectorAll('[data-nav]').forEach(button => {
+        button.addEventListener('click', () => {
+            if (!target) return;
+            const href = target.href;
+            switch (button.dataset.nav) {
+            case 'assign': location.href = href; break;
+            case 'replace': location.replace(href); break;
+            case 'open': window.open(href); break;
+            }
+        });
+    });
+
+    document.getElementById('load-iframe').addEventListener('click', () => {
+        if (!target) return;
+        const iframe = document.createElement('iframe');
+        iframe.src = target.href;
+        document.getElementById('iframe-container').replaceChildren(iframe);
+    });
+
+    document.getElementById('target-form').addEventListener('submit', event => {
+        event.preventDefault();
+        const value = document.getElementById('target').value;
+        const url = parseTarget(value);
+        if (!url) {
+            document.getElementById('target-status').textContent = 'Please enter an https:// URL on a DuckDuckGo domain.';
+            return;
+        }
+        const params = new URLSearchParams({ url: url.href });
+        history.replaceState(null, '', '?' + params.toString());
+        target = url;
+        render(url);
+    });
+
+    // Navigates with no user gesture: runs from a fresh page load and waits past the longest
+    // user-activation window (5s in Chromium).
+    function startAutoNavigation (url) {
+        // Drop auto=1 so going back to this page doesn't start another countdown.
+        const params = new URLSearchParams({ url: url.href });
+        history.replaceState(null, '', '?' + params.toString());
+
+        const status = document.getElementById('auto-nav-status');
+        status.scrollIntoView();
+        let remaining = 6;
+        status.textContent = 'Navigating to ' + url.href + ' in ' + remaining + 's…';
+        const timer = setInterval(() => {
+            remaining -= 1;
+            if (remaining > 0) {
+                status.textContent = 'Navigating to ' + url.href + ' in ' + remaining + 's…';
+                return;
+            }
+            clearInterval(timer);
+            location.href = url.href;
+        }, 1000);
+    }
+
+    const initialParams = new URLSearchParams(location.search);
+    const initial = initialParams.get('url');
+    if (initial) {
+        document.getElementById('target').value = initial;
+        target = parseTarget(initial);
+        if (target) {
+            render(target);
+            if (initialParams.get('auto') === '1') {
+                startAutoNavigation(target);
+            }
+        } else {
+            document.getElementById('target-status').textContent = 'Please enter an https:// URL on a DuckDuckGo domain.';
+        }
+    }
+</script>
+
+</body>
+</html>

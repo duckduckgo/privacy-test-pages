@@ -5,7 +5,7 @@
   "scripts": {
     "test": "npm run lint-js && npm run lint-html",
     "lint-js": "eslint .",
-    "lint-html": "eslint **/*.html",
+    "lint-html": "eslint \"**/*.html\"",
     "start": "node server.js"
   },
   "repository": {

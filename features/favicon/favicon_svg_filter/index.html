@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width">
+        <title>Favicon test SVG with a filter</title>
+        <link rel="icon" type="image/svg+xml" href="dax-filter.svg">
+    </head>
+    <body>
+        <p><a href="../../../index.html">[Home]</a>/<a href="../index.html">[Favicon]</a></p>
+
+        <h1>SVG favicon using the same filter on the root and a child</h1>
+        <p>The system SVG renderer (CoreSVG) can crash an app that draws an SVG like this one through <code>NSImage</code>. A browser that draws favicons in a separate process is not affected.</p>
+        <p><strong>Expected:</strong> a Dax favicon, no crash</p>
+
+    </body>
+</html>

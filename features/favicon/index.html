@@ -15,8 +15,19 @@
         <ul>
             <li><a href="./favicon_png/index.html">PNG favicon</a></li>
             <li><a href="./favicon_svg/index.html">SVG favicon</a></li>
+            <ul>
+                <li><a href="./favicon_svg_filter/index.html">SVG with a filter on the root and on a child</a> — crashes apps that draw it through <code>NSImage</code>, so it must not crash the browser</li>
+                <li><a href="./favicon_svg_filter_utf16/index.html">The same SVG, encoded as UTF-16</a></li>
+                <li><a href="./favicon_svg_filter_prolog/index.html">The same SVG, after a long comment</a></li>
+                <li><a href="./favicon_svg_small/index.html">SVG declared at 16x16</a> — the icon must stay sharp</li>
+                <li><a href="./favicon_svg_viewbox/index.html">SVG with only a view box</a></li>
+                <li><a href="./favicon_svg_css_fill/index.html">SVG colored only through CSS</a> — an orange circle</li>
+            </ul>
             <li><a href="./favicon_jpg/index.html">JPG favicon</a></li>
             <li><a href="./favicon_webapp_manifest/index.html">Favicon in a json manifest</a></li>
+            <li><a href="./favicon_ico/index.html">ICO favicon</a></li>
+            <li><a href="./favicon_pdf/index.html">PDF favicon</a> — an orange circle</li>
+            <li><a href="./favicon_not_an_image/index.html">HTML served as a favicon</a> — the default grey icon, no crash and no hang</li>
             <li><a href="./favicon_js/index.html">Favicon replaced at runtime</a></li>
             <ul>
                 <li><a href="./favicon_js/index.html?initial=override">Favicon automatically replaced after page load</a></li>
